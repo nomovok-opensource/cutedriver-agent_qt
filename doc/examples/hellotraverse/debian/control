@@ -1,0 +1,12 @@
+Source: qttas-plugins-hello
+Section: devel
+Priority: extra
+Maintainer: Tatu Lahtela <ext-tatu.lahtela@nokia.com>
+Build-Depends: debhelper (>= 5), libqt4-dev (>=4.6.1~), qttas-dev
+Standards-Version: 3.7.2
+
+Package: qttas-plugins-hello
+Architecture: any
+Depends: qttas
+Description: QT Tas Server Hello Plugin
+ Sample plugin for Qt Tas plugin development.
