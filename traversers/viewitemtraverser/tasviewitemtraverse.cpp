@@ -64,14 +64,14 @@ void TasViewItemTraverse::traverseObject(TasObject* objectInfo, QObject* object,
     if(object->inherits("QAbstractItemView")){          
         QAbstractItemView* view = qobject_cast<QAbstractItemView*>(object);        
         if(view){                     
-            TasLogger::logger()->debug("TasViewItemTraverse::traverseObject the object is a QAbstractItemView");            
+            //            TasLogger::logger()->debug("TasViewItemTraverse::traverseObject the object is a QAbstractItemView");            
             QAbstractItemModel* model = view->model();
           
             int role = Qt::DisplayRole;                        
             if(model) {
-                TasLogger::logger()->debug("TasViewItemTraverse::traverseObject model is valid");
+                //                TasLogger::logger()->debug("TasViewItemTraverse::traverseObject model is valid");
                 if (!view->rootIndex().isValid()) {
-                    TasLogger::logger()->debug("TasViewItemTraverse::traverseObject not valid");
+                    //                    TasLogger::logger()->debug("TasViewItemTraverse::traverseObject not valid");
                 }
                 if(view->model()->inherits("QSortFilterProxyModel")){                
                     QSortFilterProxyModel* proxy = qobject_cast<QSortFilterProxyModel*>(model);
@@ -88,21 +88,21 @@ void TasViewItemTraverse::traverseObject(TasObject* objectInfo, QObject* object,
 void TasViewItemTraverse::traverseIndexLevel(QAbstractItemView* view, QAbstractItemModel *model, 
                                             int role, QModelIndex parent, TasObject* objectInfo)
 {
-    TasLogger::logger()->debug("TasViewItemTraverse::traverseIndexLevel start ");
+    //    TasLogger::logger()->debug("TasViewItemTraverse::traverseIndexLevel start ");
     if(model->hasChildren(parent)){  
-        TasLogger::logger()->debug("TasViewItemTraverse::traverseObject has children");
+        //        TasLogger::logger()->debug("TasViewItemTraverse::traverseObject has children");
         int rows = model->rowCount(parent);
         int columns = model->columnCount(parent);
-        TasLogger::logger()->debug("TasViewItemTraverse::traverseObject " + QString::number(rows) + " rows and " + 
-                                   QString::number(columns));
+        //        TasLogger::logger()->debug("TasViewItemTraverse::traverseObject " + QString::number(rows) + " rows and " + 
+        //                                   QString::number(columns));
         for(int i = 0 ; i < rows; i++){
             for(int j = 0 ; j < columns; j++){
                 QModelIndex index = model->index(i, j, parent);
                 if (index.isValid()) {
-                    TasLogger::logger()->debug("TasViewItemTraverse::traverseIndexLevel calling fill " + 
-                                               QString::number(i) + ":"+QString::number(j));
+                    //                    TasLogger::logger()->debug("TasViewItemTraverse::traverseIndexLevel calling fill " + 
+                    //QString::number(i) + ":"+QString::number(j));
                     fillTraverseData(view, model->data(index, role), objectInfo, index);
-                    TasLogger::logger()->debug("TasViewItemTraverse::traverseIndexLevel calling traverseIndexLevel");
+                    //                    TasLogger::logger()->debug("TasViewItemTraverse::traverseIndexLevel calling traverseIndexLevel");
                     traverseIndexLevel(view, model, role, index, objectInfo);
                     
                 }
@@ -114,7 +114,7 @@ void TasViewItemTraverse::traverseIndexLevel(QAbstractItemView* view, QAbstractI
             
 void TasViewItemTraverse::fillTraverseData(QAbstractItemView* view, QVariant data, TasObject* objectInfo, QModelIndex index)
 {    
-    TasLogger::logger()->debug("TasViewItemTraverse::fillTraverseData filling traverse data");
+    //    TasLogger::logger()->debug("TasViewItemTraverse::fillTraverseData filling traverse data");
     if (!data.isValid()) {
         return;
     }
@@ -145,15 +145,15 @@ void TasViewItemTraverse::fillTraverseData(QAbstractItemView* view, QVariant dat
         QGraphicsProxyWidget* proxy = TestabilityUtils::parentProxy(view);
 
         QPoint proxyPos(0,0);
-        TasLogger::logger()->debug("TasViewItemTraverse::fillTraverseData searching for proxy");        
+        //        TasLogger::logger()->debug("TasViewItemTraverse::fillTraverseData searching for proxy");        
         if (proxy) {
             // If the webview is inside a graphics proxy, 
             // Take the proxy widget global position
             proxyPos = TestabilityUtils::proxyCoordinates(proxy);
-            TasLogger::logger()->debug("TasViewItemTraverse::fillTraverseData got proxy and coords" + 
-                                       QString::number(proxyPos.x())+
-                                       ":"+
-                                       QString::number(proxyPos.y()));
+//             TasLogger::logger()->debug("TasViewItemTraverse::fillTraverseData got proxy and coords" + 
+//                                        QString::number(proxyPos.x())+
+//                                        ":"+
+//                                        QString::number(proxyPos.y()));
             viewItem.addAttribute("objectType", "Web");
         } else {
             viewItem.addAttribute("objectType","ViewItem");                        
