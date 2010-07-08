@@ -164,6 +164,9 @@ void TasBaseTraverse::printProperties(TasObject* objectInfo, QObject* object)
     }
 }
 
+/*!
+  Adds font details to the item. The prefix can be used in situations where one item can have multiple fonts.
+ */
 void TasBaseTraverse::addFont(TasObject* objectInfo, QFont font)
 {
     if(includeAttribute("fontKey")){

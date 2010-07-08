@@ -27,6 +27,10 @@
 #include <QAbstractItemView>
 #include <QModelIndex>
 #include <QSortFilterProxyModel>
+#include <QTreeWidget>
+#include <QTableWidget>
+#include <QListWidget>
+#include <QHeaderView>
 
 #include <tasqtdatamodel.h>
 
@@ -46,11 +50,23 @@ class TasViewItemTraverse :  public QObject, public TasTraverseInterface
      void traverseGraphicsItem(TasObject* objectInfo, QGraphicsItem* graphicsItem, TasCommand* command = 0);     
      
 private:
-    void traverseIndexLevel(QAbstractItemView* view, QAbstractItemModel *model, 
-                            int role, QModelIndex parent, TasObject* objectInfo);
-    
-    void fillTraverseData(QAbstractItemView* view, QVariant data, TasObject* objectInfo, QModelIndex index);
+
+	 void traverseAbstractItemView(QAbstractItemView* view, TasObject* objectInfo);
+	 void traverseTreeWidget(QTreeWidget* treeWidget, TasObject* objectInfo);	 
+	 void traverseTableWidget(QTableWidget* tableWidget, TasObject* objectInfo);	 
+	 void traverseListWidget(QListWidget* listWidget, TasObject* objectInfo);	 
+	 void traverseHeaderView(QHeaderView* headerView, TasObject* objectInfo);	 
+
+	 void traverseTreeWidgetItem(QTreeWidgetItem* item, TasObject& objectInfo, QTreeWidget *treeWidget);
+	 void traverseTableWidgetItem(QTableWidgetItem* item, TasObject& objectInfo, QTableWidget *tableWidget);
+
+	 void traverseIndexLevel(QAbstractItemView* view, QAbstractItemModel *model, int role, QModelIndex parent, TasObject* objectInfo);   
+	 void fillTraverseData(QAbstractItemView* view, QVariant data, TasObject* objectInfo, QModelIndex index);
+	 bool isItemVisible(QRect rect, QAbstractItemView* view);
+	 bool addItemLocationDetails(TasObject& objectInfo, QRect rect, QAbstractItemView* view);
      
+private:
+	 QList<QModelIndex> mTraversed;
  };
 
 #endif

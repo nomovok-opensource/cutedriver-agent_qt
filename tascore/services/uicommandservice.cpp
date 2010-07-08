@@ -32,6 +32,7 @@
 #include "keyhandler.h"
 #include "mousehandler.h"
 #include "multitouchhandler.h"
+#include "viewitemhandler.h"
 
 #include "tasdeviceutils.h"
 
@@ -50,6 +51,7 @@ UiCommandService::UiCommandService(QObject* parent)
     mInteractionHandlers.append(new ActionHandler());
     mInteractionHandlers.append(new GestureHandler());
     mInteractionHandlers.append(new MultitouchHandler());
+    mInteractionHandlers.append(new ViewItemHandler());
 }
 
 UiCommandService::~UiCommandService()

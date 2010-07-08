@@ -22,9 +22,11 @@ HEADERS += services/interactionhandlers/keyhandler.h
 HEADERS += services/interactionhandlers/gesturehandler.h
 HEADERS += services/interactionhandlers/actionhandler.h
 HEADERS += services/interactionhandlers/multitouchhandler.h
+HEADERS += services/interactionhandlers/viewitemhandler.h
 
 SOURCES += services/interactionhandlers/mousehandler.cpp 
 SOURCES += services/interactionhandlers/keyhandler.cpp 
 SOURCES += services/interactionhandlers/gesturehandler.cpp 
 SOURCES += services/interactionhandlers/actionhandler.cpp 
 SOURCES += services/interactionhandlers/multitouchhandler.cpp 
+SOURCES += services/interactionhandlers/viewitemhandler.cpp 
