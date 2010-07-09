@@ -109,12 +109,11 @@ public:
     TasAttribute& addAttribute(const QString& name, const QPointF& value);    
     TasAttribute& addBooleanAttribute(const QString& name, bool value);
     TasObject& addObject();
-    TasObject& addNewObject(quint32 id, const QString& name, const QString& type);
-    void setId(quint32 id);
+    TasObject& addNewObject(QString id, const QString& name, const QString& type);
+    void setId(const QString& id);
     void setName(const QString& name);
     void setType(const QString& type);
 	QString getType();
-    void setParentId(quint32 id );
     void setParentId(const QString& id );
         
 private:
@@ -144,7 +143,7 @@ public:
     void setName(const QString& name);
     void setType(const QString& type);
     TasObject& addNewObject();
-    TasObject& addNewObject(int id, const QString& name, const QString& type);
+    TasObject& addNewObject(const QString& id, const QString& name, const QString& type);
 
 private:
     void serializeIntoString(TasXmlWriter& xmlWriter, SerializeFilter& filter);    

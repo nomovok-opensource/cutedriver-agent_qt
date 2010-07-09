@@ -39,6 +39,7 @@
 #include <tasqtdatamodel.h>
 #include <taslogger.h>
 #include <tasconstants.h>
+#include <tascoreutils.h>
 
 #include "tassignalplugin.h"
 
@@ -170,7 +171,7 @@ bool TasSignalPlugin::listSignals(void* objectInstance, QString ptrType, QString
 
         for(int i = 0; i < target->metaObject()->methodCount(); ++i) {
             if (target->metaObject()->method(i).methodType() == QMetaMethod::Signal)
-                container.addNewObject(i, QString::fromLatin1(target->metaObject()->method(i).signature()), "QtSignal");
+                container.addNewObject(QString::number(i), QString::fromLatin1(target->metaObject()->method(i).signature()), "QtSignal");
         }
 
         SerializeFilter* filter = new SerializeFilter();		    		
@@ -214,7 +215,7 @@ bool TasSignalPlugin::enableSignal(void *objectInstance, QHash<QString, QString>
                     container = &(mOccuredSignals->addNewObjectContainer(CONTAINER_ID.toInt(), "QtSignals", "QtSignals"));
                     if(parameters.contains(PROCESS_START_TIME)){
                         QString timeStamp = parameters.value(PROCESS_START_TIME);
-                        TasObject& eventObj = container->addNewObject((int)&timeStamp, PROCESS_START_TIME, "event");
+                        TasObject& eventObj = container->addNewObject(TasCoreUtils::pointerId(&timeStamp), PROCESS_START_TIME, "event");
                         eventObj.addAttribute("timeStamp", parameters.value(PROCESS_START_TIME));
                     }
                 }

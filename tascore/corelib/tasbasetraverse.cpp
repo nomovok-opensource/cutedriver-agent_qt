@@ -30,9 +30,8 @@ TasBaseTraverse::~TasBaseTraverse()
 
 void TasBaseTraverse::addObjectDetails(TasObject* objectInfo, QObject* object)
 {
-    quint32 tasId = (quint32)object;
+    objectInfo->setId(TasCoreUtils::objectId(object));
 
-    objectInfo->setId(tasId);
     //custom traversers may want to add their own types
     if(objectInfo->getType().isEmpty()){
         QString objectType = object->metaObject()->className();
@@ -40,8 +39,7 @@ void TasBaseTraverse::addObjectDetails(TasObject* objectInfo, QObject* object)
         objectInfo->setType(objectType);    
     }
     if(includeAttribute("parent")){
-        quint32 parentId = getParentId(object);
-        objectInfo->setParentId(parentId);        
+        objectInfo->setParentId(getParentId(object));        
     }
     printProperties(objectInfo, object);      
     objectInfo->setName(object->objectName());
@@ -49,17 +47,17 @@ void TasBaseTraverse::addObjectDetails(TasObject* objectInfo, QObject* object)
 }
 
 
-quint32 TasBaseTraverse::getParentId(QObject* object)
+QString TasBaseTraverse::getParentId(QObject* object)
 {
-    quint32 parentId = 0;
+    QString parentId;
     QGraphicsWidget* go = qobject_cast<QGraphicsWidget*>(object);
     if(go){
-        QGraphicsItem* gParent = go->parentItem();
-        parentId = gParent ? (quint32)gParent:0;
+        QGraphicsItem* gParent = go->parentItem();        
+        parentId = gParent ? TestabilityUtils::graphicsItemId(gParent):"";
     }
     if(parentId == 0){
         QObject* parent = object->parent();
-        parentId = parent ? (quint32)parent:0;
+        parentId = parent ? TasCoreUtils::objectId(parent):"";
     }
     return parentId;
 }

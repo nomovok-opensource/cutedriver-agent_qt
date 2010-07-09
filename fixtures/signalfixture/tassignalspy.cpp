@@ -70,7 +70,7 @@ void TasSignalSpy::signalHasOccured()
     // retrieve current time
 	QDateTime timeStamp = QDateTime::currentDateTime();
 
-    TasObject& signalData = mObjectContainer.addNewObject(timeStamp.toString(DATE_FORMAT).toInt(), mSignalName, "QtSignal");
+    TasObject& signalData = mObjectContainer.addNewObject(timeStamp.toString(DATE_FORMAT), mSignalName, "QtSignal");
 
     signalData.addAttribute( "signalName", mSignalName);
     signalData.addAttribute( "senderObjectType", mSenderClassName);
@@ -82,7 +82,7 @@ void TasSignalSpy::signalHasOccured()
         QList<QVariant> arguments = mSignalSpy->takeFirst();
         for(int i = 0 ; i < arguments.size(); i++){
             QVariant argument = arguments.at( i );
-            TasObject& item_object_arguments = signalData.addNewObject( i, "", "QtSignalArgument" );
+            TasObject& item_object_arguments = signalData.addNewObject( QString::number(i), "", "QtSignalArgument" );
             item_object_arguments.addAttribute( "type", argument.typeName());
             item_object_arguments.addAttribute( "value", argument.toString());
         } 

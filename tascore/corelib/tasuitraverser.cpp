@@ -93,7 +93,7 @@ TasDataModel* TasUiTraverser::getUiState(TasCommand* command)
     QString qtVersion = "Qt" + QString(qVersion());
     TasObjectContainer& container = model->addNewObjectContainer(1, qtVersion, "qt");
 
-    TasObject& application = container.addNewObject(qApp->applicationPid(), getApplicationName(), "application");          
+    TasObject& application = container.addNewObject(QString::number(qApp->applicationPid()), getApplicationName(), "application");          
     addApplicationDetails(application, command);
 
     QWidgetList widgetList = qApp->topLevelWidgets();
@@ -210,9 +210,9 @@ void TasUiTraverser::addApplicationDetails(TasObject& application, TasCommand* c
 
     //set these again cause properties overwrite them
     application.setName(getApplicationName());
-    application.setId(qApp->applicationPid());
+    application.setId(QString::number(qApp->applicationPid()));
 #ifdef Q_OS_SYMBIAN
-    quint32 uid = CEikonEnv::Static()->EikAppUi()->Application()->AppDllUid().iUid;
+    quintptr uid = CEikonEnv::Static()->EikAppUi()->Application()->AppDllUid().iUid;
     application.addAttribute("applicationUid", QString::number(uid));    
 #endif    
 

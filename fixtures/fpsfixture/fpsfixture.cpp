@@ -118,19 +118,19 @@ void FpsFixture::printFpsResults(QList< QPair<QString,int> > fpsData, QObject* t
 
     QString name = TestabilityUtils::getApplicationName();
 
-    TasObject& application = container.addNewObject(qApp->applicationPid(), name, "application");
+    TasObject& application = container.addNewObject(QString::number(qApp->applicationPid()), name, "application");
     application.addAttribute("exepath", qApp->applicationFilePath().toLatin1().data());
     application.addAttribute("FullName", qApp->applicationFilePath().toLatin1().data());
     application.addAttribute("dirpath", qApp->applicationDirPath().toLatin1().data());
 
     QString objectType = target->metaObject()->className();
     objectType.replace(QString(":"), QString("_"));
-    TasObject& targetObj = application.addNewObject((int)target, target->objectName(), objectType);
+    TasObject& targetObj = application.addNewObject(TasCoreUtils::objectId(target), target->objectName(), objectType);
 
-    TasObject& fpsObj = targetObj.addNewObject((int)(&fpsData),"FpsResults", "results");
+    TasObject& fpsObj = targetObj.addNewObject(TasCoreUtils::pointerId(&fpsData),"FpsResults", "results");
     fpsObj.addAttribute("count", QString::number(fpsData.size()));
     for(int i = 0 ; i < fpsData.size(); i++ ){        
-        TasObject& fpsD = fpsObj.addNewObject(i,"FpsData", "fps");     
+        TasObject& fpsD = fpsObj.addNewObject(QString::number(i),"FpsData", "fps");     
         QPair<QString,int> value = fpsData.at(i);
         fpsD.addAttribute("timeStamp", value.first);
         fpsD.addAttribute("frameCount", value.second);

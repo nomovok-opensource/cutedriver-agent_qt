@@ -63,14 +63,13 @@ void ObjectService::performObjectService(TasCommandModel& model, TasResponse& re
         TasTarget* commandTarget = i.next();
         QString targetId = commandTarget->id();
         QString targetType = commandTarget->type();
-        quint32 id = targetId.toUInt();
         QObject* target = 0;
         QGraphicsItem* item = 0;
         if(targetType == TYPE_GRAPHICS_VIEW){
-            item = findGraphicsItem(id); 
+            item = findGraphicsItem(targetId); 
         }
         else if(targetType == TYPE_STANDARD_VIEW){
-            target = findWidget(id);
+            target = findWidget(targetId);
         }
         else if(targetType ==  TYPE_APPLICATION_VIEW ){
             target = qApp;

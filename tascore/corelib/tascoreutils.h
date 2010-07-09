@@ -36,7 +36,8 @@ public:
 	static QString parseExecutable(QString completePath);
 	static void wait(int millis);
 
-	//	static QString touchEventDetails(QTouchEvent* event);
+	static QString objectId(QObject* object);
+	static QString pointerId(void* ptr);
 };
 
 #endif

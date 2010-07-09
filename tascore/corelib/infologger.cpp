@@ -232,7 +232,7 @@ QByteArray* InfoLogger::loadData(QFile* file, const QString& name)
     in.seek(0);
     while (!in.atEnd()) {
         TasObject& obj = parentData.addObject();
-        obj.setId(counter);        
+        obj.setId(QString::number(counter));        
         obj.setType("logEntry");
         obj.setName("LogEntry");
         //load attributes format is: title:value;title:value....

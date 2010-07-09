@@ -46,6 +46,7 @@ class QFont;
 class TAS_EXPORT TasBaseTraverse
 {
 public:
+
     virtual ~TasBaseTraverse();
 
 	void resetFilter();
@@ -53,7 +54,7 @@ public:
     void addObjectDetails(TasObject* objectData, QObject* object);
 
 	//protected:
-    quint32 getParentId(QObject* object);
+    QString getParentId(QObject* object);
     void printProperties(TasObject* objectData, QObject* object);    
     void addFont(TasObject* objectInfo, QFont font);
     void addVariantValue(TasAttribute& attr, const QVariant& value);

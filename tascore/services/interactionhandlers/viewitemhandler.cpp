@@ -60,19 +60,20 @@ void ViewItemHandler::setCheckState(QTreeWidget* treeWidget, TasCommand& command
     Qt::CheckState newState = static_cast<Qt::CheckState>(command.parameter("state").toInt());
     int column = command.parameter("column").toInt();
     //look for the item
-    QTreeWidgetItem* item = findTreeItem(treeWidget, command.parameter("item").toUInt());
+    QTreeWidgetItem* item = findTreeItem(treeWidget, command.parameter("item"));
     if(item){
         item->setCheckState(column, newState);
     }
 }
 
-QTreeWidgetItem* ViewItemHandler::findTreeItem(QTreeWidget* treeWidget, quint32 itemId)
+QTreeWidgetItem* ViewItemHandler::findTreeItem(QTreeWidget* treeWidget, const QString& itemId)
 {
     QTreeWidgetItem* item = 0;
     int count = treeWidget->topLevelItemCount(); 
     for(int i = 0; i < count; i++){
         QTreeWidgetItem* candidate = treeWidget->topLevelItem(i);
-        if( (quint32)candidate == itemId){
+        QString candidateId = TasCoreUtils::pointerId(candidate);
+        if( candidateId == itemId){
             item = candidate;
             break;
         }
@@ -86,13 +87,14 @@ QTreeWidgetItem* ViewItemHandler::findTreeItem(QTreeWidget* treeWidget, quint32 
     return item;
 }
 
-QTreeWidgetItem* ViewItemHandler::findFromTreeItem(QTreeWidgetItem* parent, quint32 itemId)
+QTreeWidgetItem* ViewItemHandler::findFromTreeItem(QTreeWidgetItem* parent, const QString& itemId)
 {
     QTreeWidgetItem* item = 0;
     int count = parent->childCount();
     for(int i = 0 ; i < count; i++){        
         QTreeWidgetItem* candidate = parent->child(i);
-        if((quint32)candidate == itemId){
+        QString candidateId = TasCoreUtils::pointerId(candidate);
+        if( candidateId == itemId){
             item = candidate;
             break;
         }

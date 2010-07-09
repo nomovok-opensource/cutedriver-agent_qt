@@ -222,9 +222,9 @@ TasObject::~TasObject()
     Ids are used to separate objects. 
 
 */
-void TasObject::setId(quint32 id)
+void TasObject::setId(const QString& itemId)
 {
-    this->id = QString::number(id);
+    this->id = itemId;
 }
 
 /*!
@@ -397,7 +397,7 @@ TasObject& TasObject::addObject()
     Add new object under this object with the given object values.
 
 */
-TasObject& TasObject::addNewObject(quint32 id, const QString& name, const QString& type)
+TasObject& TasObject::addNewObject(QString id, const QString& name, const QString& type)
 {
     TasObject& object = addObject();
     object.setId(id);
@@ -406,10 +406,6 @@ TasObject& TasObject::addNewObject(quint32 id, const QString& name, const QStrin
     return object;
 }
 
-void TasObject::setParentId(quint32 parentId )
-{
-    setParentId(QString::number(parentId));
-}
 void TasObject::setParentId(const QString& parentId )
 {
     this->parentId = parentId;
@@ -530,7 +526,7 @@ TasObject& TasObjectContainer::addNewObject()
     Add a new object to the container with the given values.
 
 */
-TasObject& TasObjectContainer::addNewObject(int id, const QString& name, const QString& type)
+TasObject& TasObjectContainer::addNewObject(const QString& id, const QString& name, const QString& type)
 {
     TasObject& object = addNewObject();
     object.setId(id);

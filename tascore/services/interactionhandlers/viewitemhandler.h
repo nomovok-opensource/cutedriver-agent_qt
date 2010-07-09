@@ -38,8 +38,8 @@ public:
 
 private:
 	void setCheckState(QTreeWidget* treeWidget, TasCommand& command);
-	QTreeWidgetItem* findTreeItem(QTreeWidget* treeWidget, quint32 itemId);
-	QTreeWidgetItem* findFromTreeItem(QTreeWidgetItem* parent, quint32 itemId);
+	QTreeWidgetItem* findTreeItem(QTreeWidget* treeWidget, const QString& itemId);
+	QTreeWidgetItem* findFromTreeItem(QTreeWidgetItem* parent, const QString& itemId);
   
 };
 

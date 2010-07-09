@@ -86,16 +86,15 @@ bool FixtureService::performFixture(TasCommandModel& model, QString& message)
         if(targetId.isEmpty() || targetType.isEmpty()){
             continue;
         }
-        quint32 id = targetId.toUInt();
         void* ptr = 0;
         QString objectType = NULL_TYPE;
 
         if(targetType == TYPE_GRAPHICS_VIEW){
-            ptr = findGraphicsItem(id); 
+            ptr = findGraphicsItem(targetId); 
             objectType = GRAPHICS_ITEM_TYPE;
         }
         else if(targetType == TYPE_STANDARD_VIEW){
-            ptr = findWidget(id);
+            ptr = findWidget(targetId);
             objectType = WIDGET_TYPE;
         }        
         else if(targetType == TYPE_APPLICATION_VIEW){

@@ -237,7 +237,7 @@ void TestabilityService::sendRegisterMessage()
     attrs[PLUGIN_NAME] = TestabilityUtils::getApplicationName();
     attrs[PLUGIN_TYPE] = TAS_PLUGIN;
 #ifdef Q_OS_SYMBIAN
-    quint32 uid = CEikonEnv::Static()->EikAppUi()->Application()->AppDllUid().iUid;
+    quintptr uid = CEikonEnv::Static()->EikAppUi()->Application()->AppDllUid().iUid;
     attrs[APP_UID] = QString::number(uid);
 #endif        
     QString message = makeReqisterMessage(COMMAND_REGISTER, attrs);

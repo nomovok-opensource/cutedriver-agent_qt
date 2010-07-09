@@ -155,16 +155,15 @@ TasEventFilter* EventService::getFilterForTarget(TasTarget* commandTarget, bool 
         filter = mEventFilters.value(targetId);
     }
     else if(create){
-        quint32 id = targetId.toUInt();
         QObject* target = 0;
         if(targetType == TYPE_GRAPHICS_VIEW){
-            QGraphicsItem* item = findGraphicsItem(id); 
+            QGraphicsItem* item = findGraphicsItem(targetId); 
             if (item->isWindow() || item->isWidget()) {
                 target = (QObject*)((QGraphicsWidget*)item);                        
             }            
         }
         else if(targetType == TYPE_STANDARD_VIEW){
-            target = findWidget(id);
+            target = findWidget(targetId);
         }        
         else if(targetType == TYPE_APPLICATION_VIEW){
             target= qApp;
@@ -221,7 +220,7 @@ void TasEventFilter::addStartTime(QDateTime startTime)
 {
     if(mTasEvents){
         TasObject& eventObj = mTasEvents->addObject();
-        eventObj.setId(int(&startTime));
+        eventObj.setId(TasCoreUtils::pointerId(&startTime));
         eventObj.setType(QString("event"));
         eventObj.setName(PROCESS_START_TIME);
         eventObj.addAttribute("timeStamp", startTime.toString(DATE_FORMAT));
@@ -239,7 +238,7 @@ bool TasEventFilter::eventFilter(QObject *target, QEvent *event)
             return false;
 
         TasObject& eventObj = mTasEvents->addObject();
-        eventObj.setId(int(event));
+        eventObj.setId(TasCoreUtils::pointerId(event));                                     
         eventObj.setType(QString("event"));
         eventObj.setName(eventType);
         eventObj.addAttribute("timeStamp", QDateTime::currentDateTime().toString(DATE_FORMAT));
@@ -247,8 +246,7 @@ bool TasEventFilter::eventFilter(QObject *target, QEvent *event)
 
         if(target){
             TasObject& targetObj = eventObj.addObject();
-            int targetId = (int)target;
-            targetObj.setId(targetId);
+            targetObj.setId(TasCoreUtils::objectId(target));
             targetObj.setName(target->objectName() != NULL ? target->objectName() : "NoName");
             targetObj.setType(target->metaObject()->className());
 

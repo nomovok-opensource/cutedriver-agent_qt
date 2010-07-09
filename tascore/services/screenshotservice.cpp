@@ -91,12 +91,11 @@ void ScreenshotService::getScreenshot(TasCommandModel& model, TasResponse& respo
             draw = true;
         }
 
-        quint32 id = targetId.toUInt();
         QWidget* target = 0;
         errorMsg = "Taking screenshot failed!";
         if(targetType == TYPE_GRAPHICS_VIEW){
             TasLogger::logger()->debug("TYPE_GRAPHICS_VIEW Target id:" + targetId);
-            QGraphicsItem* item = findGraphicsItem(id); 
+            QGraphicsItem* item = findGraphicsItem(targetId); 
             if(item){
                 QGraphicsView* view = getViewForItem(item);
                 if(view){                    
@@ -125,7 +124,7 @@ void ScreenshotService::getScreenshot(TasCommandModel& model, TasResponse& respo
         else{
             if(targetType == TYPE_STANDARD_VIEW){
                 TasLogger::logger()->debug("TYPE_STANDARD_VIEW about to find widget Target id:" + targetId);
-                target = findWidget(id);
+                target = findWidget(targetId);
             }
             else{
                 TasLogger::logger()->debug("TYPE_APPLICATION_VIEW about to find application window Target id:" + targetId);

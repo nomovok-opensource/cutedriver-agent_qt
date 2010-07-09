@@ -33,17 +33,17 @@
   Casting direclty from the id does not work so we need to look
   for the object with a matching id.   
 */
-QWidget* TestabilityUtils::findWidget(quint32 id)
+QWidget* TestabilityUtils::findWidget(const QString& id)
 {
-    TasLogger::logger()->debug("TestabilityUtils::findWidget id:" + QString().setNum(id));
+    TasLogger::logger()->debug("TestabilityUtils::findWidget id:" + id);
     QWidget* widget = NULL;
-    QWidget* target = (QWidget*)id;
     QWidgetList widgetList = qApp->allWidgets();        
     if (!widgetList.empty()){        
         QWidgetList::iterator i;
         for (i = widgetList.begin(); i != widgetList.end(); ++i){        
             QWidget* current = *i;        
-            if(current == target){
+            QString currentId = TasCoreUtils::objectId(current);
+            if(currentId == id){
                 widget = current;
                 break;
             }
@@ -59,7 +59,7 @@ QWidget* TestabilityUtils::findWidget(quint32 id)
   Get the correct QGraphicsItem for the given object id.
   Looks for the item from graphicsviews and scenes     
 */
-QGraphicsItem* TestabilityUtils::findGraphicsItem(quint32 id)
+QGraphicsItem* TestabilityUtils::findGraphicsItem(const QString& id)
 {
     QGraphicsItem* item = NULL;
     QWidgetList widgetList = qApp->topLevelWidgets();        
@@ -83,7 +83,7 @@ QGraphicsItem* TestabilityUtils::findGraphicsItem(quint32 id)
   Looks for a graphicsitem with thte given id from the children of the
   given object.
 */
-QGraphicsItem* TestabilityUtils::findFromObject(quint32 id, QObject* object)
+QGraphicsItem* TestabilityUtils::findFromObject(const QString& id, QObject* object)
 {
     QGraphicsItem* item = NULL;
     //check view first
@@ -125,7 +125,7 @@ QGraphicsItem* TestabilityUtils::findFromObject(quint32 id, QObject* object)
   Iterates a list of graphicsitems looking for a match for the given id.
   NULL is returned if a match is not found.
 */
-QGraphicsItem* TestabilityUtils::lookForMatch(QList<QGraphicsItem*> itemList, quint32 targetId)
+QGraphicsItem* TestabilityUtils::lookForMatch(QList<QGraphicsItem*> itemList, const QString& targetId)
 {
     QGraphicsItem* item = NULL;
     if (!itemList.isEmpty()){
@@ -146,11 +146,12 @@ QGraphicsItem* TestabilityUtils::lookForMatch(QList<QGraphicsItem*> itemList, qu
   making the comparison.
   Returns true if the given item matches. 
 */
-bool TestabilityUtils::verifyGraphicsItemMatch(quint32 targetId, QGraphicsItem* source)
+bool TestabilityUtils::verifyGraphicsItemMatch(const QString& targetId, QGraphicsItem* source)
 {    
     bool doesMatch = false;
     //first check simple match
-    quint32 sourceId = (quint32)source;
+    QString sourceId = TestabilityUtils::graphicsItemId(source);
+    
     if (sourceId == targetId){
         doesMatch = true;
     }
@@ -158,7 +159,7 @@ bool TestabilityUtils::verifyGraphicsItemMatch(quint32 targetId, QGraphicsItem* 
         //is object decendant
         if (source->isWindow() || source->isWidget()) {
             QObject * object = (QObject*)((QGraphicsWidget*)source);
-            sourceId = (quint32)object;
+            sourceId = TasCoreUtils::objectId(object);
             if (sourceId == targetId){
                 doesMatch = true;                        
             }   
@@ -402,4 +403,9 @@ ItemLocationDetails TestabilityUtils::getItemLocationDetails(QGraphicsItem* grap
     }
     locationDetails.visible = isVisible;
     return locationDetails;
+}
+
+QString TestabilityUtils::graphicsItemId(QGraphicsItem* graphicsItem)
+{
+    return QString::number((quintptr)graphicsItem);
 }

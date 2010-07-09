@@ -59,7 +59,7 @@ QByteArray* UiStateService::serverUiState()
     TasObjectContainer& container = model->addNewObjectContainer(1, qtVersion, "qt");
 
     QString name = TasCoreUtils::getApplicationName();
-    TasObject& application = container.addNewObject(QCoreApplication::applicationPid(), name, "application");
+    TasObject& application = container.addNewObject(QString::number(QCoreApplication::applicationPid()), name, "application");
     application.addAttribute("exepath", qApp->applicationFilePath().toLatin1().data());
     application.addAttribute("FullName", qApp->applicationFilePath().toLatin1().data());
     application.addAttribute("dirpath", qApp->applicationDirPath().toLatin1().data());

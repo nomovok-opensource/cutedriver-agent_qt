@@ -143,7 +143,7 @@ bool RecorderService::eventFilter(QObject *target, QEvent *event)
         if( target->isWidgetType() && (eventType  == "MouseButtonRelease" || eventType == "MouseButtonPress" || eventType == "MouseMove")){
 
             TasObject& eventObj = mTasEvents->addObject();
-            eventObj.setId(eventCounter);
+            eventObj.setId(QString::number(eventCounter));
             eventObj.setType(QString("event"));
             eventObj.setName(eventType);
             eventObj.addAttribute("timeStamp", QDateTime::currentDateTime().toString(QString("yyyyMMddhhmmsszzz")));
@@ -194,7 +194,7 @@ bool RecorderService::eventFilter(QObject *target, QEvent *event)
             }
             //set the id to match the event
             //makes it possible to get details from xml tree using the same id
-            targetObj.setId(eventCounter);
+            targetObj.setId(QString::number(eventCounter));
             //increase for the next event
             eventCounter++;
         }

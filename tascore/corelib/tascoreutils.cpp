@@ -354,26 +354,18 @@ QString TasCoreUtils::eventType(QEvent* event)
     }
 }
 
-// QString TasCoreUtils::touchEventDetails(QTouchEvent* event)
-// {
-//     QString details = " details[";
-//     QTouchEvent::TouchPoint touchPoint;
-//     foreach(touchPoint, event->touchPoints()){
-//         details.append("Pos:");
-//         details.append(QString::number(touchPoint.pos().x()) + "," + QString::number(touchPoint.pos().y()));
-//         details.append(" Screen:");
-//         details.append(QString::number(touchPoint.screenPos().x()) + "," +QString::number(touchPoint.screenPos().y()));
-//         details.append(" Scene:");
-//         details.append(QString::number(touchPoint.scenePos().x()) + ","+QString::number(touchPoint.scenePos().y()));
-//         details.append(" Normalized:");
-//         details.append(QString::number(touchPoint.pos().x()) +","+QString::number(touchPoint.pos().y()));
-//         details.append(",");
-//     }
-//     details.append("]");
-//     return details;
-// }
-
 void TasCoreUtils::wait(int millis)
 {
     Sleeper::sleep(millis);
 }
+
+QString TasCoreUtils::objectId(QObject* object)
+{
+    return QString::number((quintptr)object);
+}
+
+QString TasCoreUtils::pointerId(void* ptr)
+{
+    return QString::number((quintptr)ptr);
+}
+

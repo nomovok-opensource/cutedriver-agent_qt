@@ -50,9 +50,13 @@ private:
     bool executeJavaScriptWebElement(TasTarget* target, TasCommand* command);
     bool executeJavaScriptQWebFrame(TasTarget* target, TasCommand* command);
 
-    bool traverseJavaScriptToQWebFrame(QWebFrame* webFrame, QString javaScript, quint32 id);
-    bool traverseJavaScriptToWebElement(QWebFrame* webFrame, quint32 webFrameId, QString javaScript, QString query, int &index, TasCommand* command,int parentFrames=0);
+    bool traverseJavaScriptToQWebFrame(QWebFrame* webFrame, QString javaScript, QString id);
+    bool traverseJavaScriptToWebElement(QWebFrame* webFrame, QString webFrameId, QString javaScript, QString query, int &index, TasCommand* command,int parentFrames=0);
 
+
+	bool executeJavascriptOnWebElement(QWebFrame* webFrame, QString webFrameId, QString javaScript, QString elementId);
+	QWebElement* lookForWebElement(const QWebElement &parentElement, QString elementId, QString webFrameId);
+	QWebFrame* lookForWebFrame(QWebFrame* webFrame, QString webFrameId);
 
     QList<QWebFrame*> traverseStart();
     QList<QWebFrame*> traverseObject(QObject* object);

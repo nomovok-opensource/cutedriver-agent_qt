@@ -52,13 +52,15 @@ public:
 	static QPoint proxyCoordinates(QGraphicsItem* item, bool absolute = true);
 	static ItemLocationDetails getItemLocationDetails(QGraphicsItem* graphicsItem, TasCommand* command=0);
 	static bool isCustomTraverse();
+	static QString graphicsItemId(QGraphicsItem* graphicsItem);
+
 
 protected:
-	QWidget* findWidget(quint32 id);
-	QGraphicsItem* findFromObject(quint32 id, QObject* object);
-	QGraphicsItem* findGraphicsItem(quint32 id);
-	QGraphicsItem* lookForMatch(QList<QGraphicsItem*> itemList, quint32 targetId);
-	bool verifyGraphicsItemMatch(quint32 targetId, QGraphicsItem* source);
+	QWidget* findWidget(const QString& id);
+	QGraphicsItem* findFromObject(const QString& id, QObject* object);
+	QGraphicsItem* findGraphicsItem(const QString& id);
+	QGraphicsItem* lookForMatch(QList<QGraphicsItem*> itemList, const QString& targetId);
+	bool verifyGraphicsItemMatch(const QString& targetId, QGraphicsItem* source);
 	QWidget* getApplicationWindow();
 private:
 

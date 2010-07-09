@@ -155,7 +155,7 @@ void UiCommandService::executeNextCommand()
 TargetData UiCommandService::makeInteractionData(TasTarget* commandTarget)
 {
     QString targetType = commandTarget->type();
-    quint32 id = commandTarget->id().toUInt();
+    QString id = commandTarget->id();
     QWidget* target = 0;
     QGraphicsItem* item = 0;
     QPoint point;

@@ -66,7 +66,7 @@ protected:
 	QGraphicsItem* mItem;
 
 private:
-	quint32 mTargetId;
+	QString mTargetId;
 	QString mTargetType;
     Qt::MouseButton mButton;    
     bool mPress;

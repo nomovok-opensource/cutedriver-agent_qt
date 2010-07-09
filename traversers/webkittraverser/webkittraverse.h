@@ -55,13 +55,13 @@ public:
 private:
 
 #if QT_VERSION >= 0x040600
-    void traverseWebElement(TasObject* parent, QPoint parentPos, QPoint screenPos, QWebElement* webElement);
+	void traverseWebElement(TasObject* parent, QPoint parentPos, QPoint screenPos, QWebElement* webElement, const QString& webFrameId);
     void parseAttributes(QWebElement* webElement, TasObject* objInfo);
     void traverseQWebView(TasObject* objectInfo, QWebView* webView);
     void traverseQWebPage(TasObject& pageInfo, QWebPage* webPage, 
                            const QPoint& webViewPos, const QPoint& screenPos);
     void traverseQGraphicsWebView(TasObject* objectInfo, QGraphicsWebView* webView, TasCommand* command);
-    void traverseFrame(QWebFrame * webFrame, TasObject& parent, int parentId, const QPoint& parentPos, const QPoint& screenPos);
+    void traverseFrame(QWebFrame * webFrame, TasObject& parent, QString parentId, const QPoint& parentPos, const QPoint& screenPos);
     int counter;
 
 #endif

@@ -102,14 +102,14 @@ void TasLayoutTraverse::addLayoutItem(TasObject& objectInfo, QLayoutItem* item)
         if(!item->layout()){
             objectInfo.addAttribute("objectType", TYPE_LAYOUT_ITEM);
             objectInfo.setType("QLayoutItem");           
-            objectInfo.setId((int)item);
+            objectInfo.setId(TasCoreUtils::pointerId(item));
         }
         else{
             objectInfo.addAttribute("objectType", TYPE_LAYOUT);
         }
 
         if(item->widget()){
-            objectInfo.addAttribute("itemId", QString::number((quint32)(QObject*)item->widget()));
+            objectInfo.addAttribute("itemId", TasCoreUtils::objectId((QObject*)item->widget()));
         }
 
         objectInfo.addAttribute("minimumSize", item->minimumSize());
@@ -138,7 +138,7 @@ void TasLayoutTraverse::addGraphicsWidgetLayout(TasObject& objectInfo, QGraphics
 void TasLayoutTraverse::addGraphicsLayoutItem(TasObject& objectInfo, QGraphicsLayoutItem *item, QGraphicsItem* parent)
 {
     if(item){
-        objectInfo.setId((int)item);
+        objectInfo.setId(TasCoreUtils::pointerId(item));
         if(item->isLayout()){
             objectInfo.addAttribute("objectType", TYPE_LAYOUT);
         }
@@ -167,10 +167,10 @@ void TasLayoutTraverse::addGraphicsLayoutItem(TasObject& objectInfo, QGraphicsLa
         if(item->graphicsItem()){
             if (item->graphicsItem()->isWindow() || item->graphicsItem()->isWidget()) {
                 QObject* qWidget = (QObject*)((QGraphicsWidget*)item->graphicsItem());
-                objectInfo.addAttribute("itemId", QString::number((quint32)qWidget));
+                objectInfo.addAttribute("itemId", TasCoreUtils::objectId(qWidget));
             }
             else{
-                objectInfo.addAttribute("itemId", QString::number((quint32)item->graphicsItem()));
+                objectInfo.addAttribute("itemId", TestabilityUtils::graphicsItemId(item->graphicsItem()));
             }
         }
 

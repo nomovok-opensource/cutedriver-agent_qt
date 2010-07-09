@@ -262,7 +262,7 @@ void GestureHandler::setParameters(TasCommand& command)
         mDuration = command.parameter("speed").toInt();
     }
     if (!command.parameter("targetId").isEmpty()) {
-        mTargetId = command.parameter("targetId").toUInt();
+        mTargetId = command.parameter("targetId");
     }
     if (!command.parameter("targetType").isEmpty()) {
         mTargetType = command.parameter("targetType");

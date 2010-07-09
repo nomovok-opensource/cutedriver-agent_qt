@@ -105,27 +105,32 @@ bool WebkitCommandService::executeJavaScriptWebElement(TasTarget* target, TasCom
     mainFrameList = traverseStart();
 
 //    TasLogger::logger()->debug("  mainFrameList size " + QString::number(mainFrameList.count()) );
+    QString frameId = command->parameter("webframe_id");
+    QString jScript = command->parameter("java_script");
+    QString elementId = command->parameter("elementId");
+    QString query = command->parameter("locator_query");
 
-    foreach(QWebFrame* frame, mainFrameList)
-    {
-        bool ret = false;
-        ret = traverseJavaScriptToWebElement(frame,
-                                             command->parameter("webframe_id").toUInt(),
-                                             command->parameter("java_script"),
-                                             command->parameter("locator_query"),
-                                             index,
-                                             command);
-        if(ret) return ret;
+    foreach(QWebFrame* frame, mainFrameList){
+        if(query.isEmpty()){
+            if(executeJavascriptOnWebElement(frame, frameId, jScript, elementId)){
+                return true;
+            }
+        }
+        else{
+            bool ret = false;
+            ret = traverseJavaScriptToWebElement(frame, frameId, jScript, query, index, command);
+            if(ret) return ret;
+        }
     }
 
-    mErrorMessage = "When executing JavaScript to WebElement: QWebFrame not found";
+    //mErrorMessage = "When executing JavaScript to WebElement: QWebFrame not found";
     return false;
 }
 
 bool WebkitCommandService::executeJavaScriptQWebFrame(TasTarget* target, TasCommand* command)
 {
     TasLogger::logger()->debug("WebkitCommandService::executeJavaScriptQWebFrame JavaScript \"" + command->parameter("java_script")  + "\"");
-    quint32 id = target->id().toUInt();
+    QString id = target->id();
 
     QList<QWebFrame*> mainFrameList;
 
@@ -145,8 +150,78 @@ bool WebkitCommandService::executeJavaScriptQWebFrame(TasTarget* target, TasComm
 
 }
 
+
+bool WebkitCommandService::executeJavascriptOnWebElement(QWebFrame* webFrame, QString webFrameId, QString javaScript, QString elementId)
+{    
+    bool success = false;
+    QWebFrame* targetFrame = 0;
+    //this is the frame we want
+    if( webFrameId == TasCoreUtils::objectId(webFrame)){
+        targetFrame = webFrame;
+    }
+    //need to look for it from child frames
+    else{
+        targetFrame = lookForWebFrame(webFrame, webFrameId);
+    }
+    if(targetFrame){
+        //frame found! lets look for the element
+        QWebElement* element = lookForWebElement(targetFrame->documentElement(), elementId, webFrameId);
+        if(element){
+            element->evaluateJavaScript(javaScript);
+            success = true;   
+        }
+        else{
+            mErrorMessage = "When executing JavaScript to WebElement: QWebElement not found";
+        }
+    }            
+    else{
+        mErrorMessage = "When executing JavaScript to WebElement: QWebFrame not found";        
+    }
+    return success;
+}
+
+QWebFrame* WebkitCommandService::lookForWebFrame(QWebFrame* webFrame, QString webFrameId)
+{
+    QWebFrame* targetFrame = 0;
+    foreach(QWebFrame* childFrame, webFrame->childFrames()) {
+        if(webFrameId == TasCoreUtils::objectId(childFrame)){
+            targetFrame = childFrame;
+            break;
+        }
+        else{
+            targetFrame = lookForWebFrame(childFrame, webFrameId);
+        }
+        if(targetFrame){
+            break;
+        }
+    }
+    return targetFrame;
+}
+
+QWebElement* WebkitCommandService::lookForWebElement(const QWebElement &parentElement, QString elementId, QString webFrameId)
+{
+    TasLogger::logger()->debug("WebkitCommandService::lookForWebElement elementid " + elementId);
+    QWebElement* match = 0;
+    QWebElement element = parentElement.firstChild();
+    while (!element.isNull()) {        
+        TasLogger::logger()->debug("WebkitCommandService::lookForWebElement candidate " + TasCoreUtils::pointerId(&element));
+        QString candidateId = QString::number(qHash(element.toOuterXml() + webFrameId));
+        if(elementId == candidateId){
+            match = &element;
+        }
+        else{
+            match = lookForWebElement(element, elementId, webFrameId);
+        }
+        if(match){
+            break;
+        }
+        element = element.nextSibling();
+    }
+    return match;
+}
+                                                          
 bool WebkitCommandService::traverseJavaScriptToWebElement(QWebFrame* webFrame,
-                                                          quint32 webFrameId,
+                                                          QString webFrameId,
                                                           QString javaScript,
                                                           QString query,
                                                           int &index,
@@ -154,15 +229,15 @@ bool WebkitCommandService::traverseJavaScriptToWebElement(QWebFrame* webFrame,
                                                           int parentFrames)
 {
     TasLogger::logger()->debug("WebkitCommandService::traverseJavaScriptToWebElement index(" + QString::number(index) +
-                               ") webFrameId(" + QString::number(webFrameId) +
-                               ") webFrame(" + QString::number((quint32)webFrame) + ")");
+                               ") webFrameId(" + webFrameId +
+                               ") webFrame(" + TasCoreUtils::objectId(webFrame) + ")");
     QList<QWebElement> element_list;
     int count = 0;
 
     //find all elements, is matching webframe or if doing search to all webframes
-    if(webFrameId == 0 || webFrameId == (quint32)webFrame)
+    if(webFrameId == 0 || webFrameId == TasCoreUtils::objectId(webFrame))
     {
-//        TasLogger::logger()->debug("  ok to search elements " );
+        TasLogger::logger()->debug("  ok to search elements " );
 
          //findAllElements
          //check do we have other limitations than tag type
@@ -233,11 +308,12 @@ bool WebkitCommandService::traverseJavaScriptToWebElement(QWebFrame* webFrame,
         mErrorMessage = "When executing JavaScript to WebElement: QWebElement not found";
         return false;
     }
-}
+ }
 
-bool WebkitCommandService::traverseJavaScriptToQWebFrame(QWebFrame* webFrame, QString javaScript, quint32 id)
+bool WebkitCommandService::traverseJavaScriptToQWebFrame(QWebFrame* webFrame, QString javaScript, QString id)
 {
-    if((quint32)webFrame == id)
+    TasLogger::logger()->debug("WebkitCommandService::traverseJavaScriptToQWebFrame id " + id + "cast id: " + TasCoreUtils::objectId(webFrame) + ".");
+    if(TasCoreUtils::objectId(webFrame) == id)
     {
 //        TasLogger::logger()->debug("WebkitCommandService::traverseJavaScriptToQWebFrame found");
         webFrame->evaluateJavaScript(javaScript);

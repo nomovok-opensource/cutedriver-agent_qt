@@ -60,8 +60,7 @@ void TasQtTraverse::traverseGraphicsItem(TasObject* objectInfo, QGraphicsItem* g
     }
 
     objectInfo->addAttribute("objectType", embeddedApp? TYPE_WEB : TYPE_GRAPHICS_VIEW);                
-    quint32 tasId = (quint32)graphicsItem;                       
-    objectInfo->setId(tasId);
+    objectInfo->setId(TestabilityUtils::graphicsItemId(graphicsItem));
     addGraphicsItemCoordinates(objectInfo, graphicsItem, command);    
     printGraphicsItemProperties(objectInfo, graphicsItem);
 }

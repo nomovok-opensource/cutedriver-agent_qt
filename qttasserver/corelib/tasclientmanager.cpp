@@ -267,7 +267,7 @@ void TasClientManager::crashedApplicationList(TasObject& parent)
     		
     foreach (TasClient* crashedClient, mCrashedProcesses) {
 		TasObject& clientObj = parent.addObject();
-		clientObj.setId(crashedClient->processId().toInt());
+		clientObj.setId(crashedClient->processId());
 		clientObj.setType(QString("application"));
 		clientObj.setName(crashedClient->applicationName());
 		clientObj.addAttribute(QString("crashTime"), crashedClient->crashTime().toString());
@@ -545,7 +545,7 @@ void TasClientManager::applicationList(TasObject& parent)
     foreach (TasClient* app, mClients){
         if(app->socket()){
             TasObject& appObj = parent.addObject();
-            appObj.setId(app->processId().toInt());
+            appObj.setId(app->processId());
             appObj.setType(QString("application"));
             appObj.setName(app->applicationName());
         }

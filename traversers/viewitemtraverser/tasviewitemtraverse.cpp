@@ -61,7 +61,6 @@ void TasViewItemTraverse::traverseGraphicsItem(TasObject* /*objectInfo*/, QGraph
 */
 void TasViewItemTraverse::traverseObject(TasObject* objectInfo, QObject* object, TasCommand*)
 {
-    TasLogger::logger()->debug("TasViewItemTraverse::traverseObject");
     if(object->inherits("QAbstractItemView")){          
 
         //traverse the different types of viewitems 
@@ -118,7 +117,7 @@ void TasViewItemTraverse::traverseHeaderView(QHeaderView* headerView, TasObject*
         for(int i = 0; i < count; i++){
             if(!headerView->isSectionHidden(i)){
                 TasObject& headerItem = objectInfo->addObject();
-                headerItem.setId((quint32)&headerItem);
+                headerItem.setId(TasCoreUtils::pointerId(&headerItem));
                 headerItem.setType("ItemData");
                 headerItem.addAttribute("section", i);
                 headerItem.addAttribute("text", model->headerData(i, headerView->orientation()).toString()); 
@@ -165,7 +164,7 @@ void TasViewItemTraverse::traverseTableWidget(QTableWidget* tableWidget, TasObje
 void TasViewItemTraverse::traverseTableWidgetItem(QTableWidgetItem* item, TasObject& objectInfo, QTableWidget *tableWidget)
 {
     TasLogger::logger()->debug("TasViewItemTraverse::traverseTableWidgetItem");
-    objectInfo.setId((quint32)item);
+    objectInfo.setId(TasCoreUtils::pointerId(item));    
     objectInfo.setType("QTableWidgetItem");
     objectInfo.addBooleanAttribute("selected", item->isSelected());
     objectInfo.addAttribute("checkState", item->checkState());      
@@ -175,7 +174,7 @@ void TasViewItemTraverse::traverseTableWidgetItem(QTableWidgetItem* item, TasObj
     objectInfo.addAttribute("statusTip", item->statusTip());
     objectInfo.addAttribute("toolTip", item->toolTip());
     objectInfo.addAttribute("whatsThis", item->whatsThis());
-    objectInfo.addAttribute("parentWidget", QString::number((quint32)tableWidget));
+    objectInfo.addAttribute("parentWidget", TasCoreUtils::pointerId(tableWidget));
     addFont(&objectInfo, item->font());
     QRect rect = tableWidget->visualItemRect(item);
     if(addItemLocationDetails(objectInfo, rect, tableWidget)){
@@ -191,7 +190,7 @@ void TasViewItemTraverse::traverseListWidget(QListWidget* listWidget, TasObject*
         QListWidgetItem* item = listWidget->item(i);
         if(item && !item->isHidden()){
             TasObject& listItem = objectInfo->addObject();
-            listItem.setId((quint32)item);
+            listItem.setId(TasCoreUtils::pointerId(item));            
             listItem.setType("QListWidgetItem");
             listItem.addAttribute("text", item->text());
             listItem.addAttribute("textAlignment", item->textAlignment());
@@ -199,7 +198,7 @@ void TasViewItemTraverse::traverseListWidget(QListWidget* listWidget, TasObject*
             listItem.addAttribute("whatsThis", item->whatsThis());
             listItem.addBooleanAttribute("selected", item->isSelected());
             listItem.addAttribute("checkState", item->checkState());
-            listItem.addAttribute("parentWidget", QString::number((quint32)listWidget));
+            listItem.addAttribute("parentWidget", TasCoreUtils::pointerId(listWidget));
             addFont(&listItem, item->font());
             QRect rect = listWidget->visualItemRect(item);
             if(addItemLocationDetails(listItem, rect, listWidget)){
@@ -224,14 +223,14 @@ void TasViewItemTraverse::traverseTreeWidget(QTreeWidget* treeWidget, TasObject*
 
 void TasViewItemTraverse::traverseTreeWidgetItem(QTreeWidgetItem* item, TasObject& objectInfo, QTreeWidget *treeWidget)
 {
-    objectInfo.setId((quint32)item);
+    objectInfo.setId(TasCoreUtils::pointerId(item));
     objectInfo.setType("QTreeWidgetItem");
     objectInfo.addBooleanAttribute("disabled",item->isDisabled());
     objectInfo.addBooleanAttribute("expanded", item->isExpanded());
     objectInfo.addBooleanAttribute("firstColumnSpanned", item->isFirstColumnSpanned());
     objectInfo.addBooleanAttribute("hidden", item->isHidden());
     objectInfo.addBooleanAttribute("selected", item->isSelected());
-    objectInfo.addAttribute("parentWidget", QString::number((quint32)treeWidget));
+    objectInfo.addAttribute("parentWidget", TasCoreUtils::pointerId(treeWidget));
 
     //add location
     QRect rect = treeWidget->visualItemRect(item);
@@ -242,7 +241,7 @@ void TasViewItemTraverse::traverseTreeWidgetItem(QTreeWidgetItem* item, TasObjec
     int count = item->columnCount();
     for(int i = 0; i < count; i++){
         TasObject& column = objectInfo.addObject();    
-        column.setId((quint32)&column);
+        column.setId(TasCoreUtils::pointerId(&column));
         column.setType("TreeWidgetItemColumn");
         column.addAttribute("column", i);
         //text 
@@ -256,8 +255,8 @@ void TasViewItemTraverse::traverseTreeWidgetItem(QTreeWidgetItem* item, TasObjec
         if(item->sizeHint(i).isValid()){
             column.addAttribute("sizeHint", item->sizeHint(i));
         }
-        column.addAttribute("parentWidget", QString::number((quint32)treeWidget));
-        column.addAttribute("parentItem", QString::number((quint32)item));
+        column.addAttribute("parentWidget", TasCoreUtils::pointerId(treeWidget));
+        column.addAttribute("parentItem", TasCoreUtils::pointerId(item));
     }
     //iterate children
     count = item->childCount();
@@ -312,7 +311,7 @@ void TasViewItemTraverse::fillTraverseData(QAbstractItemView* view, QVariant dat
     QRect rect = view->visualRect(index );
     if(isItemVisible(rect, view)){
         TasObject& viewItem = objectInfo->addObject();
-        viewItem.setId((quint32)&viewItem);                
+        viewItem.setId(TasCoreUtils::pointerId(&viewItem));                
         viewItem.setType("ItemData");
         viewItem.addAttribute("row",index.row());
         viewItem.addAttribute("column",index.column());
