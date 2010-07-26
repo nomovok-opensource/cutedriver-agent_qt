@@ -41,7 +41,9 @@ ServerWindow::ServerWindow(QWidget* parent)
     stopButton = new QPushButton("Stop");
     startButton = new QPushButton("Start");
     resetButton =  new QPushButton ("Reset server");
-    
+#ifdef Q_OS_SYMBIAN
+    pluginButton = new QPushButton ("Enable tas");    
+#endif
     monitor = new ServerMonitor();
 
     QLabel* stateLabel = new QLabel("Server state:");
@@ -64,6 +66,11 @@ ServerWindow::ServerWindow(QWidget* parent)
     connect(resetButton, SIGNAL(clicked()), editField, SLOT(clear()));
     connect(statusButton, SIGNAL(clicked()), editField, SLOT(clear()));
 
+#ifdef Q_OS_SYMBIAN
+    connect(pluginButton, SIGNAL(clicked()), editField, SLOT(clear()));
+    connect(pluginButton, SIGNAL(clicked()), monitor, SLOT(enablePluginLoad()));
+#endif
+
     connect(statusButton, SIGNAL(clicked()), monitor, SLOT(serverState()));    
     connect(stopButton, SIGNAL(clicked()), monitor, SLOT(stopServer()));
     connect(startButton, SIGNAL(clicked()), monitor, SLOT(startServer()));
@@ -78,7 +85,12 @@ ServerWindow::ServerWindow(QWidget* parent)
     mainLayout->addWidget(versionLabel, 1, 0);
     mainLayout->addWidget(versionValue, 1, 1);
     mainLayout->addWidget(editField, 2,0, 1, 2);
+#ifdef Q_OS_SYMBIAN
+    mainLayout->addWidget(statusButton, 3, 0);
+    mainLayout->addWidget(pluginButton, 3, 1);
+#else
     mainLayout->addWidget(statusButton, 3, 0, 1, 2);
+#endif
     mainLayout->addWidget(stopButton, 4, 0);
     mainLayout->addWidget(startButton, 4, 1);
     mainLayout->addWidget(resetButton, 5, 0);

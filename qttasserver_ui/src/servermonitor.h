@@ -65,6 +65,9 @@ public slots:
   void restartServer();
   void stopServer();
   void startServer();
+#ifdef Q_OS_SYMBIAN
+  void enablePluginLoad();
+#endif
 
 private slots:
   void error(const QString& message);

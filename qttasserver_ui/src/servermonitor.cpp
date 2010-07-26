@@ -180,6 +180,28 @@ void ServerMonitor::killServer()
 
 }
 
+#ifdef Q_OS_SYMBIAN
+void ServerMonitor::enablePluginLoad()
+{  
+    emit serverDebug("Attempting to enable plugin loading...");    
+    QProcess process;
+    process.start("TasHookActivator");
+    if(process.waitForStarted()){
+        emit serverDebug("Plugin enabler started successfully.");    
+        if(process.waitForFinished()){            
+            emit serverDebug("Plugin enabler executed successfully.");    
+            emit serverDebug("Applications should now load the plugin.");    
+        }
+        else{
+            emit serverDebug("Plugin enabler did not finish properly.");    
+        }
+    }
+    else{
+        emit serverDebug("Could not start enabler. " + process.errorString());            
+    }
+}
+#endif
+
 
 TasClient::TasClient()
 {
@@ -267,3 +289,4 @@ void TasClient::connectionTimeout()
     mConnected = false;
     emit error("Server did not respond in time.");
 }
+

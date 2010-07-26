@@ -44,6 +44,7 @@ private:
    QPushButton* stopButton;
    QPushButton* startButton;
    QPushButton* resetButton;
+   QPushButton* pluginButton;
    ServerMonitor* monitor;
 };
 
