@@ -22,6 +22,7 @@
 #include <QDateTime>
 
 #include <taslogger.h>
+#include <tascoreutils.h>
 
 #include "tastraverserloader.h"
 #include "tassignalspy.h"
@@ -58,7 +59,7 @@ void TasSignalSpy::setTarget(QObject* target)
 {
     mTarget = target;
     mSenderClassName = QString(mTarget->metaObject()->className());
-	mSenderId = QString::number((int) mTarget);
+    mSenderId = TasCoreUtils::objectId(mTarget);
 }
 
 /*!

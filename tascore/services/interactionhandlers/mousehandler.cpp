@@ -41,7 +41,7 @@ MouseHandler::MouseHandler()
 
 MouseHandler::~MouseHandler()
 {
-    QHashIterator<int, QList<int>*> i(mTouchIds);
+    QHashIterator<QString, QList<int>*> i(mTouchIds);
     while (i.hasNext()) {
         delete i.next();
     }
@@ -325,7 +325,7 @@ QList<QTouchEvent::TouchPoint> MouseHandler::convertToTouchPoints(QWidget* targe
     QList<int> *pointIds;
     //we need to store the touchpoint ids, the same id must be attached for untill touch point released
     if(targetItem) {
-        int itemId = (int)targetItem;
+        QString itemId = TasCoreUtils::pointerId(targetItem);
         if(state == Qt::TouchPointReleased && mTouchIds.contains(itemId)){
             pointIds = mTouchIds.take(itemId);
             remove = true;

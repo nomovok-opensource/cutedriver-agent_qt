@@ -346,7 +346,7 @@ bool TasViewItemTraverse::addItemLocationDetails(TasObject& objectInfo, QRect re
         objectInfo.addAttribute("width",rect.width());
         objectInfo.addAttribute("height",rect.height());
         //add viewportid, needed for control
-        objectInfo.addAttribute("viewPort",QString::number((int)view->viewport()));
+        objectInfo.addAttribute("viewPort",TasCoreUtils::pointerId(view->viewport()));
         QGraphicsProxyWidget* proxy = TestabilityUtils::parentProxy(view);
         QPoint proxyPos(0,0);
         if (proxy) {
