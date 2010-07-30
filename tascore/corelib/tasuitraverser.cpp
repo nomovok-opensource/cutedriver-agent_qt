@@ -223,7 +223,8 @@ void TasUiTraverser::addApplicationDetails(TasObject& application, TasCommand* c
     application.addAttribute("processId", QString::number(qApp->applicationPid()).toLatin1().data());
     application.addAttribute("version", qApp->applicationVersion().toLatin1().data());
     application.addAttribute("objectType", TYPE_APPLICATION_VIEW);
-    application.addAttribute("objectId", (int)qApp);
+    application.addAttribute("objectId", TasCoreUtils::objectId(qApp));
+
     int mem = TasDeviceUtils::currentProcessHeapSize();
     if(mem != -1){
         application.addAttribute("memUsage", mem);

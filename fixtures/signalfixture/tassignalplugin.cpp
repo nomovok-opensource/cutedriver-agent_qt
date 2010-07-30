@@ -209,7 +209,7 @@ bool TasSignalPlugin::enableSignal(void *objectInstance, QHash<QString, QString>
             int signalId = target->metaObject()->indexOfMethod(signalName.toLatin1().data());
             if(signalId != -1){
                 const char* signature = target->metaObject()->method(signalId).signature();
-                QString hashIdentificator = QString::number((int) target);
+                QString hashIdentificator = TasCoreUtils::objectId(target);
                 TasObjectContainer* container = mOccuredSignals->findObjectContainer(CONTAINER_ID);
                 if(!container){
                     container = &(mOccuredSignals->addNewObjectContainer(CONTAINER_ID.toInt(), "QtSignals", "QtSignals"));
