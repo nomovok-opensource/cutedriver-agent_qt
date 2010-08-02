@@ -88,3 +88,11 @@ void TasDeviceUtils::addSystemMemoryStatus(TasObject& object)
 void TasDeviceUtils::tapScreen(int , int , int )
 {    
 }
+
+/*!
+  True returned so that server is not started in environments that do not implement this method.
+ */
+bool TasDeviceUtils::isServerRunning()
+{
+    return true;
+}

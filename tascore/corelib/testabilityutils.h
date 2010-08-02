@@ -53,7 +53,7 @@ public:
 	static ItemLocationDetails getItemLocationDetails(QGraphicsItem* graphicsItem, TasCommand* command=0);
 	static bool isCustomTraverse();
 	static QString graphicsItemId(QGraphicsItem* graphicsItem);
-
+	static bool autostart();
 
 protected:
 	QWidget* findWidget(const QString& id);

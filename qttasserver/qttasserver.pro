@@ -38,6 +38,7 @@ symbian: {
     TARGET.VID = VID_DEFAULT
     TARGET.EPOCALLOWDLLDATA = 1 
     TARGET.EPOCHEAPSIZE = 0x20000 0x3400000
+
     LIBS += -leuser
     LIBS += -lws32
     LIBS += -lapgrfx

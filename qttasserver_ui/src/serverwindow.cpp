@@ -37,14 +37,21 @@ ServerWindow::ServerWindow(QWidget* parent)
 {
     setWindowTitle("Qt TasServer Ui");
 
+    monitor = new ServerMonitor();
+
     statusButton = new QPushButton("Check status");
     stopButton = new QPushButton("Stop");
     startButton = new QPushButton("Start");
     resetButton =  new QPushButton ("Reset server");
 #ifdef Q_OS_SYMBIAN
     pluginButton = new QPushButton ("Enable tas");    
+    autoStart = new QCheckBox("Autostart"); 
+    autoStart->setTristate(false);
+    if(monitor->autostartState()){
+        autoStart->setCheckState(Qt::Checked);
+    }
+    connect(autoStart, SIGNAL(toggled(bool)), monitor, SLOT(setAutoStart(bool)));
 #endif
-    monitor = new ServerMonitor();
 
     QLabel* stateLabel = new QLabel("Server state:");
     QLabel* versionLabel = new QLabel("Server version:");   
@@ -95,6 +102,7 @@ ServerWindow::ServerWindow(QWidget* parent)
     mainLayout->addWidget(startButton, 4, 1);
     mainLayout->addWidget(resetButton, 5, 0);
     mainLayout->addWidget(quitButton, 5, 1);
+    mainLayout->addWidget(autoStart, 6, 0, 1, 2);
     setLayout(mainLayout);     
 
     QRect rect = qApp->desktop()->screenGeometry();    

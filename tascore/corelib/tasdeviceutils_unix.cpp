@@ -215,4 +215,11 @@ void TasDeviceUtils::sendMouseEvent(int x, int y, Qt::MouseButton button, QEvent
     XCloseDisplay(dpy);
 }
 
+/*!
+  Not implemented, true returned to avoid autostart.
+ */
+bool TasDeviceUtils::isServerRunning()
+{
+    return true;
+}
 

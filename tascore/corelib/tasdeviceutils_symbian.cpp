@@ -33,6 +33,8 @@ QTM_USE_NAMESPACE
 #include "gpuinfo_symbian.h"
 #endif
 
+_LIT( KQTasServerName, "qttasserver" );
+
 TasDeviceUtils::TasDeviceUtils()
 {
     gpuDetailsHandler = 0;
@@ -130,5 +132,28 @@ void TasDeviceUtils::addSystemInformation(TasObject& object)
 
 void TasDeviceUtils::sendMouseEvent(int x, int y, Qt::MouseButton button, QEvent::Type type)
 {
+}
+
+/*!
+  Start the qttasserver if not running.
+ */
+bool TasDeviceUtils::isServerRunning()
+{
+    //1. look for the process
+    bool running = false;
+    TFindProcess findProcess;
+    TFullName processName;
+    while ( findProcess.Next( processName ) == KErrNone ){        
+        if ( ( processName.Find( KQTasServerName ) != KErrNotFound ) ){
+            RProcess process;
+            TInt err = process.Open( findProcess );
+            if( err == KErrNone){
+                running = true;
+                process.Close();
+                break;
+            }              
+        }
+    }
+    return running;
 }
 

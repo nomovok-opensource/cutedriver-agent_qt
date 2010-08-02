@@ -67,6 +67,8 @@ public slots:
   void startServer();
 #ifdef Q_OS_SYMBIAN
   void enablePluginLoad();
+  void setAutoStart(bool autostart);
+  bool autostartState();
 #endif
 
 private slots:

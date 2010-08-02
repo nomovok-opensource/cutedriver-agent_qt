@@ -286,8 +286,16 @@ bool TestabilityUtils::isBlackListed()
     return false;
 }
 
-
-
+bool TestabilityUtils::autostart()
+{
+    QVariant value = TestabilitySettings::settings()->getValue(AUTO_START);
+    if(value.isValid() && value.canConvert<QString>()){
+        if(value.toString() == "on"){
+            return true;
+        }
+    }
+    return false;
+}
 
 /*!        
     Returns the Proxy Widget if any parent widget has a proxy

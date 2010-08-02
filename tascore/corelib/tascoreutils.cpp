@@ -35,6 +35,7 @@
 #endif
 
 #include "tascoreutils.h"
+#include "tasdeviceutils.h"
 
 class Sleeper: public QThread {
 public:
@@ -369,3 +370,17 @@ QString TasCoreUtils::pointerId(void* ptr)
     return QString::number((quintptr)ptr);
 }
 
+/*!
+ * Start the server if not already running.
+ * Server is only started in environments that support isServerRunning method
+ * default implementation of the method will return true and server not being started.
+ */
+bool TasCoreUtils::startServer()
+{
+    bool started = false;
+    if(!TasDeviceUtils::isServerRunning()){
+        //must be in path
+        started = QProcess::startDetached("qttasserver");
+    }
+    return started;
+}

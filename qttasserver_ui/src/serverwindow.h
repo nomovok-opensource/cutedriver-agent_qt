@@ -24,6 +24,7 @@
 #include <QObject>
 #include <QWidget>
 #include <QPushButton>
+#include <QCheckBox>
 
 #include "servermonitor.h"
 
@@ -45,6 +46,7 @@ private:
    QPushButton* startButton;
    QPushButton* resetButton;
    QPushButton* pluginButton;
+   QCheckBox* autoStart;
    ServerMonitor* monitor;
 };
 

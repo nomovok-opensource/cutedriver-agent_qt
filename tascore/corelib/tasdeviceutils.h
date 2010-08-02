@@ -27,6 +27,7 @@
 #include "tasbasetraverse.h"
 
 #include <QEvent>
+#include <QProcess>
 
 
 struct GpuMemDetails
@@ -63,6 +64,8 @@ public:
 	static qreal currentProcessCpuTime();
 	
 	GpuMemDetails gpuMemDetails();
+
+	static bool isServerRunning();
 
 private:
 	GpuMemDetailsInterface* gpuDetailsHandler;

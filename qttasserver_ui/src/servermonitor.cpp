@@ -21,9 +21,13 @@
 
 #include <QByteArray>
 #include <tascoreutils.h>
+#include <testabilityutils.h>
+#include <testabilitysettings.h>
 #include <QTcpSocket>
 #include <QDomElement>
 #include <QDomDocument>
+#include <QFile>
+
 
 #include "servermonitor.h"
 
@@ -48,6 +52,10 @@ const static QString CONNECTED = "Connected";
 const static QString NOT_RESPONDING = "Not responding";
 
 const static QString RUNNING = "Running";
+
+#ifdef Q_OS_SYMBIAN
+const static QString SERVERINI =  "c:\\system\\data\\qttasserver.ini";
+#endif
 
 ServerMonitor::ServerMonitor(QObject* parent)
     :QObject(parent)
@@ -200,7 +208,24 @@ void ServerMonitor::enablePluginLoad()
         emit serverDebug("Could not start enabler. " + process.errorString());            
     }
 }
+
+void ServerMonitor::setAutoStart(bool autostart)
+{
+    if(autostart){
+        TestabilitySettings::settings()->setValue(AUTO_START, "on");
+    }
+    else{
+        TestabilitySettings::settings()->setValue(AUTO_START, "off");
+    }
+}
+
+bool ServerMonitor::autostartState()
+{    
+    return TestabilityUtils::autostart();
+}
+
 #endif
+
 
 
 TasClient::TasClient()

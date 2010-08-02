@@ -195,6 +195,7 @@ static const QString COMMAND_EXEC_JS_ON_QWEBFRAME = "ExecuteJavaScriptOnQWebFram
 
 //settings
 static const QString BLACK_LISTED = "black_list";
+static const QString AUTO_START = "autostart";
 
 
 #ifdef QTTASSERVER

@@ -66,6 +66,11 @@ extern "C" TAS_EXPORT void qt_testability_init()
         return;
 	}	
 
+    /* If autostart on make sure server running */
+    if(TestabilityUtils::autostart()){
+        TasCoreUtils::startServer();
+    }
+
     QVariant prop = qApp->property(PLUGIN_ATTR.toLatin1());
     if(prop.isValid() && prop.toBool()){
         return;

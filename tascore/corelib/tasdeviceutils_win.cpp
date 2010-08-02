@@ -112,3 +112,11 @@ void TasDeviceUtils::addSystemInformation(TasObject& object)
 void TasDeviceUtils::sendMouseEvent(int x, int y, Qt::MouseButton button, QEvent::Type type)
 {
 }
+
+/*!
+  Not implemented, true returned to avoid autostart.
+ */
+bool TasDeviceUtils::isServerRunning()
+{
+    return true;
+}
