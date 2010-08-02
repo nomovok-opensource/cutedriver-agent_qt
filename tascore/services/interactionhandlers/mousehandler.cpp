@@ -61,6 +61,12 @@ bool MouseHandler::executeInteraction(TargetData data)
     QString commandName = command.name();
 
     mUseTapScreen = command.parameter("useTapScreen") == "true";
+
+    QString extraIdentifier;
+    if(command.parameter("useCoordinates") == "true"){
+        extraIdentifier = QString::number(point.x()) +"_"+ QString::number(point.y());
+    }
+
     if (!mUseTapScreen) {
         TasLogger::logger()->debug("MouseHandler::executeInteraction not using tap_screen: " + command.name());
     } else {
@@ -90,8 +96,8 @@ bool MouseHandler::executeInteraction(TargetData data)
 
                 if(command.parameter("interval").isEmpty()){
                     for(int i = 0 ; i < count; i++){
-                        doMousePress(target, targetItem, button, point);
-                        doMouseRelease(target, targetItem, button, point);
+                        doMousePress(target, targetItem, button, point, extraIdentifier);
+                        doMouseRelease(target, targetItem, button, point, extraIdentifier);
                      }                    
                 }
                 else{
@@ -106,10 +112,10 @@ bool MouseHandler::executeInteraction(TargetData data)
             doMouseDblClick(target, button, point);
         }   
         else if(commandName == "MousePress"){
-            doMousePress(target, targetItem, button, point);
+            doMousePress(target, targetItem, button, point, extraIdentifier);
         }
         else if(commandName == "MouseRelease"){
-            doMouseRelease(target, targetItem, button, point);
+            doMouseRelease(target, targetItem, button, point, extraIdentifier);
         }
         else if (commandName == "MouseMove"){                        
             doMouseMove(target, targetItem, point, button);
@@ -175,14 +181,14 @@ void MouseHandler::setPoint(QPoint& point, TasCommand& command)
 /*!
     Send a mouseEvent to qApp to the given target widget. 
 */
-void MouseHandler::doMousePress(QWidget* target, QGraphicsItem* targetItem, Qt::MouseButton button, QPoint point)
+void MouseHandler::doMousePress(QWidget* target, QGraphicsItem* targetItem, Qt::MouseButton button, QPoint point, QString extraIdentifier)
 { 
     if (target) {
         target->setFocus(Qt::MouseFocusReason);
     }
     
     if(acceptsTouchEvent(target, targetItem)){
-        doTouchBegin(target, targetItem, toTouchPoints(point));
+        doTouchBegin(target, targetItem, toTouchPoints(point), extraIdentifier);
     }
     else{
         QMouseEvent* eventPress = new QMouseEvent(QEvent::MouseButtonPress, target->mapFromGlobal(point), point, button, button, 0);    
@@ -190,9 +196,9 @@ void MouseHandler::doMousePress(QWidget* target, QGraphicsItem* targetItem, Qt::
     }
 }
 
-void MouseHandler::doTouchBegin(QWidget* target, QGraphicsItem* targetItem, QList<TasTouchPoints> points)
+void MouseHandler::doTouchBegin(QWidget* target, QGraphicsItem* targetItem, QList<TasTouchPoints> points, QString extraIdentifier)
 {
-    QList<QTouchEvent::TouchPoint> touchPoints = convertToTouchPoints(target, targetItem, Qt::TouchPointPressed, points);
+    QList<QTouchEvent::TouchPoint> touchPoints = convertToTouchPoints(target, targetItem, Qt::TouchPointPressed, points, extraIdentifier);
     QTouchEvent* touchPress = new QTouchEvent(QEvent::TouchBegin, QTouchEvent::TouchScreen, Qt::NoModifier, Qt::TouchPointPressed, touchPoints);
     touchPress->setWidget(target);
     sendTouchEvent(target, touchPress);
@@ -201,10 +207,10 @@ void MouseHandler::doTouchBegin(QWidget* target, QGraphicsItem* targetItem, QLis
 /*!
     Send a mouseEvent to qApp to the given target widget. 
 */
-void MouseHandler::doMouseRelease(QWidget* target, QGraphicsItem* targetItem, Qt::MouseButton button, QPoint point)
+void MouseHandler::doMouseRelease(QWidget* target, QGraphicsItem* targetItem, Qt::MouseButton button, QPoint point, QString extraIdentifier)
 {        
     if(acceptsTouchEvent(target, targetItem)){
-        doTouchEnd(target, targetItem, toTouchPoints(point));
+        doTouchEnd(target, targetItem, toTouchPoints(point), extraIdentifier);
     }
     else{
         QMouseEvent* eventRelease = new QMouseEvent(QEvent::MouseButtonRelease, target->mapFromGlobal(point), point, button, Qt::NoButton, 0);    
@@ -221,9 +227,9 @@ QList<TasTouchPoints> MouseHandler::toTouchPoints(QPoint point)
     points.append(touchPoint);
     return points;
 }
-void MouseHandler::doTouchEnd(QWidget* target, QGraphicsItem* targetItem, QList<TasTouchPoints> points)
+void MouseHandler::doTouchEnd(QWidget* target, QGraphicsItem* targetItem, QList<TasTouchPoints> points, QString extraIdentifier)
 {
-    QList<QTouchEvent::TouchPoint> touchPoints = convertToTouchPoints(target, targetItem, Qt::TouchPointReleased, points);
+    QList<QTouchEvent::TouchPoint> touchPoints = convertToTouchPoints(target, targetItem, Qt::TouchPointReleased, points, extraIdentifier);
     QTouchEvent *touchRelease = new QTouchEvent(QEvent::TouchEnd, QTouchEvent::TouchScreen, Qt::NoModifier, Qt::TouchPointReleased, touchPoints);
     touchRelease->setWidget(target);
     sendTouchEvent(target, touchRelease);
@@ -319,13 +325,17 @@ void MouseHandler::sendTouchEvent(QWidget* target, QTouchEvent* event)
 }
 
 QList<QTouchEvent::TouchPoint> MouseHandler::convertToTouchPoints(QWidget* target, QGraphicsItem* targetItem, Qt::TouchPointState state,
-                                                                  QList<TasTouchPoints> points)
+                                                                  QList<TasTouchPoints> points, QString extraIdentifier)
 {
     bool remove = false;
     QList<int> *pointIds;
     //we need to store the touchpoint ids, the same id must be attached for untill touch point released
     if(targetItem) {
         QString itemId = TasCoreUtils::pointerId(targetItem);
+        //extraIdentifier needed to differentiate taps that occur in the same item but different coordinates
+        //in normal object taps the identifier is empty
+        itemId.append(extraIdentifier);
+
         if(state == Qt::TouchPointReleased && mTouchIds.contains(itemId)){
             pointIds = mTouchIds.take(itemId);
             remove = true;
