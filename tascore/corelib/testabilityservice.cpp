@@ -401,7 +401,7 @@ void TestabilityService::enableSignalTracking(QString signal, QString timeStamp)
 {
     TasCommandModel model;
     model.setService(FIXTURE);
-    TasTarget& target = model.addTarget(QString::number((int)qApp));
+    TasTarget& target = model.addTarget( TasCoreUtils::objectId( qApp ) );
     target.setType(TYPE_APPLICATION_VIEW);
     TasCommand& command = target.addCommand("Fixture");
     command.addParameter("plugin","tassignal");

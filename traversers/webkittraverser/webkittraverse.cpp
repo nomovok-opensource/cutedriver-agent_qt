@@ -190,6 +190,30 @@ void WebKitTraverse::traverseObject(TasObject* objectInfo, QObject* object, TasC
                 
      }
 
+    if (object->inherits("GVA::PopupWebChromeItem")) {
+//        TasLogger::logger()->debug(" WebKitTaverse::traverseObject found " + QString(object->metaObject()->className()) );
+
+        QWebElement element;
+        QMetaObject::invokeMethod(object, "element",
+                                  Qt::AutoConnection,
+                                  Q_RETURN_ARG(QWebElement, element));
+        if (!element.isNull()) {
+//          TasLogger::logger()->debug("Traversing webelement");
+          TasObject& tas_object = objectInfo->addObject();
+
+          QGraphicsWidget* item = qobject_cast<QGraphicsWidget*>(object);
+          QPoint p(item->pos().x()-element.geometry().x(),item->pos().y()-element.geometry().y());
+
+          QString tasId = TasCoreUtils::objectId(object);
+
+          traverseWebElement(&tas_object,p,p,&element, tasId);
+        } else {
+//          TasLogger::logger()->debug("QWebElement not found");
+        }
+
+     }
+
+
 #endif
 }
 

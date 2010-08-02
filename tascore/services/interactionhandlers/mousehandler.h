@@ -78,7 +78,7 @@ protected:
 
 private:
     int mTouchPointCounter;
-	QHash<int,QList<int>* > mTouchIds;
+    QHash<QString,QList<int>* > mTouchIds;
     bool mUseTapScreen; // If true, operation system native functionality will be used in mouse movements
     friend class Tapper;
 };

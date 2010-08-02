@@ -113,8 +113,10 @@ bool FpsFixture::execute(void * objectInstance, QString actionName, QHash<QStrin
 
 void FpsFixture::printFpsResults(QList< QPair<QString,int> > fpsData, QObject* target, QString& stdOut)
 {
-    TasDataModel* model = new TasDataModel();    
-    TasObjectContainer& container = model->addNewObjectContainer((int)model, "QtFps", "QtFps");
+    TasDataModel* model = new TasDataModel();
+
+    //TasObjectContainer& container = model->addNewObjectContainer((int)model, "QtFps", "QtFps");
+    TasObjectContainer& container = model->addNewObjectContainer(1, "QtFps", "QtFps");
 
     QString name = TestabilityUtils::getApplicationName();
 

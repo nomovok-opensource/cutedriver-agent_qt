@@ -16,8 +16,6 @@
 ** of this file. 
 ** 
 ****************************************************************************/ 
- 
-
 
 #include <QDir>
 #include <QDebug>
@@ -26,8 +24,6 @@
 
 #include "taslogger.h"
 #include "tascoreutils.h"
-
-
 
 static int LOG_SIZE = 100000;
 
@@ -383,8 +379,9 @@ bool EventLogger::eventFilter(QObject *target, QEvent *event)
         QString objectName = target->objectName();
         QString className  = target->metaObject()->className();
         QString line = "Event type: ";
-        QTextStream(&line) <<  TasCoreUtils::eventType(event) << " target class: " 
-                           << target->metaObject()->className() << " target id: " << (int)target;
+
+        QTextStream(&line) <<  TasCoreUtils::eventType(event) << " target class: " << target->metaObject()->className() << " target id: " << TasCoreUtils::objectId(target);
+
         TasLogger::logger()->debug(line);
     }
     return false;
