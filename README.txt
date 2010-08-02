@@ -1,4 +1,4 @@
-Build instructions:
+Build instructions for Qt agent (qttas):
 
 
 Plain Qt:
@@ -14,7 +14,7 @@ Orbit:
 4. make install (mingw32-make release)
 
 Dui(Maemo):
-1. qmake "CONFIG+=meamo"
+1. qmake "CONFIG+=maemo"
 2. make 
 3. make release (optional if you use release builds)
 4. make install 
@@ -43,9 +43,6 @@ Load the plugin in your app and call Initialize.
 
 4. Orbit and Dui
 Orbit and Dui applications load the plugin buy deafault so no action required.
-
-5. Future plans
-There are plans to add testability loading directly into Qt which will make the steps above obsolete.
 
 Logging:
 Create /logs/testability folder in your target machine to enable logging. Two logs will be created
