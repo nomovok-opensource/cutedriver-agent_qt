@@ -62,11 +62,6 @@ bool MouseHandler::executeInteraction(TargetData data)
 
     mUseTapScreen = command.parameter("useTapScreen") == "true";
 
-    QString extraIdentifier;
-    if(command.parameter("useCoordinates") == "true"){
-        extraIdentifier = QString::number(point.x()) +"_"+ QString::number(point.y());
-    }
-
     if (!mUseTapScreen) {
         TasLogger::logger()->debug("MouseHandler::executeInteraction not using tap_screen: " + command.name());
     } else {
@@ -81,6 +76,13 @@ bool MouseHandler::executeInteraction(TargetData data)
         setPoint(point, command);
         checkMoveMouse(command, point);
         wasConsumed = true;
+
+        QString extraIdentifier;
+        if(command.parameter("useCoordinates") == "true"){
+            extraIdentifier = QString::number(point.x()) +"_"+ QString::number(point.y());
+            TasLogger::logger()->debug("MouseHandler::executeInteraction: extra id to be added: " + extraIdentifier);
+        }
+
         
         if (commandName == "MouseClick" || commandName == "Tap" || commandName == "TapScreen"){
             int count = 1;
@@ -327,6 +329,8 @@ void MouseHandler::sendTouchEvent(QWidget* target, QTouchEvent* event)
 QList<QTouchEvent::TouchPoint> MouseHandler::convertToTouchPoints(QWidget* target, QGraphicsItem* targetItem, Qt::TouchPointState state,
                                                                   QList<TasTouchPoints> points, QString extraIdentifier)
 {
+    TasLogger::logger()->debug("MouseHandler::convertToTouchPoints in");
+
     bool remove = false;
     QList<int> *pointIds;
     //we need to store the touchpoint ids, the same id must be attached for untill touch point released
@@ -335,7 +339,8 @@ QList<QTouchEvent::TouchPoint> MouseHandler::convertToTouchPoints(QWidget* targe
         //extraIdentifier needed to differentiate taps that occur in the same item but different coordinates
         //in normal object taps the identifier is empty
         itemId.append(extraIdentifier);
-
+        TasLogger::logger()->debug("MouseHandler::convertToTouchPoints item id: " + itemId);
+        
         if(state == Qt::TouchPointReleased && mTouchIds.contains(itemId)){
             pointIds = mTouchIds.take(itemId);
             remove = true;
