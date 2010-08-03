@@ -164,7 +164,6 @@ void ServerMonitor::killServer()
     while ( findProcess.Next( processName ) == KErrNone )
         {
         if ( ( processName.Find( KQTasServerName ) != KErrNotFound ) )
-            //if ( ( processName.Find( serverName ) != KErrNotFound ) )
             {
             RProcess process;
             TInt err = process.Open( findProcess );
@@ -179,6 +178,7 @@ void ServerMonitor::killServer()
         }
 
 #endif
+    emit serverDebug("Clean connections...");    
     //make sure connections are re opened 
     delete mClient;
     mClient = new TasClient();

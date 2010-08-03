@@ -102,7 +102,9 @@ ServerWindow::ServerWindow(QWidget* parent)
     mainLayout->addWidget(startButton, 4, 1);
     mainLayout->addWidget(resetButton, 5, 0);
     mainLayout->addWidget(quitButton, 5, 1);
+#ifdef Q_OS_SYMBIAN
     mainLayout->addWidget(autoStart, 6, 0, 1, 2);
+#endif
     setLayout(mainLayout);     
 
     QRect rect = qApp->desktop()->screenGeometry();    
