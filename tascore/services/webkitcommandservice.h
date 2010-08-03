@@ -67,6 +67,8 @@ private:
     QList<QWebElement> traverseFrame(QWebFrame* webFrame, const QPoint& parentPos, const QPoint& screenPos, QHash<QString, QString> attributeMatchHash);
     QList<QWebElement> traverseWebElement(QPoint parentPos, QPoint screenPos,QWebElement* webElement,QHash<QString, QString> attributeMatchHash);
 
+    QString parseElementText(QString innerXml);
+
 private:
     QString mErrorMessage;
     int counter;

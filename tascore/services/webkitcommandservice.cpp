@@ -515,8 +515,6 @@ QList<QWebElement> WebkitCommandService::traverseWebElement(QPoint parentPos,
             TasLogger::logger()->debug("  matched " + i.key() + " " + i.value());
         }else if(i.key() == "innerText" && i.value() ==  webElement->toPlainText()){
             TasLogger::logger()->debug("  matched " + i.key() + " " + i.value());
-        }else if(i.key() == "elementText" && i.value() ==  webElement->toPlainText()){
-            TasLogger::logger()->debug("  matched " + i.key() + " " + i.value());
         }else if(i.key() == "name" && i.value() ==  webElement->localName().toLower()){
             TasLogger::logger()->debug("  matched " + i.key() + " " + i.value());
         }else if(i.key() == "id" && i.value().toInt() == counter  ){
@@ -526,6 +524,8 @@ QList<QWebElement> WebkitCommandService::traverseWebElement(QPoint parentPos,
         }else if(i.key() == "visible" && ((i.value() == "true") == (webElement->styleProperty("visibility", QWebElement::ComputedStyle).toLower() == "visible"))){
             TasLogger::logger()->debug("  matched " + i.key() + " " + i.value());
         }else if(i.key() == "hasFocus" && ((i.value() == "true") == (webElement->hasFocus()))){
+            TasLogger::logger()->debug("  matched " + i.key() + " " + i.value());
+        }else if(i.key() == "elementText" && i.value() ==  parseElementText(webElement->toInnerXml())){
             TasLogger::logger()->debug("  matched " + i.key() + " " + i.value());
         }else {
             //did not match webelement, skip to next
@@ -555,4 +555,69 @@ QList<QWebElement> WebkitCommandService::traverseWebElement(QPoint parentPos,
         list.append(traverseWebElement(parentPos, screenPos, &sibling, attributeMatchHash));
     }
     return list;
+}
+
+/*!
+  Parse element text for QWebElement
+*/
+QString WebkitCommandService::parseElementText(QString innerXml)
+{
+    TasLogger::logger()->debug("WebKitTaverse::parseElementText innerXml");
+    QString ret;
+    while(innerXml.size() > 0 && innerXml.contains('<')) {
+        //add space if necessary
+        if(ret.trimmed().size() > 0) {
+            ret = ret.trimmed() + " ";
+        }
+
+        // beginning, part before '<'
+        ret += innerXml.left(innerXml.indexOf('<')).trimmed();
+        TasLogger::logger()->debug("  ret: " + ret);
+        innerXml.remove(0, innerXml.indexOf('<')+1);
+        TasLogger::logger()->debug("  innerXml: " + innerXml);
+
+        //element name
+        int cut_space = innerXml.indexOf(' ');
+        int cut_gt    = innerXml.indexOf('>');
+        int cut       = cut_space > cut_gt ? cut_gt : cut_space;
+
+        TasLogger::logger()->debug("  s:" + QString::number(cut_space) + "\n  g:" + QString::number(cut_gt) + "\n  c:" + QString::number(cut));
+
+        QString elementName;
+        elementName += innerXml.left(cut).trimmed();
+        TasLogger::logger()->debug("  ele: " + elementName);
+        innerXml.remove(0, cut_gt+1);
+
+        //continue removing until current and all possible similar child elements are removed
+        int expectedEnds = 0;
+        if(innerXml.indexOf("</" + elementName) >= 0){
+            expectedEnds ++;
+        }
+
+        while(expectedEnds>0) {
+            if(expectedEnds > 20)
+            {
+                return QString("failed to parse, probably inconsistent (x)html");
+            }
+            int nextElementTag = innerXml.indexOf("<" + elementName);
+            int nextCloseElementTag = innerXml.indexOf("</" + elementName);
+
+            TasLogger::logger()->debug("  net:" + QString::number(nextElementTag) + "\n  ncet:" + QString::number(nextCloseElementTag));
+
+            if(nextElementTag != -1 && nextElementTag < nextCloseElementTag) {
+                TasLogger::logger()->debug("  start tag found");
+                innerXml.remove(0, nextElementTag + 1);
+                expectedEnds++;
+            } else {
+                TasLogger::logger()->debug("  end tag found");
+                innerXml.remove(0, nextCloseElementTag + 1);
+                expectedEnds--;
+            }
+            innerXml.remove(0, innerXml.indexOf('>')+1);
+
+        }
+    }
+    ret += innerXml.trimmed();
+    TasLogger::logger()->debug("WebKitTaverse::parseElementText innerXml ended");
+    return ret.trimmed();
 }
