@@ -269,8 +269,8 @@ void TestabilityService::connectionClosed()
     mRegisterTime.stop();
 
     //Proper fix needed at some point:
-    //for some reason we need to reuse the old connections in symbian (seems to crash or freeze it not)
-    //in windows the old connections will not work at all
+    //for some reason we need to reuse the old connections in symbian (seems to crash or freeze if not)
+    //but in windows the old connections will not work at all and we need to recreate them     
 #ifdef Q_OS_SYMBIAN
     mSocket->closeConnection();
 #else
