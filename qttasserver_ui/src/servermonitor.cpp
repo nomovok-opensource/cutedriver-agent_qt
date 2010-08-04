@@ -184,7 +184,13 @@ void ServerMonitor::killServer()
                 }              
             }
         }
-
+#else
+    //make sure connections are re opened 
+    delete mClient;
+    mClient = new TasClient();
+    connect(mClient, SIGNAL(error(const QString&)), this, SLOT(error(const QString&)));
+    connect(mClient, SIGNAL(info(const QString&)), this, SLOT(info(const QString&)));
+    connect(mClient, SIGNAL(serverResponse(const QString&)), this, SLOT(serverResponse(const QString&)));
 #endif
 }
 

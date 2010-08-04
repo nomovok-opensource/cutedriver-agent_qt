@@ -95,31 +95,18 @@ TasServer::TasServer(QObject *parent)
     mServiceManager->registerCommand(new SystemInfoService());
     mServiceManager->registerCommand(new ResourceLoggingService());    
 
-    TasLogger::logger()->debug("Creating TCP server...");
-    //ownership of serviceManager is transferred
-    mTcpServer = new TasTcpServer(QT_SERVER_PORT_OUT, *mServiceManager,this);
-
-#if defined(TAS_USELOCALSOCKET)            
-     mLocalServer = new TasLocalServer(LOCAL_SERVER_NAME, *mServiceManager, this);
+    mTcpServer = 0;
+#if defined(TAS_USELOCALSOCKET)
+    mLocalServer = 0;
 #else
-     mInternalTcpServer = new TasTcpServer(QT_SERVER_PORT, *mServiceManager, this);
-
-#ifdef Q_OS_SYMBIAN
-     //     connect(mClientManager, SIGNAL(allClientsRemoved()), mInternalTcpServer, SLOT(restartServer()));
+    mInternalTcpServer = 0;
 #endif
 
-#endif
 }
 
 TasServer::~TasServer()
 { 
-    delete mTcpServer;
-
-#if defined(TAS_USELOCALSOCKET)
-     delete mLocalServer;
-#else
-     delete mInternalTcpServer;
-#endif     
+    closeServer();
     TasClientManager::deleteInstance();
     delete mServiceManager;
 }
@@ -131,26 +118,42 @@ const QString& TasServer::getServerVersion()
 
 /*!
   Closes the server and performs cleanup.
+  Instead of closing the servers we destroy them as
+  close will not cause a disconnected signal to the clients
+  leaving the unaware of the server closing.
 */
 void TasServer::closeServer()
 {
-    mClientManager->removeAllClients();
-    TasLogger::logger()->debug("TasServer::closeServer");    
-    mTcpServer->close();
-
-#if defined(TAS_USELOCALSOCKET)            
-    mLocalServer->close();
+    delete mTcpServer;
+    mTcpServer = 0;
+#if defined(TAS_USELOCALSOCKET)
+    delete mLocalServer;
+    mLocalServer = 0;
 #else
-    mInternalTcpServer->close();
-#endif
-    TasLogger::logger()->info("TasServer::closeServer done");   
+    delete mInternalTcpServer;
+    mInternalTcpServer = 0;
+#endif     
 }
 
 void TasServer::killAllStartedProcesses()
 {
-    mClientManager->removeAllClients();
-    mTcpServer->close();
-    startServer();
+    mClientManager->removeAllClients();  
+}
+
+void TasServer::createServers()
+{    
+    if(!mTcpServer){
+        mTcpServer = new TasTcpServer(QT_SERVER_PORT_OUT, *mServiceManager,this);    
+    }
+#if defined(TAS_USELOCALSOCKET)            
+    if(!mLocalServer){
+        mLocalServer = new TasLocalServer(LOCAL_SERVER_NAME, *mServiceManager, this);
+    }
+#else
+    if(!mInternalTcpServer){
+        mInternalTcpServer = new TasTcpServer(QT_SERVER_PORT, *mServiceManager, this);
+    }
+#endif
     
 }
 
@@ -162,6 +165,8 @@ void TasServer::killAllStartedProcesses()
 */
 bool TasServer::startServer()
 {    
+    //create servers if needed.
+    createServers();
 
     //first start the tcp server for listeting tdriver messages
     if (!mTcpServer->start()){
