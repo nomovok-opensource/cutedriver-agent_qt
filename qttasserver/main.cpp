@@ -31,6 +31,8 @@ int main(int argc, char *argv[])
     QCoreApplication::setApplicationName("QtTasserver");
     
     TasServer* server = new TasServer();
+    app.connect(&app, SIGNAL(aboutToQuit()), server, SLOT(closeServer()));
+
     if (server->startServer()){ 
         return app.exec();
     }

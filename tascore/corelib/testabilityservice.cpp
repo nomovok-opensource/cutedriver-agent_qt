@@ -217,7 +217,6 @@ void TestabilityService::registerPlugin()
     if(!mServerConnection->isWritable() && !mRegisterTime.isActive()){
         TasLogger::logger()->info("TestabilityService::registerPlugin connection device not writable maybe connection not initialized."); 
         mSocket->closeConnection();
-        connectionClosed();
     }
 
     if(!mRegistered && !mRegisterTime.isActive()){
@@ -268,13 +267,6 @@ void TestabilityService::connectionClosed()
     mRegistered = false;   
     mConnected = false;
     mRegisterTime.stop();
- 
-    if(!mMarkedForDeletion){   
-        //make new connections
-        delete mSocket;
-        delete mServerConnection;
-        initializeConnections();
-    }
 
     mRegisterWatchDog.start(SERVER_REGISTRATION_TIMEOUT);     
     emit unRegistered();
