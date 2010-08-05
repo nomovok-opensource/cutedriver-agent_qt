@@ -52,9 +52,11 @@ public:
   
 protected:
     void doMouseDblClick(QWidget* target, Qt::MouseButton button, QPoint point);
-    void doMousePress(QWidget* target, QGraphicsItem* targetItem, Qt::MouseButton button, QPoint point); 
-    void doMouseRelease(QWidget* target, QGraphicsItem* targetItem, Qt::MouseButton button, QPoint point);
+
+    void doMousePress(QWidget* target, QGraphicsItem* targetItem, Qt::MouseButton button, QPoint point, QString extraIdentifier=QString()); 
+    void doMouseRelease(QWidget* target, QGraphicsItem* targetItem, Qt::MouseButton button, QPoint point, QString extraIdentifier=QString());
     void doMouseMove(QWidget* target, QGraphicsItem* targetItem, QPoint point, Qt::MouseButton button=Qt::NoButton);    
+
     void moveCursor(QPoint point);    
     void checkMoveMouse(TasCommand& command);
     void setPoint(QPoint& point, TasCommand& command);
@@ -63,11 +65,12 @@ protected:
     void doScroll(QWidget* target, QPoint& point, int delta, Qt::MouseButton button,  Qt::Orientation orient);
     void sendMouseEvent(QWidget* target, QMouseEvent* event);
 
-    void doTouchBegin(QWidget* target, QGraphicsItem* targetItem, QList<TasTouchPoints> points);
+    void doTouchBegin(QWidget* target, QGraphicsItem* targetItem, QList<TasTouchPoints> points, QString extraIdentifier=QString());
     void doTouchUpdate(QWidget* target, QGraphicsItem* targetItem, QList<TasTouchPoints> points);
-    void doTouchEnd(QWidget* target, QGraphicsItem* targetItem, QList<TasTouchPoints> points);
+    void doTouchEnd(QWidget* target, QGraphicsItem* targetItem, QList<TasTouchPoints> points, QString extraIdentifier=QString());
+
     QList<QTouchEvent::TouchPoint> convertToTouchPoints(QWidget* target, QGraphicsItem* targetItem, Qt::TouchPointState state,
-                                                        QList<TasTouchPoints> points);
+                                                        QList<TasTouchPoints> points, QString extraIdentifier=QString());
     QTouchEvent::TouchPoint makeTouchPoint(QWidget* target, QGraphicsItem* targetItem, TasTouchPoints points,
                                            Qt::TouchPointState state, int id, bool primary = true);
     void sendTouchEvent(QWidget* target, QTouchEvent* event);

@@ -30,6 +30,8 @@ const static QString CPU = "cpu";
 const static QString GPU = "gpu";
 const static QString MEM = "mem";
 const static QString ACTION = "action";
+const static QString APPEND = "append";
+const static QString CLEARLOG = "clearLog";
 const static QString FILEPATH = "filePath";
 
 const static QString ATTR_DELIM = ";";
@@ -80,12 +82,11 @@ void InfoLogger::performLogService(TasCommandModel& model, TasResponse& response
                         delete mCpu;
                         mCpu = 0;
                     }
-                    mCpu = new QFile(fileName);    
-                    mCpu->open(QIODevice::ReadWrite | QIODevice::Text | QIODevice::Truncate);               
+                    mCpu = openFile(fileName, command);
                 }
             }
-            else if(command->parameter(ACTION) == "stop"){
-                loadCpuData(response);
+            else if(command->parameter(ACTION) == "stop" || command->parameter(ACTION) == "load"){
+                loadCpuData(response, command);
             }
         }
         command = target->findCommand(MEM);
@@ -101,12 +102,11 @@ void InfoLogger::performLogService(TasCommandModel& model, TasResponse& response
                         delete mMem;
                         mMem = 0;
                     }
-                    mMem = new QFile(fileName);    
-                    mMem->open(QIODevice::ReadWrite | QIODevice::Text | QIODevice::Truncate);               
+                    mMem = openFile(fileName, command);
                 }
             }
-            else if(command->parameter(ACTION) == "stop"){
-                loadMemData(response);
+            else if(command->parameter(ACTION) == "stop" || command->parameter(ACTION) == "load"){
+                loadMemData(response, command);
             }
 
         }
@@ -123,13 +123,12 @@ void InfoLogger::performLogService(TasCommandModel& model, TasResponse& response
                         delete mGpu;
                         mGpu = 0;
                     }
-                    mGpu = new QFile(fileName);    
-                    mGpu->open(QIODevice::ReadWrite | QIODevice::Text | QIODevice::Truncate);               
+                    mGpu = openFile(fileName, command);
                 }
 
             }
-            else if(command->parameter(ACTION) == "stop"){
-                loadGpuData(response);
+            else if(command->parameter(ACTION) == "stop" || command->parameter(ACTION) == "load"){
+                loadGpuData(response, command);
             }
 
         }
@@ -161,17 +160,32 @@ bool InfoLogger::makeFileName(TasCommand* command, const QString& type, QString&
     return true;
 }
 
+QFile* InfoLogger::openFile(const QString& fileName, TasCommand* command)
+{
+    QFile* file = new QFile(fileName);    
+    if(command->parameter(APPEND) == "true"){
+        file->open(QIODevice::ReadWrite | QIODevice::Text | QIODevice::Append);               
+    }
+    else{
+        file->open(QIODevice::ReadWrite | QIODevice::Text | QIODevice::Truncate);               
+    } 
+    return file;
+}
+
 /*!
   Loads cpu data from the file and sets the in xml format as
   the response data.
 */
-void InfoLogger::loadCpuData(TasResponse& response)
+void InfoLogger::loadCpuData(TasResponse& response, TasCommand* command)
 {
     if(mCpu){
-        response.setData(loadData(mCpu, "cpuLoad"));    
-        delete mCpu;
-        mCpu = 0;
-        mState ^= CpuLogging;                    
+        bool clearFile = (command->parameter(CLEARLOG) != "false");
+        response.setData(loadData(mCpu, "cpuLoad", clearFile));    
+        if(command->parameter(ACTION) == "stop"){
+            delete mCpu;
+            mCpu = 0;
+            mState ^= CpuLogging;                    
+        }
     }
     else{
         response.setErrorMessage("No data collected!");
@@ -182,13 +196,16 @@ void InfoLogger::loadCpuData(TasResponse& response)
   Loads mem data from the file and sets the in xml format as
   the response data.
 */
-void InfoLogger::loadMemData(TasResponse& response)
+void InfoLogger::loadMemData(TasResponse& response, TasCommand* command)
 {
     if(mMem){
-        response.setData(loadData(mMem, "memUsage"));    
-        delete mMem;
-        mMem = 0;
-        mState ^= MemLogging;
+        bool clearFile = (command->parameter(CLEARLOG) != "false");
+        response.setData(loadData(mMem, "memUsage", clearFile));    
+        if(command->parameter(ACTION) == "stop"){
+            delete mMem;
+            mMem = 0;
+            mState ^= MemLogging;
+        }
     }
     else{
         TasLogger::logger()->debug("InfoLogger::loadMemData no file to load");
@@ -200,13 +217,16 @@ void InfoLogger::loadMemData(TasResponse& response)
   Loads gpu data from the file and sets the in xml format as
   the response data.
 */
-void InfoLogger::loadGpuData(TasResponse& response)
+void InfoLogger::loadGpuData(TasResponse& response, TasCommand* command)
 {
     if(mGpu){
-        response.setData(loadData(mGpu, "gpuMemUsage"));            
-        delete mGpu;
-        mGpu = 0;
-        mState ^= GpuLogging;
+        bool clearFile = (command->parameter(CLEARLOG) != "false");
+        response.setData(loadData(mGpu, "gpuMemUsage", clearFile));            
+        if(command->parameter(ACTION) == "stop"){
+            delete mGpu;
+            mGpu = 0;
+            mState ^= GpuLogging;
+        }
     }
     else{
         response.setErrorMessage("No data collected!");
@@ -218,7 +238,7 @@ void InfoLogger::loadGpuData(TasResponse& response)
   data. Serializes the data and returns a QByteArray containing the 
   serialized data.
 */
-QByteArray* InfoLogger::loadData(QFile* file, const QString& name)
+QByteArray* InfoLogger::loadData(QFile* file, const QString& name, bool removeFile)
 {
     mTimer.stop();
 
@@ -245,7 +265,9 @@ QByteArray* InfoLogger::loadData(QFile* file, const QString& name)
         counter++;
     }
     parentData.addAttribute("entryCount", counter);
-    file->remove();
+
+    if(removeFile) file->remove();
+
     SerializeFilter* filter = new SerializeFilter();		    		
     filter->serializeDuplicates(true);		    		
     QByteArray* xml = new QByteArray();

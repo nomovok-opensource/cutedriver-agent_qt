@@ -366,6 +366,9 @@ void WebKitTraverse::traverseFrame(QWebFrame* webFrame, TasObject& parent, QStri
         frameInfo.addAttribute("height", webFrame->geometry().height());
         frameInfo.addAttribute("objectType", "Web");
 
+        frameInfo.addAttribute("horizontalScrollBarHeight",webFrame->scrollBarGeometry(Qt::Horizontal).height());
+        frameInfo.addAttribute("verticalScrollBarWidth",webFrame->scrollBarGeometry(Qt::Vertical).width());
+
         QWebElement docElement = webFrame->documentElement();
         traverseWebElement(&frameInfo, parentPos+webFrame->pos()-webFrame->scrollPosition(), screenPos+webFrame->pos()-webFrame->scrollPosition(), &docElement, tasId);
 
@@ -417,12 +420,15 @@ void WebKitTraverse::traverseWebElement(TasObject* parent, QPoint parentPos, QPo
         parseAttributes(webElement, &childInfo);
     }
 
+    childInfo.addAttribute("innerText", webElement->toPlainText());
+
+    childInfo.addAttribute("elementText", parseElementText(webElement->toInnerXml()));
+
     // traverse first child
     QWebElement firstChild = webElement->firstChild();
 
-    childInfo.addAttribute("innerText", webElement->toPlainText());
-    //webElement->
-    
+
+
     if(firstChild.isNull()) {
         // has no children, print out the text if any
         //TasLogger::logger()->debug("WebKitTaverse::traverseWebElement " + webElement->localName() + " has no children");
@@ -459,4 +465,70 @@ void WebKitTraverse::parseAttributes(QWebElement* webElement, TasObject* objInfo
     }
 
 }
+
+/*!
+  Parse element text for QWebElement
+*/
+QString WebKitTraverse::parseElementText(QString innerXml)
+{
+    //TasLogger::logger()->debug("WebKitTaverse::parseElementText innerXml");
+    QString ret;
+    while(innerXml.size() > 0 && innerXml.contains('<')) {
+        //add space if necessary
+        if(ret.trimmed().size() > 0) {
+            ret = ret.trimmed() + " ";
+        }
+
+        // beginning, part before '<'
+        ret += innerXml.left(innerXml.indexOf('<')).trimmed();
+        //TasLogger::logger()->debug("  ret: " + ret);
+        innerXml.remove(0, innerXml.indexOf('<')+1);
+        //TasLogger::logger()->debug("  innerXml: " + innerXml);
+
+        //element name
+        int cut_space = innerXml.indexOf(' ');
+        int cut_gt    = innerXml.indexOf('>');
+        int cut       = cut_space > cut_gt ? cut_gt : cut_space;
+
+        //TasLogger::logger()->debug("  s:" + QString::number(cut_space) + "\n  g:" + QString::number(cut_gt) + "\n  c:" + QString::number(cut));
+
+        QString elementName;
+        elementName += innerXml.left(cut).trimmed();
+        //TasLogger::logger()->debug("  ele: " + elementName);
+        innerXml.remove(0, cut_gt+1);
+
+        //continue removing until current and all possible similar child elements are removed
+        int expectedEnds = 0;
+        if(innerXml.indexOf("</" + elementName) >= 0){
+            expectedEnds ++;
+        }
+
+        while(expectedEnds>0) {
+            if(expectedEnds > 20)
+            {
+                return QString("failed to parse, probably inconsistent (x)html");
+            }
+            int nextElementTag = innerXml.indexOf("<" + elementName);
+            int nextCloseElementTag = innerXml.indexOf("</" + elementName);
+
+            //TasLogger::logger()->debug("  net:" + QString::number(nextElementTag) + "\n  ncet:" + QString::number(nextCloseElementTag));
+
+            if(nextElementTag != -1 && nextElementTag < nextCloseElementTag) {
+                //TasLogger::logger()->debug("  start tag found");
+                innerXml.remove(0, nextElementTag + 1);
+                expectedEnds++;
+            } else {
+                //TasLogger::logger()->debug("  end tag found");
+                innerXml.remove(0, nextCloseElementTag + 1);
+                expectedEnds--;
+            }
+            innerXml.remove(0, innerXml.indexOf('>')+1);
+
+        }
+    }
+    ret += innerXml.trimmed();
+    //TasLogger::logger()->debug("WebKitTaverse::parseElementText innerXml ended");
+    return ret.trimmed();
+}
+
 #endif

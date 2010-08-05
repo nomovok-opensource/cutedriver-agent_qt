@@ -23,6 +23,7 @@
 #include <tascoreutils.h>
 #include <testabilityutils.h>
 #include <testabilitysettings.h>
+#include <taslogger.h>
 #include <QTcpSocket>
 #include <QDomElement>
 #include <QDomDocument>
@@ -64,6 +65,12 @@ ServerMonitor::ServerMonitor(QObject* parent)
     connect(mClient, SIGNAL(error(const QString&)), this, SLOT(error(const QString&)));
     connect(mClient, SIGNAL(info(const QString&)), this, SLOT(info(const QString&)));
     connect(mClient, SIGNAL(serverResponse(const QString&)), this, SLOT(serverResponse(const QString&)));
+
+    QString appName = TestabilityUtils::getApplicationName();
+    TasLogger::logger()->setLogFile(appName+".log");         
+    TasLogger::logger()->setLevel(DEBUG);                              
+    TasLogger::logger()->clearLogFile();   
+    
 }
 
 ServerMonitor::~ServerMonitor()
@@ -103,6 +110,7 @@ void ServerMonitor::stopServer()
     mState = STOP;                               
     emit serverDebug("Stopping server...");
     mClient->sendMessage(CLOSE_APP);
+    TasLogger::logger()->debug("ServerMonitor::stopServer");
 }
 
 
@@ -113,6 +121,7 @@ void ServerMonitor::info(const QString& message)
 
 void ServerMonitor::error(const QString& message)
 {
+    TasLogger::logger()->debug("ServerMonitor::error " + message);
     emit serverDebug(message);
     emit serverState(NOT_CONNECTED);
     if(mState != RESTART){
@@ -130,7 +139,7 @@ void ServerMonitor::error(const QString& message)
 
 void ServerMonitor::serverResponse(const QString& message)
 {
-
+    TasLogger::logger()->debug("ServerMonitor::serverResponse " + message);
     if(mState == STOP || mState == RESTART){
         emit serverDebug("Close command ok server stopping.");    
     }
@@ -157,35 +166,32 @@ void ServerMonitor::serverResponse(const QString& message)
 
 void ServerMonitor::killServer()
 { 
+    TasLogger::logger()->debug("ServerMonitor::killServer");
 #ifdef Q_OS_SYMBIAN
-    emit serverDebug("Try to kill the server..");    
     TFindProcess findProcess;
     TFullName processName;
     while ( findProcess.Next( processName ) == KErrNone )
         {
         if ( ( processName.Find( KQTasServerName ) != KErrNotFound ) )
-            //if ( ( processName.Find( serverName ) != KErrNotFound ) )
             {
             RProcess process;
             TInt err = process.Open( findProcess );
             if( err == KErrNone)
                 {
-                emit serverDebug("Process found kill it.");    
                 process.Kill(0);
                 process.Close();
                 break;
                 }              
             }
         }
-
-#endif
+#else
     //make sure connections are re opened 
     delete mClient;
     mClient = new TasClient();
     connect(mClient, SIGNAL(error(const QString&)), this, SLOT(error(const QString&)));
     connect(mClient, SIGNAL(info(const QString&)), this, SLOT(info(const QString&)));
     connect(mClient, SIGNAL(serverResponse(const QString&)), this, SLOT(serverResponse(const QString&)));
-
+#endif
 }
 
 #ifdef Q_OS_SYMBIAN
@@ -230,14 +236,18 @@ bool ServerMonitor::autostartState()
 
 TasClient::TasClient()
 {
+    TasLogger::logger()->debug("TasClient::TasClient");
     mTimer.setSingleShot(true);
     mConnected = false;
+    TasLogger::logger()->debug("TasClient::TasClient make socket");
     mSocket = new TasClientSocket(mServerConnection);
 	connect(mSocket, SIGNAL(socketClosed()), this, SLOT(connectionClosed()));
+    TasLogger::logger()->debug("TasClient::TasClient set responsehandler");
     mSocket->setResponseHandler(this);
-    connectToServer();
+    //connectToServer();
     connect(&mTimer, SIGNAL(timeout()), this, SLOT(connectionTimeout()));
     mSending = false;
+    TasLogger::logger()->debug("TasClient::TasClient done");
 }
 
 TasClient::~TasClient()
@@ -247,9 +257,9 @@ TasClient::~TasClient()
 
 void TasClient::connectionClosed()
 {
+    TasLogger::logger()->debug("TasClient::connectionClosed");
     if(mConnected){
         mConnected = false;
-        mServerConnection.close();
         emit error("Connection was closed by server.");
     }
 }
@@ -287,6 +297,7 @@ void TasClient::sendMessage(const QString& message)
 
 void TasClient::sendData(const QString& message)
 {
+    TasLogger::logger()->debug("TasClient::sendData");
     mTimer.start(10000);
     mMessageId = qrand();        
     if(!mSocket->sendRequest(mMessageId, message)){
@@ -295,10 +306,12 @@ void TasClient::sendData(const QString& message)
         mServerConnection.close();      
         emit error("Socket not writable!");
     }
+    TasLogger::logger()->debug("TasClient::sendData done");
 }
 
 void TasClient::serviceResponse(TasMessage& response)
 {
+    TasLogger::logger()->debug("TasClient::serviceResponse");
     if(response.messageId() == mMessageId){
         mTimer.stop();
         emit serverResponse(response.dataAsString());

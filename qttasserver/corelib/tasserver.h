@@ -62,6 +62,9 @@ public slots:
     void closeServer();
     void killAllStartedProcesses();
 
+private:
+	void createServers();
+
 private:                 
 
 	TasTcpServer* mTcpServer;

@@ -192,7 +192,7 @@ static const QString LOG_EVENTS = "logEvents";
   */
 static const QString COMMAND_EXEC_JS_ON_OBJ = "ExecuteJavaScriptOnWebElement";
 static const QString COMMAND_EXEC_JS_ON_QWEBFRAME = "ExecuteJavaScriptOnQWebFrame";
-
+static const QString COMMAND_EXEC_SCROLL_QWEBFRAME = "ScrollQWebFrame";
 //settings
 static const QString BLACK_LISTED = "black_list";
 static const QString AUTO_START = "autostart";
