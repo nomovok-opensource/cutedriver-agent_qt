@@ -179,8 +179,7 @@ QFile* InfoLogger::openFile(const QString& fileName, TasCommand* command)
 void InfoLogger::loadCpuData(TasResponse& response, TasCommand* command)
 {
     if(mCpu){
-        bool clearFile = (command->parameter(CLEARLOG) != "false");
-        response.setData(loadData(mCpu, "cpuLoad", clearFile));    
+        response.setData(loadData(mCpu, "cpuLoad", command));    
         if(command->parameter(ACTION) == "stop"){
             delete mCpu;
             mCpu = 0;
@@ -199,8 +198,7 @@ void InfoLogger::loadCpuData(TasResponse& response, TasCommand* command)
 void InfoLogger::loadMemData(TasResponse& response, TasCommand* command)
 {
     if(mMem){
-        bool clearFile = (command->parameter(CLEARLOG) != "false");
-        response.setData(loadData(mMem, "memUsage", clearFile));    
+        response.setData(loadData(mMem, "memUsage", command));    
         if(command->parameter(ACTION) == "stop"){
             delete mMem;
             mMem = 0;
@@ -220,8 +218,7 @@ void InfoLogger::loadMemData(TasResponse& response, TasCommand* command)
 void InfoLogger::loadGpuData(TasResponse& response, TasCommand* command)
 {
     if(mGpu){
-        bool clearFile = (command->parameter(CLEARLOG) != "false");
-        response.setData(loadData(mGpu, "gpuMemUsage", clearFile));            
+        response.setData(loadData(mGpu, "gpuMemUsage", command));            
         if(command->parameter(ACTION) == "stop"){
             delete mGpu;
             mGpu = 0;
@@ -238,7 +235,7 @@ void InfoLogger::loadGpuData(TasResponse& response, TasCommand* command)
   data. Serializes the data and returns a QByteArray containing the 
   serialized data.
 */
-QByteArray* InfoLogger::loadData(QFile* file, const QString& name, bool removeFile)
+QByteArray* InfoLogger::loadData(QFile* file, const QString& name, TasCommand* command)
 {
     mTimer.stop();
 
@@ -266,8 +263,13 @@ QByteArray* InfoLogger::loadData(QFile* file, const QString& name, bool removeFi
     }
     parentData.addAttribute("entryCount", counter);
 
-    if(removeFile) file->remove();
-
+    if (command->parameter(CLEARLOG) != "false"){
+        file->remove();
+        if(command->parameter(ACTION) == "load"){
+            file->open(QIODevice::ReadWrite | QIODevice::Text | QIODevice::Truncate);
+        }
+    }
+    
     SerializeFilter* filter = new SerializeFilter();		    		
     filter->serializeDuplicates(true);		    		
     QByteArray* xml = new QByteArray();
