@@ -64,9 +64,12 @@ bool WebkitCommandService::executeService(TasCommandModel& model, TasResponse& r
 //                    TasLogger::logger()->debug("WebkitCommandService::executeService command name:" + command->name());
                     bool ret = true;
 
+                    if (command->name() == COMMAND_EXEC_SCROLL_QWEBFRAME){
+                        ret = scrollQWebFrame(target, command);
+                    }else
                     if (command->name() == COMMAND_EXEC_JS_ON_OBJ) {
                         ret = executeJavaScriptWebElement(target, command);
-                    }
+                    }else
                     if (command->name() == COMMAND_EXEC_JS_ON_QWEBFRAME){
                         ret = executeJavaScriptQWebFrame(target, command);
                     }
@@ -91,7 +94,45 @@ bool WebkitCommandService::executeService(TasCommandModel& model, TasResponse& r
     }
 }
 
+bool WebkitCommandService::scrollQWebFrame(TasTarget* target, TasCommand* command)
+{
+    TasLogger::logger()->debug("WebkitCommandService::scrollQWebFrame  x,y(" +command->parameter("dx") + "," + command->parameter("dy") + ")");
+    QString id = target->id();
 
+    QList<QWebFrame*> mainFrameList;
+
+    mainFrameList = traverseStart();
+
+    foreach(QWebFrame* webFrame, mainFrameList)
+    {
+        bool ret;
+        ret = traverserScrollToQWebFrame(webFrame, id, command->parameter("dx").toInt(), command->parameter("dy").toInt());
+        if(ret) {
+            return ret;
+        }
+    }
+
+    mErrorMessage = "When scrolling QWebFrame: QWebFrame not found";
+    return false;
+}
+
+bool WebkitCommandService::traverserScrollToQWebFrame(QWebFrame* webFrame, QString id, int dx, int dy)
+{
+    //TasLogger::logger()->debug("  id(" +  TasCoreUtils::objectId(webFrame) + "," + id + ")");
+    if(TasCoreUtils::objectId(webFrame) == id){
+        //TasLogger::logger()->debug("  found (" + id + ")");
+        webFrame->scroll(dx,dy);
+        return true;
+    }
+    foreach(QWebFrame* childFrame, webFrame->childFrames()) {
+        bool ret = false;
+        ret = traverserScrollToQWebFrame(childFrame,id,dx,dy);
+        if(ret) {
+            return ret;
+        }
+    }
+    return false;
+}
 
 
 bool WebkitCommandService::executeJavaScriptWebElement(TasTarget* target, TasCommand* command)
@@ -562,7 +603,7 @@ QList<QWebElement> WebkitCommandService::traverseWebElement(QPoint parentPos,
 */
 QString WebkitCommandService::parseElementText(QString innerXml)
 {
-    TasLogger::logger()->debug("WebKitTaverse::parseElementText innerXml");
+    //TasLogger::logger()->debug("WebKitTaverse::parseElementText innerXml");
     QString ret;
     while(innerXml.size() > 0 && innerXml.contains('<')) {
         //add space if necessary
@@ -572,20 +613,20 @@ QString WebkitCommandService::parseElementText(QString innerXml)
 
         // beginning, part before '<'
         ret += innerXml.left(innerXml.indexOf('<')).trimmed();
-        TasLogger::logger()->debug("  ret: " + ret);
+        //TasLogger::logger()->debug("  ret: " + ret);
         innerXml.remove(0, innerXml.indexOf('<')+1);
-        TasLogger::logger()->debug("  innerXml: " + innerXml);
+        //TasLogger::logger()->debug("  innerXml: " + innerXml);
 
         //element name
         int cut_space = innerXml.indexOf(' ');
         int cut_gt    = innerXml.indexOf('>');
         int cut       = cut_space > cut_gt ? cut_gt : cut_space;
 
-        TasLogger::logger()->debug("  s:" + QString::number(cut_space) + "\n  g:" + QString::number(cut_gt) + "\n  c:" + QString::number(cut));
+        //TasLogger::logger()->debug("  s:" + QString::number(cut_space) + "\n  g:" + QString::number(cut_gt) + "\n  c:" + QString::number(cut));
 
         QString elementName;
         elementName += innerXml.left(cut).trimmed();
-        TasLogger::logger()->debug("  ele: " + elementName);
+        //TasLogger::logger()->debug("  ele: " + elementName);
         innerXml.remove(0, cut_gt+1);
 
         //continue removing until current and all possible similar child elements are removed
@@ -602,14 +643,14 @@ QString WebkitCommandService::parseElementText(QString innerXml)
             int nextElementTag = innerXml.indexOf("<" + elementName);
             int nextCloseElementTag = innerXml.indexOf("</" + elementName);
 
-            TasLogger::logger()->debug("  net:" + QString::number(nextElementTag) + "\n  ncet:" + QString::number(nextCloseElementTag));
+            //TasLogger::logger()->debug("  net:" + QString::number(nextElementTag) + "\n  ncet:" + QString::number(nextCloseElementTag));
 
             if(nextElementTag != -1 && nextElementTag < nextCloseElementTag) {
-                TasLogger::logger()->debug("  start tag found");
+                //TasLogger::logger()->debug("  start tag found");
                 innerXml.remove(0, nextElementTag + 1);
                 expectedEnds++;
             } else {
-                TasLogger::logger()->debug("  end tag found");
+                //TasLogger::logger()->debug("  end tag found");
                 innerXml.remove(0, nextCloseElementTag + 1);
                 expectedEnds--;
             }
@@ -618,6 +659,6 @@ QString WebkitCommandService::parseElementText(QString innerXml)
         }
     }
     ret += innerXml.trimmed();
-    TasLogger::logger()->debug("WebKitTaverse::parseElementText innerXml ended");
+    //TasLogger::logger()->debug("WebKitTaverse::parseElementText innerXml ended");
     return ret.trimmed();
 }

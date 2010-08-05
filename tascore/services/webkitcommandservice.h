@@ -47,6 +47,9 @@ public:
 	QString serviceName()const { return WEBKIT_COMMAND; }
 
 private:
+    bool scrollQWebFrame(TasTarget* target, TasCommand* command);
+    bool traverserScrollToQWebFrame(QWebFrame* webFrame, QString id, int dx, int dy);
+
     bool executeJavaScriptWebElement(TasTarget* target, TasCommand* command);
     bool executeJavaScriptQWebFrame(TasTarget* target, TasCommand* command);
 
@@ -54,9 +57,9 @@ private:
     bool traverseJavaScriptToWebElement(QWebFrame* webFrame, QString webFrameId, QString javaScript, QString query, int &index, TasCommand* command,int parentFrames=0);
 
 
-	bool executeJavascriptOnWebElement(QWebFrame* webFrame, QString webFrameId, QString javaScript, QString elementId);
-	QWebElement* lookForWebElement(const QWebElement &parentElement, QString elementId, QString webFrameId);
-	QWebFrame* lookForWebFrame(QWebFrame* webFrame, QString webFrameId);
+    bool executeJavascriptOnWebElement(QWebFrame* webFrame, QString webFrameId, QString javaScript, QString elementId);
+    QWebElement* lookForWebElement(const QWebElement &parentElement, QString elementId, QString webFrameId);
+    QWebFrame* lookForWebFrame(QWebFrame* webFrame, QString webFrameId);
 
     QList<QWebFrame*> traverseStart();
     QList<QWebFrame*> traverseObject(QObject* object);
