@@ -56,19 +56,20 @@ private:
 
 	void checkLoggerState();
 
-	void loadCpuData(TasResponse& response);
-	void loadGpuData(TasResponse& response);
-	void loadMemData(TasResponse& response);
+	void loadCpuData(TasResponse& response, TasCommand* command);
+	void loadGpuData(TasResponse& response, TasCommand* command);
+	void loadMemData(TasResponse& response, TasCommand* command);
 
 	void logMem();
 	void logCpu();
 	void logGpu();
 
 
-	QByteArray* loadData(QFile* file, const QString& name);
+	QByteArray* loadData(QFile* file, const QString& name, TasCommand* command);
 	bool makeFileName(TasCommand* command, const QString& type, QString& name);
 
 	void writeLine(const QString& line, QFile* file);
+	QFile* openFile(const QString& fileName, TasCommand* command);
 
 private slots:	
 	void timerEvent();

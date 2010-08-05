@@ -216,7 +216,6 @@ void TestabilityService::registerPlugin()
 
     if(!mServerConnection->isWritable() && !mRegisterTime.isActive()){
         TasLogger::logger()->info("TestabilityService::registerPlugin connection device not writable maybe connection not initialized."); 
-        mSocket->closeConnection();
         connectionClosed();
     }
 
@@ -268,13 +267,20 @@ void TestabilityService::connectionClosed()
     mRegistered = false;   
     mConnected = false;
     mRegisterTime.stop();
- 
+
+    //Proper fix needed at some point:
+    //for some reason we need to reuse the old connections in symbian (seems to crash or freeze if not)
+    //but in windows the old connections will not work at all and we need to recreate them     
+#ifdef Q_OS_SYMBIAN
+    mSocket->closeConnection();
+#else
     if(!mMarkedForDeletion){   
         //make new connections
         delete mSocket;
         delete mServerConnection;
         initializeConnections();
     }
+#endif
 
     mRegisterWatchDog.start(SERVER_REGISTRATION_TIMEOUT);     
     emit unRegistered();
