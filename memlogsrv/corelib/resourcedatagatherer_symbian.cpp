@@ -57,6 +57,7 @@ ResourceDataGatherer::~ResourceDataGatherer()
 
 void ResourceDataGatherer::initializeMemLogging()
 {
+    TasLogger::logger()->debug("> ResourceDataGatherer::initializeMemLogging");
     int error = KErrNone;
     bool foundAny = false;
     RThread thread;
@@ -162,10 +163,9 @@ int ResourceDataGatherer::getMemLoggingData(QString& logEntry)
             }
             
             TMemSpyHeapStatisticsRHeap stats = heapInfo.AsRHeap().Statistics();
-            TUint totalSize =       heapInfo.AsRHeap().ObjectData().Size();
+            TUint totalSize =       heapInfo.AsRHeap().MetaData().iHeapSize;
             TUint allocatedSize =   stats.StatsAllocated().TypeSize();
             TUint freeSize =        stats.StatsFree().TypeSize();
-            TUint totalCells =      stats.StatsCommon().TotalCellCount();
             TUint allocatedCells =  stats.StatsAllocated().TypeCount();
             TUint freeCells =       stats.StatsFree().TypeCount();
             TUint slackSize =       stats.StatsFree().SlackSpaceCellSize();
@@ -181,7 +181,7 @@ int ResourceDataGatherer::getMemLoggingData(QString& logEntry)
             logEntry.append(",");
             logEntry.append(QString::number(freeSize));
             logEntry.append(" cells:");
-            logEntry.append(QString::number(totalCells));
+            logEntry.append(QString::number(allocatedCells + freeCells));
             logEntry.append(",");
             logEntry.append(QString::number(allocatedCells));
             logEntry.append(",");
