@@ -65,7 +65,7 @@ private:
 	void logGpu();
 
 
-	QByteArray* loadData(QFile* file, const QString& name, bool removeFile);
+	QByteArray* loadData(QFile* file, const QString& name, TasCommand* command);
 	bool makeFileName(TasCommand* command, const QString& type, QString& name);
 
 	void writeLine(const QString& line, QFile* file);
