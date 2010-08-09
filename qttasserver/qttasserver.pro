@@ -75,6 +75,11 @@ unix: {
 	QT += testlib
 }
 
+CONFIG(maemo){
+DEFINES += TAS_MAEMO
+}
+
+
 INSTALLS += target
 
 
