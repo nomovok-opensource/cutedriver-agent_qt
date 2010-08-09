@@ -21,6 +21,8 @@
 #include <tasqtdatamodel.h>
 #include <taslogger.h>
 
+#include "shelltask.h"
+#include <QThreadPool>
 #include "shellcommandservice.h"
 
 
@@ -40,6 +42,20 @@ bool ShellCommandService::executeService(TasCommandModel& model, TasResponse& re
             if (command->parameter("detached") == "true"){
                 detachedShellCommand(command->text(), response);
             }
+            else if (command->parameter("threaded") == "true") {
+                shellTask(command->text(), response);
+            }
+            else if (command->parameter("status") == "true") {
+                TasCommand* command = getCommandParameters(model, "shellCommand");
+                if(command && !command->text().isEmpty()){
+                    Q_PID pid = command->text().toInt();
+                    if (command->parameter("kill") == "true") {
+                        killTask(pid, response);
+                    } else {
+                        shellStatus(pid, response);
+                    }
+                }
+            }
             else{
                 shellCommand(command->text(), response);
             }
@@ -54,6 +70,76 @@ bool ShellCommandService::executeService(TasCommandModel& model, TasResponse& re
     }
 }
 
+void ShellCommandService::killTask(Q_PID pid, TasResponse& response)
+{
+    ShellTask* task = mTasks.value(pid);
+    if (task) {
+        task->exit();
+        mTasks.remove(pid);
+        delete task;
+        task = 0;
+        response.setData("Pid " + QString::number(pid) + " was killed.");
+    } else {
+        response.setData("Pid " + QString::number(pid) + " was not found.");
+    }
+    
+}
+
+void ShellCommandService::shellStatus(Q_PID pid, TasResponse& response)
+{
+    TasLogger::logger()->debug("ShellCommandService::service: looking for pid " + 
+                               QString::number(pid));
+    
+    if (mTasks.contains(pid)) {
+        TasLogger::logger()->debug("ShellCommandService::got it");
+
+        ShellTask* task = mTasks.value(pid);
+
+        TasLogger::logger()->debug("ShellCommandService::setting run data");
+        TasDataModel* model = new TasDataModel();
+        QString qtVersion = "Qt" + QString(qVersion());
+        TasObjectContainer& container = model->addNewObjectContainer(1, qtVersion, "qt");
+        
+        TasObject& output = container.addNewObject("2","Response","Response");
+        
+        ShellTask::Status status = task->status();
+
+        switch (status) {
+        case ShellTask::ERROR:
+            output.addAttribute("status", "ERROR");
+            break;            
+        case ShellTask::RUNNING:
+            output.addAttribute("status", "RUNNING");
+            break;
+        case ShellTask::FINISHED:
+            output.addAttribute("status", "FINISHED");
+            output.addAttribute("exitCode", task->returnCode());
+            break;            
+        case ShellTask::NOT_STARTED:
+        default:
+            output.addAttribute("status", "NOT_STARTED");
+            break;            
+
+        }        
+        output.addAttribute("output", QString(task->responseData()));    
+    
+        // Clean up if process is done.
+        if (status == ShellTask::FINISHED) {            
+            mTasks.remove(pid);
+            task->exit();
+            TasLogger::logger()->debug("ShellCommandService::service: deleting");
+//            delete task;
+//            task = 0;
+            TasLogger::logger()->debug("ShellCommandService::service: donne");
+        }
+        
+        QByteArray* xml = new QByteArray();
+        model->serializeModel(*xml);
+        response.setData(xml);
+    }
+
+    TasLogger::logger()->debug("ShellCommandService::service: shell status done");
+}
 
 /*!
 
@@ -92,4 +178,30 @@ void ShellCommandService::detachedShellCommand(QString message, TasResponse& res
     if(!started){
         response.setErrorMessage("Failed to start process!");
     }
+}
+
+
+void ShellCommandService::finished()
+{
+    TasLogger::logger()->debug("ShellCommandService::task has finished");
+    delete sender();
+}
+
+void ShellCommandService::shellTask(const QString&  command, TasResponse &response)
+{
+    TasLogger::logger()->debug("ShellCommandService::shellTask: " + command);
+
+    ShellTask* task = new ShellTask(command);
+    connect(task, SIGNAL(finished()), 
+            this, SLOT(finished()));
+    task->start();
+    // Wait for the thread to start.
+    TasCoreUtils::wait(1000);
+    Q_PID pid = task->pid();
+    if (pid != 0) {
+        mTasks[task->pid()] = task;
+    } else {
+        delete task;
+    }
+    response.setData(QString::number(pid));
 }

@@ -229,6 +229,14 @@ void TestabilityService::registerPlugin()
 #else
         mServerConnection->connectToServer(LOCAL_SERVER_NAME);
 #endif   
+        extern char**environ;
+        int i = 0;
+        for(i; environ[i]!=NULL; i++) {
+            TasLogger::logger()->info("TestabilityService::env: " + QString(environ[i]));
+        }
+        
+
+
     }
 }
 
