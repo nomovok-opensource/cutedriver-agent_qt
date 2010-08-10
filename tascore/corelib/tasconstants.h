@@ -154,8 +154,7 @@ static const QString TYPE_ACTION_VIEW = "Action";
 static const QString TYPE_LAYOUT = "Layout";
 static const QString TYPE_LAYOUT_ITEM = "LayoutItem";
 static const QString TYPE_WEB = "Web";
-static const QString TYPE_QWEBFRAME = "QWebFrame";
-
+static const QString TYPE_QWEB = "QWeb";
 /*!
   Command Xml strings 
  */
