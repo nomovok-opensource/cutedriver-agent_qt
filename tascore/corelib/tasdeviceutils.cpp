@@ -58,7 +58,7 @@ void TasDeviceUtils::resetInactivity()
   Returns the heap size of the process. 
   -1 means not supported.
  */
-qreal TasDeviceUtils::currentProcessHeapSize()
+int TasDeviceUtils::currentProcessHeapSize()
 {
     return -1;
 }
@@ -70,7 +70,7 @@ void TasDeviceUtils::addSystemInformation(TasObject& object)
 {}
 
 
-qint64 TasDeviceUtils::currentProcessCpuTime()
+qreal TasDeviceUtils::currentProcessCpuTime()
 {
     return -1;
 }
@@ -85,9 +85,6 @@ void TasDeviceUtils::addSystemMemoryStatus(TasObject& object)
 }
 
 
-void TasDeviceUtils::tapScreen(int , int , int )
-{    
-}
 
 /*!
   True returned so that server is not started in environments that do not implement this method.
@@ -95,4 +92,8 @@ void TasDeviceUtils::tapScreen(int , int , int )
 bool TasDeviceUtils::isServerRunning()
 {
     return true;
+}
+
+void TasDeviceUtils::sendMouseEvent(int x, int y, Qt::MouseButton button, QEvent::Type type)
+{
 }
