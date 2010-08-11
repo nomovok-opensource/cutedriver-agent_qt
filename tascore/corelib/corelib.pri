@@ -56,7 +56,10 @@ unix: {
 	   HEADERS += $$PWD/gpuinfo_symbian.h 
        SOURCES += $$PWD/tasdeviceutils_symbian.cpp
        SOURCES += $$PWD/gpuinfo_symbian.cpp
-    } 	
+    } 	macx:{
+	    SOURCES += $$PWD/tasdeviceutils.cpp	
+       
+       }
 	  else{	
 	    SOURCES += $$PWD/tasdeviceutils_unix.cpp	
    	}
