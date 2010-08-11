@@ -25,6 +25,7 @@
 #include <QProcess>
 #include <QThread>
 #include <QMutex>
+
 class ShellTask : public QThread
 {
     Q_OBJECT
@@ -33,7 +34,8 @@ public:
         NOT_STARTED, 
         RUNNING, 
         FINISHED,
-        ERROR 
+		// MINGW did not like the name ERROR?
+        ERR, 		
     };
 
 
@@ -44,20 +46,20 @@ public:
 
     ShellTask::Status status();
 
-    Q_PID pid() const;
+    qint64 pid() const;
     int returnCode() const;
     QByteArray responseData();
 
 private slots:
     void started();
     void finished(int exitCode, QProcess::ExitStatus exitStatus);
-    void error(QProcess::ProcessError error);
+    void processError(QProcess::ProcessError error);
 
     void readStdOut();
 private:
     QString mCommand;
     volatile Status mStatus;
-    volatile Q_PID mPid;
+    volatile qint64 mPid;
     int mReturnCode;
     QByteArray mResponse;
     QProcess* mProcess;

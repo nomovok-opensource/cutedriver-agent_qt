@@ -16,13 +16,26 @@
 ** of this file. 
 ** 
 ****************************************************************************/ 
- 
+
+
+
+
 
 #include "shelltask.h"
+
+
+ 
+
 
 #include <taslogger.h>
 #include <QProcess>
 #include <QMutexLocker>
+
+#ifdef Q_OS_WIN32
+#include <Windows.h>
+#endif
+
+
 
 ShellTask::ShellTask(const QString &command) : 
     mCommand(command), 
@@ -52,7 +65,7 @@ void ShellTask::run()
     connect(mProcess, SIGNAL(started()), 
             this, SLOT(started()));
     connect(mProcess, SIGNAL(error(QProcess::ProcessError)) ,
-            this, SLOT(error(QProcess::ProcessError)));
+            this, SLOT(processError(QProcess::ProcessError)));
 
     connect(mProcess, SIGNAL(finished(int, QProcess::ExitStatus)),
             this, SLOT(finished(int, QProcess::ExitStatus)));
@@ -63,7 +76,11 @@ void ShellTask::run()
     mProcess->setEnvironment(QProcess::systemEnvironment());
 
     mProcess->start(mCommand);
-    mPid = mProcess->pid();
+#ifdef Q_OS_WIN32
+    mPid = mProcess->pid()->dwProcessId;
+#else
+	mPid = mProcess->pid();
+#endif
     mProcess->closeWriteChannel();
 
     exec();
@@ -83,7 +100,7 @@ QByteArray ShellTask::responseData()
     return response;
 }
 
-Q_PID ShellTask::pid() const
+qint64 ShellTask::pid() const
 {
     return mPid;
 }
@@ -116,11 +133,12 @@ void ShellTask::finished(int exitCode, QProcess::ExitStatus )
     mReturnCode = exitCode;
 }
 
-void ShellTask::error(QProcess::ProcessError error) 
+void ShellTask::processError(QProcess::ProcessError processError) 
 {
     TasLogger::logger()->debug("ShellTask::error in task");
-    mStatus = ShellTask::ERROR;
-    switch (error) {
+	
+    mStatus = ShellTask::ERR;
+    switch (processError) {
     case QProcess::FailedToStart:
         mResponse = QString("Command failed to start").toUtf8();
 

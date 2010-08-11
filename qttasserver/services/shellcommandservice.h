@@ -45,13 +45,13 @@ private slots:
     void finished();
 
 private:
-    void killTask(Q_PID pid, TasResponse& response);
-    void shellStatus(Q_PID pid, TasResponse& response);
+    void killTask(qint64 pid, TasResponse& response);
+    void shellStatus(qint64 pid, TasResponse& response);
     void shellCommand(QString message, TasResponse& response);
     void detachedShellCommand(QString message, TasResponse& response);
     void shellTask(const QString&  command, TasResponse &response);
 
-    QMap<Q_PID, ShellTask*> mTasks;
+    QMap<qint64, ShellTask*> mTasks;
 };
 
 #endif

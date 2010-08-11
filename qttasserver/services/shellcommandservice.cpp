@@ -48,7 +48,7 @@ bool ShellCommandService::executeService(TasCommandModel& model, TasResponse& re
             else if (command->parameter("status") == "true") {
                 TasCommand* command = getCommandParameters(model, "shellCommand");
                 if(command && !command->text().isEmpty()){
-                    Q_PID pid = command->text().toInt();
+                    qint64 pid = command->text().toInt();
                     if (command->parameter("kill") == "true") {
                         killTask(pid, response);
                     } else {
@@ -70,7 +70,7 @@ bool ShellCommandService::executeService(TasCommandModel& model, TasResponse& re
     }
 }
 
-void ShellCommandService::killTask(Q_PID pid, TasResponse& response)
+void ShellCommandService::killTask(qint64 pid, TasResponse& response)
 {
     ShellTask* task = mTasks.value(pid);
     if (task) {
@@ -85,7 +85,7 @@ void ShellCommandService::killTask(Q_PID pid, TasResponse& response)
     
 }
 
-void ShellCommandService::shellStatus(Q_PID pid, TasResponse& response)
+void ShellCommandService::shellStatus(qint64 pid, TasResponse& response)
 {
     TasLogger::logger()->debug("ShellCommandService::service: looking for pid " + 
                                QString::number(pid));
@@ -105,7 +105,7 @@ void ShellCommandService::shellStatus(Q_PID pid, TasResponse& response)
         ShellTask::Status status = task->status();
 
         switch (status) {
-        case ShellTask::ERROR:
+        case ShellTask::ERR:
             output.addAttribute("status", "ERROR");
             break;            
         case ShellTask::RUNNING:
@@ -197,7 +197,7 @@ void ShellCommandService::shellTask(const QString&  command, TasResponse &respon
     task->start();
     // Wait for the thread to start.
     TasCoreUtils::wait(1000);
-    Q_PID pid = task->pid();
+    qint64 pid = task->pid();
     if (pid != 0) {
         mTasks[task->pid()] = task;
     } else {
