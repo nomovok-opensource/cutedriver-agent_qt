@@ -1,8 +1,8 @@
-qttas (0.9.1-1) unstable; urgency=low
+qttas (0.9.0-3) unstable; urgency=low
 
-  * new release tag
+  * Send mouse events too even if the widget claims to support touch events
 
- -- Petri Kiiskinen <ext-petri.ak.kiiskinen@nokia.com>  Tue, 10 Aug 2010 14:31:38 +0300
+ -- Petri Kiiskinen <ext-petri.ak.kiiskinen@nokia.com>  Wed, 11 Aug 2010 16:30:38 +0300
 
 qttas (0.9.0-2) unstable; urgency=low
 
