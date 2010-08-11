@@ -633,6 +633,9 @@ TasSocket* TasClient::socket()
 
 void TasClient::disconnected()
 {
+    TasLogger::logger()->debug(
+        "TasClient::disconnected socket");
+        
     mSocket = 0;
 }
 
