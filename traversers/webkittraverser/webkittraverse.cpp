@@ -368,7 +368,7 @@ void WebKitTraverse::traverseFrame(QWebFrame* webFrame, TasObject& parent, QStri
         frameInfo.addAttribute("y_absolute", screenPos.y() + webFrame->pos().y());
         frameInfo.addAttribute("width", webFrame->geometry().width());
         frameInfo.addAttribute("height", webFrame->geometry().height());
-        frameInfo.addAttribute("objectType", TYPE_QWEB);
+        frameInfo.addAttribute("objectType", TYPE_WEB);
 
         frameInfo.addAttribute("horizontalScrollBarHeight",webFrame->scrollBarGeometry(Qt::Horizontal).height());
         frameInfo.addAttribute("verticalScrollBarWidth",webFrame->scrollBarGeometry(Qt::Vertical).width());
