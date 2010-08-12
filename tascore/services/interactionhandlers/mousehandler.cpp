@@ -192,10 +192,10 @@ void MouseHandler::doMousePress(QWidget* target, QGraphicsItem* targetItem, Qt::
     if(acceptsTouchEvent(target, targetItem)){
         doTouchBegin(target, targetItem, toTouchPoints(point), extraIdentifier);
     }
-    else{
+//    else{
         QMouseEvent* eventPress = new QMouseEvent(QEvent::MouseButtonPress, target->mapFromGlobal(point), point, button, button, 0);    
         sendMouseEvent(target, eventPress);
-    }
+//    }
 }
 
 void MouseHandler::doTouchBegin(QWidget* target, QGraphicsItem* targetItem, QList<TasTouchPoints> points, QString extraIdentifier)
@@ -214,10 +214,10 @@ void MouseHandler::doMouseRelease(QWidget* target, QGraphicsItem* targetItem, Qt
     if(acceptsTouchEvent(target, targetItem)){
         doTouchEnd(target, targetItem, toTouchPoints(point), extraIdentifier);
     }
-    else{
+//    else{
         QMouseEvent* eventRelease = new QMouseEvent(QEvent::MouseButtonRelease, target->mapFromGlobal(point), point, button, Qt::NoButton, 0);    
         sendMouseEvent(target, eventRelease);
-    }
+//    }
 
 }
 
@@ -252,10 +252,10 @@ void MouseHandler::doMouseMove(QWidget* target, QGraphicsItem* targetItem, QPoin
     if(acceptsTouchEvent(target, targetItem) && button != Qt::NoButton){
         doTouchUpdate(target, targetItem, toTouchPoints(point));
     }
-    else{
+//    else{
         QMouseEvent* eventMove = new QMouseEvent(QEvent::MouseMove, target->mapFromGlobal(point), point, button, button, 0);
         sendMouseEvent(target, eventMove);
-    }
+//    }
 }
 
 bool MouseHandler::acceptsTouchEvent(QWidget* target, QGraphicsItem* targetItem)
