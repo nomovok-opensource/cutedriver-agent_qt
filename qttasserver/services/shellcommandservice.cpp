@@ -76,8 +76,8 @@ void ShellCommandService::killTask(qint64 pid, TasResponse& response)
     if (task) {
         task->exit();
         mTasks.remove(pid);
-        delete task;
-        task = 0;
+//        delete task;
+//        task = 0;
         response.setData("Pid " + QString::number(pid) + " was killed.");
     } else {
         response.setData("Pid " + QString::number(pid) + " was not found.");
