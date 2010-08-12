@@ -40,7 +40,8 @@
 ShellTask::ShellTask(const QString &command) : 
     mCommand(command), 
     mStatus(ShellTask::NOT_STARTED), 
-    mPid(0)
+    mPid(0),
+    mProcess(0)
 {
 }
 
@@ -50,9 +51,10 @@ ShellTask::~ShellTask()
         if (mProcess->state() == QProcess::Running ||
             mProcess->state() == QProcess::Starting) {
             mProcess->terminate();
-            mProcess->kill();
+          //  mProcess->kill();
         }
-        delete mProcess;
+        //delete mProcess;
+        //mProcess=0;
     }            
 }
 
@@ -61,7 +63,7 @@ void ShellTask::run()
     TasLogger::logger()->debug("ShellTask::run task");
     qRegisterMetaType<QProcess::ExitStatus>("QProcess::ExitStatus");
     qRegisterMetaType<QProcess::ProcessError>("QProcess::ProcessError");
-    mProcess = new QProcess();
+    mProcess = new QProcess(this);
     connect(mProcess, SIGNAL(started()), 
             this, SLOT(started()));
     connect(mProcess, SIGNAL(error(QProcess::ProcessError)) ,
@@ -131,6 +133,7 @@ void ShellTask::finished(int exitCode, QProcess::ExitStatus )
     mResponse.append(mProcess->readAll());
     mStatus = ShellTask::FINISHED;
     mReturnCode = exitCode;
+
 }
 
 void ShellTask::processError(QProcess::ProcessError processError) 
