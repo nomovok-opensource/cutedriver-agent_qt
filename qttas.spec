@@ -1,5 +1,5 @@
 Name: qttas-server
-Version: 0.8.4
+Version: 0.9.0.3
 Release:1%{?dist}
 Summary: Qt Test Automation Server
 Group: Development/Tools
@@ -46,7 +46,6 @@ rm -rf %{buildroot}
 %{_bindir}/qttas*
 %{_sysconfdir}/init/*
 %{_sysconfdir}/qt_testability/*
-%{_sysconfdir}/X11/*
 
 
 
@@ -78,6 +77,11 @@ Qt TAS development header.
 %files devel
 %defattr(-,root,root,-)
 %{_includedir}/*
+%{_libdir}/qt4/mkspecs/features/*
+%doc /usr/share/doc/qttas-dev/examples/hellotraverse/HOWTO
+%doc /usr/share/doc/qttas-dev/examples/hellotraverse/*
+
+
 
 
 
@@ -93,5 +97,8 @@ Qt Test Automation Server plugins
 
 
 %changelog
+* Mon Aug 16 2010 - ext-tatu.lahtela@nokia.com - 0.9.0.3
+- RPM Package for release
+
 * Thu Jun 17 2010 - ext-tatu.lahtela@nokia.com - 0.8.4
 - Testing RPM Packaging
