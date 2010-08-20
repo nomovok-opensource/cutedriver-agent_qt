@@ -58,7 +58,7 @@ private:
 
 
     bool executeJavascriptOnWebElement(QWebFrame* webFrame, QString webFrameId, QString javaScript, QString elementId);
-    QWebElement* lookForWebElement(const QWebElement &parentElement, QString elementId, QString webFrameId);
+    QWebElement lookForWebElement(const QWebElement &parentElement, QString elementId, QString webFrameId);
     QWebFrame* lookForWebFrame(QWebFrame* webFrame, QString webFrameId);
 
     QList<QWebFrame*> traverseStart();
