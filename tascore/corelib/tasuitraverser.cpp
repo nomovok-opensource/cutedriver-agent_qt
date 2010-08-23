@@ -102,10 +102,12 @@ TasDataModel* TasUiTraverser::getUiState(TasCommand* command)
         while(iter.hasNext()){
             QWidget *widget = iter.next();
             //only print widgets if they are visible
-            if (!widget->graphicsProxyWidget() &&   
-                (TestabilityUtils::isCustomTraverse() || widget->isVisible() 
-                    )) /*&& !wasTraversed(widget)*/{
-                traverseObject(application.addObject(), widget, command);
+            if (!widget->graphicsProxyWidget() &&  (TestabilityUtils::isCustomTraverse() || widget->isVisible())){
+                //widgets that have a parent will not be traversed unless the parent is the app
+                //this is done to avoid objects being traversed more than once
+                if(!widget->parent() || widget->parent() == qApp){
+                    traverseObject(application.addObject(), widget, command);
+                }
             }            
         }
     }
@@ -117,7 +119,7 @@ TasDataModel* TasUiTraverser::getUiState(TasCommand* command)
     mFilter->clear();
     return model;
 }
-
+    
 void TasUiTraverser::traverseObject(TasObject& objectInfo, QObject* object, TasCommand* command)
 {
     for (int i = 0; i < mTraversers.size(); i++) {
