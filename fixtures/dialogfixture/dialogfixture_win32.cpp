@@ -25,11 +25,10 @@
 
 #include "dialogfixture.h"
 
-#include <QList>
 #include <QRegExp>
 
-// it's assumed that TCHAR is wchar_t. If it isn't, then compilation will hopefully fail.
 
+// it's assumed that TCHAR is wchar_t. If it isn't, then compilation will hopefully fail.
 
 static TCHAR* convertToTCHAR(const QString& qstr)
 {
@@ -144,27 +143,4 @@ int DialogFixture::sendText(const QString &text, const QRegExp &childName, const
     return foundCount;
 }
 
-
-#if 0
-    HWND buttonHandle;
-    HWND textBoxHandle;
-    if (TextBoxHandle){
-        HWND ComboBoxHandle = FindWindowEx(TextBoxHandle, 0, L"ComboBox", NULL);
-        if (ComboBoxHandle){
-            HWND EditHandle = FindWindowEx(ComboBoxHandle, 0, L"Edit", NULL);
-            if (EditHandle){
-                wchar_t* file = converToWChar(filePath);
-                SendMessage(EditHandle, WM_SETTEXT, 0, (LPARAM)file);
-                delete file;
-            }
-        }
-    }
-    //send button click to open button
-    wchar_t* button = converToWChar(buttonName);
-    ButtonHandle = FindWindowEx(WindowHandle, 0, L"Button", button);
-    delete button;
-    if (ButtonHandle){
-        SendMessage (ButtonHandle, BM_CLICK, 0 , 0);
-    }
-#endif
 
