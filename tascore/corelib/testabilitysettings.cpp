@@ -44,6 +44,7 @@ TestabilitySettings::TestabilitySettings()
         QDir dir("c:\\");
         dir.mkpath("c:\\qt_testability\\"); 
         QFile::copy(romFileName, fileName);
+        QFile::setPermissions(fileName, QFile::ReadOther | QFile::WriteOther | QFile::ReadOwner | QFile::WriteOwner);
     }
 #endif
     mSettings = new QSettings(fileName, QSettings::IniFormat);
@@ -73,8 +74,10 @@ QVariant TestabilitySettings::getValue(const QString& key)
     return mSettings->value(key);
 }
 
-void TestabilitySettings::setValue(const QString& key, const QVariant& value)
+bool TestabilitySettings::setValue(const QString& key, const QVariant& value)
 {
-    mSettings->setValue(key, value);
-    mSettings->sync();
+    if(mSettings->isWritable()){
+        mSettings->setValue(key, value);
+        mSettings->sync();
+    }
 }

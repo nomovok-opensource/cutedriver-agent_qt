@@ -37,7 +37,7 @@ public:
 	static void deleteInstance();
 
 	QVariant getValue(const QString& key);
-	void setValue(const QString& key, const QVariant& value);
+	bool setValue(const QString& key, const QVariant& value);
 
 private:
     static TestabilitySettings *mInstance;
