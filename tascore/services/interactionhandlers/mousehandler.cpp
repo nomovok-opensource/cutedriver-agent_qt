@@ -93,12 +93,14 @@ bool MouseHandler::executeInteraction(TargetData data)
                 target = qApp->widgetAt(point.x(), point.y());
             }            
             if(target){
-//                int duration = 1000000*command.parameter("duration").toFloat();
-
+                int duration = command.parameter("duration").toFloat();
 
                 if(command.parameter("interval").isEmpty()){
                     for(int i = 0 ; i < count; i++){
                         doMousePress(target, targetItem, button, point, extraIdentifier);
+                        if (duration != 0) {
+                            TasCoreUtils::wait(duration);
+                        }
                         doMouseRelease(target, targetItem, button, point, extraIdentifier);
                      }                    
                 }
