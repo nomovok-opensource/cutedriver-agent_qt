@@ -1,5 +1,5 @@
 Name: qttas-server
-Version: 0.9.0.3
+Version: 0.9.1
 Release:1%{?dist}
 Summary: Qt Test Automation Server
 Group: Development/Tools
@@ -8,8 +8,8 @@ URL: https://code.nokia.com/
 Source0: %{name}-%{version}.tar.gz
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
-BuildRequires: qt-devel libXtst-devel
-Requires: qt
+BuildRequires: qt-devel libXtst-devel libqtwebkit-devel libX11-devel libXext-devel libXi-devel
+Requires: qt 
 
 
 %description
@@ -29,8 +29,7 @@ make %{?_smp_mflags}
 %install
 rm -rf %{buildroot}
 make install INSTALL_ROOT=%{buildroot}
-# For some reason rpmlint doesn't like this file?
-rm -rv %{buildroot}/usr/lib/libqttestability.so
+
 
 
 %clean
@@ -77,7 +76,7 @@ Qt TAS development header.
 %files devel
 %defattr(-,root,root,-)
 %{_includedir}/*
-%{_libdir}/qt4/mkspecs/features/*
+/usr/share/qt4/mkspecs/features/*
 %doc /usr/share/doc/qttas-dev/examples/hellotraverse/HOWTO
 %doc /usr/share/doc/qttas-dev/examples/hellotraverse/*
 
@@ -97,6 +96,9 @@ Qt Test Automation Server plugins
 
 
 %changelog
+* Mon Aug 16 2010 - ext-tatu.lahtela@nokia.com - 0.9.1
+- Test
+
 * Mon Aug 16 2010 - ext-tatu.lahtela@nokia.com - 0.9.0.3
 - RPM Package for release
 
