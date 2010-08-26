@@ -36,8 +36,6 @@
 static const QString CLASS_NAME = "className";
 static const QString INTERVAL = "interval";
 
-#include <windows.h>
-#include <commctrl.h>
 
 Q_EXPORT_PLUGIN2(dialogfixture, DialogFixture)
 
