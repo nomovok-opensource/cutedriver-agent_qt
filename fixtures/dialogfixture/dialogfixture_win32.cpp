@@ -22,10 +22,9 @@
 
 #include <windows.h>
 #include <psapi.h>
+#include <windows.h>
 
 #include "dialogfixture.h"
-
-#include <QRegExp>
 
 
 // it's assumed that TCHAR is wchar_t. If it isn't, then compilation will hopefully fail.
