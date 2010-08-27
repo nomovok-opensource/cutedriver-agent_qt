@@ -105,7 +105,7 @@ void TasServerServiceManager::handleServiceRequest(TasCommandModel& commandModel
     }
 
     if(targetClient){
-        TasLogger::logger()->debug("TasServerServiceManager::handleServiceRequest set waiter " + QString::number(responseId));
+        //TasLogger::logger()->debug("TasServerServiceManager::handleServiceRequest set waiter " + QString::number(responseId));
         ResponseWaiter* waiter = new ResponseWaiter(responseId, requester);
         if(commandModel.service() == CLOSE_APPLICATION){
             waiter->setResponseFilter(new ClientRemoveFilter(commandModel));
@@ -137,7 +137,7 @@ void TasServerServiceManager::serviceResponse(TasMessage& response)
 
 void TasServerServiceManager::removeWaiter(qint32 responseId)
 {
-    TasLogger::logger()->debug("TasServerServiceManager::removeWaiter remove " + QString::number(responseId));
+    //TasLogger::logger()->debug("TasServerServiceManager::removeWaiter remove " + QString::number(responseId));
     reponseQueue.remove(responseId);
 }
 
