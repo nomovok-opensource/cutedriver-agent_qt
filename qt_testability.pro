@@ -35,7 +35,9 @@ SUBDIRS += traversers
 
 SUBDIRS += loaders
 
+CONFIG(maemo) {
 SUBDIRS  += xsession
+}
 
 CONFIG  += ordered
 
