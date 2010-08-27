@@ -69,13 +69,25 @@ QT += network xml testlib gui webkit
 #configuration file
 configuration.files = conf/qt_testability.ini
 unix:{
-	configuration.path = /etc/qt_testability
+	configuration.path = /etc/qt_testability 
 
   HEADERS.path = /usr/include/tdriver/
   
   HEADERS_OLD.path = /usr/include/matti/
   HEADERS_OLD.files = $$HEADERS
   INSTALLS += HEADERS_OLD
+
+
+  # include desktop file into rpm
+  CONFIG(RPM) { 
+    DESKTOP.files = conf/xdg/autostart/qttasserver.desktop
+    DESKTOP.path = /etc/xdg/autostart/
+    INSTALLS += DESKTOP
+  }
+
+
+
+
 
 }
 macx: {
