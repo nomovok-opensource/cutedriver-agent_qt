@@ -73,6 +73,15 @@ void ResourceDataGatherer::initializeMemLogging()
     while (findThread.Next(threadFullName) == KErrNone  && !foundAny) {
         foundAny = true;
         error = thread.Open(findThread);
+
+        //check that the thread is still alive
+        if(thread.ExitType() != EExitPending){
+            thread.Close();
+            TasLogger::logger()->warning("ResourceDataGatherer::initializeMemLogging already exited thread found, continue searching.");
+            foundAny = false;
+            continue;
+        }
+
         if (!error) {
             mThreadId = thread.Id().Id();
             RProcess parentProcess;
@@ -127,25 +136,24 @@ int ResourceDataGatherer::getMemLoggingData(QString& logEntry)
 {
     if (mMemSpyDriver && mDataSourceOpen) {
         int suspendedCount = mMemSpyDriver->ProcessThreadsSuspend(mParentPid);
-        if (suspendedCount) {
+        if (suspendedCount > 0) {
             TMemSpyHeapInfo heapInfo;
+            //get heap info
             int error = mMemSpyDriver->GetHeapInfoUser(heapInfo, mThreadId);
+
+            //resume always
+            int suspendError = mMemSpyDriver->ProcessThreadsResume(mParentPid);
+            if(suspendError != KErrNone){
+                TasLogger::logger()->error("  ResourceDataGatherer::getMemLoggingData resuming error: " + QString::number(suspendError));
+            }
+
             if (error) {
                 TasLogger::logger()->error("  ResourceDataGatherer::getMemLoggingData heap info error: " + QString::number(error));
                 return error;
             }
 
-            error = mMemSpyDriver->ProcessThreadsResume(mParentPid);
-            if (!error) {
-                suspendedCount = 0;
-            }
-            else {
-                TasLogger::logger()->error("  ResourceDataGatherer::getMemLoggingData resuming error: " + QString::number(error));
-                return error;
-            }
-
             if (mFirstLogFileWrite) {
-                logEntry.append(mThreadFullName + "\n");
+                //logEntry.append(mThreadFullName + "\n");
                 mTimestamp = 0;
                 mTime.start();
                 mFirstLogFileWrite = false;
@@ -193,6 +201,7 @@ int ResourceDataGatherer::getMemLoggingData(QString& logEntry)
             return TAS_ERROR_NONE;
         }
         else {
+            TasLogger::logger()->error("ResourceDataGatherer::getMemLoggingData could not suspend. ");
             return TAS_ERROR_NOT_FOUND;
         }
     }

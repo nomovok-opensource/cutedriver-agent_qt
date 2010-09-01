@@ -173,7 +173,9 @@ int ResourceLoggingService::stopLogging(
     
     int i = 0;
     bool foundAny = false;
-    foreach (ResourceLoggingTimer* timer, mLoggingTimers) {
+    QMutableListIterator<ResourceLoggingTimer*> iter(mLoggingTimers);
+    while (iter.hasNext()) {
+        ResourceLoggingTimer* timer = iter.next();
         if (timer->resource() == processName) {
             foundAny = true;
             timer->stop();
@@ -184,10 +186,9 @@ int ResourceLoggingService::stopLogging(
                 responseData = timer->getLogFileName();
             }
             delete timer;
-            mLoggingTimers.removeAt(i);
+            iter.remove();
             break;
         }
-        i++;
     }
     if (!foundAny) {
         return TAS_ERROR_NOT_FOUND;
@@ -259,7 +260,7 @@ ResourceLoggingTimer::ResourceLoggingTimer(
                     errorCode = TAS_ERROR_FILE_ERROR;
                 }
             }
-            if (mLogFile->open(QIODevice::ReadWrite | QIODevice::Text)) {
+            if (mLogFile->open(QIODevice::ReadWrite | QIODevice::Text | QIODevice::Truncate)) {
                 mLogFileStream.setDevice(mLogFile);
                 mDataGatherer = new ResourceDataGatherer(resourceType, 
                         resourceIdentifier, timestampAbsolute);
