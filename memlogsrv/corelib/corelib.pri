@@ -23,9 +23,8 @@ HEADERS += corelib/tasqtmemlogservice.h
 HEADERS += corelib/resourcedatagatherer.h
 SOURCES += corelib/tasqtmemlogservice.cpp
 
-#api changing so commented out
-#symbian: {
-#    SOURCES += corelib/resourcedatagatherer_symbian.cpp
-#} else {
+symbian: {
+    SOURCES += corelib/resourcedatagatherer_symbian.cpp
+} else {
     SOURCES += corelib/resourcedatagatherer.cpp
-#}
+}
