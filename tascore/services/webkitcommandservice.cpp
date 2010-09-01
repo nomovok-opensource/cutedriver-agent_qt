@@ -206,9 +206,9 @@ bool WebkitCommandService::executeJavascriptOnWebElement(QWebFrame* webFrame, QS
     }
     if(targetFrame){
         //frame found! lets look for the element
-        QWebElement* element = lookForWebElement(targetFrame->documentElement(), elementId, webFrameId);
-        if(element){
-            element->evaluateJavaScript(javaScript);
+        QWebElement element = lookForWebElement(targetFrame->documentElement(), elementId, webFrameId);
+        if(!element.isNull()){
+            element.evaluateJavaScript(javaScript);
             success = true;   
         }
         else{
@@ -239,21 +239,22 @@ QWebFrame* WebkitCommandService::lookForWebFrame(QWebFrame* webFrame, QString we
     return targetFrame;
 }
 
-QWebElement* WebkitCommandService::lookForWebElement(const QWebElement &parentElement, QString elementId, QString webFrameId)
+QWebElement WebkitCommandService::lookForWebElement(const QWebElement &parentElement, QString elementId, QString webFrameId)
 {
     TasLogger::logger()->debug("WebkitCommandService::lookForWebElement elementid " + elementId);
-    QWebElement* match = 0;
+    QWebElement match;
     QWebElement element = parentElement.firstChild();
     while (!element.isNull()) {        
         TasLogger::logger()->debug("WebkitCommandService::lookForWebElement candidate " + TasCoreUtils::pointerId(&element));
         QString candidateId = QString::number(qHash(element.toOuterXml() + webFrameId));
         if(elementId == candidateId){
-            match = &element;
+            match = element;
         }
         else{
             match = lookForWebElement(element, elementId, webFrameId);
         }
-        if(match){
+        if(!match.isNull()){
+            TasLogger::logger()->debug("WebkitCommandService::lookForWebElement match found " + elementId);
             break;
         }
         element = element.nextSibling();

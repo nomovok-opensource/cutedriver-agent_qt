@@ -124,7 +124,13 @@ static const QString QT_SERVER_NAME = "127.0.0.1";
 static const int QT_SERVER_PORT = 55534;
 static const int QT_SERVER_PORT_OUT = 55535;
 
+#ifdef TAS_MAEMO
+// Duo to bug in security system explicit declaration. Remove if works.
+static const QString LOCAL_SERVER_NAME = "/var/tmp/qttasserver_pipe";
+#else 
 static const QString LOCAL_SERVER_NAME = "qttasserver_pipe";
+#endif
+
 
 static const QString DATE_FORMAT = "yyyyMMddhhmmsszzz";
 
@@ -154,8 +160,7 @@ static const QString TYPE_ACTION_VIEW = "Action";
 static const QString TYPE_LAYOUT = "Layout";
 static const QString TYPE_LAYOUT_ITEM = "LayoutItem";
 static const QString TYPE_WEB = "Web";
-static const QString TYPE_QWEBFRAME = "QWebFrame";
-
+static const QString TYPE_QWEB = "QWeb";
 /*!
   Command Xml strings 
  */

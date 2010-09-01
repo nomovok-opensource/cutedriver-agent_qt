@@ -234,6 +234,7 @@ void WebKitTraverse::traverseQGraphicsWebView(TasObject* objectInfo, QGraphicsWe
     if(webPage) {
         //TasLogger::logger()->debug("WebKitTaverse::traverseObject QWebPage != null");
         TasObject& pageInfo = objectInfo->addObject();
+        pageInfo.addAttribute("objectType", TYPE_GRAPHICS_VIEW);
         traverseQWebPage(pageInfo, webPage, coords.first,coords.second);
     }
     
@@ -282,6 +283,7 @@ void WebKitTraverse::traverseQWebView(TasObject* objectInfo, QWebView* webView)
     if(webPage) {
         //TasLogger::logger()->debug("WebKitTaverse::traverseObject QWebPage != null");
         TasObject& pageInfo = objectInfo->addObject();
+        pageInfo.addAttribute("objectType", TYPE_STANDARD_VIEW);
         traverseQWebPage(pageInfo, webPage, webViewPos,screenPos);
     }
 
@@ -307,6 +309,8 @@ void WebKitTraverse::traverseQWebPage(TasObject& pageInfo, QWebPage* webPage,
     pageInfo.addAttribute("y_absolute", screenPos.y());
     pageInfo.addAttribute("x", webViewPos.x());                        
     pageInfo.addAttribute("y", webViewPos.y());
+    pageInfo.addAttribute("objectType", TYPE_QWEB);
+
 
 //         pageInfo.addAttribute("width", webView->width());                        
 //         pageInfo.addAttribute("height", webView->height());
@@ -364,7 +368,7 @@ void WebKitTraverse::traverseFrame(QWebFrame* webFrame, TasObject& parent, QStri
         frameInfo.addAttribute("y_absolute", screenPos.y() + webFrame->pos().y());
         frameInfo.addAttribute("width", webFrame->geometry().width());
         frameInfo.addAttribute("height", webFrame->geometry().height());
-        frameInfo.addAttribute("objectType", "Web");
+        frameInfo.addAttribute("objectType", TYPE_WEB);
 
         frameInfo.addAttribute("horizontalScrollBarHeight",webFrame->scrollBarGeometry(Qt::Horizontal).height());
         frameInfo.addAttribute("verticalScrollBarWidth",webFrame->scrollBarGeometry(Qt::Vertical).width());
@@ -412,7 +416,7 @@ void WebKitTraverse::traverseWebElement(TasObject* parent, QPoint parentPos, QPo
     childInfo.addAttribute("y_absolute", childPos.y()+screenPos.y());   
     childInfo.addAttribute("width", webElement->geometry().width());
     childInfo.addAttribute("height", webElement->geometry().height());
-    childInfo.addAttribute("objectType", "Web");
+    childInfo.addAttribute("objectType", TYPE_WEB);
     childInfo.addBooleanAttribute("visible", webElement->styleProperty("visibility", QWebElement::ComputedStyle).toLower() == "visible");
     childInfo.addBooleanAttribute("hasFocus", webElement->hasFocus());
 

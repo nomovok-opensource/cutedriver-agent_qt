@@ -1,22 +1,22 @@
-/*************************************************************************** 
-** 
-** Copyright (C) 2010 Nokia Corporation and/or its subsidiary(-ies). 
-** All rights reserved. 
-** Contact: Nokia Corporation (testabilitydriver@nokia.com) 
-** 
+/***************************************************************************
+**
+** Copyright (C) 2010 Nokia Corporation and/or its subsidiary(-ies).
+** All rights reserved.
+** Contact: Nokia Corporation (testabilitydriver@nokia.com)
+**
 ** This file is part of Testability Driver Qt Agent
-** 
-** If you have questions regarding the use of this file, please contact 
-** Nokia at testabilitydriver@nokia.com . 
-** 
-** This library is free software; you can redistribute it and/or 
-** modify it under the terms of the GNU Lesser General Public 
-** License version 2.1 as published by the Free Software Foundation 
-** and appearing in the file LICENSE.LGPL included in the packaging 
-** of this file. 
-** 
-****************************************************************************/ 
- 
+**
+** If you have questions regarding the use of this file, please contact
+** Nokia at testabilitydriver@nokia.com .
+**
+** This library is free software; you can redistribute it and/or
+** modify it under the terms of the GNU Lesser General Public
+** License version 2.1 as published by the Free Software Foundation
+** and appearing in the file LICENSE.LGPL included in the packaging
+** of this file.
+**
+****************************************************************************/
+
 
 #include <QHash>
 
@@ -40,7 +40,7 @@ bool RegisterService::executeService(TasCommandModel& model, TasResponse& respon
         TasCommand* command = getCommandParameters(model, COMMAND_REGISTER);
         if(command){
             registerPlugin(*command, response);
-            connect(response.requester(), SIGNAL(messageSent()), this, SLOT(registerQueuedClients()));  
+            connect(response.requester(), SIGNAL(messageSent()), this, SLOT(registerQueuedClients()));
         }
         else{
             command = getCommandParameters(model, COMMAND_UNREGISTER);
@@ -70,17 +70,19 @@ void RegisterService::registerPlugin(TasCommand& command, TasResponse& response)
 
 void RegisterService::registerQueuedClients()
 {
-    disconnect(sender(), 0, this, 0); 
+    disconnect(sender(), 0, this, 0);
     while (!mClientQueue.isEmpty()){
         ClientDetails client = mClientQueue.dequeue();
-        TasLogger::logger()->info("RegisterService::registerPlugin: register plugin with processId: " 
+        TasLogger::logger()->info("RegisterService::registerPlugin: register plugin with processId: "
                                   + client.processId + " name: " + client.processName +", type: "+
                                   client.pluginType);
-        
-        TasClient* tasClient = TasClientManager::instance()->addRegisteredClient(client.processId, client.processName, 
-                                                                                 client.socket, client.pluginType); 
+
+        TasClient* tasClient = TasClientManager::instance()->addRegisteredClient(client.processId, client.processName,
+                                                                                 client.socket, client.pluginType);
 #ifdef Q_OS_SYMBIAN
         tasClient->setApplicationUid(client.applicationUid);
+#else
+        (void)tasClient;
 #endif
 
         TasClientManager::instance()->detachFromStartupData(client.processName);

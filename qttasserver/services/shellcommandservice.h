@@ -23,24 +23,35 @@
 #define SHELLCOMMANDSERVICE_H
 
 #include <tasconstants.h>
+#include <tascoreutils.h>
 
 #include "tasservercommand.h"
+class ShellTask;
 
-class ShellCommandService : public TasServerCommand
+class ShellCommandService : public QObject, public TasServerCommand
 {
+    Q_OBJECT
 public:
     ShellCommandService();
     ~ShellCommandService();
 
-	/*!
-	  From ServiceInterface
-	*/
-	bool executeService(TasCommandModel& model, TasResponse& response);
-	QString serviceName() const { return SHELL_COMMAND; }
+    /*!
+      From ServiceInterface
+    */
+    bool executeService(TasCommandModel& model, TasResponse& response);
+    QString serviceName() const { return SHELL_COMMAND; }
+    
+private slots:
+    void finished();
 
 private:
-	void shellCommand(QString message, TasResponse& response);
-        void detachedShellCommand(QString message, TasResponse& response);
+    void killTask(qint64 pid, TasResponse& response);
+    void shellStatus(qint64 pid, TasResponse& response);
+    void shellCommand(QString message, TasResponse& response);
+    void detachedShellCommand(QString message, TasResponse& response);
+    void shellTask(const QString&  command, TasResponse &response);
+
+    QMap<qint64, ShellTask*> mTasks;
 };
 
 #endif

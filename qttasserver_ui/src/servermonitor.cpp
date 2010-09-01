@@ -218,10 +218,22 @@ void ServerMonitor::enablePluginLoad()
 void ServerMonitor::setAutoStart(bool autostart)
 {
     if(autostart){
-        TestabilitySettings::settings()->setValue(AUTO_START, "on");
+        emit serverDebug("Setting autostart value on");    
+        if(TestabilitySettings::settings()->setValue(AUTO_START, "on")){
+            emit serverDebug("Setting autostart value on succeeded.");    
+        }
+        else{
+            emit serverDebug("Setting autostart value on failed.");    
+        }
     }
     else{
-        TestabilitySettings::settings()->setValue(AUTO_START, "off");
+        emit serverDebug("Setting autostart value off");    
+        if(TestabilitySettings::settings()->setValue(AUTO_START, "off")){
+            emit serverDebug("Setting autostart value off succeeded.");    
+        }
+        else{
+            emit serverDebug("Setting autostart value off failed.");    
+        }
     }
 }
 

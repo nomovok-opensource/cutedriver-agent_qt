@@ -52,19 +52,23 @@ SOURCES += $$PWD/tascoreutils.cpp
 SOURCES += $$PWD/infologger.cpp
 
 unix: {
-	symbian: {
-	   HEADERS += $$PWD/gpuinfo_symbian.h 
+    symbian: {
+       HEADERS += $$PWD/gpuinfo_symbian.h 
        SOURCES += $$PWD/tasdeviceutils_symbian.cpp
        SOURCES += $$PWD/gpuinfo_symbian.cpp
-    } 	
-	  else{	
-	    SOURCES += $$PWD/tasdeviceutils_unix.cpp	
-   	}
+    } else {
+       macx:{
+         SOURCES += $$PWD/tasdeviceutils.cpp	
+       }
+       else{	
+         SOURCES += $$PWD/tasdeviceutils_unix.cpp	
+       }
+    }
 }
 win32: {
     SOURCES += $$PWD/tasdeviceutils_win.cpp
     LIBS += -lPsapi
-}		
+}
 
 CONFIG(maemo){
 LIBS += -lqmsystem 

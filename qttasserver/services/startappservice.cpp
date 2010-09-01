@@ -172,11 +172,11 @@ void StartAppService::launchDetached(const QString& applicationPath, const QStri
 
 RegisterWaiter::RegisterWaiter(TasSocket* socket, TasClient *target, qint32 messageId)
 {
-    messageId = messageId;
+    mMessageId = messageId;
     mSocket = socket;
     mProcessId = target->processId();
     mProcessName = target->applicationName();
-    TasLogger::logger()->debug("RegisterWaiter::RegisterWaiter " + mProcessId);
+    //TasLogger::logger()->debug("RegisterWaiter::RegisterWaiter " + mProcessId + " messageId " + QString::number(mMessageId));
 
     connect(target, SIGNAL(registered(const QString&)), this, SLOT(clientRegistered(const QString&)));       
     connect(target, SIGNAL(crashed()), this, SLOT(crashed()));
@@ -195,6 +195,7 @@ RegisterWaiter::RegisterWaiter(TasSocket* socket, TasClient *target, qint32 mess
 void RegisterWaiter::clientRegistered(const QString& processId)
  {
     TasLogger::logger()->debug("RegisterWaiter::clientRegistered " + processId);    
+    //    TasLogger::logger()->debug("RegisterWaiter::clientRegistered respond with id " + QString::number(mMessageId));    
     mSocket->sendResponse(mMessageId, processId);
     mWaiter.stop();
     deleteLater();
