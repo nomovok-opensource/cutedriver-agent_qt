@@ -43,9 +43,14 @@ else {
             SOURCES += dialogfixture_win32.cpp
             LIBS += -lPsapi
         }
-        else:error( "Unknown platform" )
+        else {
+            # TODO: create separate empty implementation, when symbian is implemented
+            warning( "dialogfixture.pro: Unknown platform, using symbian source." )
+            SOURCES += dialogfixture_symbian.cpp
+        }
     }
 }
+
 DESTDIR = lib
 INSTALLS += target
 LIBS += -L../../tascore/lib/ \
