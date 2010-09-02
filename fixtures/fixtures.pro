@@ -45,4 +45,5 @@ SUBDIRS += tapfixture
 
 SUBDIRS += dialogfixture
 
+
 CONFIG  += ordered

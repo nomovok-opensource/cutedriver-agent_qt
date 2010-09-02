@@ -76,8 +76,11 @@ QVariant TestabilitySettings::getValue(const QString& key)
 
 bool TestabilitySettings::setValue(const QString& key, const QVariant& value)
 {
+    bool wasSet = false;
     if(mSettings->isWritable()){
         mSettings->setValue(key, value);
         mSettings->sync();
+        wasSet =  true;
     }
+    return wasSet;
 }
