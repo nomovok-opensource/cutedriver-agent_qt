@@ -2,12 +2,12 @@
 ## 
 ## Copyright (C) 2010 Nokia Corporation and/or its subsidiary(-ies). 
 ## All rights reserved. 
-## Contact: Nokia Corporation (mattisupport@nokia.com) 
+## Contact: Nokia Corporation (testabilitydriver@nokia.com) 
 ## 
-## This file is part of MATTI. 
+## This file is part of Testability Driver Qt Agent
 ## 
 ## If you have questions regarding the use of this file, please contact 
-## Nokia at mattisupport@nokia.com. 
+## Nokia at testabilitydriver@nokia.com . 
 ## 
 ## This library is free software; you can redistribute it and/or 
 ## modify it under the terms of the GNU Lesser General Public 
