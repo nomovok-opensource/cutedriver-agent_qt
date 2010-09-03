@@ -61,76 +61,27 @@ bool GestureHandler::executeInteraction(TargetData data)
 
     mWidget = data.target;
     mItem = data.targetItem;
+
     TasCommand& command = *data.command;
-    QPoint point = data.targetPoint;
-    QWidget* target = data.target;
-    QGraphicsItem* targetItem = data.targetItem;
+    mTargetDetails = getParameters(command);
 
     QString commandName = command.name();
-    setPoint(point, command);
+//     QPoint point = data.targetPoint;
+//     setPoint(point, command);
+
     if(mGesturePath){
         delete mGesturePath;
         mGesturePath = 0;
     }
-    if (commandName == "MouseGesture"){  
-        setParameters(command);
-        QLineF gestureLine;
-        gestureLine.setP1(QPointF(point));
-        gestureLine.setLength(mDistance);
-        gestureLine.setAngle(mDirection);
-        if(targetItem){
-            QGraphicsView* view = TestabilityUtils::getViewForItem(targetItem);
-            if(view && !view->viewportTransform().isIdentity()){                    
-                TasLogger::logger()->debug("Gesture is transformed");
-                QTransform transform = view->viewportTransform();
-                QLineF transformedLine = transform.map(gestureLine);
-                //set new angle and length based on transformation
-                gestureLine.setLength(transformedLine.length());
-                gestureLine.setAngle(transformedLine.angle());
-            }
-        }
-        mGesturePath = new LinePath(gestureLine);
 
-        startGesture();
-        wasConsumed = true;
-    }
-    else if(commandName == "MouseGestureTo"){     
-        setParameters(command);
-        QPoint end = getTargetPoint();
-        if(!end.isNull()){
-            QLineF gestureLine;
-            gestureLine.setP1(QPointF(point));
-            gestureLine.setP2(QPointF(end));
-            mGesturePath = new LinePath(gestureLine);
-            startGesture();
-        }
-        else{
-            TasLogger::logger()->error("GestureHandler::executeInteraction could not find drag target!");
-        }
-        wasConsumed = true;
-    }
-    else if(commandName == "MouseGestureToCoordinates"){     
-        setParameters(command);
-        int x = command.parameter("x").toInt();
-        int y = command.parameter("y").toInt();
-        QPoint end(x,y);
-        if(!end.isNull()){
-            QLineF gestureLine;
-            gestureLine.setP1(QPointF(point));
-            gestureLine.setP2(QPointF(end));
-            mGesturePath = new LinePath(gestureLine);
-            startGesture();
-        }
-        else{
-            TasLogger::logger()->error("GestureHandler::executeInteraction could not find drag target!");
-        }
-        wasConsumed = true;
-    }
-    else if(commandName == "MouseGesturePoints"){
-        setParameters(command);
+    if(commandName == "MouseGesturePoints"){
+        TasCommand& command = *data.command;
+        QPoint point = data.targetPoint;
+        QWidget* target = data.target;
+        //        QGraphicsItem* targetItem = data.targetItem;
+
         QList<QPoint> gesturePoints;
         QList<int> gestureIntervals;
-        //        gesturePoints.append(point);
         QStringList points = command.text().split(";",QString::SkipEmptyParts);
         for(int i = 0 ; i < points.size(); i++){
             QString rawPoint = points.at(i);
@@ -157,7 +108,77 @@ bool GestureHandler::executeInteraction(TargetData data)
         startGesture();
         wasConsumed = true;
     }
+    else if(commandName.startsWith("MouseGesture")){
+        QLineF gestureLine = makeGestureLine(data);
+        if(!gestureLine.isNull()){
+            mGesturePath = new LinePath(gestureLine);
+            startGesture();
+        }
+        else{
+            TasLogger::logger()->error("GestureHandler::executeInteraction invalid line. Cannot start gesture.");
+        }
+        wasConsumed = true;
+    }
     return wasConsumed;
+}
+
+/*!
+ Makes a QLineF to be used as the gesture from the given data. Check 
+ isNull before using incase given data is not valid.
+ */
+QLineF GestureHandler::makeGestureLine(TargetData data)
+{
+    TasCommand& command = *data.command;
+    QString commandName = command.name();
+
+    QPoint point = data.targetPoint;
+    QGraphicsItem* targetItem = data.targetItem;
+    TargetDetails targetDetails = getParameters(command);
+    QLineF gestureLine;
+    setPoint(point, command);        
+
+    if (commandName == "MouseGesture"){  
+        gestureLine.setP1(QPointF(point));
+        gestureLine.setLength(targetDetails.distance);
+        gestureLine.setAngle(targetDetails.direction);
+        if(targetItem){
+            QGraphicsView* view = TestabilityUtils::getViewForItem(targetItem);
+            if(view && !view->viewportTransform().isIdentity()){                    
+                QTransform transform = view->viewportTransform();
+                QLineF transformedLine = transform.map(gestureLine);
+                //set new angle and length based on transformation
+                gestureLine.setLength(transformedLine.length());
+                gestureLine.setAngle(transformedLine.angle());
+            }
+        }
+    }
+    else if(commandName == "MouseGestureTo"){     
+        QPoint end = getTargetPoint(targetDetails);
+        if(!end.isNull()){
+            gestureLine.setP1(QPointF(point));
+            gestureLine.setP2(QPointF(end));
+        }
+    }
+    else if(commandName == "MouseGestureToCoordinates"){     
+        int x = command.parameter("x").toInt();
+        int y = command.parameter("y").toInt();
+        QPoint end(x,y);
+        if(!end.isNull()){
+            gestureLine.setP1(QPointF(point));
+            gestureLine.setP2(QPointF(end));
+        }
+    }
+    else if(commandName == "MouseGestureFromCoordinates"){     
+        int x = command.parameter("x").toInt();
+        int y = command.parameter("y").toInt();        
+        QPoint start(x,y);
+        if(!start.isNull()){
+            gestureLine.setP1(QPointF(start));
+            gestureLine.setLength(targetDetails.distance);
+            gestureLine.setAngle(targetDetails.direction);
+        }
+    }
+    return gestureLine;
 }
 
 void GestureHandler::startGesture()
@@ -172,8 +193,8 @@ void GestureHandler::startGesture()
     //the gesture is not detected to be a long press
     qApp->installEventFilter(this);
     beginGesture();
-    mTimeLine->setDuration(mDuration);
-    mTimeLine->setFrameRange(0,mDuration/FRAME_RANGE_DIV);    
+    mTimeLine->setDuration(mTargetDetails.duration);
+    mTimeLine->setFrameRange(0, mTargetDetails.duration/FRAME_RANGE_DIV);    
     mTimeLine->start();
 }
 
@@ -185,7 +206,7 @@ void GestureHandler::timerEvent(qreal value)
 {
     //do not send an event if no movement
     if(mPrevious != mGesturePath->pointAt(value)){
-        doMouseMove(mWidget, mItem, mGesturePath->pointAt(value), mButton);        
+        doMouseMove(mWidget, mItem, mGesturePath->pointAt(value), mTargetDetails.button);        
     }
     mPrevious = mGesturePath->pointAt(value);
 }
@@ -195,12 +216,12 @@ void GestureHandler::finished()
     //make sure the end is reached
     //do not send an event if no movement
     if(mPrevious != mGesturePath->endPoint()){
-        doMouseMove(mWidget, mItem, mGesturePath->endPoint(), mButton);
+        doMouseMove(mWidget, mItem, mGesturePath->endPoint(), mTargetDetails.button);
     }
-    if(mRelease){
-        if(mIsDrag){
+    if(mTargetDetails.release){
+        if(mTargetDetails.isDrag){
             //send move event to the end point with intention to cause a stopping effect
-            doMouseMove(mWidget, mItem, mGesturePath->endPoint(), mButton);          
+            doMouseMove(mWidget, mItem, mGesturePath->endPoint(), mTargetDetails.button);          
             //stay motionless and then release mouse
             QTimer::singleShot(50, this, SLOT(releaseMouse()));
         }
@@ -213,17 +234,17 @@ void GestureHandler::finished()
 
 void GestureHandler::beginGesture()
 {
-    if(mPress){
+    if(mTargetDetails.press){
         doMouseMove(mWidget, mItem, mGesturePath->startPoint(), Qt::NoButton);
         mPrevious = mGesturePath->startPoint();
-        doMousePress(mWidget, mItem, mButton, mGesturePath->startPoint());            
+        doMousePress(mWidget, mItem, mTargetDetails.button, mGesturePath->startPoint());            
     }
 
 }
 
 void GestureHandler::releaseMouse()
 {
-    doMouseRelease(mWidget, mItem, mButton, mGesturePath->endPoint());            
+    doMouseRelease(mWidget, mItem, mTargetDetails.button, mGesturePath->endPoint());            
 }
 
 /*!
@@ -248,54 +269,58 @@ bool GestureHandler::eventFilter(QObject* /*target*/, QEvent *event)
     }
 }
 
-void GestureHandler::setParameters(TasCommand& command)
+TargetDetails GestureHandler::getParameters(TasCommand& command)
 {
+    TargetDetails targetDetails;
+
     if (!command.parameter("direction").isEmpty()) {
-        mDirection = command.parameter("direction").toInt();
-        mDirection -= 90;
-        mDirection = mDirection * -1;
+        int direction = command.parameter("direction").toInt();
+        direction -= 90;
+        direction = direction * -1;
+        targetDetails.direction = direction;
     }
     if (!command.parameter("distance").isEmpty()) {
-        mDistance = command.parameter("distance").toInt();
+        targetDetails.distance = command.parameter("distance").toInt();
     }    
     if (!command.parameter("speed").isEmpty()) {
-        mDuration = command.parameter("speed").toInt();
+        targetDetails.duration = command.parameter("speed").toInt();
     }
     if (!command.parameter("targetId").isEmpty()) {
-        mTargetId = command.parameter("targetId");
+        targetDetails.targetId = command.parameter("targetId");
     }
     if (!command.parameter("targetType").isEmpty()) {
-        mTargetType = command.parameter("targetType");
+        targetDetails.targetType = command.parameter("targetType");
     }
 
-    mIsDrag = false;
+    targetDetails.isDrag = false;
     if (command.parameter("isDrag") == "true") {
-        mIsDrag = true;
+        targetDetails.isDrag = true;
     }
 
-    mButton = getMouseButton(command);
+    targetDetails.button = getMouseButton(command);
     
-    mPress = true;
-    mRelease = true;
+    targetDetails.press = true;
+    targetDetails.release = true;
     if (command.parameter("press") == "false") {
-        mPress = false;
+        targetDetails.press = false;
     }
     if (command.parameter("release") == "false") {
-        mRelease = false;
+        targetDetails.release = false;
     }
+    return targetDetails;
 }
 
-QPoint GestureHandler::getTargetPoint()
+QPoint GestureHandler::getTargetPoint(TargetDetails details)
 {
     QPoint targetPoint;
-    if(mTargetType == TYPE_GRAPHICS_VIEW){
-        QGraphicsItem* targetItem = findGraphicsItem(mTargetId); 
+    if(details.targetType == TYPE_GRAPHICS_VIEW){
+        QGraphicsItem* targetItem = findGraphicsItem(details.targetId); 
         if(targetItem){
             viewPortAndPosition(targetItem, targetPoint);   
         }
     }
     else{
-        QWidget* targetWidget = findWidget(mTargetId);
+        QWidget* targetWidget = findWidget(mTargetDetails.targetId);
         if(targetWidget){
             targetPoint = targetWidget->mapToGlobal(targetWidget->rect().center());
         }

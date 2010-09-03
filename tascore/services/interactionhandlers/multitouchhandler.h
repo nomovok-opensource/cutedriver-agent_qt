@@ -76,6 +76,21 @@ protected:
 	QList<QPoint> mLastPoints;
 };
 
+class LinearGesturePath : public MultitouchGesturePath
+{
+public:
+    LinearGesturePath(QList<QLineF> lines);
+    ~LinearGesturePath();
+  
+	QList<TasTouchPoints> startPoints();
+	QList<TasTouchPoints> pointAts(qreal value);
+	QList<TasTouchPoints> endPoints();
+
+private:
+	QList<QLineF> mLines;
+};  
+
+
 class PinchZoomGesturePath : public MultitouchGesturePath
 {
 public:

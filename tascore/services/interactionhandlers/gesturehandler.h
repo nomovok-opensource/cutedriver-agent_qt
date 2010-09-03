@@ -32,6 +32,19 @@
 
 class GesturePath;
 
+struct TargetDetails
+{
+  int distance;    
+  int direction;
+  int duration;
+  QString targetId;
+  QString targetType;
+  bool press;
+  bool release;
+  bool isDrag;
+  Qt::MouseButton button;    
+};
+
 class GestureHandler : public QObject, public MouseHandler
 {
   Q_OBJECT
@@ -46,7 +59,9 @@ public:
 protected:
 	virtual void beginGesture();
 	void startGesture();
-	void setParameters(TasCommand& command);
+	TargetDetails getParameters(TasCommand& command);
+
+	QLineF makeGestureLine(TargetData data);
 
 protected slots:
     virtual void timerEvent(qreal);
@@ -55,26 +70,18 @@ protected slots:
 
 private:
     void setNewPoint();
-	QPoint getTargetPoint();
+	QPoint getTargetPoint(TargetDetails targetDetails);
 
 
 protected:
-    int mDistance;    
-    int mDirection;
-	int mDuration;
-    QWidget* mWidget;
-	QGraphicsItem* mItem;
+	TargetDetails mTargetDetails;
+	QWidget* mWidget;
+    QGraphicsItem* mItem;
 
 private:
-	QString mTargetId;
-	QString mTargetType;
-    Qt::MouseButton mButton;    
-    bool mPress;
-    bool mRelease;
 	GesturePath* mGesturePath;
 	QTimeLine* mTimeLine;
 	QPoint mPrevious;
-	bool mIsDrag;
 };
 
 class GesturePath
