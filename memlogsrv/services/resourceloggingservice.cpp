@@ -173,7 +173,9 @@ int ResourceLoggingService::stopLogging(
     
     int i = 0;
     bool foundAny = false;
-    foreach (ResourceLoggingTimer* timer, mLoggingTimers) {
+    QMutableListIterator<ResourceLoggingTimer*> iter(mLoggingTimers);
+    while (iter.hasNext()) {
+        ResourceLoggingTimer* timer = iter.next();
         if (timer->resource() == processName) {
             foundAny = true;
             timer->stop();
@@ -184,10 +186,9 @@ int ResourceLoggingService::stopLogging(
                 responseData = timer->getLogFileName();
             }
             delete timer;
-            mLoggingTimers.removeAt(i);
+            iter.remove();
             break;
         }
-        i++;
     }
     if (!foundAny) {
         return TAS_ERROR_NOT_FOUND;
@@ -199,6 +200,7 @@ int ResourceLoggingService::stopLogging(
 
 void ResourceLoggingService::timerError(int errorCode, QString& resourceIdentifier)
 {
+    TasLogger::logger()->debug("> ResourceLoggingService::timerError: " + QString::number(errorCode));
     int i = 0;
     foreach (ResourceLoggingTimer* timer, mLoggingTimers) {
         if (timer->resource() == resourceIdentifier) {
@@ -258,7 +260,7 @@ ResourceLoggingTimer::ResourceLoggingTimer(
                     errorCode = TAS_ERROR_FILE_ERROR;
                 }
             }
-            if (mLogFile->open(QIODevice::ReadWrite | QIODevice::Text)) {
+            if (mLogFile->open(QIODevice::ReadWrite | QIODevice::Text | QIODevice::Truncate)) {
                 mLogFileStream.setDevice(mLogFile);
                 mDataGatherer = new ResourceDataGatherer(resourceType, 
                         resourceIdentifier, timestampAbsolute);
@@ -312,6 +314,7 @@ int ResourceLoggingTimer::interval()
     
 void ResourceLoggingTimer::start() 
 { 
+    TasLogger::logger()->debug("> ResourceLoggingTimer::start");
     if (mTimer) {
         int interval = mTimer->interval();
         if (!interval) {
@@ -331,6 +334,7 @@ void ResourceLoggingTimer::start()
     
 void ResourceLoggingTimer::start(int milliSecInterval) 
 {
+    TasLogger::logger()->debug("> ResourceLoggingTimer::start: " + QString::number(milliSecInterval));
     if (mTimer) {
         if (milliSecInterval != interval()) {
             mTimer->start(milliSecInterval);
@@ -346,6 +350,7 @@ void ResourceLoggingTimer::start(int milliSecInterval)
     
 void ResourceLoggingTimer::stop() 
 { 
+    TasLogger::logger()->debug("> ResourceLoggingTimer::stop");
     if (mTimer) {
         if (mTimer->isActive()) {
             mTimer->stop();

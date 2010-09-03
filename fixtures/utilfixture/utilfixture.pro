@@ -18,13 +18,34 @@
 ############################################################################
 
 
+TEMPLATE = lib
+TARGET = utilfixture
+CONFIG += plugin
 
-HEADERS += corelib/tasqtmemlogservice.h
-HEADERS += corelib/resourcedatagatherer.h
-SOURCES += corelib/tasqtmemlogservice.cpp
+include(../../tasbase.pri)
+
+target.path = $$TAS_TARGET_PLUGIN/tasfixtures
 
 symbian: {
-    SOURCES += corelib/resourcedatagatherer_symbian.cpp
-} else {
-    SOURCES += corelib/resourcedatagatherer.cpp
+	TARGET.EPOCALLOWDLLDATA = 1
+    TARGET.CAPABILITY=CAP_GENERAL_DLL
+	util_fixture_plugin.sources = utilfixture.dll
+	util_fixture_plugin.path = /resource/qt/plugins/tasfixtures
+ 
+	DEPLOYMENT += util_fixture_plugin
+	
 }
+
+
+DEPENDPATH += . 
+INCLUDEPATH += . ../../tascore/corelib
+
+# Input
+HEADERS += utilfixtureplugin.h
+SOURCES += utilfixtureplugin.cpp
+
+DESTDIR = lib
+
+INSTALLS += target
+
+LIBS += -L../../tascore/lib/ -lqttestability -lwidgetregistryclient

@@ -1,5 +1,5 @@
 Name: qttas-server
-Version: 0.9.1
+Version: 0.9.0
 Release:1%{?dist}
 Summary: Qt Test Automation Server
 Group: Development/Tools
@@ -8,9 +8,13 @@ URL: https://code.nokia.com/
 Source0: %{name}-%{version}.tar.gz
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
-BuildRequires: qt-devel libXtst-devel libqtwebkit-devel libX11-devel libXext-devel libXi-devel
-Requires: qt 
-
+BuildRequires:  pkgconfig(QtCore)
+BuildRequires:  pkgconfig(QtWebKit)
+BuildRequires:  pkgconfig(x11)
+BuildRequires:  pkgconfig(xext)
+BuildRequires:  pkgconfig(xi)
+BuildRequires:  pkgconfig(xtst)
+Requires: qttas-server-plugins
 
 %description
 Qt TAS is a test automation server which provides testability 
@@ -47,7 +51,6 @@ rm -rf %{buildroot}
 %{_sysconfdir}/xdg/autostart/qttasserver.desktop
 
 
-
 %package libs
 Summary: Qt Test automation server library files
 
@@ -69,6 +72,7 @@ Qt TAS development library files
 
 %package devel
 Summary: Qt Test automation server development headers
+Requires: qttas-server-libs
 
 %description devel
 Qt TAS development header.
@@ -77,11 +81,7 @@ Qt TAS development header.
 %defattr(-,root,root,-)
 %{_includedir}/*
 /usr/share/qt4/mkspecs/features/*
-%doc /usr/share/doc/qttas-dev/examples/hellotraverse/HOWTO
 %doc /usr/share/doc/qttas-dev/examples/hellotraverse/*
-
-
-
 
 
 
@@ -96,9 +96,6 @@ Qt Test Automation Server plugins
 
 
 %changelog
-* Mon Aug 16 2010 - ext-tatu.lahtela@nokia.com - 0.9.1
-- Test
-
 * Mon Aug 16 2010 - ext-tatu.lahtela@nokia.com - 0.9.0.3
 - RPM Package for release
 

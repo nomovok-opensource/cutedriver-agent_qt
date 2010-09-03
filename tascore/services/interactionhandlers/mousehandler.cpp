@@ -223,11 +223,12 @@ void MouseHandler::doMouseRelease(QWidget* target, QGraphicsItem* targetItem, Qt
 
 }
 
-QList<TasTouchPoints> MouseHandler::toTouchPoints(QPoint point)
+QList<TasTouchPoints> MouseHandler::toTouchPoints(QPoint point, bool isPrimary)
 {
     QList<TasTouchPoints> points;
     TasTouchPoints touchPoint;
     touchPoint.screenPoint = point;
+    touchPoint.isPrimary = isPrimary;
     points.append(touchPoint);
     return points;
 }
@@ -367,7 +368,7 @@ QList<QTouchEvent::TouchPoint> MouseHandler::convertToTouchPoints(QWidget* targe
                 mTouchPointCounter++;
                 pointIds->append(mTouchPointCounter);                
             }
-            touchPoints.append(makeTouchPoint(target, targetItem, points.at(i), state, pointIds->at(i), false));
+            touchPoints.append(makeTouchPoint(target, targetItem, points.at(i), state, pointIds->at(i)));
         }
     }
 
@@ -378,12 +379,12 @@ QList<QTouchEvent::TouchPoint> MouseHandler::convertToTouchPoints(QWidget* targe
 
 QTouchEvent::TouchPoint MouseHandler::makeTouchPoint(QWidget* target, QGraphicsItem* targetItem,
                                                      TasTouchPoints points, Qt::TouchPointState state,
-                                                     int id, bool primary)
+                                                     int id)
 {
     Q_UNUSED(targetItem);
     QTouchEvent::TouchPoint touchPoint(id);
     Qt::TouchPointStates states = state;
-    if(primary){
+    if(points.isPrimary){
         states |= Qt::TouchPointPrimary;
     }
     touchPoint.setState(states);

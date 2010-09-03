@@ -34,6 +34,9 @@ CONFIG(mobility){
 
 SUBDIRS += popupfixture
 
+symbian: {
+	SUBDIRS += utilfixture
+}
 CONFIG(maemo){
 #SUBDIRS += duifixture #not supported anymore
 }
@@ -41,5 +44,6 @@ CONFIG(maemo){
 SUBDIRS += tapfixture
 
 SUBDIRS += dialogfixture
+
 
 CONFIG  += ordered
