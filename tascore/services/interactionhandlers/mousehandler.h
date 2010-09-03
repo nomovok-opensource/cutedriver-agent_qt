@@ -38,6 +38,7 @@ struct TasTouchPoints
     QPoint screenPoint;
     QPoint lastScreenPoint;
     QPoint startScreenPoint;
+    bool isPrimary;
 };
 
 
@@ -72,12 +73,12 @@ protected:
     QList<QTouchEvent::TouchPoint> convertToTouchPoints(QWidget* target, QGraphicsItem* targetItem, Qt::TouchPointState state,
                                                         QList<TasTouchPoints> points, QString extraIdentifier=QString());
     QTouchEvent::TouchPoint makeTouchPoint(QWidget* target, QGraphicsItem* targetItem, TasTouchPoints points,
-                                           Qt::TouchPointState state, int id, bool primary = true);
+                                           Qt::TouchPointState state, int id);
     void sendTouchEvent(QWidget* target, QTouchEvent* event);
 
     bool acceptsTouchEvent(QWidget* target, QGraphicsItem* targetItem);
 
-    QList<TasTouchPoints> toTouchPoints(QPoint point);
+    QList<TasTouchPoints> toTouchPoints(QPoint point, bool isPrimary=true);
 
 private:
     int mTouchPointCounter;
