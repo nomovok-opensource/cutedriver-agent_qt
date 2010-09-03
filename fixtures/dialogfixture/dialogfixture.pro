@@ -22,13 +22,13 @@ CONFIG += plugin
 include(../../tasbase.pri)
 target.path = $$TAS_TARGET_PLUGIN/tasfixtures
 
-# symbian: {
-# TARGET.EPOCALLOWDLLDATA = 1
-# TARGET.CAPABILITY=CAP_GENERAL_DLL
-# dialog_fixture_plugin.sources = dialogfixture.dll
-# dialog_fixture_plugin.path = /resource/qt/plugins/tasfixtures
-# DEPLOYMENT += dialog_fixture_plugin
-# }
+ symbian: {
+ TARGET.EPOCALLOWDLLDATA = 1
+ TARGET.CAPABILITY=CAP_GENERAL_DLL
+ dialog_fixture_plugin.sources = dialogfixture.dll
+ dialog_fixture_plugin.path = /resource/qt/plugins/tasfixtures
+ DEPLOYMENT += dialog_fixture_plugin
+ }
 DEPENDPATH += .
 INCLUDEPATH += . \
     ../../tascore/corelib
@@ -43,9 +43,14 @@ else {
             SOURCES += dialogfixture_win32.cpp
             LIBS += -lPsapi
         }
-        else:error( "Unknown platform" )
+        else {
+            # TODO: create separate empty implementation, when symbian is implemented
+            warning( "dialogfixture.pro: Unknown platform, using symbian source." )
+            SOURCES += dialogfixture_symbian.cpp
+        }
     }
 }
+
 DESTDIR = lib
 INSTALLS += target
 LIBS += -L../../tascore/lib/ \

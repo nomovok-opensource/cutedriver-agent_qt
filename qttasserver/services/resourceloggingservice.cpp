@@ -61,7 +61,7 @@ MemLogServerWaiter::MemLogServerWaiter(TasSocket* requester, TasClient *target, 
 {
     mSocket = requester;
     mTarget = target;
-    messageId = messageId;
+    mMessageId = messageId;
     mCommandXml = commandXml;
     connect(mTarget, SIGNAL(registered(const QString&)), this, SLOT(clientRegistered(const QString&)));       
     connect(mTarget, SIGNAL(crashed()), this, SLOT(crashed()));
