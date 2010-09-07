@@ -27,27 +27,27 @@
 /*!
   Services
  */
-static const QString START_APPLICATION          = "startApplication";
-static const QString CLOSE_APPLICATION          = "closeApplication";
-static const QString UI_COMMAND                 = "uiCommand";
-static const QString APPLICATION_STATE          = "uiState";
-static const QString WEBKIT_COMMAND             = "webkitCommand";
-static const QString SCREEN_SHOT                = "screenShot";
-static const QString FIXTURE                    = "fixture";
-static const QString REGISTER                   = "register";
-static const QString SHELL_COMMAND              = "shellCommand";
-static const QString KILL                       = "kill";
-static const QString PLATFORM                   = "platformOperation";
-static const QString COLLECT_EVENTS             = "collectEvents";
-static const QString OBJECT_SERVICE             = "objectManipulation";
-static const QString LIST_APPS                  = "listApps";
-static const QString RECORD_EVENTS              = "recordEvents";
-static const QString CONF_SERVICE               = "confService";
-static const QString INFO_SERVICE               = "infoService";                                                  
-static const QString LIST_CRASHED_APPS          = "listCrashedApps";
-static const QString BRING_TO_FOREGROUND        = "bringToForeground";
-static const QString SYSTEM_INFO_SERVICE        = "systemInfo";
-static const QString RESOURCE_LOGGING_SERVICE   = "resourceLogging";
+const char* const START_APPLICATION          = "startApplication";
+const char* const CLOSE_APPLICATION          = "closeApplication";
+const char* const UI_COMMAND                 = "uiCommand";
+const char* const APPLICATION_STATE          = "uiState";
+const char* const WEBKIT_COMMAND             = "webkitCommand";
+const char* const SCREEN_SHOT                = "screenShot";
+const char* const FIXTURE                    = "fixture";
+const char* const REGISTER                   = "register";
+const char* const SHELL_COMMAND              = "shellCommand";
+const char* const KILL                       = "kill";
+const char* const PLATFORM                   = "platformOperation";
+const char* const COLLECT_EVENTS             = "collectEvents";
+const char* const OBJECT_SERVICE             = "objectManipulation";
+const char* const LIST_APPS                  = "listApps";
+const char* const RECORD_EVENTS              = "recordEvents";
+const char* const CONF_SERVICE               = "confService";
+const char* const INFO_SERVICE               = "infoService";                                                  
+const char* const LIST_CRASHED_APPS          = "listCrashedApps";
+const char* const BRING_TO_FOREGROUND        = "bringToForeground";
+const char* const SYSTEM_INFO_SERVICE        = "systemInfo";
+const char* const RESOURCE_LOGGING_SERVICE   = "resourceLogging";
 
 /*
  Message flags 
@@ -88,119 +88,119 @@ static const int TAS_ERROR_FILE_ERROR = -6;
 /*
   Message strings sent to the client.
  */
-static const QString MESSAGE_CHECKSUM_ERROR_MSG = "Given checksum does not match the calculated one!";
-static const QString INVALID_FLAG_ERROR_MSG = "The given flag is not supported!";
-static const QString MESSAGE_READ_ERROR_MSG = "Unable to read message!";
-static const QString UI_COMMAND_ERROR = "Unable to perform given ui commands!";
-static const QString INVALID_PLUGIN_MSG = "No plugin found for the given id!";
-static const QString PLUGIN_CONNECTION_FAILURE = "Connection to plugin failed.";
-static const QString NOT_ABLE_TO_TAKE_SCREENSHOT = "Could not take UI screenshot (maybe no running applications or qttasserver in no gui mode).";
-static const QString NO_COMMAND_TO_EXECUTE = "No command was given to be executed.";
-static const QString OK_MESSAGE = "OK";
-static const QString APP_CLOSE_FAILED_MSG = "Closing the application failed!";
-static const QString PARSE_ERROR = "Could not parse the command xml.";
+const char* const MESSAGE_CHECKSUM_ERROR_MSG = "Given checksum does not match the calculated one!";
+const char* const INVALID_FLAG_ERROR_MSG = "The given flag is not supported!";
+const char* const MESSAGE_READ_ERROR_MSG = "Unable to read message!";
+const char* const UI_COMMAND_ERROR = "Unable to perform given ui commands!";
+const char* const INVALID_PLUGIN_MSG = "No plugin found for the given id!";
+const char* const PLUGIN_CONNECTION_FAILURE = "Connection to plugin failed.";
+const char* const NOT_ABLE_TO_TAKE_SCREENSHOT = "Could not take UI screenshot (maybe no running applications or qttasserver in no gui mode).";
+const char* const NO_COMMAND_TO_EXECUTE = "No command was given to be executed.";
+const char* const OK_MESSAGE = "OK";
+const char* const APP_CLOSE_FAILED_MSG = "Closing the application failed!";
+const char* const PARSE_ERROR = "Could not parse the command xml.";
 
-static const QString TRUE_MSG = "true";
-static const QString FALSE_MSG = "false";
+const char* const TRUE_MSG = "true";
+const char* const FALSE_MSG = "false";
 
 /*
   TasServer name used in QLocalServer   
  */
-static const QString TAS_SERVER_NAME = "tas_server";
+const char* const TAS_SERVER_NAME = "tas_server";
 
 /*!
  Dynamic property name set to qApp to detect plugin existence.
  Used to avoid double plugin load.
  */
-static const QString PLUGIN_ATTR = "testability_plugin";
+const char* const PLUGIN_ATTR = "testability_plugin";
 
 /*
   Host names and ports
  */
 
-static const QString SERVER_EXECUTABLE = "qttasserver";
+const char* const SERVER_EXECUTABLE = "qttasserver";
 
-static const QString QT_SERVER_NAME = "127.0.0.1";
+const char* const QT_SERVER_NAME = "127.0.0.1";
 static const int QT_SERVER_PORT = 55534;
 static const int QT_SERVER_PORT_OUT = 55535;
 
 #ifdef TAS_MAEMO
 // Duo to bug in security system explicit declaration. Remove if works.
-static const QString LOCAL_SERVER_NAME = "/var/tmp/qttasserver_pipe";
+const char* const LOCAL_SERVER_NAME = "/var/tmp/qttasserver_pipe";
 #else 
-static const QString LOCAL_SERVER_NAME = "qttasserver_pipe";
+const char* const LOCAL_SERVER_NAME = "qttasserver_pipe";
 #endif
 
 
-static const QString DATE_FORMAT = "yyyyMMddhhmmsszzz";
+const char* const DATE_FORMAT = "yyyyMMddhhmmsszzz";
 
 //header length
 static const int HEADER_LENGTH = 12;
 
 
-static const QString SIGNAL_KEY = "signal";
+const char* const SIGNAL_KEY = "signal";
 
-static const QString PROCESS_START_TIME = "ProcessStarted";
+const char* const PROCESS_START_TIME = "ProcessStarted";
 
 /*!
   Timer based system file paths  
  */
-static const QString COMMAND_FILE= "C:\\TasCommands.xml";
-static const QString UI_STATE_FILE = "C:\\QTDumpUi.xml";
+const char* const COMMAND_FILE= "C:\\TasCommands.xml";
+const char* const UI_STATE_FILE = "C:\\QTDumpUi.xml";
 
 /*!
   Object types. Graphics type object (GraphicsItem) need special 
   operations to enable event sending.
   Application view means application level (e.g screenshot)
 */
-static const QString TYPE_GRAPHICS_VIEW = "Graphics";
-static const QString TYPE_STANDARD_VIEW = "Standard";
-static const QString TYPE_APPLICATION_VIEW = "Application";
-static const QString TYPE_ACTION_VIEW = "Action";
-static const QString TYPE_LAYOUT = "Layout";
-static const QString TYPE_LAYOUT_ITEM = "LayoutItem";
-static const QString TYPE_WEB = "Web";
-static const QString TYPE_QWEB = "QWeb";
+const char* const TYPE_GRAPHICS_VIEW = "Graphics";
+const char* const TYPE_STANDARD_VIEW = "Standard";
+const char* const TYPE_APPLICATION_VIEW = "Application";
+const char* const TYPE_ACTION_VIEW = "Action";
+const char* const TYPE_LAYOUT = "Layout";
+const char* const TYPE_LAYOUT_ITEM = "LayoutItem";
+const char* const TYPE_WEB = "Web";
+const char* const TYPE_QWEB = "QWeb";
 /*!
   Command Xml strings 
  */
-static const QString COMMAND_TARGET = "Target";
-static const QString COMMAND_ROOT = "TasCommands";
-static const QString COMMAND_SERVICE = "service";
-static const QString COMMAND_TYPE = "Command";
-static const QString COMMAND_TYPE_NAME = "name";
-static const QString COMMAND_TARGET_ID = "TasId";
-static const QString APPLICATION_TARGET = "Application";
-static const QString COMMAND_REGISTER = "registerPlugin";
-static const QString COMMAND_UNREGISTER = "unRegisterPlugin";
-static const QString PLUGIN_ID = "processId";
-static const QString PLUGIN_NAME = "processName";
-static const QString PLUGIN_TYPE = "pluginType";
-static const QString TAS_PLUGIN = "tasPlugin";
-static const QString LOG_MEM_SRV = "memLogSrv";
-static const QString APP_UID = "applicationUid";
-static const QString CONFIGURE_LOGGER_COMMAND = "configureLogger";
-static const QString CONFIGURE_LOGEVENTS_COMMAND = "configureEventLogging";
+const char* const COMMAND_TARGET = "Target";
+const char* const COMMAND_ROOT = "TasCommands";
+const char* const COMMAND_SERVICE = "service";
+const char* const COMMAND_TYPE = "Command";
+const char* const COMMAND_TYPE_NAME = "name";
+const char* const COMMAND_TARGET_ID = "TasId";
+const char* const APPLICATION_TARGET = "Application";
+const char* const COMMAND_REGISTER = "registerPlugin";
+const char* const COMMAND_UNREGISTER = "unRegisterPlugin";
+const char* const PLUGIN_ID = "processId";
+const char* const PLUGIN_NAME = "processName";
+const char* const PLUGIN_TYPE = "pluginType";
+const char* const TAS_PLUGIN = "tasPlugin";
+const char* const LOG_MEM_SRV = "memLogSrv";
+const char* const APP_UID = "applicationUid";
+const char* const CONFIGURE_LOGGER_COMMAND = "configureLogger";
+const char* const CONFIGURE_LOGEVENTS_COMMAND = "configureEventLogging";
 
-static const QString CLEAR_LOG = "clearLog";
-static const QString LOG_LEVEL = "logLevel";
-static const QString LOG_TO_QDEBUG = "logToQDebug";
-static const QString LOG_FOLDER = "logFolder";
-static const QString LOG_FILE = "logFile";
-static const QString LOG_QDEBUG = "logQDebug";
-static const QString LOG_FILE_SIZE = "logSize";
-static const QString LOG_ENABLE = "logEnabled";
-static const QString LOG_EVENTS = "logEvents";
+const char* const CLEAR_LOG = "clearLog";
+const char* const LOG_LEVEL = "logLevel";
+const char* const LOG_TO_QDEBUG = "logToQDebug";
+const char* const LOG_FOLDER = "logFolder";
+const char* const LOG_FILE = "logFile";
+const char* const LOG_QDEBUG = "logQDebug";
+const char* const LOG_FILE_SIZE = "logSize";
+const char* const LOG_ENABLE = "logEnabled";
+const char* const LOG_EVENTS = "logEvents";
 
 /*!
   webkit service commands
   */
-static const QString COMMAND_EXEC_JS_ON_OBJ = "ExecuteJavaScriptOnWebElement";
-static const QString COMMAND_EXEC_JS_ON_QWEBFRAME = "ExecuteJavaScriptOnQWebFrame";
-static const QString COMMAND_EXEC_SCROLL_QWEBFRAME = "ScrollQWebFrame";
+const char* const COMMAND_EXEC_JS_ON_OBJ = "ExecuteJavaScriptOnWebElement";
+const char* const COMMAND_EXEC_JS_ON_QWEBFRAME = "ExecuteJavaScriptOnQWebFrame";
+const char* const COMMAND_EXEC_SCROLL_QWEBFRAME = "ScrollQWebFrame";
 //settings
-static const QString BLACK_LISTED = "black_list";
-static const QString AUTO_START = "autostart";
+const char* const BLACK_LISTED = "black_list";
+const char* const AUTO_START = "autostart";
 
 
 #ifdef QTTASSERVER
