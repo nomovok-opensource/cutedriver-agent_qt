@@ -152,7 +152,7 @@ TasResponse::TasResponse(qint32 messageId, QByteArray* data, bool isError, bool 
 {
     //defaults to OK_MESSAGE
     if(!data){
-        data = new QByteArray(OK_MESSAGE.toUtf8());
+        data = new QByteArray(OK_MESSAGE);
     }
     TasMessage::setMessageId(messageId);
     TasMessage::setData(data, isCompressed);

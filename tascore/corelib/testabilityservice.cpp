@@ -71,12 +71,12 @@ extern "C" TAS_EXPORT void qt_testability_init()
         TasCoreUtils::startServer();
     }
 
-    QVariant prop = qApp->property(PLUGIN_ATTR.toLatin1());
+    QVariant prop = qApp->property(PLUGIN_ATTR);
     if(prop.isValid() && prop.toBool()){
         return;
     }
 
-    qApp->setProperty(PLUGIN_ATTR.toLatin1(), QVariant(true));
+    qApp->setProperty(PLUGIN_ATTR, QVariant(true));
 
     QString id = QString::number(qApp->applicationPid());
     QString name = TestabilityUtils::getApplicationName();
