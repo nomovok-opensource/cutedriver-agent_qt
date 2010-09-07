@@ -17,32 +17,32 @@
 ## 
 ############################################################################
 
-HEADERS += services/uistateservice.h 
-HEADERS += services/closeappservice.h 
-HEADERS += services/fixtureservice.h 
-HEADERS += services/screenshotservice.h 
-#HEADERS += services/platformservice.h
-HEADERS += services/eventservice.h 
-HEADERS += services/objectservice.h 
-HEADERS += services/uicommandservice.h 
-HEADERS += services/webkitcommandservice.h 
-HEADERS += services/recorderservice.h 
-HEADERS += services/confservice.h 
-HEADERS += services/infoservice.h 
+HEADERS += $$PWD/uistateservice.h 
+HEADERS += $$PWD/closeappservice.h 
+HEADERS += $$PWD/fixtureservice.h 
+HEADERS += $$PWD/screenshotservice.h 
+#HEADERS += $$PWD/platformservice.h
+HEADERS += $$PWD/eventservice.h 
+HEADERS += $$PWD/objectservice.h 
+HEADERS += $$PWD/uicommandservice.h 
+HEADERS += $$PWD/webkitcommandservice.h 
+HEADERS += $$PWD/recorderservice.h 
+HEADERS += $$PWD/confservice.h 
+HEADERS += $$PWD/infoservice.h 
 
-SOURCES += services/uistateservice.cpp 
-SOURCES += services/closeappservice.cpp 
-SOURCES += services/fixtureservice.cpp 
-SOURCES += services/screenshotservice.cpp 
-#SOURCES += services/platformservice.cpp
-SOURCES += services/eventservice.cpp 
-SOURCES += services/objectservice.cpp 
-SOURCES += services/uicommandservice.cpp 
-SOURCES += services/webkitcommandservice.cpp 
-SOURCES += services/recorderservice.cpp 
-SOURCES += services/confservice.cpp 
-SOURCES += services/infoservice.cpp 
+SOURCES += $$PWD/uistateservice.cpp 
+SOURCES += $$PWD/closeappservice.cpp 
+SOURCES += $$PWD/fixtureservice.cpp 
+SOURCES += $$PWD/screenshotservice.cpp 
+#SOURCES += $$PWD/platformservice.cpp
+SOURCES += $$PWD/eventservice.cpp 
+SOURCES += $$PWD/objectservice.cpp 
+SOURCES += $$PWD/uicommandservice.cpp 
+SOURCES += $$PWD/webkitcommandservice.cpp 
+SOURCES += $$PWD/recorderservice.cpp 
+SOURCES += $$PWD/confservice.cpp 
+SOURCES += $$PWD/infoservice.cpp 
 
-include (services/interactionhandlers/handlers.pri)
+include ($$PWD/interactionhandlers/handlers.pri)
 
  

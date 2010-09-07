@@ -30,19 +30,17 @@
 
 */    
 
-static int FRAME_RANGE_DIV = 10;
-
 
 GestureHandler::GestureHandler(QObject* parent)
     :QObject(parent)
 {
-    mGesturePath = 0;
+    mGesture = 0;
 }
 
 GestureHandler::~GestureHandler()
 {    
-    if(mGesturePath){
-        delete mGesturePath;
+    if(mGesture){
+        delete mGesture;
     }
 }
 
@@ -59,19 +57,18 @@ bool GestureHandler::executeInteraction(TargetData data)
 {
     bool wasConsumed = false;
 
-    mWidget = data.target;
-    mItem = data.targetItem;
-
     TasCommand& command = *data.command;
     mTargetDetails = getParameters(command);
+    mTargetDetails.widget = data.target;
+    mTargetDetails.item = data.targetItem;
 
     QString commandName = command.name();
 //     QPoint point = data.targetPoint;
 //     setPoint(point, command);
 
-    if(mGesturePath){
-        delete mGesturePath;
-        mGesturePath = 0;
+    if(mGesture){
+        delete mGesture;
+        mGesture = 0;
     }
 
     if(commandName == "MouseGesturePoints"){
@@ -103,15 +100,15 @@ bool GestureHandler::executeInteraction(TargetData data)
                 }
             }
         }
-        mGesturePath = new PointsPath(gesturePoints);
-        mGesturePath->setIntervals(gestureIntervals);
+        mGesture = new PointsTasGesture(gesturePoints);
+        //   mGesture->setIntervals(gestureIntervals);
         startGesture();
         wasConsumed = true;
     }
     else if(commandName.startsWith("MouseGesture")){
         QLineF gestureLine = makeGestureLine(data);
         if(!gestureLine.isNull()){
-            mGesturePath = new LinePath(gestureLine);
+            mGesture = new LineTasGesture(gestureLine);
             startGesture();
         }
         else{
@@ -205,23 +202,23 @@ void GestureHandler::startGesture()
 void GestureHandler::timerEvent(qreal value)
 {
     //do not send an event if no movement
-    if(mPrevious != mGesturePath->pointAt(value)){
-        doMouseMove(mWidget, mItem, mGesturePath->pointAt(value), mTargetDetails.button);        
+    if(mPrevious != mGesture->pointsAt(value).at(0).screenPoint){
+        doMouseMove(mTargetDetails.widget, mTargetDetails.item, mGesture->pointsAt(value).at(0).screenPoint, mTargetDetails.button);        
     }
-    mPrevious = mGesturePath->pointAt(value);
+    mPrevious = mGesture->pointsAt(value).at(0).screenPoint;
 }
 
 void GestureHandler::finished()
 {
     //make sure the end is reached
     //do not send an event if no movement
-    if(mPrevious != mGesturePath->endPoint()){
-        doMouseMove(mWidget, mItem, mGesturePath->endPoint(), mTargetDetails.button);
+    if(mPrevious != mGesture->endPoints().at(0).screenPoint){
+        doMouseMove(mTargetDetails.widget, mTargetDetails.item, mGesture->endPoints().at(0).screenPoint, mTargetDetails.button);
     }
     if(mTargetDetails.release){
         if(mTargetDetails.isDrag){
             //send move event to the end point with intention to cause a stopping effect
-            doMouseMove(mWidget, mItem, mGesturePath->endPoint(), mTargetDetails.button);          
+            doMouseMove(mTargetDetails.widget, mTargetDetails.item, mGesture->endPoints().at(0).screenPoint, mTargetDetails.button);          
             //stay motionless and then release mouse
             QTimer::singleShot(50, this, SLOT(releaseMouse()));
         }
@@ -235,16 +232,16 @@ void GestureHandler::finished()
 void GestureHandler::beginGesture()
 {
     if(mTargetDetails.press){
-        doMouseMove(mWidget, mItem, mGesturePath->startPoint(), Qt::NoButton);
-        mPrevious = mGesturePath->startPoint();
-        doMousePress(mWidget, mItem, mTargetDetails.button, mGesturePath->startPoint());            
+        doMouseMove(mTargetDetails.widget, mTargetDetails.item, mGesture->startPoints().at(0).screenPoint, Qt::NoButton);
+        mPrevious = mGesture->startPoints().at(0).screenPoint;
+        doMousePress(mTargetDetails.widget, mTargetDetails.item, mTargetDetails.button, mGesture->startPoints().at(0).screenPoint);            
     }
 
 }
 
 void GestureHandler::releaseMouse()
 {
-    doMouseRelease(mWidget, mItem, mTargetDetails.button, mGesturePath->endPoint());            
+    doMouseRelease(mTargetDetails.widget, mTargetDetails.item, mTargetDetails.button, mGesture->endPoints().at(0).screenPoint);            
 }
 
 /*!
@@ -272,6 +269,8 @@ bool GestureHandler::eventFilter(QObject* /*target*/, QEvent *event)
 TargetDetails GestureHandler::getParameters(TasCommand& command)
 {
     TargetDetails targetDetails;
+    targetDetails.widget = 0;
+    targetDetails.item = 0;
 
     if (!command.parameter("direction").isEmpty()) {
         int direction = command.parameter("direction").toInt();
@@ -326,146 +325,4 @@ QPoint GestureHandler::getTargetPoint(TargetDetails details)
         }
     }
     return targetPoint;
-}
-
-
-/*!
-  \class LinePath
-  \brief Returns points on a coordinate line
-
-  Mousegesture done in a line format are done unsing QLines.
-  The line is divided in to sections of QPoints on the line. 
-  The mouse is then moved along those points. 
-
-*/    
-
-
-LinePath::LinePath(QLineF gestureLine)
-{
-    mGestureLine = gestureLine;
-}
-
-QPoint LinePath::startPoint()
-{
-    return mGestureLine.p1().toPoint();
-}
-
-/*!
-  Returns a point for the value. The value is something between 0 and 1.
- */
-QPoint LinePath::pointAt(qreal value)
-{
-    return mGestureLine.pointAt(value).toPoint();
-}
-
-QPoint LinePath::endPoint()
-{
-    return mGestureLine.p2().toPoint();
-}
-
-
-PointsPath::PointsPath(QList<QPoint> points)
-{
-    mPoints = points;
-    mUseIntervals = false;
-}
-
-/*
-  Will return a null point of list empty.
- */
-QPoint PointsPath::startPoint()
-{
-    if(mPoints.isEmpty()){
-        return QPoint();
-    }
-    else{
-        return mPoints.first();
-    }
-    
-}
-
-void PointsPath::setIntervals(QList<int> intervals)
-{
-    mIntervals = intervals;
-    mUseIntervals = true;
-    calculateAnimation();
-}
-
-
-/*!
-  Returns a point for the value. The value is something between 0 and 1. 
-  Calculated the correct point for the value. Will return a null point of 
-  list empty.
- */
-QPoint PointsPath::pointAt(qreal value)
-{
-
-    if(mPoints.isEmpty()){
-        return QPoint();
-    }
-    else{        
-        int step = qRound(value*mPoints.size());
-        if(step < mPoints.size()){
-            return mPoints.at(step);
-        }
-        else{
-            return endPoint();
-        }        
-    }
-}
-
-bool PointsPath::useIntervals()
-{
-    return mUseIntervals;
-}
-
-/*
-  Will return a null point of list empty.
- */
-QPoint PointsPath::endPoint()
-{
-    if(mPoints.isEmpty()){
-        return QPoint();
-    }
-    else{
-        return mPoints.last();
-    }
-}
-
-int PointsPath::getDuration()
-{
-    int duration = 0;
-    if(!mIntervals.isEmpty()){
-        for (int i = 0; i < mIntervals.size(); ++i) {
-            duration += mIntervals.at(i);
-        }
-    }
-    return duration;
-}
-
-
-/*!
-  QTimeLine send frameupdates at certain intervals. Therefore we need to multiply those
-  points which have larget interval values.
- */
-void PointsPath::calculateAnimation()
-{
-    int duration = getDuration();
-    if(duration > 0){
-        int frames = qRound(duration/FRAME_RANGE_DIV);
-        int avgFrameTime = qRound(duration/frames);
-        QList<QPoint> timedPoints;
-        //go through each point and check the interval
-        for(int i = 0 ; i < mPoints.size(); i++){
-            QPoint point = mPoints.at(i);
-            int interval = mIntervals.at(i);
-            int multiplier = qRound(interval/avgFrameTime);
-            timedPoints.append(point); // all points are added once (at least)
-            multiplier--;
-            for(int j = 0 ; j < multiplier; j++){
-                timedPoints.append(point);   
-            }
-        }
-        mPoints = timedPoints;
-    }
 }

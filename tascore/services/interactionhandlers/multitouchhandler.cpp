@@ -42,13 +42,13 @@ static QString ROTATE_DIRECTION = "rotate_direction";
 MultitouchHandler::MultitouchHandler(QObject* parent)
     :GestureHandler(parent)
 {
-    mGesturePath = 0;
+    mGesture = 0;
 }
 
 MultitouchHandler::~MultitouchHandler()
 {    
-    if(mGesturePath){
-        delete mGesturePath;
+    if(mGesture){
+        delete mGesture;
     }
 }
 
@@ -67,14 +67,14 @@ bool MultitouchHandler::executeInteraction(TargetData data)
     TasCommand& command = *data.command;
     QPoint point = data.targetPoint;
     QString commandName = command.name();
-    mWidget = data.target;
-    mItem = data.targetItem;
+    mTargetDetails = getParameters(command);
+    mTargetDetails.widget = data.target;
+    mTargetDetails.item = data.targetItem;
 
     if(commandName == "PinchZoom" || commandName == "Rotate"){
         //from mousehandler
         setPoint(point, command);
         //from gesturehandler
-        mTargetDetails = getParameters(command);
         bool start = false;
         if(commandName == "PinchZoom"){                             
             start = makePinchZoomGesture(command, point);
@@ -104,12 +104,12 @@ bool MultitouchHandler::executeMultitouchInteraction(QList<TargetData> dataList)
             if(targetData.command->name() == "MouseClick" || targetData.command->name() == "MousePress" ||
                targetData.command->name() == "Tap" ){            
                 touchPoints.append(convertToTouchPoints(targetData.target,targetData.targetItem,
-                                                        Qt::TouchPointPressed, toTouchPoints(targetData.targetPoint)));
+                                                        Qt::TouchPointPressed, toTouchPoints(targetData.targetPoint, false)));
             }
             if(targetData.command->name() == "MouseClick" || targetData.command->name() == "MouseRelease" ||
                targetData.command->name() == "Tap" ){            
                 touchReleasePoints.append(convertToTouchPoints(targetData.target,targetData.targetItem,
-                                                               Qt::TouchPointReleased, toTouchPoints(targetData.targetPoint)));
+                                                               Qt::TouchPointReleased, toTouchPoints(targetData.targetPoint, false)));
             }            
             //points gesture not supported
             if(targetData.command->name().startsWith("MouseGesture") && targetData.command->name() != "MouseGesturePoints"){
@@ -148,11 +148,11 @@ bool MultitouchHandler::executeMultitouchInteraction(QList<TargetData> dataList)
         }
 
         if(!lines.isEmpty()){
-            if(mGesturePath){
-                delete mGesturePath;
-                mGesturePath = 0;
+            if(mGesture){
+                delete mGesture;
+                mGesture = 0;
             }   
-            mGesturePath = new LinearGesturePath(lines);
+            mGesture = new MultiLineTasGesture(lines);
             startGesture();
         }
     }
@@ -176,16 +176,16 @@ bool MultitouchHandler::makePinchZoomGesture(TasCommand& command, QPoint point)
     line.setAngle(mTargetDetails.direction+180);
     QLineF line2 = makeLine(line.p2().toPoint(), distance_2, line.angle());
 
-    if(mGesturePath){
-        delete mGesturePath;
-        mGesturePath = 0;
+    if(mGesture){
+        delete mGesture;
+        mGesture = 0;
     }
     if(command.parameter(TYPE) == "in"){
-        mGesturePath = new PinchZoomGesturePath(line1, line2);
+        mGesture = new PinchZoomTasGesture(line1, line2);
     }
     else if(command.parameter(TYPE) == "out"){
         //flip the lines if zoom out
-        mGesturePath = new PinchZoomGesturePath(QLineF(line1.p2(), line1.p1()), QLineF(line2.p2(), line2.p1()));
+        mGesture = new PinchZoomTasGesture(QLineF(line1.p2(), line1.p1()), QLineF(line2.p2(), line2.p1()));
     }
     else{
         TasLogger::logger()->error("MultitouchHandler::makePinchZoomGesture invalid type.");
@@ -206,11 +206,11 @@ bool MultitouchHandler::makeRotationGesture(TasCommand& command, QPoint point)
 
     QLineF line = makeLine(point, radius, mTargetDetails.direction);
     if(command.parameter(TYPE) == "one_point"){
-        mGesturePath = new SectorGesturePath(line, mTargetDetails.distance);
+        mGesture = new SectorTasGesture(line, mTargetDetails.distance);
     }
     else if(command.parameter(TYPE) == "two_point"){
         QLineF line2 = makeLine(point, radius, mTargetDetails.direction+180);
-        mGesturePath = new ArcsGesturePath(line, line2, mTargetDetails.distance);
+        mGesture = new ArcsTasGesture(line, line2, mTargetDetails.distance);
     }
     else{
         TasLogger::logger()->error("MultitouchHandler::makeRotationGesture invalid type.");
@@ -270,225 +270,18 @@ bool MultitouchHandler::validateRotationParams(TasCommand& command)
 */
 void MultitouchHandler::timerEvent(qreal value)
 {
-    doTouchUpdate(mWidget, mItem, mGesturePath->pointAts(value));
+    doTouchUpdate(mTargetDetails.widget, mTargetDetails.item, mGesture->pointsAt(value));
 }
 
 void MultitouchHandler::finished()
 {
     //make sure the end is reached
-    doTouchUpdate(mWidget, mItem, mGesturePath->endPoints());
-    doTouchEnd(mWidget, mItem, mGesturePath->endPoints());
+    doTouchUpdate(mTargetDetails.widget, mTargetDetails.item, mGesture->endPoints());
+    doTouchEnd(mTargetDetails.widget, mTargetDetails.item, mGesture->endPoints());
 }
 
 void MultitouchHandler::beginGesture()
 {
-    doTouchBegin(mWidget, mItem, mGesturePath->startPoints());
+    doTouchBegin(mTargetDetails.widget, mTargetDetails.item, mGesture->startPoints());
 }
 
-TasTouchPoints MultitouchGesturePath::makeTouchPoint(QPoint pos, QPoint lastPos, QPoint startPos)
-{
-    TasTouchPoints touchPoint;
-    touchPoint.screenPoint = pos;
-    touchPoint.lastScreenPoint = lastPos;
-    touchPoint.startScreenPoint = startPos;
-    return touchPoint;
-}
-
-LinearGesturePath::LinearGesturePath(QList<QLineF> lines)
-{
-    mLines = lines;
-}
-
-LinearGesturePath::~LinearGesturePath()
-{
-    mLines.clear();
-}
-
-QList<TasTouchPoints> LinearGesturePath::startPoints()
-{
-    mLastPoints.clear();
-    QList<TasTouchPoints> points;
-    foreach(QLineF line, mLines){
-        QPoint point = line.p1().toPoint();
-        points.append(makeTouchPoint(point));
-        mLastPoints.append(point);
-    }
-    mStartPoints = QList<QPoint>(mLastPoints);
-    return points;
-}
-
-QList<TasTouchPoints> LinearGesturePath::pointAts(qreal value)
-{
-    QList<TasTouchPoints> points;
-    QList<QPoint> screenPoints;
-    for(int i ; i < mLines.size(); i++){
-        QLineF line = mLines.at(i);
-        TasTouchPoints touchPoint = makeTouchPoint(line.pointAt(value).toPoint(), mLastPoints.at(i), mStartPoints.at(i));
-        points.append(touchPoint);
-        screenPoints.append(touchPoint.screenPoint);
-    }
-    mLastPoints.clear();
-    mLastPoints.append(screenPoints);
-    return points;
-}
-
-QList<TasTouchPoints> LinearGesturePath::endPoints()
-{
-    QList<TasTouchPoints> points;
-    for(int i ; i < mLines.size(); i++){
-        QLineF line = mLines.at(i);
-        points.append(makeTouchPoint(line.p2().toPoint(), mLastPoints.at(i), mStartPoints.at(i)));
-    }
-    return points;
-}
-
-
-
-PinchZoomGesturePath::PinchZoomGesturePath(QLineF line1, QLineF line2)
-{
-    mGestureLine1 = line1;
-    mGestureLine2 = line2;
-}
-
-PinchZoomGesturePath::~PinchZoomGesturePath()
-{}
-
-QList<TasTouchPoints> PinchZoomGesturePath::startPoints()
-{
-    QList<TasTouchPoints> points;
-    points.append(makeTouchPoint(mGestureLine1.p1().toPoint()));
-    points.append(makeTouchPoint(mGestureLine2.p1().toPoint()));
-    mLastPoints.clear();
-    mLastPoints.append(mGestureLine1.p1().toPoint());
-    mLastPoints.append(mGestureLine2.p1().toPoint());
-    mStartPoints = QList<QPoint>(mLastPoints);
-    return points;
-}
-
-QList<TasTouchPoints> PinchZoomGesturePath::pointAts(qreal value)
-{
-    QList<TasTouchPoints> points;
-    TasTouchPoints touchPoint1 = makeTouchPoint(mGestureLine1.pointAt(value).toPoint(), mLastPoints.at(0), mStartPoints.at(0));
-    TasTouchPoints touchPoint2 = makeTouchPoint(mGestureLine2.pointAt(value).toPoint(), mLastPoints.at(1), mStartPoints.at(1));
-    points.append(touchPoint1);
-    points.append(touchPoint2);
-    mLastPoints.clear();
-    mLastPoints.append(touchPoint1.screenPoint);
-    mLastPoints.append(touchPoint2.screenPoint);
-    return points;
-}
-
-QList<TasTouchPoints> PinchZoomGesturePath::endPoints()
-{
-    QList<TasTouchPoints> points;
-    points.append(makeTouchPoint(mGestureLine1.p2().toPoint(), mLastPoints.at(0), mStartPoints.at(0)));
-    points.append(makeTouchPoint(mGestureLine2.p2().toPoint(), mLastPoints.at(1), mStartPoints.at(1)));
-    return points;
-}
-
-SectorGesturePath::SectorGesturePath(QLineF line, int distance)
-{
-    mGestureLine = line;
-    mStartAngle = mGestureLine.angle();
-    mDistance = distance;
-    TasLogger::logger()->debug("SectorGesturePath::SectorGesturePath line: " + QString::number(mGestureLine.angle()) + 
-                               "," + QString::number(mGestureLine.length()));
-}
-
-QList<TasTouchPoints> SectorGesturePath::startPoints()
-{
-    mLastPoints = activePoints();
-    mStartPoints = QList<QPoint>(mLastPoints);
-
-    QList<TasTouchPoints> points;
-    points.append(makeTouchPoint(mLastPoints.at(0)));
-    points.append(makeTouchPoint(mLastPoints.at(1)));
-    return points;
-}
-
-QList<QPoint> SectorGesturePath::activePoints()
-{
-    QList<QPoint> points;
-    points.append(mGestureLine.p1().toPoint());
-    points.append(mGestureLine.p2().toPoint());    
-    return points;
-}
-
-QList<TasTouchPoints> SectorGesturePath::pointAts(qreal value)
-{
-    mGestureLine.setAngle((mDistance*value)+mStartAngle);
-    QList<QPoint> currentPoints = activePoints();
-
-    QList<TasTouchPoints> points;
-    points.append(makeTouchPoint(currentPoints.at(0), mLastPoints.at(0), mStartPoints.at(0)));
-    points.append(makeTouchPoint(currentPoints.at(1), mLastPoints.at(1), mStartPoints.at(1)));
-    mLastPoints = currentPoints;
-
-    return points;
-}
-
-QList<TasTouchPoints> SectorGesturePath::endPoints()
-{
-    mGestureLine.setAngle(mDistance+mStartAngle);
-    QList<QPoint> currentPoints = activePoints();
-
-    QList<TasTouchPoints> points;
-    points.append(makeTouchPoint(currentPoints.at(0), mLastPoints.at(0), mStartPoints.at(0)));
-    points.append(makeTouchPoint(currentPoints.at(1), mLastPoints.at(1), mStartPoints.at(1)));
-    mLastPoints = currentPoints;
-
-    return points;
-}
-
-ArcsGesturePath::ArcsGesturePath(QLineF line1, QLineF line2, int distance)
-{
-    mGestureLine1 = line1;
-    mGestureLine2 = line2;
-    mStartAngle1 = mGestureLine1.angle();
-    mStartAngle2 = mGestureLine2.angle();
-    mDistance = distance;
-}
-
-QList<TasTouchPoints> ArcsGesturePath::startPoints()
-{    
-    mLastPoints = activePoints();
-    mStartPoints = QList<QPoint>(mLastPoints);
-
-    QList<TasTouchPoints> points;
-    points.append(makeTouchPoint(mLastPoints.at(0)));
-    points.append(makeTouchPoint(mLastPoints.at(1)));
-    return points;
-}
-
-QList<QPoint> ArcsGesturePath::activePoints()
-{
-    QList<QPoint> points;
-    points.append(mGestureLine1.p2().toPoint());
-    points.append(mGestureLine2.p2().toPoint());
-    return points;
-}
-
-QList<TasTouchPoints> ArcsGesturePath::pointAts(qreal value)
-{
-    mGestureLine1.setAngle((mDistance*value)+mStartAngle1);
-    mGestureLine2.setAngle((mDistance*value)+mStartAngle2);
-    QList<QPoint> currentPoints = activePoints();
-    QList<TasTouchPoints> points;
-    points.append(makeTouchPoint(currentPoints.at(0), mLastPoints.at(0), mStartPoints.at(0)));
-    points.append(makeTouchPoint(currentPoints.at(1), mLastPoints.at(1), mStartPoints.at(1)));
-    mLastPoints = currentPoints;
-    return points;
-}
-
-QList<TasTouchPoints> ArcsGesturePath::endPoints()
-{
-    mGestureLine1.setAngle(mDistance+mStartAngle1);
-    mGestureLine2.setAngle(mDistance+mStartAngle2);
-    QList<QPoint> currentPoints = activePoints();
-
-    QList<TasTouchPoints> points;
-    points.append(makeTouchPoint(currentPoints.at(0), mLastPoints.at(0), mStartPoints.at(0)));
-    points.append(makeTouchPoint(currentPoints.at(1), mLastPoints.at(1), mStartPoints.at(1)));
-    mLastPoints = currentPoints;
-    return points;
-}

@@ -29,6 +29,7 @@
 #include <QList>
 
 #include "gesturehandler.h"
+#include "tasgesture.h"
 
 class MultitouchGesturePath;
 
@@ -58,90 +59,7 @@ private:
 	QLineF makeLine(QPoint start, int length, int angle);
 
 private:
-	MultitouchGesturePath* mGesturePath;
-};
-
-class MultitouchGesturePath
-{
-public:
-    virtual ~MultitouchGesturePath(){};
-
-    virtual QList<TasTouchPoints> startPoints() = 0;
-    virtual QList<TasTouchPoints> pointAts(qreal value) = 0;
-    virtual QList<TasTouchPoints> endPoints() = 0;
-
-protected:
-	TasTouchPoints makeTouchPoint(QPoint pos, QPoint lastPos=QPoint(), QPoint startPos=QPoint());
-	QList<QPoint> mStartPoints;
-	QList<QPoint> mLastPoints;
-};
-
-class LinearGesturePath : public MultitouchGesturePath
-{
-public:
-    LinearGesturePath(QList<QLineF> lines);
-    ~LinearGesturePath();
-  
-	QList<TasTouchPoints> startPoints();
-	QList<TasTouchPoints> pointAts(qreal value);
-	QList<TasTouchPoints> endPoints();
-
-private:
-	QList<QLineF> mLines;
-};  
-
-
-class PinchZoomGesturePath : public MultitouchGesturePath
-{
-public:
-    PinchZoomGesturePath(QLineF line1, QLineF line2);
-    ~PinchZoomGesturePath();
-  
-	QList<TasTouchPoints> startPoints();
-	QList<TasTouchPoints> pointAts(qreal value);
-	QList<TasTouchPoints> endPoints();
-
-private:
-	QLineF mGestureLine1;
-	QLineF mGestureLine2;
-};
-
-class SectorGesturePath : public MultitouchGesturePath
-{
-public:
-    SectorGesturePath(QLineF line, int distance);
-
-	QList<TasTouchPoints> startPoints();
-	QList<TasTouchPoints> pointAts(qreal value);
-	QList<TasTouchPoints> endPoints();
-
-private:
-	QList<QPoint> activePoints();
-
-private:
-	QLineF mGestureLine;
-	qreal mStartAngle;
-	int mDistance;
-};
-
-class ArcsGesturePath : public MultitouchGesturePath
-{
-public:
-    ArcsGesturePath(QLineF line1, QLineF line2, int distance);
-
-	QList<TasTouchPoints> startPoints();
-	QList<TasTouchPoints> pointAts(qreal value);
-	QList<TasTouchPoints> endPoints();
-
-private:
-	QList<QPoint> activePoints();
-
-private:
-	QLineF mGestureLine1;
-	QLineF mGestureLine2;
-	qreal mStartAngle1;
-	qreal mStartAngle2;
-	int mDistance;
+	TasGesture* mGesture;
 };
 
 #endif

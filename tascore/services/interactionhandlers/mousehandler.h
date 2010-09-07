@@ -41,9 +41,14 @@ struct TasTouchPoints
     bool isPrimary;
 };
 
-
 class MouseHandler : public InteractionHandler
 {
+public:
+    enum PointerType{
+ 	    TypeMouse,
+		TypeTouch
+	};
+
 public:
     MouseHandler();
     ~MouseHandler();

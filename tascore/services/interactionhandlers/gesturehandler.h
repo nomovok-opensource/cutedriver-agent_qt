@@ -29,6 +29,7 @@
 #include <QList>
 
 #include "mousehandler.h"
+#include "tasgesture.h"
 
 class GesturePath;
 
@@ -43,6 +44,8 @@ struct TargetDetails
   bool release;
   bool isDrag;
   Qt::MouseButton button;    
+  QWidget* widget;
+  QGraphicsItem* item;
 };
 
 class GestureHandler : public QObject, public MouseHandler
@@ -72,63 +75,13 @@ private:
     void setNewPoint();
 	QPoint getTargetPoint(TargetDetails targetDetails);
 
-
 protected:
 	TargetDetails mTargetDetails;
-	QWidget* mWidget;
-    QGraphicsItem* mItem;
 
 private:
-	GesturePath* mGesturePath;
+	TasGesture* mGesture;
 	QTimeLine* mTimeLine;
 	QPoint mPrevious;
 };
 
-class GesturePath
-{
-public:
-  virtual ~GesturePath(){}
-
-  virtual QPoint startPoint() = 0;
-  virtual QPoint pointAt(qreal value) = 0;
-  virtual QPoint endPoint() = 0;
-  virtual void setIntervals(QList<int> intervals) = 0;
-  virtual bool useIntervals() =0 ;
-};
-
-class LinePath : public GesturePath
-{
-public:
-  LinePath(QLineF gestureLine);
-  QPoint startPoint();
-  QPoint pointAt(qreal value);
-  QPoint endPoint();  
-  void setIntervals(QList<int> intervals){ Q_UNUSED(intervals); return; }
-  bool useIntervals(){return false;}
-
-private:
-  QLineF mGestureLine;
-  
-};
-
-class PointsPath : public GesturePath
-{
-public:
-  PointsPath(QList<QPoint> points);  
-  void setIntervals(QList<int> intervals);
-
-  QPoint startPoint();
-  QPoint pointAt(qreal value);
-  QPoint endPoint();
-  bool useIntervals();
-  
-private:
-  void calculateAnimation();
-  int getDuration();
-
-private:
-  QList<QPoint> mPoints;
-  QList<int> mIntervals;
-  bool mUseIntervals;
-};
 #endif

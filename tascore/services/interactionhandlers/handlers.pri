@@ -17,16 +17,18 @@
 ## 
 ############################################################################
 
-HEADERS += services/interactionhandlers/mousehandler.h
-HEADERS += services/interactionhandlers/keyhandler.h
-HEADERS += services/interactionhandlers/gesturehandler.h
-HEADERS += services/interactionhandlers/actionhandler.h
-HEADERS += services/interactionhandlers/multitouchhandler.h
-HEADERS += services/interactionhandlers/viewitemhandler.h
+HEADERS += $$PWD/mousehandler.h
+HEADERS += $$PWD/keyhandler.h
+HEADERS += $$PWD/gesturehandler.h
+HEADERS += $$PWD/actionhandler.h
+HEADERS += $$PWD/multitouchhandler.h
+HEADERS += $$PWD/viewitemhandler.h
 
-SOURCES += services/interactionhandlers/mousehandler.cpp 
-SOURCES += services/interactionhandlers/keyhandler.cpp 
-SOURCES += services/interactionhandlers/gesturehandler.cpp 
-SOURCES += services/interactionhandlers/actionhandler.cpp 
-SOURCES += services/interactionhandlers/multitouchhandler.cpp 
-SOURCES += services/interactionhandlers/viewitemhandler.cpp 
+SOURCES += $$PWD/mousehandler.cpp 
+SOURCES += $$PWD/keyhandler.cpp 
+SOURCES += $$PWD/gesturehandler.cpp 
+SOURCES += $$PWD/actionhandler.cpp 
+SOURCES += $$PWD/multitouchhandler.cpp 
+SOURCES += $$PWD/viewitemhandler.cpp 
+
+include ($$PWD/gestures/gestures.pri)
