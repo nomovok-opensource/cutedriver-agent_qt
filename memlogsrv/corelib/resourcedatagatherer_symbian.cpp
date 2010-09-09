@@ -73,24 +73,24 @@ void ResourceDataGatherer::initializeMemLogging()
     while (findThread.Next(threadFullName) == KErrNone  && !foundAny) {
         foundAny = true;
         error = thread.Open(findThread);
-
-        //check that the thread is still alive
-        if(thread.ExitType() != EExitPending){
-            thread.Close();
-            TasLogger::logger()->warning("ResourceDataGatherer::initializeMemLogging already exited thread found, continue searching.");
-            foundAny = false;
-            continue;
-        }
-
-        if (!error) {
-            mThreadId = thread.Id().Id();
-            RProcess parentProcess;
-            error = thread.Process(parentProcess);
-            if (KErrNone == error) {
-                mParentPid = parentProcess.Id().Id();
+        if (error == KErrNone) {
+            //check that the thread is still alive
+            if(thread.ExitType() != EExitPending){
+                thread.Close();
+                TasLogger::logger()->warning("ResourceDataGatherer::initializeMemLogging already exited thread found, continue searching.");
+                foundAny = false;
+                continue;
             }
-            mThreadFullName = QString((const QChar*) threadFullName.Ptr(), threadFullName.Length());
-            thread.Close();
+            else{                
+                mThreadId = thread.Id().Id();
+                RProcess parentProcess;
+                error = thread.Process(parentProcess);
+                if (KErrNone == error) {
+                    mParentPid = parentProcess.Id().Id();
+                }
+                mThreadFullName = QString((const QChar*) threadFullName.Ptr(), threadFullName.Length());
+                thread.Close();
+            }
         }
     }
         
