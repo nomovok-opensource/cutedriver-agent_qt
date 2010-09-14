@@ -22,9 +22,10 @@
 #include <QtPlugin>
 #include <QDebug>
 
+#include <taslogger.h>
+#include <testabilityutils.h>
+
 #include "tasviewitemtraverse.h"
-#include "taslogger.h"
-#include "testabilityutils.h"
 
 Q_EXPORT_PLUGIN2(viewitemtraverse, TasViewItemTraverse)
 
@@ -42,13 +43,17 @@ Q_EXPORT_PLUGIN2(viewitemtraverse, TasViewItemTraverse)
 */
 TasViewItemTraverse::TasViewItemTraverse(QObject* parent)
     :QObject(parent)
-{}
+{
+    mTraverseUtils = new TasTraverseUtils();
+}
 
 /*!
     Destructor
 */
 TasViewItemTraverse::~TasViewItemTraverse()
-{}
+{
+    delete mTraverseUtils;
+}
 
 void TasViewItemTraverse::traverseGraphicsItem(TasObject* /*objectInfo*/, QGraphicsItem* /*graphicsItem*/, TasCommand*)
 {
@@ -59,10 +64,11 @@ void TasViewItemTraverse::traverseGraphicsItem(TasObject* /*objectInfo*/, QGraph
     Add items in QAbstractView decendants to the object data.
 
 */
-void TasViewItemTraverse::traverseObject(TasObject* objectInfo, QObject* object, TasCommand*)
+void TasViewItemTraverse::traverseObject(TasObject* objectInfo, QObject* object, TasCommand* command)
 {
     if(object->inherits("QAbstractItemView")){          
-
+        mTraverseUtils->clearFilter();
+        mTraverseUtils->createFilter(command);
         //traverse the different types of viewitems 
         //1. QTreeWidget 
         QTreeWidget* treeWidget = qobject_cast<QTreeWidget*>(object);
@@ -175,11 +181,11 @@ void TasViewItemTraverse::traverseTableWidgetItem(QTableWidgetItem* item, TasObj
     objectInfo.addAttribute("toolTip", item->toolTip());
     objectInfo.addAttribute("whatsThis", item->whatsThis());
     objectInfo.addAttribute("parentWidget", TasCoreUtils::pointerId(tableWidget));
-    addFont(&objectInfo, item->font());
+    mTraverseUtils->addFont(&objectInfo, item->font());
     QRect rect = tableWidget->visualItemRect(item);
     if(addItemLocationDetails(objectInfo, rect, tableWidget)){
-        addTextInfo(&objectInfo, item->text(), item->font(),
-                    (rect.width() - tableWidget->contentsMargins().right() - tableWidget->contentsMargins().left()));
+        mTraverseUtils->addTextInfo(&objectInfo, item->text(), item->font(),
+                                    (rect.width() - tableWidget->contentsMargins().right() - tableWidget->contentsMargins().left()));
     }
 }
 
@@ -199,10 +205,10 @@ void TasViewItemTraverse::traverseListWidget(QListWidget* listWidget, TasObject*
             listItem.addBooleanAttribute("selected", item->isSelected());
             listItem.addAttribute("checkState", item->checkState());
             listItem.addAttribute("parentWidget", TasCoreUtils::pointerId(listWidget));
-            addFont(&listItem, item->font());
+            mTraverseUtils->addFont(&listItem, item->font());
             QRect rect = listWidget->visualItemRect(item);
             if(addItemLocationDetails(listItem, rect, listWidget)){
-                addTextInfo(&listItem, item->text(), item->font(),
+                mTraverseUtils->addTextInfo(&listItem, item->text(), item->font(),
                             (rect.width() - listWidget->contentsMargins().right() - listWidget->contentsMargins().left()));
             }       
         }
@@ -246,7 +252,7 @@ void TasViewItemTraverse::traverseTreeWidgetItem(QTreeWidgetItem* item, TasObjec
         column.addAttribute("column", i);
         //text 
         column.addAttribute("text", item->text(i));
-        addFont(&column, item->font(i));
+        mTraverseUtils->addFont(&column, item->font(i));
         //toolTip
         column.addAttribute("toolTip", item->toolTip(i));
         column.addAttribute("checkState", item->checkState(i));
@@ -316,12 +322,12 @@ void TasViewItemTraverse::fillTraverseData(QAbstractItemView* view, QVariant dat
         viewItem.addAttribute("row",index.row());
         viewItem.addAttribute("column",index.column());
         viewItem.addAttribute("text",data.toString()); 
-        addFont(&viewItem, view->font());
+        mTraverseUtils->addFont(&viewItem, view->font());
         if(addItemLocationDetails(viewItem, rect, view)){   
             // The margin eats away the available space for the text
             // TODO check from Qt code how actually the available space is being calculated        
-            addTextInfo(&viewItem, data.toString(), view->font(),
-                        (rect.width() - view->contentsMargins().right() - view->contentsMargins().left()));
+            mTraverseUtils->addTextInfo(&viewItem, data.toString(), view->font(),
+                                        (rect.width() - view->contentsMargins().right() - view->contentsMargins().left()));
         
         }
     }

@@ -33,62 +33,56 @@
 #include "tasdeviceutils.h"
 
 
-TasUiTraverser::TasUiTraverser(QList<TasTraverseInterface*> traversers)
+TasUiTraverser::TasUiTraverser(QHash<QString, TasTraverseInterface*> traversers)
 {
     mTraversers = traversers;
-    mFilter = new TraverseFilter(); 
 }
 
 TasUiTraverser::~TasUiTraverser()
-{
-    
-    QMutableListIterator<TasTraverseInterface*> i(mTraversers);
-    while (i.hasNext()){
-        delete i.next();
-    }
+{  
     mTraversers.clear();
-    delete mFilter;
+    mPluginBlackList.clear();
+    mPluginWhiteList.clear();
 }
 
-void TasUiTraverser::setFilters(TasCommand* command)
+
+void TasUiTraverser::setFilterLists(TasCommand* command)
 {
-    if(!command){
-        return;
-    }
-    //if the command contains filtering instructions
-    //set the them for all traverser plugins
-    QStringList attributeBlackList;
-    if(!command->apiParameter("attributeBlackList").isEmpty()){
-         attributeBlackList = command->apiParameter("attributeBlackList").split(",");
-    }
-    QStringList attributeWhiteList;
-    if(!command->apiParameter("attributeWhiteList").isEmpty()){
-        attributeWhiteList = command->apiParameter("attributeWhiteList").split(",");
-    }    
-    QStringList pluginBlackList;
+    mPluginBlackList.clear();
+    mPluginWhiteList.clear();
+
     if(!command->apiParameter("pluginBlackList").isEmpty()){
-        pluginBlackList = command->apiParameter("pluginBlackList").split(",");
+        mPluginBlackList = command->apiParameter("pluginBlackList").split(",");
     }
 
-    QStringList pluginWhiteList;
     if(!command->apiParameter("pluginWhiteList").isEmpty()){
-        pluginWhiteList = command->apiParameter("pluginWhiteList").split(",");
+        mPluginWhiteList = command->apiParameter("pluginWhiteList").split(",");
     }
-
-    bool filterProps = false;
-    if(command->apiParameter("filterProperties") =="true"){
-        filterProps = true;
-    }
-    mFilter->initialize(filterProps, attributeBlackList, attributeWhiteList, pluginBlackList, pluginWhiteList);
-    for (int i = 0; i < mTraversers.size(); i++) {
-        mTraversers.at(i)->setFilter(mFilter);
-    }        
 
 }
+
+bool TasUiTraverser::filterPlugin(const QString& pluginName)
+{
+    bool filter = true;
+
+    if(mPluginWhiteList.isEmpty() && mPluginBlackList.isEmpty()){
+        filter = false;
+    }
+    //black list is valued higher than white list
+    else if(mPluginWhiteList.contains(pluginName) && !mPluginBlackList.contains(pluginName)){
+        filter = false;
+    }    
+    else if(mPluginWhiteList.isEmpty() && !mPluginBlackList.contains(pluginName)){
+        filter = false;
+    }
+    return filter;
+}
+
+
 
 TasDataModel* TasUiTraverser::getUiState(TasCommand* command)
 {
-    setFilters(command);
+    setFilterLists(command);
     TasDataModel* model = new TasDataModel();
     QString qtVersion = "Qt" + QString(qVersion());
     TasObjectContainer& container = model->addNewObjectContainer(1, qtVersion, "qt");
@@ -111,22 +105,20 @@ TasDataModel* TasUiTraverser::getUiState(TasCommand* command)
             }            
         }
     }
-    //reset filters after uistate made so that thet will not be used for 
-    //any other tasks done by traversers
-    for (int i = 0; i < mTraversers.size(); i++) {
-        mTraversers.at(i)->resetFilter();
-    }    
-    mFilter->clear();
+    
     return model;
 }
     
 void TasUiTraverser::traverseObject(TasObject& objectInfo, QObject* object, TasCommand* command)
 {
-    for (int i = 0; i < mTraversers.size(); i++) {
-        if(!mFilter->filterPlugin(mTraversers.at(i)->getPluginName())){                
-            mTraversers.at(i)->traverseObject(&objectInfo, object, command);
+    QHashIterator<QString, TasTraverseInterface*> i(mTraversers);
+    while (i.hasNext()) {
+        i.next();
+        if(!filterPlugin(i.key())){
+            i.value()->traverseObject(&objectInfo, object, command);
         }
-    }    
+    }
+
     //check decendants
     //1. is graphicsview
     if(object->inherits("QGraphicsView")){ 
@@ -170,11 +162,13 @@ void TasUiTraverser::traverseGraphicsItem(TasObject& objectInfo, QGraphicsItem* 
     }
     else{
         objectInfo.setType("QGraphicsItem");
-        for (int i = 0; i < mTraversers.size(); i++) {
-            if(!mFilter->filterPlugin(mTraversers.at(i)->getPluginName())){                
-                mTraversers.at(i)->traverseGraphicsItem(&objectInfo, graphicsItem, command);
+        QHashIterator<QString, TasTraverseInterface*> i(mTraversers);
+        while (i.hasNext()) {
+            i.next();
+            if(!filterPlugin(i.key())){
+                i.value()->traverseGraphicsItem(&objectInfo, graphicsItem, command);
             }
-        }    
+        }
         traverseGraphicsItemList(objectInfo, graphicsItem, command);
     }    
 }

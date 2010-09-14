@@ -25,7 +25,12 @@
 #include "taslogger.h"
 #include "tascoreutils.h"
 
-static int LOG_SIZE = 100000;
+#ifdef Q_OS_SYMBIAN
+const char* const LOG_PATH = "\\logs\\testability\\";
+#else
+const char* const LOG_PATH = "/logs/testability/";
+#endif
+const int LOG_SIZE = 100000;
 
 void debugOutput(QtMsgType type, const char *msg)
 {     
@@ -216,6 +221,15 @@ TasLogger* TasLogger::logger()
         mInstance = new TasLogger();        
     }    
     return mInstance;    
+}
+
+void TasLogger::removeLogger()
+{
+    if(mInstance){
+        delete mInstance;
+        mInstance = 0;
+    }
+
 }
 
 

@@ -41,19 +41,24 @@ Q_EXPORT_PLUGIN2(qttraverse, TasQtTraverse)
 */
 TasQtTraverse::TasQtTraverse(QObject* parent)
     :QObject(parent)
-{}
+{
+    mTraverseUtils = new TasTraverseUtils();
+}
 
 /*!
     Destructor
 */
 TasQtTraverse::~TasQtTraverse()
-{}
+{
+    delete mTraverseUtils;
+}
 
 /*!
   Traverse QGraphicsItem based objects.
  */
 void TasQtTraverse::traverseGraphicsItem(TasObject* objectInfo, QGraphicsItem* graphicsItem, TasCommand* command)
 {
+    mTraverseUtils->createFilter(command);
     bool embeddedApp = false;
     if (command && command->parameter("embedded") == "true") {
         embeddedApp = true;
@@ -61,8 +66,9 @@ void TasQtTraverse::traverseGraphicsItem(TasObject* objectInfo, QGraphicsItem* g
 
     objectInfo->addAttribute("objectType", embeddedApp? TYPE_WEB : TYPE_GRAPHICS_VIEW);                
     objectInfo->setId(TestabilityUtils::graphicsItemId(graphicsItem));
-    addGraphicsItemCoordinates(objectInfo, graphicsItem, command);    
-    printGraphicsItemProperties(objectInfo, graphicsItem);
+    mTraverseUtils->addGraphicsItemCoordinates(objectInfo, graphicsItem, command);    
+    mTraverseUtils->printGraphicsItemProperties(objectInfo, graphicsItem);
+    mTraverseUtils->clearFilter();
 }
 
 /*!
@@ -70,33 +76,31 @@ void TasQtTraverse::traverseGraphicsItem(TasObject* objectInfo, QGraphicsItem* g
 */
 void TasQtTraverse::traverseObject(TasObject* objectInfo, QObject* object, TasCommand* command)
 {
+    mTraverseUtils->createFilter(command);
     // Embedded apps must use coordinates for operations, as the parent has no knowledge of the 
     // Actual items
     bool embeddedApp = false;
     if (command && command->parameter("embedded") == "true") {
         embeddedApp = true;
     }
-
-
-
     //TasLogger::logger()->debug("TasQtTraverse::traverseObject in");
-    addObjectDetails(objectInfo, object);
+    mTraverseUtils->addObjectDetails(objectInfo, object);
     QGraphicsWidget* graphicsWidget = qobject_cast<QGraphicsWidget*>(object);               
     if(graphicsWidget){
         objectInfo->addAttribute("objectType", embeddedApp? TYPE_WEB : TYPE_GRAPHICS_VIEW);
         printGraphicsWidgetAction(objectInfo, graphicsWidget);
-        addGraphicsItemCoordinates(objectInfo, graphicsWidget, command);
-        addFont(objectInfo, graphicsWidget->font());
+        mTraverseUtils->addGraphicsItemCoordinates(objectInfo, graphicsWidget, command);
+        mTraverseUtils->addFont(objectInfo, graphicsWidget->font());
         // Elided format "this is a text" -> "this is a..." text for
         // items that have the "text" property.
         QVariant text = graphicsWidget->property("text");
         if (text.isValid()) {
-            addTextInfo(objectInfo, text.toString(), graphicsWidget->font(), graphicsWidget->size().width());
+            mTraverseUtils->addTextInfo(objectInfo, text.toString(), graphicsWidget->font(), graphicsWidget->size().width());
             
         }
         QVariant plainText = graphicsWidget->property("plainText");
         if (plainText.isValid()) {
-            addTextInfo(objectInfo, plainText.toString(), graphicsWidget->font(), graphicsWidget->size().width());
+            mTraverseUtils->addTextInfo(objectInfo, plainText.toString(), graphicsWidget->font(), graphicsWidget->size().width());
             
         }
     }    
@@ -116,7 +120,7 @@ void TasQtTraverse::traverseObject(TasObject* objectInfo, QObject* object, TasCo
             }
             printWidgetAction(objectInfo, widget);
             addWidgetCoordinates(objectInfo, widget,command);
-            addFont(objectInfo, widget->font());
+            mTraverseUtils->addFont(objectInfo, widget->font());
             //check is the widget a viewport to graphicsscene
             QWidget* parentWidget = widget->parentWidget();
             bool isViewPort = false;
@@ -151,6 +155,7 @@ void TasQtTraverse::traverseObject(TasObject* objectInfo, QObject* object, TasCo
         }
         
     }    
+    mTraverseUtils->clearFilter();
 }
 
 
@@ -243,44 +248,6 @@ void TasQtTraverse::printGraphicsWidgetAction(TasObject* parentObject, QGraphics
          }
     }     
 }
-
-/*! 
-    Print graphicsitem details that could be usable to the model.
-*/
-void TasQtTraverse::printGraphicsItemProperties(TasObject* objectInfo, QGraphicsItem* graphicsItem)
-{       
-    if(includeAttribute("visible")){
-        objectInfo->addBooleanAttribute("visible", graphicsItem->isVisible());
-    }
-    if(includeAttribute("enabled")){
-        objectInfo->addBooleanAttribute("enabled", graphicsItem->isEnabled());
-    }
-    if(includeAttribute("selected")){
-        objectInfo->addBooleanAttribute("selected", graphicsItem->isSelected());
-    }
-    if(includeAttribute("obscured")){
-        objectInfo->addBooleanAttribute("obscured", graphicsItem->isObscured());
-    }
-    if(includeAttribute("focus")){
-        objectInfo->addBooleanAttribute("focus", graphicsItem->hasFocus());
-    }
-    if(includeAttribute("under-mouse")){
-        objectInfo->addBooleanAttribute("under-mouse", graphicsItem->isUnderMouse());
-    }
-    if(includeAttribute("droppable")){
-        objectInfo->addBooleanAttribute("droppable", graphicsItem->acceptDrops());
-    }
-    if(includeAttribute("hoverable")){
-        objectInfo->addBooleanAttribute("hoverable", graphicsItem->acceptHoverEvents());    
-    }
-    if(includeAttribute("tooltip")){
-        objectInfo->addAttribute("tooltip", graphicsItem->toolTip());   
-    }
-    if(includeAttribute("z-value")){
-        objectInfo->addAttribute("z-value", QString::number(graphicsItem->zValue()));   
-    }
-}
-
 
 
 

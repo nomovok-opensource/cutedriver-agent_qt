@@ -22,7 +22,7 @@
 #ifndef TASUITRAVERSER_H
 #define TASUITRAVERSER_H
 
-#include <QList>
+#include <QHash>
 
 #include "tasconstants.h"
 #include "tasqtdatamodel.h"
@@ -32,7 +32,7 @@
 class TAS_EXPORT TasUiTraverser : public TestabilityUtils
 {
 public:  
-    TasUiTraverser(QList<TasTraverseInterface*> traversers);
+    TasUiTraverser(QHash<QString, TasTraverseInterface*> traversers);
 	~TasUiTraverser();
 
 	TasDataModel* getUiState(TasCommand* command);
@@ -44,11 +44,14 @@ private:
 	void traverseGraphicsItemList(TasObject& parent, QGraphicsItem* graphicsItem, TasCommand* command);
 	void traverseGraphicsViewItems(TasObject& parent, QGraphicsView* view, TasCommand* command);
 
-	void setFilters(TasCommand* command);
-  
+	void setFilterLists(TasCommand* command);  
+	bool filterPlugin(const QString& pluginName);
+
 private:
-	TraverseFilter* mFilter;
-	QList<TasTraverseInterface*> mTraversers;
+	QHash<QString, TasTraverseInterface*> mTraversers;
+	QStringList mPluginBlackList;
+	QStringList mPluginWhiteList;
 };
+
 
 #endif

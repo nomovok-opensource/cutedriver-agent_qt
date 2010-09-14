@@ -31,12 +31,10 @@
 #include "tasservicebase.h"
 #include "testabilityutils.h"
 
-class WebkitCommandService : public QObject, public TasServiceBase
+class WebkitCommandService : public TasServiceBase
 {
-  Q_OBJECT
-
 public:
-    WebkitCommandService(QObject* parent = 0);
+    WebkitCommandService();
 	~WebkitCommandService();
 
 	/*!

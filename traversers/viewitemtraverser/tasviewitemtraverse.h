@@ -33,6 +33,8 @@
 #include <QHeaderView>
 
 #include <tasqtdatamodel.h>
+#include <tasqtcommandmodel.h>
+#include <tastraverseutils.h>
 
 #include "tastraverseinterface.h"
 
@@ -66,6 +68,7 @@ private:
 	 bool addItemLocationDetails(TasObject& objectInfo, QRect rect, QAbstractItemView* view);
      
 private:
+	 TasTraverseUtils* mTraverseUtils;
 	 QList<QModelIndex> mTraversed;
  };
 

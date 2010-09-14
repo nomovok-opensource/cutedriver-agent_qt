@@ -46,12 +46,8 @@ RecorderService::RecorderService(QObject* parent)
 }
 
 RecorderService::~RecorderService()
-{
+{    
     delete mTasModel;
-    QMutableListIterator<TasTraverseInterface*> i(mTraversers);
-    while (i.hasNext()){
-        delete i.next();
-    }
     mTraversers.clear();
 }
 
@@ -134,8 +130,8 @@ void RecorderService::start()
 /*!
   Filter to receive all events and store events that have been added to the inclusion list
 */
-bool RecorderService::eventFilter(QObject *target, QEvent *event)
-{    
+ bool RecorderService::eventFilter(QObject *target, QEvent *event)
+ {    
     if (mTasEvents){
         QString eventType = TestabilityUtils::eventType(event) ;
 
@@ -177,8 +173,10 @@ bool RecorderService::eventFilter(QObject *target, QEvent *event)
                         }
                         else{
                             targetObj.setType("QGraphicsItem");
-                            for (int i = 0; i < mTraversers.size(); i++) {
-                                mTraversers.at(i)->traverseGraphicsItem(&targetObj, graphicsItem);
+                            QHashIterator<QString, TasTraverseInterface*> i(mTraversers);
+                            while (i.hasNext()) {
+                                i.next();
+                                i.value()->traverseGraphicsItem(&targetObj, graphicsItem);
                             }    
                         }    
                     }
@@ -207,8 +205,10 @@ bool RecorderService::eventFilter(QObject *target, QEvent *event)
 
 void RecorderService::printTargetDetails(QObject* target, TasObject& targetObj)
 {
-    for (int i = 0; i < mTraversers.size(); i++) {
-        mTraversers.at(i)->traverseObject(&targetObj, target);
-    }    
+    QHashIterator<QString, TasTraverseInterface*> i(mTraversers);
+    while (i.hasNext()) {
+        i.next();
+        i.value()->traverseObject(&targetObj, target);
+    }
 }
 

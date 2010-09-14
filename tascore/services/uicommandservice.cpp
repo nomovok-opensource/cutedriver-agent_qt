@@ -56,6 +56,7 @@ UiCommandService::UiCommandService(QObject* parent)
 
 UiCommandService::~UiCommandService()
 {
+    mTimer.stop();
     while (!mCommandQueue.isEmpty()){
         delete mCommandQueue.takeFirst();
     } 

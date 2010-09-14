@@ -32,6 +32,7 @@
 #endif
 
 #include <tasqtdatamodel.h>
+#include <tastraverseutils.h>
 
 #include "tastraverseinterface.h"
 
@@ -69,6 +70,8 @@ private:
 
 #endif
 
+private:
+	 TasTraverseUtils* mTraverseUtils;
     
  };
 

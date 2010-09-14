@@ -49,7 +49,7 @@ private:
 	TasObjectContainer& mObjectContainer;		
 	QSignalSpy* mSignalSpy;
 	bool mTraverseSender;
-	QList<TasTraverseInterface*> mTraversers;
+	QHash<QString, TasTraverseInterface*> mTraversers;
 	QObject* mTarget;
 };
 

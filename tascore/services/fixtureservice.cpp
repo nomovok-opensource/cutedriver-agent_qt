@@ -35,18 +35,17 @@ FixtureService::FixtureService()
 {
     mPluginLoader = new TasPluginLoader();
     mPluginLoader->initializeFixturePlugins();
-    mTimer = new QTimer();
-    mTimer->setInterval(50);
-    connect(mTimer, SIGNAL(timeout()), this, SLOT(delayedEvent()));
+    mTimer.setInterval(50);
+    connect(&mTimer, SIGNAL(timeout()), this, SLOT(delayedEvent()));
 }
 
 FixtureService::~FixtureService()
 {
+    mTimer.stop();
     delete mPluginLoader;
     while (!commandQueue.isEmpty()){
         delete commandQueue.takeFirst();
     } 
-    delete mTimer;
 }
 
 bool FixtureService::executeService(TasCommandModel& model, TasResponse& response)
@@ -62,7 +61,7 @@ bool FixtureService::executeService(TasCommandModel& model, TasResponse& respons
         else{
             //needs some refactoring to avoid double parse...(luckily small docs..)
             commandQueue.enqueue(TasCommandParser::parseCommandXml(model.sourceString()));            
-            mTimer->start();            
+            mTimer.start();            
         }
         model.forceUiUpdate(true);
         return true;
@@ -137,6 +136,6 @@ void FixtureService::delayedEvent()
     }    
     delete commands;
     if(commandQueue.isEmpty()){
-        mTimer->stop();
+        mTimer.stop();
     }
 }

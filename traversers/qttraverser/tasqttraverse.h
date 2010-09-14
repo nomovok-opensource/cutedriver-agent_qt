@@ -26,7 +26,7 @@
 #include <QObject>
 #include <QWidget>
 #include <QGraphicsItem>
-
+#include <tastraverseutils.h>
 
 #include "tasqtdatamodel.h"
 #include "tastraverseinterface.h"
@@ -42,7 +42,6 @@ class TasQtTraverse : public QObject, public TasTraverseInterface
      ~TasQtTraverse();
 
      void traverseObject(TasObject* objectInfo, QObject* object, TasCommand* command = 0);
-
      void traverseGraphicsItem(TasObject* objectInfo, QGraphicsItem* graphicsItem, TasCommand* command = 0);     
      
 private:
@@ -51,8 +50,11 @@ private:
 	 void printWidgetAction(TasObject* parentObject, QWidget* widget);
 	 void printGraphicsWidgetAction(TasObject* parentObject, QGraphicsWidget* widget);
 
-   void addWidgetCoordinates(TasObject* objectInfo, QWidget* widget, TasCommand* command);
+	 void addWidgetCoordinates(TasObject* objectInfo, QWidget* widget, TasCommand* command);
 	 void printGraphicsItemProperties(TasObject* objectData, QGraphicsItem* graphicsItem);
+
+private:
+	 TasTraverseUtils* mTraverseUtils;
 
  };
 

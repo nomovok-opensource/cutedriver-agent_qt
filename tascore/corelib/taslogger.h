@@ -33,12 +33,6 @@
 
 class EventLogger;
 
-#ifdef Q_OS_SYMBIAN
-static const QString LOG_PATH = "\\logs\\testability\\";
-#else
-static const QString LOG_PATH = "/logs/testability/";
-#endif
-
 enum LogType
 {
     FATAL = 0,
@@ -56,6 +50,7 @@ private:
     ~TasLogger();
 public:
     static TasLogger* logger();
+	static void removeLogger();
     void debug(const QString message);
     void info(const QString message);
     void warning(const QString message);

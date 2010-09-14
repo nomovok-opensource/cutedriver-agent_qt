@@ -45,7 +45,7 @@ private slots:
 private:
 	TasPluginLoader* mPluginLoader;
     QQueue<TasCommandModel*> commandQueue;
-    QTimer* mTimer;
+    QTimer mTimer;
 
 };
 

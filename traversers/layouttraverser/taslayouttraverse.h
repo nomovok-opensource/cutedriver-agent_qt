@@ -28,6 +28,7 @@
 #include <QGraphicsLayoutItem>
 
 #include <tasqtdatamodel.h>
+#include <tastraverseutils.h>
 
 #include "tastraverseinterface.h"
 
@@ -41,7 +42,6 @@ public:
      ~TasLayoutTraverse();
 
      void traverseObject(TasObject* objectInfo, QObject* object, TasCommand* command = 0);
-
      void traverseGraphicsItem(TasObject* objectInfo, QGraphicsItem* graphicsItem, TasCommand* command);     
  
 private:
@@ -49,6 +49,9 @@ private:
 	 void addGraphicsWidgetLayout(TasObject& objectInfo, QGraphicsLayout* layout, QGraphicsItem* parent);
 	 void addGraphicsLayoutItem(TasObject& objectInfo, QGraphicsLayoutItem *item, QGraphicsItem* parent);
 	 QString printPolicy(QSizePolicy::Policy policy);
+
+private:
+	 TasTraverseUtils* mTraverseUtils;
  };
 
 #endif
