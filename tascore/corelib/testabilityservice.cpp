@@ -89,20 +89,23 @@ void TestabilityLoader::load()
 {
     //set prop for app that dll loaded
     qApp->setProperty(PLUGIN_ATTR, QVariant(true));
-    mService = new TestabilityService(this);
-    TasLogger::logger()->info("TestabilityLoader::loaded"); 
+    mService = new TestabilityService();
+    TasLogger::logger()->info("TestabilityLoader::intialized"); 
 }
 
 void TestabilityLoader::unload()
 {    
-    QVariant prop = qApp->property(CLOSE_REQUESTED);
-    if(!prop.isValid() || !prop.toBool()){
-        mService->unReqisterServicePlugin();
+    if(mService){
+        qDebug("TestabilityLoader::remove testability");
+        QVariant prop = qApp->property(CLOSE_REQUESTED);
+        if(!prop.isValid() || !prop.toBool()){
+            mService->unReqisterServicePlugin();
+        }
+        delete mService;
+        mService = 0;
     }
-    delete mService;
-    mService = 0;
     TasLogger::logger()->removeLogger();
-    qDebug("TestabilityLoader::unloaded");
+    qDebug("TestabilityLoader::removed");
     deleteLater();
 }
 
