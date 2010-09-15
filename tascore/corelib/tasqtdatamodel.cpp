@@ -202,16 +202,9 @@ TasObject::TasObject()
 */
 TasObject::~TasObject()
 {
-    QMutableListIterator<TasAttribute*> i(attributes);
-    while (i.hasNext()){
-        delete i.next();
-    }
+    qDeleteAll(attributes);
     attributes.clear();
-    
-    QMutableListIterator<TasObject*> j(objects);
-    while (j.hasNext()){
-        delete j.next();
-    }
+    qDeleteAll(objects);    
     objects.clear(); 
 }
 
@@ -468,10 +461,7 @@ TasObjectContainer::TasObjectContainer()
 
 TasObjectContainer::~TasObjectContainer()
 {
-    QMutableListIterator<TasObject*> i(objects);
-    while (i.hasNext()){
-        delete i.next();
-    }
+    qDeleteAll(objects);
     objects.clear();        
 }
 
@@ -592,10 +582,7 @@ TasDataModel::~TasDataModel()
 */
 void TasDataModel::clearModel()
 {
-    QMutableListIterator<TasObjectContainer*> i(containers);
-    while (i.hasNext()){
-        delete i.next();
-    }
+    qDeleteAll(containers);
     containers.clear();        
 }
 

@@ -42,12 +42,7 @@ EventService::EventService()
 
 EventService::~EventService()
 {
-    qDebug("EventService::~EventService");
-    QHashIterator<QString, TasEventFilter*> i(mEventFilters);
-    while (i.hasNext()) {
-        i.next();
-        delete i.value();
-    }
+    qDeleteAll(mEventFilters);
     mEventFilters.clear();
 }
 

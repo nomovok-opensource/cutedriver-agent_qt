@@ -24,7 +24,6 @@
 
 #include <QApplication>
 #include <QObject>
-#include <QTimeLine>
 #include <QLineF>
 #include <QList>
 
@@ -72,7 +71,6 @@ private:
     bool mPress;
     bool mRelease;
 	GesturePath* mGesturePath;
-	QTimeLine* mTimeLine;
 	QPoint mPrevious;
 	bool mIsDrag;
 };

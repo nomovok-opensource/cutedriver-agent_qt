@@ -55,11 +55,7 @@ TasServiceManager::TasServiceManager()
  */
 TasServiceManager::~TasServiceManager()
 {
-    QMutableListIterator<TasServiceCommand*> i(mCommands);
-    while (i.hasNext()){
-        TasServiceCommand* c = i.next();
-        delete c;
-    }
+    qDeleteAll(mCommands);
     mCommands.clear();
 }
 

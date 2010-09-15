@@ -21,6 +21,8 @@
 
 #include <testabilityutils.h>
 
+#include <QTimeLine>
+
 #include "taslogger.h"
 #include "gesturehandler.h"
 
@@ -162,19 +164,19 @@ bool GestureHandler::executeInteraction(TargetData data)
 
 void GestureHandler::startGesture()
 {
-    mTimeLine = new QTimeLine();
-    mTimeLine->setCurveShape(QTimeLine::LinearCurve);
-    connect(mTimeLine, SIGNAL(valueChanged(qreal)), this, SLOT(timerEvent(qreal)));
-    connect(mTimeLine, SIGNAL(finished()), this, SLOT(finished()));
-    connect(mTimeLine, SIGNAL(finished()), mTimeLine, SLOT(deleteLater()));    
+    QTimeLine* timeLine = new QTimeLine();
+    timeLine->setCurveShape(QTimeLine::LinearCurve);
+    connect(timeLine, SIGNAL(valueChanged(qreal)), this, SLOT(timerEvent(qreal)));
+    connect(timeLine, SIGNAL(finished()), this, SLOT(finished()));
+    connect(timeLine, SIGNAL(finished()), timeLine, SLOT(deleteLater()));    
 
     //make the first press and move a bit to make sure that 
     //the gesture is not detected to be a long press
     qApp->installEventFilter(this);
     beginGesture();
-    mTimeLine->setDuration(mDuration);
-    mTimeLine->setFrameRange(0,mDuration/FRAME_RANGE_DIV);    
-    mTimeLine->start();
+    timeLine->setDuration(mDuration);
+    timeLine->setFrameRange(0,mDuration/FRAME_RANGE_DIV);    
+    timeLine->start();
 }
 
 

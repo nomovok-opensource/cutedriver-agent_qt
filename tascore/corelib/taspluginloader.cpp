@@ -61,13 +61,6 @@ TasPluginLoader::TasPluginLoader()
 */
 TasPluginLoader::~TasPluginLoader()
 {
-    /*
-    QMutableHashIterator<QString, TasFixturePluginInterface*> i(mFixturePlugins);
-    while (i.hasNext()) {            
-        i.next();
-        delete i.value();
-    }
-    */
     mFixturePlugins.clear();
 }
 

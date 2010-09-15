@@ -80,9 +80,9 @@ public:
 	TasCommand* findCommand(const QString& commandName);
 
 private:
-    QList<TasCommand*> commands;
-    QString targetId;
-    QString targetType;        
+    QList<TasCommand*> mCommands;
+    QString mTargetId;
+    QString mTargetType;        
 };
 
 class TAS_EXPORT TasCommandModel
@@ -118,7 +118,7 @@ public:
 	void setMultitouch(bool multitouch);
 
 private:
-    QList<TasTarget*> targets;
+    QList<TasTarget*> mTargets;
     QString mModelId;    
     QString mModelName;    
     QString mModelService;    
