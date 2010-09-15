@@ -53,12 +53,21 @@ TasQtTraverse::~TasQtTraverse()
     delete mTraverseUtils;
 }
 
+void TasQtTraverse::beginTraverse(TasCommand* command)
+{
+    mTraverseUtils->createFilter(command);
+}
+
+void TasQtTraverse::endTraverse()
+{
+    mTraverseUtils->clearFilter();
+}
+
 /*!
   Traverse QGraphicsItem based objects.
  */
 void TasQtTraverse::traverseGraphicsItem(TasObject* objectInfo, QGraphicsItem* graphicsItem, TasCommand* command)
 {
-    mTraverseUtils->createFilter(command);
     bool embeddedApp = false;
     if (command && command->parameter("embedded") == "true") {
         embeddedApp = true;
@@ -68,7 +77,7 @@ void TasQtTraverse::traverseGraphicsItem(TasObject* objectInfo, QGraphicsItem* g
     objectInfo->setId(TestabilityUtils::graphicsItemId(graphicsItem));
     mTraverseUtils->addGraphicsItemCoordinates(objectInfo, graphicsItem, command);    
     mTraverseUtils->printGraphicsItemProperties(objectInfo, graphicsItem);
-    mTraverseUtils->clearFilter();
+ 
 }
 
 /*!
@@ -76,8 +85,7 @@ void TasQtTraverse::traverseGraphicsItem(TasObject* objectInfo, QGraphicsItem* g
 */
 void TasQtTraverse::traverseObject(TasObject* objectInfo, QObject* object, TasCommand* command)
 {
-    mTraverseUtils->createFilter(command);
-    // Embedded apps must use coordinates for operations, as the parent has no knowledge of the 
+     // Embedded apps must use coordinates for operations, as the parent has no knowledge of the 
     // Actual items
     bool embeddedApp = false;
     if (command && command->parameter("embedded") == "true") {
@@ -155,7 +163,6 @@ void TasQtTraverse::traverseObject(TasObject* objectInfo, QObject* object, TasCo
         }
         
     }    
-    mTraverseUtils->clearFilter();
 }
 
 

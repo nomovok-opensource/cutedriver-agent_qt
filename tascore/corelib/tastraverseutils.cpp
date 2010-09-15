@@ -42,24 +42,7 @@ TasTraverseUtils::~TasTraverseUtils()
  */
 void TasTraverseUtils::createFilter(TasCommand* command)
 {
-    if(!command){
-        return;
-    }
-    //if the command contains filtering instructions
-    //set the them for all traverser plugins
-    QStringList attributeBlackList;
-    if(!command->apiParameter("attributeBlackList").isEmpty()){
-         attributeBlackList = command->apiParameter("attributeBlackList").split(",");
-    }
-    QStringList attributeWhiteList;
-    if(!command->apiParameter("attributeWhiteList").isEmpty()){
-        attributeWhiteList = command->apiParameter("attributeWhiteList").split(",");
-    }    
-    bool filterProps = false;
-    if(command->apiParameter("filterProperties") =="true"){
-        filterProps = true;
-    }
-    mTraverseFilter->initialize(filterProps, attributeBlackList, attributeWhiteList);
+    mTraverseFilter->initialize(command);
 }
 
 /*!
@@ -372,11 +355,26 @@ TasDataFilter::~TasDataFilter()
     clear();
 }
 
-void TasDataFilter::initialize(bool excludeProperties, QStringList attrBlackList, QStringList attrWhiteList)
+void TasDataFilter::initialize(TasCommand* command)
 {   
-    mExcludeProperties = excludeProperties;
-    mAttributeWhiteList = attrWhiteList;
-    mAttributeBlackList = attrBlackList;
+    clear();
+    if(!command){
+        return;
+    }
+    //if the command contains filtering instructions
+    //set the them for all traverser plugins
+    QStringList attributeBlackList;
+    if(!command->apiParameter("attributeBlackList").isEmpty()){
+         mAttributeBlackList = command->apiParameter("attributeBlackList").split(",");
+    }
+    QStringList attributeWhiteList;
+    if(!command->apiParameter("attributeWhiteList").isEmpty()){
+        mAttributeWhiteList = command->apiParameter("attributeWhiteList").split(",");
+    }    
+    mExcludeProperties = false;
+    if(command->apiParameter("filterProperties") =="true"){
+        mExcludeProperties = true;
+    }
 }
 
 void TasDataFilter::clear()

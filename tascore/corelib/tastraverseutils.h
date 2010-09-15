@@ -73,9 +73,9 @@ public:
   TasDataFilter();
   ~TasDataFilter();
 
-  void initialize(bool excludeProperties, QStringList attrBlackList, QStringList attrWhiteList);
-
+  void initialize(TasCommand* command);
   void clear();
+
   bool filterPlugin(const QString& pluginName);
   bool includeAttribute(const QString& attributeName);
   bool filterProperties();

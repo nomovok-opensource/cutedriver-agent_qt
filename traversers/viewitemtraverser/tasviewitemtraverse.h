@@ -48,8 +48,9 @@ class TasViewItemTraverse :  public QObject, public TasTraverseInterface
      ~TasViewItemTraverse();
 
      void traverseObject(TasObject* objectInfo, QObject* object, TasCommand* command = 0);
-
      void traverseGraphicsItem(TasObject* objectInfo, QGraphicsItem* graphicsItem, TasCommand* command = 0);     
+	 void beginTraverse(TasCommand* command);
+	 void endTraverse();
      
 private:
 

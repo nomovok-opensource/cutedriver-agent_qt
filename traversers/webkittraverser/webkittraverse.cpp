@@ -63,6 +63,17 @@ WebKitTraverse::~WebKitTraverse()
     delete mTraverseUtils;
 }
 
+void WebKitTraverse::beginTraverse(TasCommand* command)
+{
+    mTraverseUtils->createFilter(command);
+}
+
+void WebKitTraverse::endTraverse()
+{
+    mTraverseUtils->clearFilter();
+}
+
+
 /*!
   Traverse graphicsitem(widget) for web kit
 */

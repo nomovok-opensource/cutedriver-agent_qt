@@ -50,9 +50,11 @@ public:
      ~WebKitTraverse();
 
      void traverseObject(TasObject* objectInfo, QObject* object, TasCommand* command);
-
      void traverseGraphicsItem(TasObject* objectInfo, QGraphicsItem* graphicsItem, TasCommand* command);     
+	 void beginTraverse(TasCommand* command);
+	 void endTraverse();
     
+
 private:
 
 #if QT_VERSION >= 0x040600

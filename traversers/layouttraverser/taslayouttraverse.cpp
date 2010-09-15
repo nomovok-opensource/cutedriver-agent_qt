@@ -56,6 +56,16 @@ TasLayoutTraverse::~TasLayoutTraverse()
     delete mTraverseUtils;
 }
 
+void TasLayoutTraverse::beginTraverse(TasCommand* command)
+{
+    mTraverseUtils->createFilter(command);
+}
+
+void TasLayoutTraverse::endTraverse()
+{
+    mTraverseUtils->clearFilter();
+}
+
 /*!
   Traverse graphicsitem(widget) for possible layout objects
 */
@@ -64,9 +74,7 @@ void TasLayoutTraverse::traverseGraphicsItem(TasObject* objectInfo, QGraphicsIte
     if (graphicsItem->isWindow() || graphicsItem->isWidget()) {
         QGraphicsWidget* widget = (QGraphicsWidget*)graphicsItem;        
         if(widget && widget->layout()){
-            mTraverseUtils->createFilter(command);
             addGraphicsWidgetLayout(objectInfo->addObject(), widget->layout(), widget);
-            mTraverseUtils->clearFilter();
         }
     }
 }
@@ -80,7 +88,6 @@ void TasLayoutTraverse::traverseObject(TasObject* objectInfo, QObject* object, T
         if(widget){
             QLayout* layout = widget->layout();
             if(layout){
-                mTraverseUtils->createFilter(command);
                 TasObject& layoutInfo = objectInfo->addObject();
                 mTraverseUtils->addObjectDetails(&layoutInfo, layout);
                 layoutInfo.addAttribute("count", layout->count());
@@ -101,7 +108,6 @@ void TasLayoutTraverse::traverseObject(TasObject* objectInfo, QObject* object, T
             addGraphicsWidgetLayout(objectInfo->addObject(), graphicsWidget->layout(), graphicsWidget);
         }
     }
-    mTraverseUtils->clearFilter();
 }
 
 void TasLayoutTraverse::addLayoutItem(TasObject& objectInfo, QLayoutItem* item)

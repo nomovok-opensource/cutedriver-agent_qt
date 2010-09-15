@@ -59,6 +59,17 @@ void TasViewItemTraverse::traverseGraphicsItem(TasObject* /*objectInfo*/, QGraph
 {
 }
 
+void TasViewItemTraverse::beginTraverse(TasCommand* command)
+{
+    mTraverseUtils->createFilter(command);
+}
+
+void TasViewItemTraverse::endTraverse()
+{
+    mTraverseUtils->clearFilter();
+}
+
+
 /*!
     
     Add items in QAbstractView decendants to the object data.
@@ -67,8 +78,6 @@ void TasViewItemTraverse::traverseGraphicsItem(TasObject* /*objectInfo*/, QGraph
 void TasViewItemTraverse::traverseObject(TasObject* objectInfo, QObject* object, TasCommand* command)
 {
     if(object->inherits("QAbstractItemView")){          
-        mTraverseUtils->clearFilter();
-        mTraverseUtils->createFilter(command);
         //traverse the different types of viewitems 
         //1. QTreeWidget 
         QTreeWidget* treeWidget = qobject_cast<QTreeWidget*>(object);

@@ -50,7 +50,7 @@ class TasTraverseInterface
       reference. All default details will be added to the TasObject data container
       by the framework.     
      */
-	  virtual void traverseObject(TasObject* , QObject* , TasCommand* = 0) = 0;
+	  virtual void traverseObject(TasObject* , QObject* ,TasCommand* = 0) = 0;
 
      /*!     
       Traverse the graphicsitem by adding the special details to the given TasObject
@@ -58,6 +58,17 @@ class TasTraverseInterface
       by the framework.           
      */
 	  virtual void traverseGraphicsItem(TasObject* , QGraphicsItem* , TasCommand*  = 0) = 0;
+
+	  /*!
+		Called at the start of each traversing. Can be used to set detials as the filter
+		to be used for the traversing of one ui state.
+	   */
+	  virtual void beginTraverse(TasCommand* command){};
+
+	  /*!
+		Called at the end of each traversing. Use to clear the filter if one used.
+	   */
+	  virtual void endTraverse(){};
 
 };
 

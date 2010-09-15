@@ -43,6 +43,8 @@ public:
 
      void traverseObject(TasObject* objectInfo, QObject* object, TasCommand* command = 0);
      void traverseGraphicsItem(TasObject* objectInfo, QGraphicsItem* graphicsItem, TasCommand* command);     
+	 void beginTraverse(TasCommand* command);
+	 void endTraverse();
  
 private:
 	 void addLayoutItem(TasObject& objectInfo, QLayoutItem* item);

@@ -83,6 +83,15 @@ bool TasUiTraverser::filterPlugin(const QString& pluginName)
 TasDataModel* TasUiTraverser::getUiState(TasCommand* command)
 {
     setFilterLists(command);
+
+    //let traversers know that a new traverse operation is starting
+    QHashIterator<QString, TasTraverseInterface*> traversers(mTraversers);
+    while (traversers.hasNext()) {
+        traversers.next();
+        traversers.value()->beginTraverse(command);
+    }
+
+
     TasDataModel* model = new TasDataModel();
     QString qtVersion = "Qt" + QString(qVersion());
     TasObjectContainer& container = model->addNewObjectContainer(1, qtVersion, "qt");
@@ -104,6 +113,12 @@ TasDataModel* TasUiTraverser::getUiState(TasCommand* command)
                 }
             }            
         }
+    }
+
+    //let traversers know that a new traverse operation is ending
+    while (traversers.hasPrevious()) {
+        traversers.previous();
+        traversers.value()->endTraverse();
     }
     
     return model;
