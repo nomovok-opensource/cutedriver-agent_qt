@@ -51,6 +51,8 @@ void TasUiTraverser::setFilterLists(TasCommand* command)
     mPluginBlackList.clear();
     mPluginWhiteList.clear();
 
+    if(!command) return;
+    
     if(!command->apiParameter("pluginBlackList").isEmpty()){
         mPluginBlackList = command->apiParameter("pluginBlackList").split(",");
     }
