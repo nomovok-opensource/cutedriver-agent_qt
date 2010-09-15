@@ -35,7 +35,7 @@ CONFIG(mobility){
 SUBDIRS += popupfixture
 
 symbian: {
-	SUBDIRS += utilfixture
+#	SUBDIRS += utilfixture
 }
 CONFIG(maemo){
 #SUBDIRS += duifixture #not supported anymore
