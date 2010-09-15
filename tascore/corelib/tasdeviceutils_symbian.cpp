@@ -102,6 +102,7 @@ qreal TasDeviceUtils::currentProcessCpuTime()
 */
 void TasDeviceUtils::addSystemInformation(TasObject& object)
 {
+    Q_UNUSED(object);
     TasLogger::logger()->debug("TasDeviceUtils::addSystemInformation");
     // #if ( NCP_COMMON_BRANCH_IN_USE == MCL )
     //     TasBaseTraverse traverser;
@@ -132,6 +133,10 @@ void TasDeviceUtils::addSystemInformation(TasObject& object)
 
 void TasDeviceUtils::sendMouseEvent(int x, int y, Qt::MouseButton button, QEvent::Type type)
 {
+    Q_UNUSED(x);   
+    Q_UNUSED(y);   
+    Q_UNUSED(button);   
+    Q_UNUSED(type);   
 }
 
 /*!

@@ -26,7 +26,8 @@
 #include "tascoreutils.h"
 
 #ifdef Q_OS_SYMBIAN
-const char* const LOG_PATH = "\\logs\\testability\\";
+const char* const C_LOG_PATH = "c:\\logs\\testability\\";
+const char* const E_LOG_PATH = "e:\\logs\\testability\\";
 #else
 const char* const LOG_PATH = "/logs/testability/";
 #endif
@@ -64,11 +65,11 @@ TasLogger::TasLogger()
     mCurrentLevel = INFO;
     mLogFileName = TasCoreUtils::getApplicationName()+".log";
 #ifdef Q_OS_SYMBIAN
-    if(QDir("e:"+LOG_PATH).exists()){
-        mLogPath = "e:"+LOG_PATH;
+    if(QDir(E_LOG_PATH).exists()){
+        mLogPath = E_LOG_PATH;
     }
     else{
-        mLogPath = "c:"+LOG_PATH;
+        mLogPath = C_LOG_PATH;
     }
 #else
     mLogPath = LOG_PATH;

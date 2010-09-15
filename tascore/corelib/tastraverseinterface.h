@@ -63,7 +63,7 @@ class TasTraverseInterface
 		Called at the start of each traversing. Can be used to set detials as the filter
 		to be used for the traversing of one ui state.
 	   */
-	  virtual void beginTraverse(TasCommand* command){};
+	  virtual void beginTraverse(TasCommand*){};
 
 	  /*!
 		Called at the end of each traversing. Use to clear the filter if one used.

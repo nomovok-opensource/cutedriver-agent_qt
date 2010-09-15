@@ -45,8 +45,8 @@ public:
   
   //  virtual bool executeInteraction(TasCommand& command, QWidget* target, QPoint targetPoint, QGraphicsItem* targetItem=0) = 0;
   //  virtual bool executeMultitouchInteraction(TasCommand& command, QWidget* target, QPoint targetPoint, QGraphicsItem* targetItem=0){}
-  virtual bool executeInteraction(TargetData data) = 0;
-  virtual bool executeMultitouchInteraction(QList<TargetData> dataList){return false;}
+  virtual bool executeInteraction(TargetData) = 0;
+  virtual bool executeMultitouchInteraction(QList<TargetData>){return false;}
  
 };
 
