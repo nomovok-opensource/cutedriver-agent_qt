@@ -148,14 +148,19 @@ bool TasDeviceUtils::isServerRunning()
     bool running = false;
     TFindProcess findProcess;
     TFullName processName;
-    while ( findProcess.Next( processName ) == KErrNone ){        
+    while ( findProcess.Next( processName ) == KErrNone){        
         if ( ( processName.Find( KQTasServerName ) != KErrNotFound ) ){
             RProcess process;
             TInt err = process.Open( findProcess );
-            if( err == KErrNone){
-                running = true;
+            if( err == KErrNone){                
+                //make sure the process alive
+                if( process.ExitType() == EExitPending ){
+                    running = true;
+                }
                 process.Close();
-                break;
+                if(running){
+                    break;
+                }
             }              
         }
     }
