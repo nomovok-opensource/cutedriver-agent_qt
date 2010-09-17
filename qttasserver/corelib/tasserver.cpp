@@ -50,6 +50,17 @@
 #include "systeminfoservice.h"
 #include "resourceloggingservice.h"
 
+#ifdef Q_OS_SYMBIAN
+#include <e32property.h>
+ // TasServer Secure ID
+const TUid KHTISecID = { 0x1020DEB6 };
+// Key for qttasserver start
+const TUint KQtTasserverStarted = 2372349;
+const TInt KQtTasRunning = 1;
+#endif
+
+
+
 /*!
   \class TasServer
   \brief TasTcpServer acts as the service layer for the tas plugins and pc side test framework     
@@ -204,6 +215,17 @@ bool TasServer::startServer()
     if (!mInternalTcpServer->start()){
         mTcpServer->close();
         return false;
+    }
+#endif
+
+#ifdef Q_OS_SYMBIAN
+    TInt err = RProperty::Set(KHTISecID, KQtTasserverStarted, KQtTasRunning);
+    if(err == KErrNone ){
+        TasLogger::logger()->info("TasServer::startServer server started and ps key set.");        
+    }
+    else{
+        TasLogger::logger()->warning("TasServer::startServer server started ok but could not set ps key error : " 
+                                     + QString::number(err));
     }
 #endif
     return true;
