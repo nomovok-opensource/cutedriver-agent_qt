@@ -32,9 +32,9 @@ static QString TRAVERSE_DIR = "traversers";
 /*!
   Returns a list of traversers. Ownership is transfered.
  */
-QList<TasTraverseInterface*> TasTraverserLoader::loadTraversers()
+QHash<QString, TasTraverseInterface*> TasTraverserLoader::loadTraversers()
 {
-    QList<TasTraverseInterface*> traversers;
+    QHash<QString, TasTraverseInterface*> traversers;
     QStringList plugins = listPlugins(TRAVERSE_DIR);
     QString path = QLibraryInfo::location(QLibraryInfo::PluginsPath) + "/" + TRAVERSE_DIR;
     for (int i = 0; i < plugins.count(); i++) {
@@ -46,12 +46,11 @@ QList<TasTraverseInterface*> TasTraverserLoader::loadTraversers()
                 TasTraverseInterface* traverser = qobject_cast<TasTraverseInterface*>(plugin);        
                 if (traverser){
 #if defined(Q_OS_LINUX) || defined(Q_WS_MAC)                                  
-                    traverser->setPluginName(fileName.left(fileName.indexOf(".")).mid(3));
+                    QString name = fileName.left(fileName.indexOf(".")).mid(3);
 #else
-                    traverser->setPluginName(fileName.left(fileName.indexOf(".")));
+                    QString name = fileName.left(fileName.indexOf("."));
 #endif
-                    traverser->resetFilter();
-                    traversers.append(traverser);
+                    traversers.insert(name, traverser);
                 }
             }    
         }

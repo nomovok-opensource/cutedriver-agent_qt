@@ -60,10 +60,7 @@ TasServerServiceManager::TasServerServiceManager(QObject *parent)
 */
 TasServerServiceManager::~TasServerServiceManager()
 {
-    QMutableListIterator<TasServiceCommand*> i(mCommands);
-    while (i.hasNext()){
-        delete i.next();
-    }
+    qDeleteAll(mCommands);
     mCommands.clear();
 }
 

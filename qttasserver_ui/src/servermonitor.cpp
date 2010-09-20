@@ -178,9 +178,16 @@ void ServerMonitor::killServer()
             TInt err = process.Open( findProcess );
             if( err == KErrNone)
                 {
-                process.Kill(0);
-                process.Close();
-                break;
+                if( process.ExitType() != EExitPending )
+                    {
+                    process.Close();
+                    }
+                else
+                    {
+                    process.Kill(0);
+                    process.Close();
+                    break;
+                    }
                 }              
             }
         }

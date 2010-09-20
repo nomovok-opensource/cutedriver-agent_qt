@@ -34,26 +34,23 @@ class TraverseFilter;
 class TasCommand;
 class QGraphicsItem;
 class QFont;
+class TasDataFilter;
 
 /*!
- If used directly the filter must be set or reset before use.
- e.g. 
-    TasBaseTraverse traverse;
-    traverse.resetFilter();
-	...
- Normally the plugin loader takes care of this.
+  Utility functions for traversers. Note that if you use filters always clear after use to make sure 
+  that a filter is not on when not wanted. Normally filters are not needed.
  */
-class TAS_EXPORT TasBaseTraverse
+class TAS_EXPORT TasTraverseUtils
 {
 public:
 
-    virtual ~TasBaseTraverse();
+    TasTraverseUtils();
+	~TasTraverseUtils();
 
-	void resetFilter();
-	void setFilter(TraverseFilter* traverseFilter);
+	void clearFilter();
+	void createFilter(TasCommand* command);
     void addObjectDetails(TasObject* objectData, QObject* object);
 
-	//protected:
     QString getParentId(QObject* object);
     void printProperties(TasObject* objectData, QObject* object);    
     void addFont(TasObject* objectInfo, QFont font);
@@ -64,19 +61,21 @@ public:
     QPair<QPoint,QPoint> addGraphicsItemCoordinates(TasObject* objectInfo, QGraphicsItem* graphicsItem, 
                                     TasCommand* command);
     void addTextInfo(TasObject* objectInfo, const QString& text, const QFont& font, qreal width, Qt::TextElideMode mode=Qt::ElideRight);
+	void printGraphicsItemProperties(TasObject* objectInfo, QGraphicsItem* graphicsItem);
 private:
-	TraverseFilter* mTraverseFilter;
+	TasDataFilter* mTraverseFilter;
 };
 
-class TAS_EXPORT TraverseFilter
+
+class TasDataFilter
 {
 public:
-  TraverseFilter();
-  ~TraverseFilter();
+  TasDataFilter();
+  ~TasDataFilter();
 
-  void initialize(bool excludeProperties, QStringList attrBlackList, QStringList attrWhiteList, 
-				  QStringList pluginBlackList, QStringList pluginWhiteList);
+  void initialize(TasCommand* command);
   void clear();
+
   bool filterPlugin(const QString& pluginName);
   bool includeAttribute(const QString& attributeName);
   bool filterProperties();
@@ -84,8 +83,6 @@ public:
 private:	
   QStringList mAttributeWhiteList;
   QStringList mAttributeBlackList;
-  QStringList mPluginBlackList;
-  QStringList mPluginWhiteList;
   bool mExcludeProperties;
 
 };

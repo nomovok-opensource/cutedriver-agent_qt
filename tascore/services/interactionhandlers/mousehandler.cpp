@@ -41,10 +41,7 @@ MouseHandler::MouseHandler()
 
 MouseHandler::~MouseHandler()
 {
-    QHashIterator<QString, QList<int>*> i(mTouchIds);
-    while (i.hasNext()) {
-        delete i.next();
-    }
+    qDeleteAll(mTouchIds);
     mTouchIds.clear();
 }
   

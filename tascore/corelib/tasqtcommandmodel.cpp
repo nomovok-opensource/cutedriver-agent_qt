@@ -205,7 +205,7 @@ TasTarget::TasTarget(const TasTarget& target)
     setType(target.type());
     QListIterator<TasCommand*> i(target.commandList());
     while (i.hasNext()){        
-        commands.append(new TasCommand(*i.next()));  
+        mCommands.append(new TasCommand(*i.next()));  
     }
 }
 
@@ -214,16 +214,13 @@ TasTarget::TasTarget(const TasTarget& target)
 */
 TasTarget::~TasTarget()
 {
-    QMutableListIterator<TasCommand*> i(commands);
-    while (i.hasNext()){
-         delete i.next();
-    }
-    commands.clear();
+    qDeleteAll(mCommands);
+    mCommands.clear();
 }
 
 QList<TasCommand*> TasTarget::commandList() const
 {
-    return commands;
+    return mCommands;
 }
 
 /*!
@@ -250,7 +247,7 @@ TasCommand* TasTarget::findCommand(const QString& commandName)
 TasCommand& TasTarget::addCommand(const QString& name)
 {
     TasCommand* command = new TasCommand(name);
-    commands.append(command);
+    mCommands.append(command);
     return *command;
 }
 
@@ -259,7 +256,7 @@ TasCommand& TasTarget::addCommand(const QString& name)
 */
 void TasTarget::setId(const QString& id)
 {
-    targetId = id;
+    mTargetId = id;
 }
 
 /*!
@@ -267,7 +264,7 @@ void TasTarget::setId(const QString& id)
 */
 void TasTarget::setType(const QString& type)
 {
-    targetType = type;
+    mTargetType = type;
 }
 
 /*!
@@ -275,7 +272,7 @@ void TasTarget::setType(const QString& type)
 */
 QString TasTarget::id() const 
 {
-    return targetId;
+    return mTargetId;
 }
 
 /*!
@@ -283,7 +280,7 @@ QString TasTarget::id() const
 */
 QString TasTarget::type() const 
 {
-    return targetType;
+    return mTargetType;
 }
 
 
@@ -311,16 +308,13 @@ TasCommandModel::TasCommandModel()
 */
 TasCommandModel::~TasCommandModel()
 {
-    QMutableListIterator<TasTarget*> i(targets);
-    while (i.hasNext()){
-         delete i.next();
-    }
-    targets.clear();    
+    qDeleteAll(mTargets);
+    mTargets.clear();    
 }    
 
 QList<TasTarget*> TasCommandModel::targetList()
 {
-    return targets;
+    return mTargets;
 }
 
 /*!
@@ -346,7 +340,7 @@ TasTarget* TasCommandModel::findTarget(const QString& id)
 TasTarget& TasCommandModel::addTarget(const QString& id)
 {
     TasTarget* target = new TasTarget(id);
-    targets.append(target);
+    mTargets.append(target);
     return *target;
 }
 

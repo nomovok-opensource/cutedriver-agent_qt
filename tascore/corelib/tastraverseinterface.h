@@ -27,9 +27,10 @@
 #include <QGraphicsItem>
 
 #include "tasqtdatamodel.h"
-#include "tasbasetraverse.h"
+#include "tasqtcommandmodel.h"
+//#include "tasbasetraverse.h"
 
-class TasCommand;
+//class TasCommand;
 
 /*!
     \class TasHelperInterface
@@ -39,7 +40,7 @@ class TasCommand;
     build a plugin component that implements this interface to add special details to components 
     being traversed. 
 */
-class TasTraverseInterface : public TasBaseTraverse
+class TasTraverseInterface
  {
  public:
      virtual ~TasTraverseInterface() {}
@@ -49,23 +50,25 @@ class TasTraverseInterface : public TasBaseTraverse
       reference. All default details will be added to the TasObject data container
       by the framework.     
      */
-	  virtual void traverseObject(TasObject* , QObject* , TasCommand* = 0){} 
+	  virtual void traverseObject(TasObject* , QObject* ,TasCommand* = 0) = 0;
 
      /*!     
       Traverse the graphicsitem by adding the special details to the given TasObject
       reference. All default details will be added to the TasObject data container
       by the framework.           
      */
-	  virtual void traverseGraphicsItem(TasObject* , QGraphicsItem* , TasCommand*  = 0){}
+	  virtual void traverseGraphicsItem(TasObject* , QGraphicsItem* , TasCommand*  = 0) = 0;
 
 	  /*!
-		Used to identify the plugins
+		Called at the start of each traversing. Can be used to set detials as the filter
+		to be used for the traversing of one ui state.
 	   */
-	  void setPluginName(const QString& pluginName){mPluginName=pluginName;}
-	  QString getPluginName(){return mPluginName;}
-	  
-protected:
-	  QString mPluginName;
+	  virtual void beginTraverse(TasCommand*){};
+
+	  /*!
+		Called at the end of each traversing. Use to clear the filter if one used.
+	   */
+	  virtual void endTraverse(){};
 
 };
 

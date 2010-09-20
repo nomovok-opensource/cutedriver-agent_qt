@@ -45,14 +45,8 @@ TasSignalSpy::TasSignalSpy(QObject * object, const char * signal, TasObjectConta
 // destructor
 TasSignalSpy::~TasSignalSpy()
 {
-    delete mSignalSpy;
-    if(!mTraversers.isEmpty()){
-        QMutableListIterator<TasTraverseInterface*> i(mTraversers);
-        while (i.hasNext()){
-            delete i.next();
-        }
-        mTraversers.clear();
-    }
+    delete mSignalSpy;    
+    mTraversers.clear();
 }
 
 void TasSignalSpy::setTarget(QObject* target)
@@ -91,9 +85,11 @@ void TasSignalSpy::signalHasOccured()
 
     if(mTraverseSender){
         TasObject& targetObj = signalData.addObject();
-        for (int i = 0; i < mTraversers.size(); i++) {
-            mTraversers.at(i)->traverseObject(&targetObj, mTarget);
-        }            
+        QHashIterator<QString, TasTraverseInterface*> i(mTraversers);
+        while (i.hasNext()) {
+            i.next();
+            i.value()->traverseObject(&targetObj, mTarget);
+        }
     }
 }
 

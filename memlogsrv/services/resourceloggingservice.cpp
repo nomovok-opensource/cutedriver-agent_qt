@@ -171,7 +171,6 @@ int ResourceLoggingService::stopLogging(
         returnData = true;
     }
     
-    int i = 0;
     bool foundAny = false;
     QMutableListIterator<ResourceLoggingTimer*> iter(mLoggingTimers);
     while (iter.hasNext()) {

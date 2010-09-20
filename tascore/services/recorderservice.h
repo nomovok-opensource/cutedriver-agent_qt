@@ -50,7 +50,7 @@ private:
 	TasDataModel* mTasModel;
 	TasObject* mTasEvents; 
 	int eventCounter;
-	QList<TasTraverseInterface*> mTraversers;
+	QHash<QString, TasTraverseInterface*> mTraversers;
 };
 
 #endif

@@ -26,11 +26,11 @@
 #include <QString>
 #include <QHash>
 
-static const QString OBJECT_TYPE = "__fixture_object_type";
-static const QString WIDGET_TYPE = "QWidget";
-static const QString GRAPHICS_ITEM_TYPE = "QGraphicsItem";
-static const QString APPLICATION_TYPE = "QApplication";
-static const QString NULL_TYPE = "Null";
+const char* const OBJECT_TYPE = "__fixture_object_type";
+const char* const WIDGET_TYPE = "QWidget";
+const char* const GRAPHICS_ITEM_TYPE = "QGraphicsItem";
+const char* const APPLICATION_TYPE = "QApplication";
+const char* const NULL_TYPE = "Null";
 
 class TasFixturePluginInterface  
 {

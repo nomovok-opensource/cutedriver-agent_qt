@@ -52,13 +52,27 @@ Q_EXPORT_PLUGIN2(webkittraverse, WebKitTraverse)
 WebKitTraverse::WebKitTraverse(QObject* parent)
     :QObject(parent), counter(0)
 {
+    mTraverseUtils = new TasTraverseUtils();
 }
 
 /*!
     Destructor
 */
 WebKitTraverse::~WebKitTraverse()
-{}
+{
+    delete mTraverseUtils;
+}
+
+void WebKitTraverse::beginTraverse(TasCommand* command)
+{
+    mTraverseUtils->createFilter(command);
+}
+
+void WebKitTraverse::endTraverse()
+{
+    mTraverseUtils->clearFilter();
+}
+
 
 /*!
   Traverse graphicsitem(widget) for web kit
@@ -230,7 +244,7 @@ void WebKitTraverse::traverseQGraphicsWebView(TasObject* objectInfo, QGraphicsWe
 //    QPoint webViewPos = webView->mapTo(webView->window(), QPoint(0, 0));
 
 
-    QPair<QPoint,QPoint>  coords = addGraphicsItemCoordinates(objectInfo, webView, command);
+    QPair<QPoint,QPoint>  coords = mTraverseUtils->addGraphicsItemCoordinates(objectInfo, webView, command);
     if(webPage) {
         //TasLogger::logger()->debug("WebKitTaverse::traverseObject QWebPage != null");
         TasObject& pageInfo = objectInfo->addObject();

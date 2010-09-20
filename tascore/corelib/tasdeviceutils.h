@@ -24,7 +24,6 @@
 
 #include "tasconstants.h"
 #include "tasqtdatamodel.h"
-#include "tasbasetraverse.h"
 
 #include <QEvent>
 #include <QProcess>

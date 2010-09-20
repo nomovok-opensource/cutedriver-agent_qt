@@ -20,15 +20,14 @@
 HEADERS += $$PWD/tastraverseinterface.h 
 HEADERS += $$PWD/tasservicebase.h 
 HEADERS += $$PWD/tasservicemanager.h 
-HEADERS += $$PWD/tasbasetraverse.h 
 HEADERS += $$PWD/testabilityservice.h 
 HEADERS += $$PWD/testabilityutils.h 
 HEADERS += $$PWD/tastraverserloader.h 
 HEADERS += $$PWD/tasuitraverser.h 
+HEADERS += $$PWD/tastraverseutils.h
 
-SOURCES += $$PWD/tasbasetraverse.cpp 
 SOURCES += $$PWD/testabilityservice.cpp 
 SOURCES += $$PWD/testabilityutils.cpp 
 SOURCES += $$PWD/tastraverserloader.cpp
 SOURCES += $$PWD/tasuitraverser.cpp
-
+SOURCES += $$PWD/tastraverseutils.cpp

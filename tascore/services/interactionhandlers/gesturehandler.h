@@ -24,7 +24,6 @@
 
 #include <QApplication>
 #include <QObject>
-#include <QTimeLine>
 #include <QLineF>
 #include <QList>
 

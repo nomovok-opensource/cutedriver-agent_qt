@@ -36,18 +36,13 @@
 
 */    
 
-EventService::EventService(QObject* parent)
-    :QObject(parent)
+EventService::EventService()
 {
 }
 
 EventService::~EventService()
 {
-    QHashIterator<QString, TasEventFilter*> i(mEventFilters);
-    while (i.hasNext()) {
-        i.next();
-        delete i.value();
-    }
+    qDeleteAll(mEventFilters);
     mEventFilters.clear();
 }
 
@@ -127,7 +122,7 @@ void EventService::enableEvents(QString targetId, QObject* target, QStringList e
         filter = mEventFilters.value(targetId);
     }
     else{
-        filter = new TasEventFilter(target, this);
+        filter = new TasEventFilter(target);
         mEventFilters.insert(targetId, filter);
     }
     filter->startFiltering(eventsToListen);
@@ -169,7 +164,7 @@ TasEventFilter* EventService::getFilterForTarget(TasTarget* commandTarget, bool 
             target= qApp;
         }    
         if(target){
-            filter = new TasEventFilter(target, this);
+            filter = new TasEventFilter(target);
             mEventFilters.insert(targetId, filter);
         }
     }

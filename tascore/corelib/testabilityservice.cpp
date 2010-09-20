@@ -36,11 +36,9 @@
 #include "platformservice.h"
 #include "infoservice.h"
 
-TestabilityService *TestabilityService::mInstance = 0;
-
-static const int SERVER_REGISTRATION_TIMEOUT = 12000;
-static const int REGISTER_INTERVAL = 300;
-static const int PAINT_EVENT_LIMIT = 10;
+const int SERVER_REGISTRATION_TIMEOUT = 12000;
+const int REGISTER_INTERVAL = 300;
+const int PAINT_EVENT_LIMIT = 10;
 
 
 /*!
@@ -66,23 +64,50 @@ extern "C" TAS_EXPORT void qt_testability_init()
         return;
 	}	
 
-    /* If autostart on make sure server running */
-    if(TestabilityUtils::autostart()){
-        TasCoreUtils::startServer();
-    }
-
     QVariant prop = qApp->property(PLUGIN_ATTR);
     if(prop.isValid() && prop.toBool()){
         return;
     }
 
-    qApp->setProperty(PLUGIN_ATTR, QVariant(true));
-
-    QString id = QString::number(qApp->applicationPid());
-    QString name = TestabilityUtils::getApplicationName();
-    TestabilityService::instance();
+    /* If autostart on make sure server running */
+    if(TestabilityUtils::autostart()){
+        TasCoreUtils::startServer();
+    }
+    TestabilityLoader *loader = new TestabilityLoader();
+    loader->load();
 }
 
+TestabilityLoader::TestabilityLoader()
+{
+    TasLogger::logger()->setLogFile(TestabilityUtils::getApplicationName()+".log");    
+    TasLogger::logger()->setLevel(DEBUG); 
+    mService = 0;
+    connect(qApp, SIGNAL(aboutToQuit()), this, SLOT(unload()));
+}
+
+void TestabilityLoader::load()
+{
+    //set prop for app that dll loaded
+    qApp->setProperty(PLUGIN_ATTR, QVariant(true));
+    mService = new TestabilityService();
+    TasLogger::logger()->info("TestabilityLoader::intialized"); 
+}
+
+void TestabilityLoader::unload()
+{    
+    if(mService){
+        qDebug("TestabilityLoader::remove testability");
+        QVariant prop = qApp->property(CLOSE_REQUESTED);
+        if(!prop.isValid() || !prop.toBool()){
+            mService->unReqisterServicePlugin();
+        }
+        delete mService;
+        mService = 0;
+    }
+    TasLogger::logger()->removeLogger();
+    qDebug("TestabilityLoader::removed");
+    deleteLater();
+}
 
 
 
@@ -92,28 +117,21 @@ extern "C" TAS_EXPORT void qt_testability_init()
 TestabilityService::TestabilityService(QObject* parent)
     : QObject(parent)
 {        
-
     mMessageId = 0;
     mPaintEventCounter = 0;
+    mServiceManager = 0;
 
-    QString appName = TestabilityUtils::getApplicationName();
-    TasLogger::logger()->setLogFile(appName+".log");                                                                                                                          
-    TasLogger::logger()->setLevel(DEBUG);                              
-    TasLogger::logger()->info("TestabilityService::TestabilityService initialized"); 
     mConnected = false;
     mRegistered = false;   
-    mMarkedForDeletion = false;
        
     mPluginId = QString::number(qApp->applicationPid());
-
-    connect(qApp, SIGNAL(aboutToQuit()), this, SLOT(aboutToExit()));
 
     initializeServiceManager();
     initializeConnections();
 
     mRegisterTime.setSingleShot(true);
     connect(&mRegisterTime, SIGNAL(timeout()), this, SLOT(timeout()));
-    loadStartUpParams(appName);
+    loadStartUpParams(TestabilityUtils::getApplicationName());
 
     mRegisterWatchDog.setSingleShot(true);
 
@@ -125,7 +143,6 @@ TestabilityService::TestabilityService(QObject* parent)
     //After 5 secs force register
     mRegisterWatchDog.start(5000);
     connect(&mRegisterWatchDog, SIGNAL(timeout()), this, SLOT(registerPlugin()));
-
 }
 
 void TestabilityService::initializeConnections()
@@ -141,53 +158,31 @@ void TestabilityService::initializeConnections()
 
 }
 
-TestabilityService* TestabilityService::instance()
-{
-    if(mInstance == 0){
-        mInstance = new TestabilityService();
-    }
-    return mInstance;
-}
-
-void TestabilityService::closeApplication()
-{
-    TasLogger::logger()->debug("TestabilityService::closeApplication");
-    prepareForDeletion();
-    TasLogger::logger()->debug("TestabilityService::closeApplication quit app");
-    qApp->quit();                
-}
-
-void TestabilityService::prepareForDeletion()
-{
-    if(!mMarkedForDeletion){
-        mMarkedForDeletion = true;
-        mRegisterTime.stop();
-        mRegisterWatchDog.stop();
-        mRegistered = false;
-        if(mConnected){
-            mConnected = false;       
-            mSocket->closeConnection();     
-        }
-    }
-}
-
-
 /*!
     Destructor for TestabilityService
  */
 TestabilityService::~TestabilityService()
 {
-    if(mServiceManager){
-        delete mServiceManager;
-        mServiceManager = 0;
-    }
+    mRegisterTime.stop();
+    mRegisterWatchDog.stop();
+    mPaintTracker.stop();
+
+    mEventService = 0;
+    mFixtureService = 0;
     if(mSocket){
+        disconnect(mSocket, SIGNAL(socketClosed()), this, SLOT(connectionClosed()));
+        mSocket->clearHandlers();
+        mSocket->closeConnection();     
         delete mSocket;
         mSocket = 0;
     }
     if(mServerConnection){
         delete mServerConnection;    
         mServerConnection = 0;
+    }
+    if(mServiceManager){
+        delete mServiceManager;
+        mServiceManager = 0;
     }
 }
 
@@ -206,11 +201,6 @@ TestabilityService::~TestabilityService()
  */
 void TestabilityService::registerPlugin()
 {
-    //make sure that no register attemps made if marked for deletion
-    if(mMarkedForDeletion){
-        return;
-    }
-
     //remove paint tracking, paint tracking only on startup after this rely on the watchdog
     qApp->removeEventFilter(this);
 
@@ -229,14 +219,6 @@ void TestabilityService::registerPlugin()
 #else
         mServerConnection->connectToServer(LOCAL_SERVER_NAME);
 #endif   
-        // extern char**environ;
-        // int i = 0;
-        // for(i; environ[i]!=NULL; i++) {
-        //     TasLogger::logger()->info("TestabilityService::env: " + QString(environ[i]));
-        // }
-        
-
-
     }
 }
 
@@ -282,14 +264,11 @@ void TestabilityService::connectionClosed()
 #ifdef Q_OS_SYMBIAN
     mSocket->closeConnection();
 #else
-    if(!mMarkedForDeletion){   
-        //make new connections
-        delete mSocket;
-        delete mServerConnection;
-        initializeConnections();
-    }
+    //make new connections
+    delete mSocket;
+    delete mServerConnection;
+    initializeConnections();
 #endif
-
     mRegisterWatchDog.start(SERVER_REGISTRATION_TIMEOUT);     
     emit unRegistered();
 }
@@ -318,11 +297,6 @@ void TestabilityService::timeout()
     connectionClosed();
 }
 
-void TestabilityService::aboutToExit()
-{
-    unReqisterServicePlugin();     
-}
-
 /*!
  
     Sends an unregister message to the TasServer.
@@ -341,9 +315,7 @@ void TestabilityService::unReqisterServicePlugin()
         mMessageId++;
         mSocket->sendRequest(mMessageId, message);
         mRegistered = false;        
-        emit unRegistered();
     }
-    prepareForDeletion();
 }
 
 
@@ -374,21 +346,22 @@ QString TestabilityService::makeReqisterMessage(QString command, QMap<QString,QS
 
 void TestabilityService::initializeServiceManager()
 {
+
     mServiceManager = new TasServiceManager();
-    mEventService = new EventService();
-    mFixtureService = new FixtureService();
-    //initialize service
-    mServiceManager->registerCommand(mEventService);
-    mServiceManager->registerCommand(mFixtureService);
-    mServiceManager->registerCommand(new UiStateService());
     mServiceManager->registerCommand(new CloseAppService());    
+    mServiceManager->registerCommand(new ConfService());
+    mServiceManager->registerCommand(new InfoService());
     mServiceManager->registerCommand(new ObjectService());
     mServiceManager->registerCommand(new ScreenshotService());
     mServiceManager->registerCommand(new UiCommandService());
-    mServiceManager->registerCommand(new RecorderService());
-    mServiceManager->registerCommand(new ConfService());
     mServiceManager->registerCommand(new WebkitCommandService());
-    mServiceManager->registerCommand(new InfoService());
+    mServiceManager->registerCommand(new UiStateService());
+    mServiceManager->registerCommand(new RecorderService());    
+
+    mEventService = new EventService();
+    mServiceManager->registerCommand(mEventService);
+    mFixtureService = new FixtureService();
+    mServiceManager->registerCommand(mFixtureService);
 }
 
 void TestabilityService::loadStartUpParams(QString appName)

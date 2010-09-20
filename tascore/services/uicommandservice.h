@@ -42,10 +42,9 @@ class InteractionHandler : public TestabilityUtils
 {
 public:
   virtual ~InteractionHandler(){};
- 
+
   virtual bool executeInteraction(TargetData data) = 0;
   virtual bool executeMultitouchInteraction(QList<TargetData> dataList){return false;}
- 
 };
 
 

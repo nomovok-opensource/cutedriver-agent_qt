@@ -23,14 +23,14 @@
 #define TASTRAVERSERLOADER_H
 
 #include <QObject>
-#include <QList>
+#include <QHash>
 #include "tastraverseinterface.h"
 #include "taspluginloader.h"
 
 class TAS_EXPORT TasTraverserLoader : public TasPluginLoader
 {
 public:
-   QList<TasTraverseInterface*> loadTraversers();
+   QHash<QString, TasTraverseInterface*> loadTraversers();
 };
 
 #endif

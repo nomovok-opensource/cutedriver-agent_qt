@@ -22,9 +22,9 @@
 #ifndef CLOSEAPPSERVICE_H
 #define CLOSEAPPSERVICE_H
 
-#include <QTimer>
-
 #include "tasservicebase.h"
+
+const char* const CLOSE_REQUESTED = "tas_do_close";
 
 class CloseAppService : public TasServiceBase 
 {

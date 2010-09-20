@@ -56,13 +56,10 @@ UiCommandService::UiCommandService(QObject* parent)
 
 UiCommandService::~UiCommandService()
 {
-    while (!mCommandQueue.isEmpty()){
-        delete mCommandQueue.takeFirst();
-    } 
-    QMutableListIterator<InteractionHandler*> i(mInteractionHandlers);
-    while (i.hasNext()){
-        delete i.next();
-    }
+    mTimer.stop();
+    qDeleteAll(mCommandQueue);
+    mCommandQueue.clear();
+    qDeleteAll(mInteractionHandlers);
     mInteractionHandlers.clear();   
 }
 

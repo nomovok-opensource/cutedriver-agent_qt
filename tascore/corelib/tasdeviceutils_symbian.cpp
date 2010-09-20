@@ -102,6 +102,7 @@ qreal TasDeviceUtils::currentProcessCpuTime()
 */
 void TasDeviceUtils::addSystemInformation(TasObject& object)
 {
+    Q_UNUSED(object);
     TasLogger::logger()->debug("TasDeviceUtils::addSystemInformation");
     // #if ( NCP_COMMON_BRANCH_IN_USE == MCL )
     //     TasBaseTraverse traverser;
@@ -132,6 +133,10 @@ void TasDeviceUtils::addSystemInformation(TasObject& object)
 
 void TasDeviceUtils::sendMouseEvent(int x, int y, Qt::MouseButton button, QEvent::Type type)
 {
+    Q_UNUSED(x);   
+    Q_UNUSED(y);   
+    Q_UNUSED(button);   
+    Q_UNUSED(type);   
 }
 
 /*!
@@ -143,14 +148,19 @@ bool TasDeviceUtils::isServerRunning()
     bool running = false;
     TFindProcess findProcess;
     TFullName processName;
-    while ( findProcess.Next( processName ) == KErrNone ){        
+    while ( findProcess.Next( processName ) == KErrNone){        
         if ( ( processName.Find( KQTasServerName ) != KErrNotFound ) ){
             RProcess process;
             TInt err = process.Open( findProcess );
-            if( err == KErrNone){
-                running = true;
+            if( err == KErrNone){                
+                //make sure the process alive
+                if( process.ExitType() == EExitPending ){
+                    running = true;
+                }
                 process.Close();
-                break;
+                if(running){
+                    break;
+                }
             }              
         }
     }

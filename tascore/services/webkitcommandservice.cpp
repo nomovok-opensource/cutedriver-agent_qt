@@ -43,8 +43,8 @@
 
 */    
 
-WebkitCommandService::WebkitCommandService(QObject* parent)
-    :QObject(parent), counter(0)
+WebkitCommandService::WebkitCommandService()
+    :counter(0)
 {}
 
 WebkitCommandService::~WebkitCommandService()

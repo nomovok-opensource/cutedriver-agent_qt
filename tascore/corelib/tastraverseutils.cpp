@@ -22,13 +22,39 @@
 #include <QTextCodec>
 
 #include "testabilityutils.h"
-#include "tasbasetraverse.h"
+#include "tastraverseutils.h"
 #include "taslogger.h"
 
-TasBaseTraverse::~TasBaseTraverse()
-{}
+TasTraverseUtils::TasTraverseUtils()
+{
+    mTraverseFilter = new TasDataFilter();
+    
+}
 
-void TasBaseTraverse::addObjectDetails(TasObject* objectInfo, QObject* object)
+TasTraverseUtils::~TasTraverseUtils()
+{    
+    delete mTraverseFilter;
+}
+
+/*!
+ * Createst a filter from the given data. A filter must always be cleared
+ * after use.
+ */
+void TasTraverseUtils::createFilter(TasCommand* command)
+{
+    mTraverseFilter->initialize(command);
+}
+
+/*!
+  Clears the filter.
+ */
+void TasTraverseUtils::clearFilter()
+ {    
+    mTraverseFilter->clear(); 
+}
+
+
+void TasTraverseUtils::addObjectDetails(TasObject* objectInfo, QObject* object)
 {
     objectInfo->setId(TasCoreUtils::objectId(object));
 
@@ -47,7 +73,7 @@ void TasBaseTraverse::addObjectDetails(TasObject* objectInfo, QObject* object)
 }
 
 
-QString TasBaseTraverse::getParentId(QObject* object)
+QString TasTraverseUtils::getParentId(QObject* object)
 {
     QString parentId;
     QGraphicsWidget* go = qobject_cast<QGraphicsWidget*>(object);
@@ -63,7 +89,7 @@ QString TasBaseTraverse::getParentId(QObject* object)
 }
 
 
-void TasBaseTraverse::addVariantValue(TasAttribute& attr, const QVariant& value) 
+void TasTraverseUtils::addVariantValue(TasAttribute& attr, const QVariant& value) 
 {
     switch (value.type()) {
     case QVariant::Size:
@@ -105,7 +131,7 @@ void TasBaseTraverse::addVariantValue(TasAttribute& attr, const QVariant& value)
 /*
   Print metadata details to the model.
 */
-void TasBaseTraverse::printProperties(TasObject* objectInfo, QObject* object)
+void TasTraverseUtils::printProperties(TasObject* objectInfo, QObject* object)
 {            
     const QMetaObject *metaobject = object->metaObject();
     int count = metaobject->propertyCount();
@@ -165,7 +191,7 @@ void TasBaseTraverse::printProperties(TasObject* objectInfo, QObject* object)
 /*!
   Adds font details to the item. The prefix can be used in situations where one item can have multiple fonts.
  */
-void TasBaseTraverse::addFont(TasObject* objectInfo, QFont font)
+void TasTraverseUtils::addFont(TasObject* objectInfo, QFont font)
 {
     if(includeAttribute("fontKey")){
         objectInfo->addAttribute("fontKey", font.key());
@@ -211,7 +237,7 @@ void TasBaseTraverse::addFont(TasObject* objectInfo, QFont font)
     }
 }
 
-bool TasBaseTraverse::includeAttribute(const QString& attributeName)
+bool TasTraverseUtils::includeAttribute(const QString& attributeName)
 {
     if(mTraverseFilter){
         return mTraverseFilter->includeAttribute(attributeName);
@@ -219,20 +245,7 @@ bool TasBaseTraverse::includeAttribute(const QString& attributeName)
     return true;
 }
 
-/*!
- * Ownership is not taken.
- */
-void TasBaseTraverse::setFilter(TraverseFilter* traverseFilter)
-{
-    mTraverseFilter = traverseFilter;
-}
-
-void TasBaseTraverse::resetFilter()
-{    
-    mTraverseFilter = 0;   
-}
-
-QPair<QPoint,QPoint> TasBaseTraverse::addGraphicsItemCoordinates(TasObject* objectInfo, 
+QPair<QPoint,QPoint> TasTraverseUtils::addGraphicsItemCoordinates(TasObject* objectInfo, 
                                                                  QGraphicsItem* graphicsItem, 
                                                                  TasCommand* command)
 {   
@@ -275,7 +288,7 @@ QPair<QPoint,QPoint> TasBaseTraverse::addGraphicsItemCoordinates(TasObject* obje
   Add details about the text into the attribute. Including elide and coded details.
   Add the elided text, e.g. "This is a long text" -> "This is a long ...", into attributes 
 */
-void TasBaseTraverse::addTextInfo(TasObject* objectInfo, const QString& text, 
+void TasTraverseUtils::addTextInfo(TasObject* objectInfo, const QString& text, 
                                   const QFont& font, qreal width, Qt::TextElideMode mode)
 {
     QFontMetricsF metrics(font);
@@ -294,58 +307,89 @@ void TasBaseTraverse::addTextInfo(TasObject* objectInfo, const QString& text,
 }
 
 
-TraverseFilter::TraverseFilter()
+/*! 
+    Print graphicsitem details that could be usable to the model.
+*/
+void TasTraverseUtils::printGraphicsItemProperties(TasObject* objectInfo, QGraphicsItem* graphicsItem)
+{       
+    if(mTraverseFilter->includeAttribute("visible")){
+        objectInfo->addBooleanAttribute("visible", graphicsItem->isVisible());
+    }
+    if(mTraverseFilter->includeAttribute("enabled")){
+        objectInfo->addBooleanAttribute("enabled", graphicsItem->isEnabled());
+    }
+    if(mTraverseFilter->includeAttribute("selected")){
+        objectInfo->addBooleanAttribute("selected", graphicsItem->isSelected());
+    }
+    if(mTraverseFilter->includeAttribute("obscured")){
+        objectInfo->addBooleanAttribute("obscured", graphicsItem->isObscured());
+    }
+    if(mTraverseFilter->includeAttribute("focus")){
+        objectInfo->addBooleanAttribute("focus", graphicsItem->hasFocus());
+    }
+    if(mTraverseFilter->includeAttribute("under-mouse")){
+        objectInfo->addBooleanAttribute("under-mouse", graphicsItem->isUnderMouse());
+    }
+    if(mTraverseFilter->includeAttribute("droppable")){
+        objectInfo->addBooleanAttribute("droppable", graphicsItem->acceptDrops());
+    }
+    if(mTraverseFilter->includeAttribute("hoverable")){
+        objectInfo->addBooleanAttribute("hoverable", graphicsItem->acceptHoverEvents());    
+    }
+    if(mTraverseFilter->includeAttribute("tooltip")){
+        objectInfo->addAttribute("tooltip", graphicsItem->toolTip());   
+    }
+    if(mTraverseFilter->includeAttribute("z-value")){
+        objectInfo->addAttribute("z-value", QString::number(graphicsItem->zValue()));   
+    }
+}
+
+
+TasDataFilter::TasDataFilter()
 {
     mExcludeProperties = true;    
 }
 
-TraverseFilter::~TraverseFilter()
+TasDataFilter::~TasDataFilter()
 {
     clear();
 }
 
-void TraverseFilter::initialize(bool excludeProperties, QStringList attrBlackList, QStringList attrWhiteList, 
-                                QStringList pluginBlackList, QStringList pluginWhiteList)
+void TasDataFilter::initialize(TasCommand* command)
 {   
-    mExcludeProperties = excludeProperties;
-    mAttributeWhiteList = attrWhiteList;
-    mAttributeBlackList = attrBlackList;
-    mPluginBlackList = pluginBlackList;
-    mPluginWhiteList = pluginWhiteList;
+    clear();
+    if(!command){
+        return;
+    }
+    //if the command contains filtering instructions
+    //set the them for all traverser plugins
+    QStringList attributeBlackList;
+    if(!command->apiParameter("attributeBlackList").isEmpty()){
+         mAttributeBlackList = command->apiParameter("attributeBlackList").split(",");
+    }
+    QStringList attributeWhiteList;
+    if(!command->apiParameter("attributeWhiteList").isEmpty()){
+        mAttributeWhiteList = command->apiParameter("attributeWhiteList").split(",");
+    }    
+    mExcludeProperties = false;
+    if(command->apiParameter("filterProperties") =="true"){
+        mExcludeProperties = true;
+    }
 }
 
-void TraverseFilter::clear()
+void TasDataFilter::clear()
 {
     mAttributeWhiteList.clear();
     mAttributeBlackList.clear();
-    mPluginBlackList.clear();
-    mPluginWhiteList.clear();
     mExcludeProperties = true;    
 }
 
-bool TraverseFilter::filterPlugin(const QString& pluginName)
-{
-    bool filter = true;
-
-    if(mPluginWhiteList.isEmpty() && mPluginBlackList.isEmpty()){
-        filter = false;
-    }
-    //black list is valued higher than white list
-    else if(mPluginWhiteList.contains(pluginName) && !mPluginBlackList.contains(pluginName)){
-        filter = false;
-    }    
-    else if(mPluginWhiteList.isEmpty() && !mPluginBlackList.contains(pluginName)){
-        filter = false;
-    }
-    return filter;
-}
-
-bool TraverseFilter::filterProperties()
+bool TasDataFilter::filterProperties()
 {
     return mExcludeProperties;
 }
 
-bool TraverseFilter::includeAttribute(const QString& attributeName)
+bool TasDataFilter::includeAttribute(const QString& attributeName)
 {
     bool include = false;
     if(mAttributeWhiteList.isEmpty() && mAttributeBlackList.isEmpty()){

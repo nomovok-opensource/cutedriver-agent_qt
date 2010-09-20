@@ -27,20 +27,20 @@
 #include "tasqtdatamodel.h"
 
 //xml strings
-static const QString VERSION = "version";
-static const QString DATE_TIME = "dateTime";
-static const QString NAME = "name";
-static const QString TYPE = "type";
-static const QString DATA_TYPE = "dataType";
-static const QString ID = "id";
-static const QString ROOT_NAME = "tasMessage";
-static const QString CONTAINER_NAME = "tasInfo";
-static const QString OBJECT_NAME = "object";
-static const QString OBJECTS_NAME = "objects";
-static const QString ATTRIBUTE_NAME = "attribute";
-static const QString ATTRIBUTES_NAME = "attributes";
-static const QString VALUE_NAME = "value";
-static const QString PARENT = "parent";
+const char* const VERSION = "version";
+const char* const DATE_TIME = "dateTime";
+const char* const NAME = "name";
+const char* const TYPE = "type";
+const char* const DATA_TYPE = "dataType";
+const char* const ID = "id";
+const char* const ROOT_NAME = "tasMessage";
+const char* const CONTAINER_NAME = "tasInfo";
+const char* const OBJECT_NAME = "object";
+const char* const OBJECTS_NAME = "objects";
+const char* const ATTRIBUTE_NAME = "attribute";
+const char* const ATTRIBUTES_NAME = "attributes";
+const char* const VALUE_NAME = "value";
+const char* const PARENT = "parent";
 
 
 /*!
@@ -202,16 +202,9 @@ TasObject::TasObject()
 */
 TasObject::~TasObject()
 {
-    QMutableListIterator<TasAttribute*> i(attributes);
-    while (i.hasNext()){
-        delete i.next();
-    }
+    qDeleteAll(attributes);
     attributes.clear();
-    
-    QMutableListIterator<TasObject*> j(objects);
-    while (j.hasNext()){
-        delete j.next();
-    }
+    qDeleteAll(objects);    
     objects.clear(); 
 }
 
@@ -468,10 +461,7 @@ TasObjectContainer::TasObjectContainer()
 
 TasObjectContainer::~TasObjectContainer()
 {
-    QMutableListIterator<TasObject*> i(objects);
-    while (i.hasNext()){
-        delete i.next();
-    }
+    qDeleteAll(objects);
     objects.clear();        
 }
 
@@ -592,10 +582,7 @@ TasDataModel::~TasDataModel()
 */
 void TasDataModel::clearModel()
 {
-    QMutableListIterator<TasObjectContainer*> i(containers);
-    while (i.hasNext()){
-        delete i.next();
-    }
+    qDeleteAll(containers);
     containers.clear();        
 }
 

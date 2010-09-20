@@ -43,9 +43,8 @@
 
     All plugin load functions may return null if no plugin can be loaded.
 
-    The plugin loader class will store the plugins in a cache so they will only
-    be loaded once. Therefore it is advised that this class should be used
-    as a class member variable.
+    The plugin loader class will store will unload all of the pluginloaders when deleted.
+    Note that the unload can fail if other loaders are using the same plugin.
 */
 
 static QString FIXTURE_DIR = "tasfixtures";
@@ -62,11 +61,6 @@ TasPluginLoader::TasPluginLoader()
 */
 TasPluginLoader::~TasPluginLoader()
 {
-    QMutableHashIterator<QString, TasFixturePluginInterface*> i(mFixturePlugins);
-    while (i.hasNext()) {            
-        i.next();
-        delete i.value();
-    }
     mFixturePlugins.clear();
 }
 

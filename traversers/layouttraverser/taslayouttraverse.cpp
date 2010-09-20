@@ -44,18 +44,32 @@ Q_EXPORT_PLUGIN2(layouttraverse, TasLayoutTraverse)
 */
 TasLayoutTraverse::TasLayoutTraverse(QObject* parent)
     :QObject(parent)
-{}
+{
+    mTraverseUtils = new TasTraverseUtils();
+}
 
 /*!
     Destructor
 */
 TasLayoutTraverse::~TasLayoutTraverse()
-{}
+{
+    delete mTraverseUtils;
+}
+
+void TasLayoutTraverse::beginTraverse(TasCommand* command)
+{
+    mTraverseUtils->createFilter(command);
+}
+
+void TasLayoutTraverse::endTraverse()
+{
+    mTraverseUtils->clearFilter();
+}
 
 /*!
   Traverse graphicsitem(widget) for possible layout objects
 */
-void TasLayoutTraverse::traverseGraphicsItem(TasObject* objectInfo, QGraphicsItem* graphicsItem, TasCommand*)
+void TasLayoutTraverse::traverseGraphicsItem(TasObject* objectInfo, QGraphicsItem* graphicsItem, TasCommand* command)
 {
     if (graphicsItem->isWindow() || graphicsItem->isWidget()) {
         QGraphicsWidget* widget = (QGraphicsWidget*)graphicsItem;        
@@ -67,7 +81,7 @@ void TasLayoutTraverse::traverseGraphicsItem(TasObject* objectInfo, QGraphicsIte
 /*!
   Traverse object(widget) for possible layout objects
 */
-void TasLayoutTraverse::traverseObject(TasObject* objectInfo, QObject* object, TasCommand* )
+void TasLayoutTraverse::traverseObject(TasObject* objectInfo, QObject* object, TasCommand* command)
 {
     if (object->isWidgetType()){
         QWidget* widget = qobject_cast<QWidget*>(object);            
@@ -75,7 +89,7 @@ void TasLayoutTraverse::traverseObject(TasObject* objectInfo, QObject* object, T
             QLayout* layout = widget->layout();
             if(layout){
                 TasObject& layoutInfo = objectInfo->addObject();
-                addObjectDetails(&layoutInfo, layout);
+                mTraverseUtils->addObjectDetails(&layoutInfo, layout);
                 layoutInfo.addAttribute("count", layout->count());
                 layoutInfo.addBooleanAttribute("enabled", layout->isEnabled());
                 addLayoutItem(layoutInfo, layout);

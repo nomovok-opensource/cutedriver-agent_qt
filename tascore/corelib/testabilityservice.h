@@ -44,17 +44,16 @@
 #include "eventservice.h"
 #include "fixtureservice.h"
 
-class TAS_EXPORT TestabilityService : public QObject, public ResponseHandler
+
+class TestabilityService : public QObject, public ResponseHandler
 {
     Q_OBJECT
 
-private:
+public:
     TestabilityService(QObject *parent = 0);
     ~TestabilityService();
 
 public:
-	static TestabilityService* instance();
-
 	bool eventFilter(QObject *target, QEvent *event);
 
 signals:
@@ -65,8 +64,6 @@ public slots:
 	void registerPlugin();
     void unReqisterServicePlugin();
 	void serviceResponse(TasMessage& response);
-    void aboutToExit();    
-	void closeApplication();
     
 private slots:
 	void sendRegisterMessage();
@@ -82,7 +79,7 @@ private:
 	void initializeConnections();
 
 private:
-    static TestabilityService *mInstance;
+   
  	TasServiceManager* mServiceManager;
 
 #if defined(TAS_NOLOCALSOCKET)
@@ -100,9 +97,25 @@ private:
 	QTimer mRegisterTime;
 	QTimer mRegisterWatchDog;
 	QTimer mPaintTracker;
-	bool mMarkedForDeletion;
 	qint32 mMessageId;
 	int mPaintEventCounter;
 };
+
+
+class TestabilityLoader : public QObject
+{
+  Q_OBJECT
+
+public:
+   TestabilityLoader();
+
+public slots:
+   void load();
+   void unload();
+
+private:
+   TestabilityService *mService;
+};
+
 #endif
 

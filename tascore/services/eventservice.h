@@ -32,10 +32,10 @@
 
 class TasEventFilter;
 
-class EventService : public QObject, public TasServiceBase 
+class EventService : public TasServiceBase 
 {
 public:
-    EventService(QObject* parent = 0);
+    EventService();
 	~EventService();
 
 	/*!
