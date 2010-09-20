@@ -157,8 +157,8 @@ bool TestabilityUtils::verifyGraphicsItemMatch(const QString& targetId, QGraphic
     }
     else{        
         //is object decendant
-        if (source->isWindow() || source->isWidget()) {
-            QObject * object = (QObject*)((QGraphicsWidget*)source);
+        QGraphicsWidget* object = castToGraphicsWidget(source);
+        if (source) {            
             sourceId = TasCoreUtils::objectId(object);
             if (sourceId == targetId){
                 doesMatch = true;                        
@@ -417,3 +417,12 @@ QString TestabilityUtils::graphicsItemId(QGraphicsItem* graphicsItem)
 {
     return QString::number((quintptr)graphicsItem);
 }
+
+QGraphicsWidget* TestabilityUtils::castToGraphicsWidget(QGraphicsItem* graphicsItem)
+{
+    if(graphicsItem && graphicsItem->isWidget()){
+        return static_cast<QGraphicsWidget*>(graphicsItem);
+    }
+    return 0;
+}
+
