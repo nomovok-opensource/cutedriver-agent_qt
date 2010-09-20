@@ -168,7 +168,7 @@ void RecorderService::start()
                     QGraphicsItem* graphicsItem = scene->itemAt(view->mapToScene(position));
                     if(graphicsItem){                        
                         if (graphicsItem->isWindow() || graphicsItem->isWidget()) {
-                            QObject * objectAt = (QObject*)((QGraphicsWidget*)graphicsItem);        
+                            QObject * objectAt = TestabilityUtils::castToGraphicsWidget(graphicsItem);
                             printTargetDetails(objectAt, targetObj);
                         }
                         else{

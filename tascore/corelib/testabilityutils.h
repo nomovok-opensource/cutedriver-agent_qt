@@ -54,6 +54,7 @@ public:
 	static bool isCustomTraverse();
 	static QString graphicsItemId(QGraphicsItem* graphicsItem);
 	static bool autostart();
+	static QGraphicsWidget* castToGraphicsWidget(QGraphicsItem* graphicsItem);
 
 protected:
 	QWidget* findWidget(const QString& id);

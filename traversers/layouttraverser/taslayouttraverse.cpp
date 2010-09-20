@@ -178,9 +178,9 @@ void TasLayoutTraverse::addGraphicsLayoutItem(TasObject& objectInfo, QGraphicsLa
             objectInfo.addAttribute("geometry", geometry);
         }
 
-        if(item->graphicsItem()){
-            if (item->graphicsItem()->isWindow() || item->graphicsItem()->isWidget()) {
-                QObject* qWidget = (QObject*)((QGraphicsWidget*)item->graphicsItem());
+        if(item->graphicsItem()){            
+            QGraphicsWidget* qWidget = TestabilityUtils::castToGraphicsWidget(item->graphicsItem());
+            if(qWidget) {
                 objectInfo.addAttribute("itemId", TasCoreUtils::objectId(qWidget));
             }
             else{

@@ -168,8 +168,8 @@ void TasUiTraverser::traverseObject(TasObject& objectInfo, QObject* object, TasC
 
 void TasUiTraverser::traverseGraphicsItem(TasObject& objectInfo, QGraphicsItem* graphicsItem, TasCommand* command)
 {
-    if (graphicsItem->isWindow() || graphicsItem->isWidget()) {
-        QObject * object = (QObject*)((QGraphicsWidget*)graphicsItem);        
+    QGraphicsWidget* object = TestabilityUtils::castToGraphicsWidget(graphicsItem);
+    if (object) {
         traverseObject(objectInfo, object, command);
         // Traverse the actual widget under the proxy, if available
         QGraphicsProxyWidget* proxy = qobject_cast<QGraphicsProxyWidget*>(object);
