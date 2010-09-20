@@ -289,7 +289,11 @@ bool TasTcpServer::start()
 {
     bool started = false;
     for(int i = 0; i < 5; i++){
+#ifdef Q_OS_SYMBIAN
+        if(listen(QHostAddress::LocalHost, mPort)){
+#else
         if(listen(QHostAddress::Any, mPort)){
+#endif
             started = true;
             break;
         }
