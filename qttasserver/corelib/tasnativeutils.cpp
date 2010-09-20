@@ -36,7 +36,7 @@
   is not available, or the window can not be found.
 */
 
-int TasNativeUtils::pidOfActiveWindow(const QList<QString>& pids)
+int TasNativeUtils::pidOfActiveWindow(const QHash<QString, TasClient*> clients)
 {
     return -1;
 }

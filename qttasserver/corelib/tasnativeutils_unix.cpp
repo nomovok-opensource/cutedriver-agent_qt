@@ -232,8 +232,9 @@ int errorHandler(Display*, XErrorEvent* e)
 
 
 
-int TasNativeUtils::pidOfActiveWindow(const QList<QString>& pids)
+int TasNativeUtils::pidOfActiveWindow(const QHash<QString, TasClient*> clients)
 {
+    const QList<QString>& pids = clients.keys();
     TasLogger::logger()->debug("TasNativeUtils::pidOfActiveWindow Querying for active window");
     int pid = -1;
     Display* display = 0;

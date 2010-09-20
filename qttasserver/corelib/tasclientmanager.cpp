@@ -465,7 +465,8 @@ TasClient* TasClientManager::findByApplicationName(const QString& applicationNam
 */
 TasClient* TasClientManager::latestClient(bool includeSocketless)
 {
-    int pid = TasNativeUtils::pidOfActiveWindow(mClients.keys());
+    //    int pid = TasNativeUtils::pidOfActiveWindow(mClients.keys());
+    int pid = TasNativeUtils::pidOfActiveWindow(mClients);
     if (pid != -1) {
         QString processId = QString::number(pid);
         if(mClients.contains(processId)){

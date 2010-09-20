@@ -30,7 +30,7 @@ public:
     /*! Pid of the active window, only ids registered to qttas are taken
      * into account.
      */
-    static int pidOfActiveWindow(const QList<QString>& pids);
+    static int pidOfActiveWindow(const QHash<QString, TasClient*> clients);
     static int bringAppToForeground(TasClient& client);
 };
 
