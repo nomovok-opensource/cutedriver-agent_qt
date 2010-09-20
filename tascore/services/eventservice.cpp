@@ -153,9 +153,7 @@ TasEventFilter* EventService::getFilterForTarget(TasTarget* commandTarget, bool 
         QObject* target = 0;
         if(targetType == TYPE_GRAPHICS_VIEW){
             QGraphicsItem* item = findGraphicsItem(targetId); 
-            if (item->isWindow() || item->isWidget()) {
-                target = (QObject*)((QGraphicsWidget*)item);                        
-            }            
+            target = TestabilityUtils::castToGraphicsWidget(item);
         }
         else if(targetType == TYPE_STANDARD_VIEW){
             target = findWidget(targetId);

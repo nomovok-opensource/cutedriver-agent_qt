@@ -83,7 +83,7 @@ void ObjectService::performObjectService(TasCommandModel& model, TasResponse& re
             TasCommand* command = j.next();
             if(command->name() == "SetAttribute"){
                 if(item != 0 && item->isWidget()){
-                    QObject * object = (QObject*)((QGraphicsWidget*)item);
+                    QObject * object = TestabilityUtils::castToGraphicsWidget(item);
                     doSetAttribute(command, object, errorString);
                 }
                 else if(target != 0){

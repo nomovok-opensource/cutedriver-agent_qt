@@ -441,7 +441,7 @@ QList<QWebFrame*> WebkitCommandService::traverseGraphicsItem(QGraphicsItem* grap
 {
     QList<QWebFrame*> list;
     if (graphicsItem->isWindow() || graphicsItem->isWidget()) {
-        QObject * object = (QObject*)((QGraphicsWidget*)graphicsItem);
+        QObject * object = TestabilityUtils::castToGraphicsWidget(graphicsItem);
         list.append(traverseObject(object));
         // Traverse the actual widget under the proxy, if available
         QGraphicsProxyWidget* proxy = qobject_cast<QGraphicsProxyWidget*>(object);

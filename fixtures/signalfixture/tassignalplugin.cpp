@@ -40,6 +40,7 @@
 #include <taslogger.h>
 #include <tasconstants.h>
 #include <tascoreutils.h>
+#include <testabilityutils.h>
 
 #include "tassignalplugin.h"
 
@@ -253,9 +254,7 @@ QObject* TasSignalPlugin::castToObject(void* objectInstance, QString ptrType)
     }
     else if( ptrType == GRAPHICS_ITEM_TYPE ){
         QGraphicsItem* item = reinterpret_cast<QGraphicsItem*>(objectInstance);   
-        if(item && (item->isWidget() || item->isWindow())){
-            target = (QObject*)((QGraphicsWidget*)item);
-        }
+        target = TestabilityUtils::castToGraphicsWidget(item);
     }
     else if( ptrType == APPLICATION_TYPE ){
         target = qApp;
