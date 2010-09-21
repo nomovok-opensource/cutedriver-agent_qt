@@ -46,7 +46,8 @@ class MouseHandler : public InteractionHandler
 public:
     enum PointerType{
  	    TypeMouse,
-		TypeTouch
+		TypeTouch,
+		TypeBoth
 	};
 
 public:

@@ -152,7 +152,7 @@ bool MultitouchHandler::executeMultitouchInteraction(QList<TargetData> dataList)
                 delete mGesture;
                 mGesture = 0;
             }   
-            mGesture = new MultiLineTasGesture(lines);
+            //            mGesture = new MultiLineTasGesture(lines);
             startGesture();
         }
     }
@@ -181,11 +181,11 @@ bool MultitouchHandler::makePinchZoomGesture(TasCommand& command, QPoint point)
         mGesture = 0;
     }
     if(command.parameter(TYPE) == "in"){
-        mGesture = new PinchZoomTasGesture(line1, line2);
+        //mGesture = new PinchZoomTasGesture(command, line1, line2);
     }
     else if(command.parameter(TYPE) == "out"){
         //flip the lines if zoom out
-        mGesture = new PinchZoomTasGesture(QLineF(line1.p2(), line1.p1()), QLineF(line2.p2(), line2.p1()));
+        //mGesture = new PinchZoomTasGesture(command, QLineF(line1.p2(), line1.p1()), QLineF(line2.p2(), line2.p1()));
     }
     else{
         TasLogger::logger()->error("MultitouchHandler::makePinchZoomGesture invalid type.");
@@ -206,11 +206,11 @@ bool MultitouchHandler::makeRotationGesture(TasCommand& command, QPoint point)
 
     QLineF line = makeLine(point, radius, mTargetDetails.direction);
     if(command.parameter(TYPE) == "one_point"){
-        mGesture = new SectorTasGesture(line, mTargetDetails.distance);
+        //mGesture = new SectorTasGesture(command, line, mTargetDetails.distance);
     }
     else if(command.parameter(TYPE) == "two_point"){
         QLineF line2 = makeLine(point, radius, mTargetDetails.direction+180);
-        mGesture = new ArcsTasGesture(line, line2, mTargetDetails.distance);
+        //mGesture = new ArcsTasGesture(command, line, line2, mTargetDetails.distance);
     }
     else{
         TasLogger::logger()->error("MultitouchHandler::makeRotationGesture invalid type.");

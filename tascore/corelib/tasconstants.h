@@ -21,7 +21,9 @@
 
 #ifndef TASCONSTANTS_H
 #define TASCONSTANTS_H
-    
+   
+#include <QtGlobal>
+ 
 /*!
   Services
  */

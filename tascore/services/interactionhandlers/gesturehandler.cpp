@@ -102,7 +102,7 @@ bool GestureHandler::executeInteraction(TargetData data)
                 }
             }
         }
-        mGesture = new PointsTasGesture(gesturePoints);
+        mGesture = new PointsTasGesture(data, gesturePoints);
         //   mGesture->setIntervals(gestureIntervals);
         startGesture();
         wasConsumed = true;
@@ -110,7 +110,7 @@ bool GestureHandler::executeInteraction(TargetData data)
     else if(commandName.startsWith("MouseGesture")){
         QLineF gestureLine = makeGestureLine(data);
         if(!gestureLine.isNull()){
-            mGesture = new LineTasGesture(gestureLine);
+            mGesture = new LineTasGesture(data, gestureLine);
             startGesture();
         }
         else{
