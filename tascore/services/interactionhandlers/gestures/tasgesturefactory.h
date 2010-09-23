@@ -33,7 +33,10 @@ public:
 
     TasGesture* makeGesture(TargetData data);
 	void addRecognizer(TasGestureRecognizer* recognizer);
-	QString getErrorMessage();
+	QString errorMessage();
+
+private:
+	void createRecognizers();
 
 private:
 	QList<TasGestureRecognizer*> mRecognizers;

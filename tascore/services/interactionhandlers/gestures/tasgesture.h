@@ -25,6 +25,7 @@
 #include <QTimeLine>
 #include <QLine>
 
+#include "tastoucheventgenerator.h"
 #include "tasconstants.h"
 #include "mousehandler.h"
 
@@ -42,8 +43,13 @@ public:
 	virtual bool isMultiTouch() = 0;
 	MouseHandler::PointerType pointerType();
 	void setPointerType(MouseHandler::PointerType type);
-	void setTarget(QWidget* target);
 	QWidget* getTarget();
+	QGraphicsItem* getTargetItem();	
+	Qt::MouseButton getMouseButton();
+	int getDuration(){return mDuration;}
+	bool isDrag(){return mIsDrag;}
+	bool isPress(){return mPress;}
+	bool isRelease(){return mRelease;}
 
 protected:
 	TasTouchPoints makeTouchPoint(QPoint pos, QPoint lastPos=QPoint(), QPoint startPos=QPoint());
@@ -54,13 +60,15 @@ protected:
 	bool mPress;
 	bool mRelease;
 	int mDuration;
-
 	QWidget* mTarget;
+	QGraphicsItem* mTargetItem;
+
 	QPoint mStartPoint;
 	QPoint mLastPoint; 
 	//for multitouch
 	QList<QPoint> mStartPoints;
 	QList<QPoint> mLastPoints;
+	Qt::MouseButton mButton;
 	MouseHandler::PointerType mPointerType;
 };
 

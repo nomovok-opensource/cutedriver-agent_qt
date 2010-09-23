@@ -49,6 +49,7 @@
 TasGestureFactory::TasGestureFactory()
 {
     mErrorMessage = "None";
+    createRecognizers();
 }
 
 /*!
@@ -75,13 +76,12 @@ void TasGestureFactory::addRecognizer(TasGestureRecognizer* recognizer)
 TasGesture* TasGestureFactory::makeGesture(TargetData data)
 {
     QString gestureType = data.command->name();
- 
+
     foreach(TasGestureRecognizer* recogizer, mRecognizers){
         if(recogizer->isSupportedType(gestureType)){
             return recogizer->create(data);
         }
     }
-
     mErrorMessage = "TasGestureFactory::makeGesture: Uknown gesture type " + gestureType + ".";
     return 0;
 }
@@ -89,7 +89,15 @@ TasGesture* TasGestureFactory::makeGesture(TargetData data)
 /*!
   Return the latest error message.
  */
-QString TasGestureFactory::getErrorMessage()
+QString TasGestureFactory::errorMessage()
 {
     return mErrorMessage;
+}
+
+void TasGestureFactory::createRecognizers()
+{
+    addRecognizer(new LineTasGestureRecognizer());
+    addRecognizer(new PointsTasGestureRecognizer());
+    addRecognizer(new PinchZoomTasGestureRecognizer());
+    addRecognizer(new RotationTasGestureRecognizer());
 }

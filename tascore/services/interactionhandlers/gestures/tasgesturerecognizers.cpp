@@ -40,16 +40,17 @@ const char* const ROTATE_DIRECTION = "rotate_direction";
     \fn TasGesture* TasGestureRecognizer::create(TargetData data)
 
     Creates the TasGesture that matches the given data.
+
 */
 
-QPoint TasGestureRecognizer::getPoint(TasCommand& command)
+QPoint TasGestureUtils::getPoint(TasCommand& command)
 {
     int x = command.parameter("x").toInt();
     int y = command.parameter("y").toInt();
     return QPoint(x,y);
 }
 
-QPoint TasGestureRecognizer::getTargetPoint(TasCommand& command)
+QPoint TasGestureUtils::getTargetPoint(TasCommand& command)
 {
     QString targetId = command.parameter("targetId");
     QPoint targetPoint;
@@ -69,7 +70,7 @@ QPoint TasGestureRecognizer::getTargetPoint(TasCommand& command)
 }
 
 
-void TasGestureRecognizer::doTransform(QGraphicsItem* targetItem, QLineF& gestureLine)
+void TasGestureUtils::doTransform(QGraphicsItem* targetItem, QLineF& gestureLine)
 {
     if(targetItem){
         QGraphicsView* view = TestabilityUtils::getViewForItem(targetItem);
@@ -83,12 +84,12 @@ void TasGestureRecognizer::doTransform(QGraphicsItem* targetItem, QLineF& gestur
     }
 }
 
-int TasGestureRecognizer::getDistance(TasCommand& command)
+int TasGestureUtils::getDistance(TasCommand& command)
 {
     return command.parameter("distance").toInt();
 }
 
-int TasGestureRecognizer::getDirection(TasCommand& command)
+int TasGestureUtils::getDirection(TasCommand& command)
 {
     int direction = command.parameter("direction").toInt();
     direction -= 90;
@@ -96,7 +97,7 @@ int TasGestureRecognizer::getDirection(TasCommand& command)
     return direction;
 }
 
-QLineF TasGestureRecognizer::makeLine(QPoint start, int length, int angle)
+QLineF TasGestureUtils::makeLine(QPoint start, int length, int angle)
 {
     QLineF line;
     line.setP1(start);
@@ -138,7 +139,7 @@ TasGesture* LineTasGestureRecognizer::create(TargetData data)
 
     QLineF gestureLine;
     if(command.name() == "MouseGestureFromCoordinates"){
-        QPoint start = getPoint(command);
+        QPoint start = mUtils.getPoint(command);
         gestureLine.setP1(QPointF(start));    
     }
     else{
@@ -146,17 +147,17 @@ TasGesture* LineTasGestureRecognizer::create(TargetData data)
     }
  
     if(command.name() == "MouseGesture" || command.name() == "MouseGestureFromCoordinates"){
-        gestureLine.setLength(getDistance(command));
-        gestureLine.setAngle(getDirection(command));
-        doTransform(data.targetItem, gestureLine);
+        gestureLine.setLength(mUtils.getDistance(command));
+        gestureLine.setAngle(mUtils.getDirection(command));
+        mUtils.doTransform(data.targetItem, gestureLine);
     }
     else{
         QPoint end;
         if(command.name() == "MouseGestureTo"){
-            end = getTargetPoint(command);
+            end = mUtils.getTargetPoint(command);
         }
         else{
-            end = getPoint(command);
+            end = mUtils.getPoint(command);
         }
         gestureLine.setP1(QPointF(point));
         gestureLine.setP2(QPointF(end));
@@ -227,7 +228,7 @@ TasGesture* PinchZoomTasGestureRecognizer::create(TargetData data)
 
     QPoint point = data.targetPoint;
     if(command.parameter("useCoordinates") == "true"){ 
-        point = getPoint(command);
+        point = mUtils.getPoint(command);
     }
 
     int distance_1 = command.parameter(DIST_ONE).toInt();
@@ -235,12 +236,12 @@ TasGesture* PinchZoomTasGestureRecognizer::create(TargetData data)
     int differential = command.parameter(DIFF).toInt();        
 
     //this is the diff line
-    QLineF line = makeLine(point,differential/2, getDirection(command));
+    QLineF line = mUtils.makeLine(point,differential/2, mUtils.getDirection(command));
 
     //actual gesture lines
-    QLineF line1 = makeLine(line.p2().toPoint(), distance_1, line.angle());
-    line.setAngle(getDirection(command)+180);
-    QLineF line2 = makeLine(line.p2().toPoint(), distance_2, line.angle());
+    QLineF line1 = mUtils.makeLine(line.p2().toPoint(), distance_1, line.angle());
+    line.setAngle(mUtils.getDirection(command)+180);
+    QLineF line2 = mUtils.makeLine(line.p2().toPoint(), distance_2, line.angle());
     if(command.parameter(TYPE) == "in"){
         return new PinchZoomTasGesture(data, line1, line2);
     }
@@ -288,20 +289,20 @@ TasGesture* RotationTasGestureRecognizer::create(TargetData data)
     QPoint point = data.targetPoint;
 
     int radius = command.parameter(RADIUS).toInt();
-    int distance = getDistance(command);
-    int direction = getDirection(command);
+    int distance = mUtils.getDistance(command);
+    int direction = mUtils.getDirection(command);
 
     if(command.parameter(ROTATE_DIRECTION) == "Clockwise"){
         distance = distance * -1;
     }
 
-    QLineF line = makeLine(point, radius, direction);
+    QLineF line = mUtils.makeLine(point, radius, direction);
 
     if(command.parameter(TYPE) == "one_point"){
         return new SectorTasGesture(data, line, distance);
     }
     else{
-        QLineF line2 = makeLine(point, radius, direction+180);
+        QLineF line2 = mUtils.makeLine(point, radius, direction+180);
         return new ArcsTasGesture(data, line, line2, distance);
     }
 }

@@ -22,44 +22,27 @@
 #ifndef MULTITOUCHHANDLER_H
 #define MULTITOUCHHANDLER_H
 
-#include <QApplication>
-#include <QObject>
-#include <QTimeLine>
-#include <QLineF>
-#include <QList>
+#include <QStringList>
 
-#include "gesturehandler.h"
-#include "tasgesture.h"
+#include "uicommandservice.h"
+#include "tasgesturefactory.h"
+#include "tastoucheventgenerator.h"
 
-class MultitouchGesturePath;
-
-class MultitouchHandler : public GestureHandler
+class MultitouchHandler : public InteractionHandler
 {
-  Q_OBJECT
 
 public:
-    MultitouchHandler(QObject* parent=0);
+    MultitouchHandler();
     ~MultitouchHandler();
   
 	bool executeInteraction(TargetData data);
 	bool executeMultitouchInteraction(QList<TargetData> dataList);
 
-protected:
-	void beginGesture();
-
-protected slots:
-    void timerEvent(qreal);
-	void finished();
-
 private:
-	bool validateZoomParams(TasCommand& command);
-	bool validateRotationParams(TasCommand& command);
-	bool makePinchZoomGesture(TasCommand& command, QPoint point);
-	bool makeRotationGesture(TasCommand& command, QPoint point);
-	QLineF makeLine(QPoint start, int length, int angle);
-
-private:
-	TasGesture* mGesture;
+	QStringList mPressCommands;
+	QStringList mReleaseCommands;
+	TasGestureFactory* mFactory;
+	TasTouchEventGenerator mTouchGen;
 };
 
 #endif

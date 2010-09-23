@@ -17,10 +17,7 @@
 ** 
 ****************************************************************************/ 
  
-
-
 #include <QtTest/qtestspontaneevent.h>
-
 #include "taslogger.h"
 #include "mousehandler.h"
 
@@ -35,51 +32,25 @@
 
 MouseHandler::MouseHandler()
 {
-    mTouchPointCounter = 0;
-    mUseTapScreen = false;
+    mCommands << "MousePress" << "MouseRelease" << "MouseClick" 
+              << "Tap" << "TapScreen" << "MouseMove" <<  "MouseDblClick";
 }
 
 MouseHandler::~MouseHandler()
 {
-    qDeleteAll(mTouchIds);
-    mTouchIds.clear();
 }
   
 bool MouseHandler::executeInteraction(TargetData data)
 {
     //TasLogger::logger()->debug("MouseHandler::executeInteraction");
     bool wasConsumed = false;
-
     TasCommand& command = *data.command;
-    QWidget* target = data.target;
-    QPoint point = data.targetPoint;
-    QGraphicsItem* targetItem = data.targetItem;
-
     QString commandName = command.name();
-
-    mUseTapScreen = command.parameter("useTapScreen") == "true";
-
-    if (!mUseTapScreen) {
-        TasLogger::logger()->debug("MouseHandler::executeInteraction not using tap_screen: " + command.name());
-    } else {
-        TasLogger::logger()->debug("MouseHandler::executeInteraction USING XEVENTS: " + command.name());        
-    }
-
-    if(commandName == "MousePress" || commandName == "MouseRelease" || commandName == "MouseClick" || 
-       commandName == "Tap" || commandName == "TapScreen" || commandName == "MouseMove" || 
-       commandName == "MouseDblClick"){
-        
-        Qt::MouseButton button = getMouseButton(command);
-        setPoint(point, command);
-        checkMoveMouse(command, point);
-        wasConsumed = true;
-
-        QString extraIdentifier;
-        if(command.parameter("useCoordinates") == "true"){
-            extraIdentifier = QString::number(point.x()) +"_"+ QString::number(point.y());
-            TasLogger::logger()->debug("MouseHandler::executeInteraction: extra id to be added: " + extraIdentifier);
-        }
-
+    if(mCommands.contains(commandName)){       
+        TapDetails details = makeDetails(data);
+        setPoint(command, details);
+        wasConsumed = true;        
+        checkMoveMouse(command, details.point);        
         
         if (commandName == "MouseClick" || commandName == "Tap" || commandName == "TapScreen"){
             int count = 1;
@@ -87,45 +58,45 @@ bool MouseHandler::executeInteraction(TargetData data)
                 count = command.parameter("count").toInt();       
             }
             if(commandName == "TapScreen"){
-                target = qApp->widgetAt(point.x(), point.y());
+                details.target = qApp->widgetAt(details.point.x(), details.point.y());
             }            
-            if(target){
+            if(details.target){
                 int duration = command.parameter("duration").toFloat();
 
                 if(command.parameter("interval").isEmpty()){
                     for(int i = 0 ; i < count; i++){
-                        doMousePress(target, targetItem, button, point, extraIdentifier);
+                        press(details);
                         if (duration != 0) {
                             TasCoreUtils::wait(duration);
                         }
-                        doMouseRelease(target, targetItem, button, point, extraIdentifier);
+                        release(details);
                      }                    
                 }
                 else{
                     //interval based tapping
                     int interval = command.parameter("interval").toInt();
-                    new Tapper(this, count, interval, target, targetItem, button, point);
+                    new Tapper(this, details, count, interval);
                 }
 
             }
         }
         else if(commandName == "MouseDblClick"){
-            doMouseDblClick(target, button, point);
+            mMouseGen.doMouseDblClick(details.target, details.button, details.point);
         }   
         else if(commandName == "MousePress"){
-            doMousePress(target, targetItem, button, point, extraIdentifier);
+            press(details);
         }
         else if(commandName == "MouseRelease"){
-            doMouseRelease(target, targetItem, button, point, extraIdentifier);
+            release(details);
         }
         else if (commandName == "MouseMove"){                        
-            doMouseMove(target, targetItem, point, button);
+            move(details);
         }
     }
     else if (commandName == "Scroll"){
         wasConsumed = true;
+        TapDetails details = makeDetails(data);
 
-        Qt::MouseButton button = getMouseButton(command);
         int deltaValue = 0 ;
         Qt::Orientation direction = Qt::Vertical;
                    
@@ -137,10 +108,121 @@ bool MouseHandler::executeInteraction(TargetData data)
                 direction = Qt::Horizontal;
             }
         }        
-        doScroll(target, point, deltaValue, button, direction);                
+        mMouseGen.doScroll(details.target, details.point, deltaValue, details.button, direction);                
+    }
+    else if(commandName == "Hover" || commandName == "Trigger"){
+        performActionEvent(makeDetails(data));
+        wasConsumed = true;
     }
     return wasConsumed;
 }
+
+void MouseHandler::performActionEvent(TapDetails details)
+{
+    QString id = details.command->parameter("id");
+    QWidget* actionWidget = details.target;
+    QAction* action = getAction(actionWidget, id.toInt());    
+    if(action){                        
+        //only way to activate the action is to simulate mouse events
+        //attempt to get the coordinates for the action...
+        QPoint point(0,0);         
+        if(QMenuBar* bar = qobject_cast<QMenuBar*>(actionWidget)){            
+            QRect rect = bar->actionGeometry(action);
+            point = rect.topLeft();
+        }
+        else if(QMenu* menu = qobject_cast<QMenu*>(actionWidget)){           
+            QRect rect = menu->actionGeometry(action);
+            point = rect.topLeft();
+        }   
+        else if(QToolBar* bar = qobject_cast<QToolBar*>(actionWidget)){
+            actionWidget = bar->widgetForAction(action);
+        }
+        else{
+            //skip since we are not sure what to do...
+            return;
+        }
+        QPoint screenPoint = actionWidget->mapToGlobal(point);
+        //add mouse events tha match the action type
+        if ( details.command->name() == "Hover"){             
+            move(details);
+        }
+        else{
+            press(details);
+            release(details);
+        }                   
+    }
+}
+
+/*!
+    Get the correct action associated with the widget and calculate its center pos.
+ */
+QAction* MouseHandler::getAction(QWidget* widget, int id)
+{
+    QAction* action = NULL;
+    QList<QAction*> actions = widget->actions();        
+    if(actions.size() > 0){        
+        QAction* target = (QAction*)id;    
+        for(int i = 0 ; i < actions.size(); i++){
+            QAction * ac = actions.at(i);            
+            if ( ac == target){
+                action = ac; 
+                break;
+            }            
+        }
+    }
+    return action;
+}
+
+MouseHandler::TapDetails MouseHandler::makeDetails(TargetData data)
+{
+    TasCommand& command = *data.command;
+    TapDetails details;
+    details.command = data.command;
+    details.target = data.target;
+    details.point = data.targetPoint;
+    details.targetItem = data.targetItem;
+    details.button = getMouseButton(command);
+    details.pointerType = MouseHandler::TypeMouse;
+    if(!command.parameter(POINTER_TYPE).isEmpty()){
+        details.pointerType = static_cast<MouseHandler::PointerType>(command.parameter(POINTER_TYPE).toInt());
+    }
+    mMouseGen.setUseTapScreen(command.parameter("useTapScreen") == "true");  
+            
+    return details;
+}
+
+void MouseHandler::press(TapDetails details)
+{
+    if(details.pointerType == TypeMouse || details.pointerType == TypeBoth){
+        mMouseGen.doMousePress(details.target, details.button, details.point);
+    }
+    if(details.pointerType == TypeTouch || details.pointerType == TypeBoth){        
+        //set primary only when mouse events are sent
+        bool primary  = (details.pointerType == TypeBoth);
+        mTouchGen.doTouchBegin(details.target, details.targetItem, details.point, primary, details.extraIdentifier);
+    }
+}
+void MouseHandler::move(TapDetails details)
+{
+    if(details.pointerType == TypeMouse || details.pointerType == TypeBoth){
+        mMouseGen.doMouseMove(details.target, details.point, details.button);
+    }
+    if(details.pointerType == TypeTouch || details.pointerType == TypeBoth){
+        bool primary  = (details.pointerType == TypeBoth);
+        mTouchGen.doTouchUpdate(details.target, details.targetItem, details.point, primary);
+    }
+}
+void MouseHandler::release(TapDetails details)
+{
+    if(details.pointerType == TypeMouse || details.pointerType == TypeBoth){
+        mMouseGen.doMouseRelease(details.target, details.button, details.point);
+    }
+    if(details.pointerType == TypeTouch || details.pointerType == TypeBoth){
+        bool primary  = (details.pointerType == TypeBoth);
+        mTouchGen.doTouchEnd(details.target, details.targetItem, details.point, primary, details.extraIdentifier);
+    }
+}
+
 
 Qt::MouseButton MouseHandler::getMouseButton(TasCommand& command)
 {
@@ -162,274 +244,40 @@ Qt::MouseButton MouseHandler::getMouseButton(TasCommand& command)
 void MouseHandler::checkMoveMouse(TasCommand& command, QPoint point)
 {
     if(command.parameter("mouseMove") == "true"){                
-        moveCursor(point);
+        mMouseGen.moveCursor(point);
     }           
 }
 
 /*!
  Set point from parameters. 
  */
-void MouseHandler::setPoint(QPoint& point, TasCommand& command)
+void MouseHandler::setPoint(TasCommand& command, TapDetails& details)
 {
     if(command.parameter("useCoordinates") == "true"){ 
         int x = command.parameter("x").toInt();
         int y = command.parameter("y").toInt();
-        point.setX(x);
-        point.setY(y);           
+        details.point.setX(x);
+        details.point.setY(y);           
+        details.extraIdentifier = QString::number(details.point.x()) +"_"+ QString::number(details.point.y());
     }
 }
 
-/*!
-    Send a mouseEvent to qApp to the given target widget. 
-*/
-void MouseHandler::doMousePress(QWidget* target, QGraphicsItem* targetItem, Qt::MouseButton button, QPoint point, QString extraIdentifier)
-{ 
-    if (target) {
-        target->setFocus(Qt::MouseFocusReason);
-    }
-    
-    if(acceptsTouchEvent(target, targetItem)){
-        doTouchBegin(target, targetItem, toTouchPoints(point), extraIdentifier);
-    }
-//    else{
-        QMouseEvent* eventPress = new QMouseEvent(QEvent::MouseButtonPress, target->mapFromGlobal(point), point, button, button, 0);    
-        sendMouseEvent(target, eventPress);
-//    }
-}
-
-void MouseHandler::doTouchBegin(QWidget* target, QGraphicsItem* targetItem, QList<TasTouchPoints> points, QString extraIdentifier)
+Tapper::Tapper(MouseHandler* handler, MouseHandler::TapDetails details, int count, int interval)
 {
-    QList<QTouchEvent::TouchPoint> touchPoints = convertToTouchPoints(target, targetItem, Qt::TouchPointPressed, points, extraIdentifier);
-    QTouchEvent* touchPress = new QTouchEvent(QEvent::TouchBegin, QTouchEvent::TouchScreen, Qt::NoModifier, Qt::TouchPointPressed, touchPoints);
-    touchPress->setWidget(target);
-    sendTouchEvent(target, touchPress);
-}
-
-/*!
-    Send a mouseEvent to qApp to the given target widget. 
-*/
-void MouseHandler::doMouseRelease(QWidget* target, QGraphicsItem* targetItem, Qt::MouseButton button, QPoint point, QString extraIdentifier)
-{        
-    if(acceptsTouchEvent(target, targetItem)){
-        doTouchEnd(target, targetItem, toTouchPoints(point), extraIdentifier);
-    }
-//    else{
-        QMouseEvent* eventRelease = new QMouseEvent(QEvent::MouseButtonRelease, target->mapFromGlobal(point), point, button, Qt::NoButton, 0);    
-        sendMouseEvent(target, eventRelease);
-//    }
-
-}
-
-QList<TasTouchPoints> MouseHandler::toTouchPoints(QPoint point, bool isPrimary)
-{
-    QList<TasTouchPoints> points;
-    TasTouchPoints touchPoint;
-    touchPoint.screenPoint = point;
-    touchPoint.isPrimary = isPrimary;
-    points.append(touchPoint);
-    return points;
-}
-void MouseHandler::doTouchEnd(QWidget* target, QGraphicsItem* targetItem, QList<TasTouchPoints> points, QString extraIdentifier)
-{
-    QList<QTouchEvent::TouchPoint> touchPoints = convertToTouchPoints(target, targetItem, Qt::TouchPointReleased, points, extraIdentifier);
-    QTouchEvent *touchRelease = new QTouchEvent(QEvent::TouchEnd, QTouchEvent::TouchScreen, Qt::NoModifier, Qt::TouchPointReleased, touchPoints);
-    touchRelease->setWidget(target);
-    sendTouchEvent(target, touchRelease);
-}
-
-void MouseHandler::doMouseDblClick(QWidget* target, Qt::MouseButton button, QPoint point)
-{
-    QMouseEvent* eventDblClick = new QMouseEvent(QEvent::MouseButtonDblClick, target->mapFromGlobal(point), point, button, Qt::NoButton, 0);    
-    sendMouseEvent(target, eventDblClick);
-}
-
-/*!
-    Move cursor to given position.
-*/
-void MouseHandler::doMouseMove(QWidget* target, QGraphicsItem* targetItem, QPoint point, Qt::MouseButton button)
-{ 
-    moveCursor(point);
-    if(acceptsTouchEvent(target, targetItem) && button != Qt::NoButton){
-        doTouchUpdate(target, targetItem, toTouchPoints(point));
-    }
-//    else{
-        QMouseEvent* eventMove = new QMouseEvent(QEvent::MouseMove, target->mapFromGlobal(point), point, button, button, 0);
-        sendMouseEvent(target, eventMove);
-//    }
-}
-
-bool MouseHandler::acceptsTouchEvent(QWidget* target, QGraphicsItem* targetItem)
-{
-    bool accepts = false;
-    if(target->testAttribute(Qt::WA_AcceptTouchEvents)){
-        accepts = true;
-    } 
-    //the viewport seems to accept but the item not
-    if(targetItem && !targetItem->acceptTouchEvents()){
-        accepts = false;
-    }
-    //accepts = false;
-    return accepts;
-}
-void MouseHandler::doTouchUpdate(QWidget* target, QGraphicsItem* targetItem, QList<TasTouchPoints> points)
-{
-    QList<QTouchEvent::TouchPoint> touchPoints = convertToTouchPoints(target, targetItem, Qt::TouchPointMoved, points);
-    QTouchEvent* touchMove = new QTouchEvent(QEvent::TouchUpdate, QTouchEvent::TouchScreen, Qt::NoModifier, Qt::TouchPointMoved, touchPoints);
-    touchMove->setWidget(target);
-    sendTouchEvent(target, touchMove);
-}
-
-void MouseHandler::moveCursor(QPoint point)
-{
-//    TasLogger::logger()->debug("MouseHandler::moveCursor");
-    if (mUseTapScreen) {
-        TasLogger::logger()->debug("MouseHandler::moveCursor using XEVENTS");
-        TasDeviceUtils::sendMouseEvent(point.x(), 
-                                       point.y(), 
-                                       Qt::NoButton, 
-                                       QEvent::MouseMove);
-                
-    } else {
-        QCursor::setPos(point);
-        qApp->processEvents();
-    }
-}
-
-
-/*!
-    Scroll the mouse wheel 
-*/
-void MouseHandler::doScroll(QWidget* target, QPoint& point, int delta, Qt::MouseButton button,  Qt::Orientation orient)
-{
-    QWheelEvent* event = new QWheelEvent(point, target->mapToGlobal(point), delta, button, 0, orient);
-    qApp->postEvent(target, event);
-}
-
-void MouseHandler::sendMouseEvent(QWidget* target, QMouseEvent* event)
-{    
-    if(mUseTapScreen){
-        TasLogger::logger()->debug("MouseHandler::sendMousEvent using XEVENTS");
-        TasDeviceUtils::sendMouseEvent(event->globalX(), 
-                                       event->globalY(), 
-                                       event->button(), 
-                                       event->type());
-
-    } else {
-        QSpontaneKeyEvent::setSpontaneous(event);
-        qApp->postEvent(target, event);   
-    }
-}
-
-void MouseHandler::sendTouchEvent(QWidget* target, QTouchEvent* event)
-{
-    QSpontaneKeyEvent::setSpontaneous(event);
-    qApp->postEvent(target, event);   
-}
-
-QList<QTouchEvent::TouchPoint> MouseHandler::convertToTouchPoints(QWidget* target, QGraphicsItem* targetItem, Qt::TouchPointState state,
-                                                                  QList<TasTouchPoints> points, QString extraIdentifier)
-{
-    TasLogger::logger()->debug("MouseHandler::convertToTouchPoints in");
-
-    bool remove = false;
-    QList<int> *pointIds;
-    //we need to store the touchpoint ids, the same id must be attached for untill touch point released
-    if(targetItem) {
-        QString itemId = TasCoreUtils::pointerId(targetItem);
-        //extraIdentifier needed to differentiate taps that occur in the same item but different coordinates
-        //in normal object taps the identifier is empty
-        itemId.append(extraIdentifier);
-        TasLogger::logger()->debug("MouseHandler::convertToTouchPoints item id: " + itemId);
-        
-        if(state == Qt::TouchPointReleased && mTouchIds.contains(itemId)){
-            pointIds = mTouchIds.take(itemId);
-            remove = true;
-        }
-        else if(state == Qt::TouchPointMoved && mTouchIds.contains(itemId)){
-            pointIds = mTouchIds.value(itemId);
-        }
-        else{
-            pointIds = new QList<int>();
-            mTouchIds.insert(itemId, pointIds);
-        }
-    }
-    else{
-        pointIds = new QList<int>();
-        remove = true;
-    }
-
-    QList<QTouchEvent::TouchPoint> touchPoints;    
-    if(!points.isEmpty()){
-        for(int i = 0 ; i < points.size() ; i++){
-            if(pointIds->size() <= i ){
-                mTouchPointCounter++;
-                pointIds->append(mTouchPointCounter);                
-            }
-            touchPoints.append(makeTouchPoint(target, targetItem, points.at(i), state, pointIds->at(i)));
-        }
-    }
-
-    if(remove) delete pointIds;
-
-    return touchPoints;
-}
-
-QTouchEvent::TouchPoint MouseHandler::makeTouchPoint(QWidget* target, QGraphicsItem* targetItem,
-                                                     TasTouchPoints points, Qt::TouchPointState state,
-                                                     int id)
-{
-    Q_UNUSED(targetItem);
-    QTouchEvent::TouchPoint touchPoint(id);
-    Qt::TouchPointStates states = state;
-    if(points.isPrimary){
-        states |= Qt::TouchPointPrimary;
-    }
-    touchPoint.setState(states);
-    touchPoint.setPos(target->mapFromGlobal(points.screenPoint));    
-    touchPoint.setScreenPos(points.screenPoint);    
-    QRect screenGeometry = QApplication::desktop()->screenGeometry(points.screenPoint);
-    touchPoint.setNormalizedPos(QPointF(points.screenPoint.x() / screenGeometry.width(),
-                                        points.screenPoint.y() / screenGeometry.height()));
-
-    //in addition to the position we also need to set last and start positions as 
-    //some gesture may depend on them
-    if(!points.lastScreenPoint.isNull()){
-        touchPoint.setLastPos(target->mapFromGlobal(points.lastScreenPoint));    
-        touchPoint.setLastScreenPos(points.lastScreenPoint);    
-        touchPoint.setLastNormalizedPos(QPointF(points.lastScreenPoint.x() / screenGeometry.width(),
-                                                points.lastScreenPoint.y() / screenGeometry.height()));
-    }
-    if(!points.startScreenPoint.isNull()){
-        touchPoint.setStartPos(target->mapFromGlobal(points.startScreenPoint));    
-        touchPoint.setStartScreenPos(points.startScreenPoint);    
-        touchPoint.setStartNormalizedPos(QPointF(points.startScreenPoint.x() / screenGeometry.width(),
-                                                points.startScreenPoint.y() / screenGeometry.height()));
-    }
-    return touchPoint;
-}
-
-
-Tapper::Tapper(MouseHandler* handler, int count, int interval, QWidget* target, 
-               QGraphicsItem* targetItem, Qt::MouseButton button, QPoint point)
-{
+    mHandler = handler;
     mMaxCount = count;
     mTapCount = 0;
-    mHandler = handler;
-    mTarget = target;
-    mTargetItem = targetItem;
-    mButton = button;
-    mPoint = point;
+    mDetails = details;
     connect(&mTimer, SIGNAL(timeout()), this, SLOT(tap()));
     mTimer.start(interval);
 }
 
 void Tapper::tap()
 {
-    TasLogger::logger()->debug("Tapper::tap");
     mTapCount++;
     
-    mHandler->doMousePress(mTarget, mTargetItem, mButton, mPoint);
-    mHandler->doMouseRelease(mTarget, mTargetItem, mButton, mPoint);
+    mHandler->press(mDetails);
+    mHandler->release(mDetails);
 
     if( mTapCount >= mMaxCount ){
         mTimer.stop();        

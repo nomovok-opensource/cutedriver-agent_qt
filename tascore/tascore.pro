@@ -48,8 +48,8 @@ symbian: {
 
 }
 
-DEPENDPATH += . corelib services services/interactionhandlers services/interactionhandlers/gestures
-INCLUDEPATH += . corelib services services/interactionhandlers services/interactionhandlers/gestures
+DEPENDPATH += . corelib services services/interactionhandlers services/interactionhandlers/gestures services/interactionhandlers/eventgenerator
+INCLUDEPATH += . corelib services services/interactionhandlers services/interactionhandlers/gestures services/interactionhandlers/eventgenerator
 
 
 CONFIG(maemo){

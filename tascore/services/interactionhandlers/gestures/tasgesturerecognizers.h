@@ -26,15 +26,12 @@
 #include "uicommandservice.h"
 #include "tasgesture.h"
 
-class TasGestureRecognizer : public TestabilityUtils
+class TasGestureUtils : public TestabilityUtils
 {
-public:
-    virtual ~TasGestureRecognizer(){}
-    virtual TasGesture* create(TargetData data) = 0;
-	virtual bool isSupportedType(const QString& gestureType) = 0;
-
-protected:	
-	void doTransform(QGraphicsItem* targetItem, QLineF& gestureLine);
+public:  
+    TasGestureUtils(){};
+    ~TasGestureUtils(){};
+  	void doTransform(QGraphicsItem* targetItem, QLineF& gestureLine);
 	QPoint getPoint(TasCommand& command);
 	QPoint getTargetPoint(TasCommand& command);
 	int getDistance(TasCommand& command);
@@ -42,7 +39,15 @@ protected:
 	QLineF makeLine(QPoint start, int length, int angle);
 };
 
-class LineTasGestureRecognizer : TasGestureRecognizer
+class TasGestureRecognizer
+{
+public:
+    virtual ~TasGestureRecognizer(){}
+    virtual TasGesture* create(TargetData data) = 0;
+	virtual bool isSupportedType(const QString& gestureType) = 0;
+};
+
+class LineTasGestureRecognizer : public TasGestureRecognizer
 {
 public:
     LineTasGestureRecognizer();
@@ -51,10 +56,10 @@ public:
 
 private:
 	QStringList mTypes;
-
+	TasGestureUtils mUtils;
 };
 
-class PointsTasGestureRecognizer : TasGestureRecognizer
+class PointsTasGestureRecognizer : public TasGestureRecognizer
 {
 public:
     PointsTasGestureRecognizer();
@@ -62,7 +67,7 @@ public:
 	bool isSupportedType(const QString& gestureType);
 };
 
-class PinchZoomTasGestureRecognizer : TasGestureRecognizer
+class PinchZoomTasGestureRecognizer : public TasGestureRecognizer
 {
 public:
     PinchZoomTasGestureRecognizer();
@@ -71,9 +76,12 @@ public:
 
 private:
 	bool validateZoomParams(TasCommand& command);
+
+private:
+	TasGestureUtils mUtils;
 };
 
-class RotationTasGestureRecognizer : TasGestureRecognizer
+class RotationTasGestureRecognizer : public TasGestureRecognizer
 {
 public:
     RotationTasGestureRecognizer();
@@ -81,6 +89,10 @@ public:
 	bool isSupportedType(const QString& gestureType);
 private:
 	bool validateRotationParams(TasCommand& command);
+
+private:
+	TasGestureUtils mUtils;
 };
+
 
 #endif

@@ -21,9 +21,12 @@
 #define TASGESTURERUNNER_H
 
 #include "tasgesture.h"
+#include "tastoucheventgenerator.h"
+#include "tasmouseeventgenerator.h"
 
 class TasGestureRunner : public QObject
 {
+    Q_OBJECT
 public:  
     TasGestureRunner(TasGesture* gesture, QObject* parent=0);
     ~TasGestureRunner();
@@ -37,11 +40,18 @@ protected slots:
 
 private:
 	void startGesture();
+	void move(QList<TasTouchPoints> points, bool force=false);
+	bool noMovement(QList<TasTouchPoints> points);
 
 private:
 	QTimeLine mTimeLine;
 	TasGesture* mGesture;
+	TasMouseEventGenerator mMouseGen;
+	TasTouchEventGenerator mTouchGen;	
+	QList<TasTouchPoints> mPreviousPoints;
 };
+
+
 
 
 

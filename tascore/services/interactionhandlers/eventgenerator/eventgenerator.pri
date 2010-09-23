@@ -17,16 +17,11 @@
 ## 
 ############################################################################
 
-HEADERS += $$PWD/tasgesture.h
-HEADERS += $$PWD/tasgesturerecognizers.h
-HEADERS += $$PWD/tasgesturefactory.h
-HEADERS += $$PWD/tasgesturerunner.h
+HEADERS += $$PWD/tasmouseeventgenerator.h
+HEADERS += $$PWD/tastoucheventgenerator.h
 
-SOURCES += $$PWD/tasgesture.cpp 
-SOURCES += $$PWD/tasgesturerecognizers.cpp
-SOURCES += $$PWD/tasgesturefactory.cpp
-SOURCES += $$PWD/tasgesturerunner.cpp
-
+SOURCES += $$PWD/tasmouseeventgenerator.cpp
+SOURCES += $$PWD/tastoucheventgenerator.cpp
 
 
 

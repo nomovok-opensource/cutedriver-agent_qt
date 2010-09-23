@@ -28,90 +28,77 @@
 #include <QCursor>
 #include <QWidget>
 #include <QTimer>
+#include <QAction>
 
 #include "uicommandservice.h"
+#include "tasmouseeventgenerator.h"          
+#include "tastoucheventgenerator.h"
 
 class Tapper;
 
-struct TasTouchPoints
-{
-    QPoint screenPoint;
-    QPoint lastScreenPoint;
-    QPoint startScreenPoint;
-    bool isPrimary;
-};
+const char* const POINTER_TYPE = "eventType";
+
 
 class MouseHandler : public InteractionHandler
 {
 public:
     enum PointerType{
- 	    TypeMouse,
-		TypeTouch,
-		TypeBoth
+ 	    TypeMouse = 0,
+		TypeTouch = 1,
+		TypeBoth = 2
+	};
+
+	struct TapDetails{
+        QWidget* target;
+	    QGraphicsItem* targetItem;
+	    Qt::MouseButton button;
+	    QPoint point;
+	    QString extraIdentifier;
+ 	    MouseHandler::PointerType pointerType;
+ 	    TasCommand* command;
 	};
 
 public:
-    MouseHandler();
+     MouseHandler();
     ~MouseHandler();
   	
 	
     virtual bool executeInteraction(TargetData data);
   
-protected:
-    void doMouseDblClick(QWidget* target, Qt::MouseButton button, QPoint point);
-
-    void doMousePress(QWidget* target, QGraphicsItem* targetItem, Qt::MouseButton button, QPoint point, QString extraIdentifier=QString()); 
-    void doMouseRelease(QWidget* target, QGraphicsItem* targetItem, Qt::MouseButton button, QPoint point, QString extraIdentifier=QString());
-    void doMouseMove(QWidget* target, QGraphicsItem* targetItem, QPoint point, Qt::MouseButton button=Qt::NoButton);    
-
-    void moveCursor(QPoint point);    
-    void checkMoveMouse(TasCommand& command);
-    void setPoint(QPoint& point, TasCommand& command);
-    void checkMoveMouse(TasCommand& command, QPoint point);
-    Qt::MouseButton getMouseButton(TasCommand& command);
-    void doScroll(QWidget* target, QPoint& point, int delta, Qt::MouseButton button,  Qt::Orientation orient);
-    void sendMouseEvent(QWidget* target, QMouseEvent* event);
-
-    void doTouchBegin(QWidget* target, QGraphicsItem* targetItem, QList<TasTouchPoints> points, QString extraIdentifier=QString());
-    void doTouchUpdate(QWidget* target, QGraphicsItem* targetItem, QList<TasTouchPoints> points);
-    void doTouchEnd(QWidget* target, QGraphicsItem* targetItem, QList<TasTouchPoints> points, QString extraIdentifier=QString());
-
-    QList<QTouchEvent::TouchPoint> convertToTouchPoints(QWidget* target, QGraphicsItem* targetItem, Qt::TouchPointState state,
-                                                        QList<TasTouchPoints> points, QString extraIdentifier=QString());
-    QTouchEvent::TouchPoint makeTouchPoint(QWidget* target, QGraphicsItem* targetItem, TasTouchPoints points,
-                                           Qt::TouchPointState state, int id);
-    void sendTouchEvent(QWidget* target, QTouchEvent* event);
-
-    bool acceptsTouchEvent(QWidget* target, QGraphicsItem* targetItem);
-
-    QList<TasTouchPoints> toTouchPoints(QPoint point, bool isPrimary=true);
+	static Qt::MouseButton getMouseButton(TasCommand& command);
 
 private:
-    int mTouchPointCounter;
-    QHash<QString,QList<int>* > mTouchIds;
-    bool mUseTapScreen; // If true, operation system native functionality will be used in mouse movements
-    friend class Tapper;
+	void performActionEvent(TapDetails details);
+    void checkMoveMouse(TasCommand& command);
+    void setPoint(TasCommand& command, TapDetails& details);
+    void checkMoveMouse(TasCommand& command, QPoint point);   
+	void press(TapDetails details);
+	void move(TapDetails details);
+	void release(TapDetails details);
+
+	MouseHandler::TapDetails makeDetails(TargetData data);
+	QAction* getAction(QWidget* widget, int id);
+
+private:
+	TasMouseEventGenerator mMouseGen;
+	TasTouchEventGenerator mTouchGen;
+	QStringList mCommands;
+	friend class Tapper;
 };
 
 class Tapper : public QObject
 {
     Q_OBJECT
-
-    public:
-    Tapper(MouseHandler* handler, int count, int interval, QWidget* target, QGraphicsItem* 
-           targetItem, Qt::MouseButton button, QPoint point);
+public:
+    Tapper(MouseHandler* handler, MouseHandler::TapDetails details, int count, int interval);
 	
 private slots:
     void tap();
-
 	
 private:
+	MouseHandler* mHandler;
     QTimer mTimer;
-    QWidget* mTarget; 
-    QGraphicsItem* mTargetItem;
-    Qt::MouseButton mButton;
-    QPoint mPoint;
-    MouseHandler* mHandler;
+	MouseHandler::TapDetails mDetails;
     int mMaxCount;
     int mTapCount;
 };

@@ -288,6 +288,8 @@ void TasLogger::writeLogLine(LogType type, const QString& message)
 {
     if(mEnabled && type <= mCurrentLevel){
       
+        if(message.contains("QMetaProperty::read")) return;
+
         if(!mUseQDebug){
             //check is rolling needed. Done hourly
             if(mLastLogRollCheck.elapsed() > 600000){

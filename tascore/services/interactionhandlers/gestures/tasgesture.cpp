@@ -19,6 +19,7 @@
 
 #include "tasgesture.h"
 #include "taslogger.h"
+#include "mousehandler.h"
 
 /*!
     \class TasGesture
@@ -63,7 +64,11 @@
  */
 TasGesture::TasGesture(TargetData data)
 {
+    mPointerType = MouseHandler::TypeMouse;
+    
+
     mTarget = data.target;
+    mTargetItem = data.targetItem;
 
     TasCommand& command = *data.command;
 
@@ -84,17 +89,10 @@ TasGesture::TasGesture(TargetData data)
     if (command.parameter("release") == "false") {
         mRelease = false;
     }
-    QString pointerType = command.parameter("pointerType");
-    if(pointerType == "touch"){
-        setPointerType(MouseHandler::TypeTouch);
+    if(!command.parameter(POINTER_TYPE).isEmpty()){
+        setPointerType(static_cast<MouseHandler::PointerType>(command.parameter(POINTER_TYPE).toInt()));
     }
-    else if(pointerType == "both"){
-        setPointerType(MouseHandler::TypeBoth);
-    }
-    else{
-        //default
-        setPointerType(MouseHandler::TypeMouse); 
-    }
+    mButton = MouseHandler::getMouseButton(command);
 }
 
 /*!
@@ -105,6 +103,11 @@ TasGesture::TasGesture(TargetData data)
 MouseHandler::PointerType TasGesture::pointerType()
 {
     return mPointerType;
+}
+
+Qt::MouseButton TasGesture::getMouseButton()
+{
+    return mButton;
 }
 
 /*!
@@ -126,11 +129,11 @@ QWidget* TasGesture::getTarget()
 }
 
 /*!
-  Set the target for the gesture. Usually the viewport. Must be set.
+  Returns the item to which the gesture is targetted to. Can be null if no item.
  */
-void TasGesture::setTarget(QWidget* target)
+QGraphicsItem* TasGesture::getTargetItem()
 {
-    mTarget = target;
+    return mTargetItem;
 }
 
 /*!

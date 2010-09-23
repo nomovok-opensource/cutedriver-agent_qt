@@ -27,7 +27,7 @@
 #include "uicommandservice.h"
 #include "tassocket.h"
 
-#include "actionhandler.h"
+//#include "actionhandler.h"
 #include "gesturehandler.h"
 #include "keyhandler.h"
 #include "mousehandler.h"
@@ -48,7 +48,7 @@ UiCommandService::UiCommandService(QObject* parent)
     connect(&mTimer, SIGNAL(timeout()), this, SLOT(executeNextCommand()));
     mInteractionHandlers.append(new MouseHandler());
     mInteractionHandlers.append(new KeyHandler());
-    mInteractionHandlers.append(new ActionHandler());
+    //    mInteractionHandlers.append(new ActionHandler());
     mInteractionHandlers.append(new GestureHandler());
     mInteractionHandlers.append(new MultitouchHandler());
     mInteractionHandlers.append(new ViewItemHandler());

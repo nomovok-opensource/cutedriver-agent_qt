@@ -29,58 +29,22 @@
 
 #include "mousehandler.h"
 #include "tasgesture.h"
+#include "tasgesturefactory.h"
 
 class GesturePath;
 
-struct TargetDetails
+class GestureHandler : public InteractionHandler
 {
-  int distance;    
-  int direction;
-  int duration;
-  QString targetId;
-  QString targetType;
-  bool press;
-  bool release;
-  bool isDrag;
-  Qt::MouseButton button;    
-  QWidget* widget;
-  QGraphicsItem* item;
-};
-
-class GestureHandler : public QObject, public MouseHandler
-{
-  Q_OBJECT
 
 public:
-    GestureHandler(QObject* parent=0);
+    GestureHandler();
     ~GestureHandler();
   
 	bool executeInteraction(TargetData data);
-    bool eventFilter(QObject *target, QEvent *event);        
-
-protected:
-	virtual void beginGesture();
-	void startGesture();
-	TargetDetails getParameters(TasCommand& command);
-
-	QLineF makeGestureLine(TargetData data);
-
-protected slots:
-    virtual void timerEvent(qreal);
-	virtual void finished();
-	void releaseMouse();
 
 private:
-    void setNewPoint();
-	QPoint getTargetPoint(TargetDetails targetDetails);
-
-protected:
-	TargetDetails mTargetDetails;
-
-private:
-	TasGesture* mGesture;
-	QTimeLine* mTimeLine;
-	QPoint mPrevious;
+	TasGestureFactory* mFactory;
+	QStringList mAcceptedCommand;
 };
 
 #endif
