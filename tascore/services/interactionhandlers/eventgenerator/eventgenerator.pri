@@ -17,19 +17,11 @@
 ## 
 ############################################################################
 
-HEADERS += $$PWD/mousehandler.h
-HEADERS += $$PWD/keyhandler.h
-HEADERS += $$PWD/gesturehandler.h
-#HEADERS += $$PWD/actionhandler.h
-HEADERS += $$PWD/multitouchhandler.h
-HEADERS += $$PWD/viewitemhandler.h
+HEADERS += $$PWD/tasmouseeventgenerator.h
+HEADERS += $$PWD/tastoucheventgenerator.h
 
-SOURCES += $$PWD/mousehandler.cpp 
-SOURCES += $$PWD/keyhandler.cpp 
-SOURCES += $$PWD/gesturehandler.cpp 
-#SOURCES += $$PWD/actionhandler.cpp 
-SOURCES += $$PWD/multitouchhandler.cpp 
-SOURCES += $$PWD/viewitemhandler.cpp 
+SOURCES += $$PWD/tasmouseeventgenerator.cpp
+SOURCES += $$PWD/tastoucheventgenerator.cpp
 
-include ($$PWD/gestures/gestures.pri)
-include ($$PWD/eventgenerator/eventgenerator.pri)
+
+

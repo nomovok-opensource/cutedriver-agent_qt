@@ -44,5 +44,3 @@ SOURCES += services/confservice.cpp
 SOURCES += services/infoservice.cpp
 
 include (./interactionhandlers/handlers.pri)
-
-

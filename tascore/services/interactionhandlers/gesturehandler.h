@@ -28,98 +28,23 @@
 #include <QList>
 
 #include "mousehandler.h"
+#include "tasgesture.h"
+#include "tasgesturefactory.h"
 
 class GesturePath;
 
-class GestureHandler : public QObject, public MouseHandler
+class GestureHandler : public InteractionHandler
 {
-  Q_OBJECT
 
 public:
-    GestureHandler(QObject* parent=0);
+    GestureHandler();
     ~GestureHandler();
   
 	bool executeInteraction(TargetData data);
-    bool eventFilter(QObject *target, QEvent *event);        
-
-protected:
-	virtual void beginGesture();
-	void startGesture();
-	void setParameters(TasCommand& command);
-
-protected slots:
-    virtual void timerEvent(qreal);
-	virtual void finished();
-	void releaseMouse();
 
 private:
-    void setNewPoint();
-	QPoint getTargetPoint();
-
-
-protected:
-    int mDistance;    
-    int mDirection;
-	int mDuration;
-    QWidget* mWidget;
-	QGraphicsItem* mItem;
-
-private:
-	QString mTargetId;
-	QString mTargetType;
-    Qt::MouseButton mButton;    
-    bool mPress;
-    bool mRelease;
-	GesturePath* mGesturePath;
-	QPoint mPrevious;
-	bool mIsDrag;
+	TasGestureFactory* mFactory;
+	QStringList mAcceptedCommand;
 };
 
-class GesturePath
-{
-public:
-  virtual ~GesturePath(){}
-
-  virtual QPoint startPoint() = 0;
-  virtual QPoint pointAt(qreal value) = 0;
-  virtual QPoint endPoint() = 0;
-  virtual void setIntervals(QList<int> intervals) = 0;
-  virtual bool useIntervals() =0 ;
-};
-
-class LinePath : public GesturePath
-{
-public:
-  LinePath(QLineF gestureLine);
-  QPoint startPoint();
-  QPoint pointAt(qreal value);
-  QPoint endPoint();  
-  void setIntervals(QList<int> intervals){ Q_UNUSED(intervals); return; }
-  bool useIntervals(){return false;}
-
-private:
-  QLineF mGestureLine;
-  
-};
-
-class PointsPath : public GesturePath
-{
-public:
-  PointsPath(QList<QPoint> points);  
-  void setIntervals(QList<int> intervals);
-
-  QPoint startPoint();
-  QPoint pointAt(qreal value);
-  QPoint endPoint();
-  bool useIntervals();
-  
-private:
-  void calculateAnimation();
-  int getDuration();
-
-private:
-  QList<QPoint> mPoints;
-  QList<int> mIntervals;
-  bool mUseIntervals;
-};
 #endif

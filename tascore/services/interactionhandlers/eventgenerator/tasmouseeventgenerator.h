@@ -19,31 +19,38 @@
  
 
 
-#ifndef ACTIONHANDLER_H
-#define ACTIONHANDLER_H
+#ifndef TASMOUSEEVENTGENERATOR_H
+#define TASMOUSEEVENTGENERATOR_H
 
 #include <QApplication>
 #include <QPoint>
+#include <QWidget>
+#include <QMouseEvent>
+#include <QCursor>
 
-#include "uicommandservice.h"
-#include "tasmouseeventgenerator.h"
-#include "tastoucheventgenerator.h"
-
-class ActionHandler : public InteractionHandler
+class TasMouseEventGenerator : public QObject
 {
+   Q_OBJECT
 public:
-    ActionHandler();
-    ~ActionHandler();
+    TasMouseEventGenerator(QObject* parent=0);
+    ~TasMouseEventGenerator();
+
+	void setUseTapScreen(bool use);
   
-	bool executeInteraction(TargetData data);
+public slots:	
+	void doMousePress(QWidget* target, Qt::MouseButton button, QPoint point); 
+    void doMouseRelease(QWidget* target, Qt::MouseButton button, QPoint point);
+    void doMouseMove(QWidget* target, QPoint point, Qt::MouseButton button=Qt::NoButton);    
+    void doScroll(QWidget* target, QPoint& point, int delta, Qt::MouseButton button,  Qt::Orientation orient);
+    void doMouseDblClick(QWidget* target, Qt::MouseButton button, QPoint point);
+	void moveCursor(QPoint point);
 
 private:
-	void performActionEvent(TasCommand& command, QWidget* target);
-	QAction* getAction(QWidget* widget, int id);
+	void sendMouseEvent(QWidget* target, QMouseEvent* event);
+
 
 private:
-	TasMouseEventGenerator mMouseGen;
-	TasTouchEventGenerator mTouchGen;
+	bool mUseTapScreen;
 };
 
 #endif

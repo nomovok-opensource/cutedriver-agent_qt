@@ -16,34 +16,43 @@
 ** of this file. 
 ** 
 ****************************************************************************/ 
- 
 
+#ifndef TASGESTURERUNNER_H
+#define TASGESTURERUNNER_H
 
-#ifndef ACTIONHANDLER_H
-#define ACTIONHANDLER_H
-
-#include <QApplication>
-#include <QPoint>
-
-#include "uicommandservice.h"
-#include "tasmouseeventgenerator.h"
+#include "tasgesture.h"
 #include "tastoucheventgenerator.h"
+#include "tasmouseeventgenerator.h"
 
-class ActionHandler : public InteractionHandler
+class TasGestureRunner : public QObject
 {
-public:
-    ActionHandler();
-    ~ActionHandler();
-  
-	bool executeInteraction(TargetData data);
+    Q_OBJECT
+public:  
+    TasGestureRunner(TasGesture* gesture, QObject* parent=0);
+    ~TasGestureRunner();
+
+	bool eventFilter(QObject *target, QEvent *event);        
+
+protected slots:
+    void timerEvent(qreal);
+	void finished();
+	void releaseMouse();
 
 private:
-	void performActionEvent(TasCommand& command, QWidget* target);
-	QAction* getAction(QWidget* widget, int id);
+	void startGesture();
+	void move(QList<TasTouchPoints> points, bool force=false);
+	bool noMovement(QList<TasTouchPoints> points);
 
 private:
+	QTimeLine mTimeLine;
+	TasGesture* mGesture;
 	TasMouseEventGenerator mMouseGen;
-	TasTouchEventGenerator mTouchGen;
+	TasTouchEventGenerator mTouchGen;	
+	QList<TasTouchPoints> mPreviousPoints;
 };
+
+
+
+
 
 #endif

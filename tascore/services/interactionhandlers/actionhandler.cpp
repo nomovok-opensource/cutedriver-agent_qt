@@ -52,8 +52,7 @@ bool ActionHandler::executeInteraction(TargetData data)
 void ActionHandler::performActionEvent(TasCommand& command, QWidget* widget)
 {
     QString id = command.parameter("id");
-    QString name = command.name();            
-        
+    QString name = command.name();                    
     QAction* action = getAction(widget, id.toInt());    
     QWidget* actionWidget = widget;
     if(action){                        
@@ -81,11 +80,11 @@ void ActionHandler::performActionEvent(TasCommand& command, QWidget* widget)
         QPoint screenPoint = actionWidget->mapToGlobal(point);
         //add mouse events tha match the action type
         if ( name == "Hover"){             
-            doMouseMove(actionWidget, 0, screenPoint);
+            mMouseGen.doMouseMove(actionWidget, screenPoint);
         }
         else{
-            doMousePress(actionWidget, 0, Qt::LeftButton, screenPoint);                
-            doMouseRelease(actionWidget, 0, Qt::LeftButton, screenPoint);                
+            mMouseGen.doMousePress(actionWidget, Qt::LeftButton, screenPoint);                
+            mMouseGen.doMouseRelease(actionWidget, Qt::LeftButton, screenPoint);                
         }                   
     }
 }

@@ -16,34 +16,31 @@
 ** of this file. 
 ** 
 ****************************************************************************/ 
- 
 
+#ifndef TASGESTUREFACTORY_H
+#define TASGESTUREFACTORY_H
 
-#ifndef ACTIONHANDLER_H
-#define ACTIONHANDLER_H
+#include <QList>
 
-#include <QApplication>
-#include <QPoint>
+#include "tasgesturerecognizers.h"
+#include "tasgesture.h"
 
-#include "uicommandservice.h"
-#include "tasmouseeventgenerator.h"
-#include "tastoucheventgenerator.h"
-
-class ActionHandler : public InteractionHandler
+class TasGestureFactory
 {
 public:
-    ActionHandler();
-    ~ActionHandler();
-  
-	bool executeInteraction(TargetData data);
+    TasGestureFactory();
+    ~TasGestureFactory();
+
+    TasGesture* makeGesture(TargetData data);
+	void addRecognizer(TasGestureRecognizer* recognizer);
+	QString errorMessage();
 
 private:
-	void performActionEvent(TasCommand& command, QWidget* target);
-	QAction* getAction(QWidget* widget, int id);
+	void createRecognizers();
 
 private:
-	TasMouseEventGenerator mMouseGen;
-	TasTouchEventGenerator mTouchGen;
+	QList<TasGestureRecognizer*> mRecognizers;
+	QString mErrorMessage;
 };
 
 #endif
