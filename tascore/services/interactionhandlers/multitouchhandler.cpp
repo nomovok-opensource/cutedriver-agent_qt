@@ -65,14 +65,40 @@ bool MultitouchHandler::executeMultitouchInteraction(QList<TargetData> dataList)
         //look for tap downs and taps (press down motion to start the multitouch)
         QList<QTouchEvent::TouchPoint> touchPoints;
         QList<QTouchEvent::TouchPoint> touchReleasePoints;
+        //we need to group points to enable the touch ids for points
+        //the string is actually a identifier for a graphicsitem and possible extra details 
+        //if specific points pressed
+        QHash<QString, QList<TasTouchPoints>* > itemPressPoints;
+        QHash<QString, QList<TasTouchPoints>* > itemReleasePoints;
+
         QList<TasGesture*> gestures;
         TargetData targetData;
         foreach(targetData, dataList){
             if(mPressCommands.contains(targetData.command->name())){            
-                touchPoints.append(mTouchGen.convertToTouchPoints(targetData, Qt::TouchPointPressed));
+                if(targetData.targetItem){
+                    QString identifier = idAndCoordinates(targetData);
+                    if(!itemPressPoints.contains(identifier)){
+                        itemPressPoints.insert(identifier, new QList<TasTouchPoints>());
+                    }
+                    itemPressPoints.value(identifier)->append(mTouchGen.toTouchPoint(targetData.targetPoint, false));
+                    TasLogger::logger()->debug("Press points appended for " + identifier);
+                }
+                else{
+                    touchPoints.append(mTouchGen.convertToTouchPoints(targetData, Qt::TouchPointPressed));                    
+                }
             }
             if(mReleaseCommands.contains(targetData.command->name())){
-                touchReleasePoints.append(mTouchGen.convertToTouchPoints(targetData, Qt::TouchPointReleased));
+                if(targetData.targetItem){
+                    QString identifier = idAndCoordinates(targetData);
+                    if(!itemPressPoints.contains(identifier)){
+                        itemPressPoints.insert(identifier, new QList<TasTouchPoints>());
+                    }
+                    itemReleasePoints.value(identifier)->append(mTouchGen.toTouchPoint(targetData.targetPoint, false));
+                    TasLogger::logger()->debug("Release points appended for " + identifier);
+                }
+                else{
+                    touchReleasePoints.append(mTouchGen.convertToTouchPoints(targetData, Qt::TouchPointReleased));
+                }
             }            
             TasGesture* gesture = mFactory->makeGesture(targetData);
             if(gesture){
@@ -82,6 +108,21 @@ bool MultitouchHandler::executeMultitouchInteraction(QList<TargetData> dataList)
 
         //currently only one target widget supported
         QWidget *target = dataList.first().target;
+
+        //make touch points from the collected points per graphicsitem
+        QMutableHashIterator<QString, QList<TasTouchPoints>* > presses(itemPressPoints);
+        while (presses.hasNext()) {
+            TasLogger::logger()->debug("Press points appended to touch list.");
+            presses.next();
+            touchPoints.append(mTouchGen.convertToTouchPoints(target, Qt::TouchPointPressed, *presses.value(), presses.key()));
+        }
+
+        QMutableHashIterator<QString, QList<TasTouchPoints>* > releases(itemReleasePoints);
+        while (releases.hasNext()) {
+            TasLogger::logger()->debug("Release points appended to touch list.");
+            releases.next();
+            touchReleasePoints.append(mTouchGen.convertToTouchPoints(target, Qt::TouchPointReleased, *releases.value(), releases.key()));
+        }
 
         //send begin event
         if(!touchPoints.isEmpty()){
@@ -101,7 +142,23 @@ bool MultitouchHandler::executeMultitouchInteraction(QList<TargetData> dataList)
         }
         //add support for gestures...
 
+        //cleanup
+        qDeleteAll(itemPressPoints);
+        itemPressPoints.clear();
+        qDeleteAll(itemReleasePoints);
+        itemReleasePoints.clear();
+
     }
     return consumed;
 }
 
+QString MultitouchHandler::idAndCoordinates(TargetData data)
+{
+    QString id = TasCoreUtils::pointerId(data.targetItem);
+    if(data.command->parameter("useCoordinates") == "true"){ 
+        data.targetPoint.setX(data.command->parameter("x").toInt());
+        data.targetPoint.setY(data.command->parameter("y").toInt());        
+        id = QString::number(data.targetPoint.x()) +"_"+ QString::number(data.targetPoint.y());
+    }
+    return id;
+}

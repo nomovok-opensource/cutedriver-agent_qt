@@ -36,45 +36,41 @@ TasTouchEventGenerator::~TasTouchEventGenerator()
     mTouchIds.clear();
 }
 
-void TasTouchEventGenerator::doTouchBegin(QWidget* target, QGraphicsItem* targetItem, 
-                                          QPoint point, bool primary, QString extraIdentifier)
+void TasTouchEventGenerator::doTouchBegin(QWidget* target, QPoint point, bool primary, QString identifier)
 {
-    doTouchBegin(target, targetItem, toTouchPoints(point,primary), extraIdentifier);
+    doTouchBegin(target, toTouchPoints(point,primary), identifier);
 }
 
-void TasTouchEventGenerator::doTouchUpdate(QWidget* target, QGraphicsItem* targetItem, QPoint point, bool primary)
+void TasTouchEventGenerator::doTouchUpdate(QWidget* target, QPoint point, bool primary, QString identifier)
 {
-    doTouchUpdate(target, targetItem, toTouchPoints(point,primary));
+    doTouchUpdate(target, toTouchPoints(point,primary), identifier);
 }
 
-void TasTouchEventGenerator::doTouchEnd(QWidget* target, QGraphicsItem* targetItem, QPoint point, bool primary, 
-                                        QString extraIdentifier)
+void TasTouchEventGenerator::doTouchEnd(QWidget* target, QPoint point, bool primary, QString identifier)
 {
-    doTouchEnd(target, targetItem, toTouchPoints(point,primary), extraIdentifier);
+    doTouchEnd(target, toTouchPoints(point,primary), identifier);
 }
 
 
-void TasTouchEventGenerator::doTouchBegin(QWidget* target, QGraphicsItem* targetItem, 
-                                          QList<TasTouchPoints> points, QString extraIdentifier)
+void TasTouchEventGenerator::doTouchBegin(QWidget* target, QList<TasTouchPoints> points, QString identifier)
 {
-    QList<QTouchEvent::TouchPoint> touchPoints = convertToTouchPoints(target, targetItem, Qt::TouchPointPressed, points, extraIdentifier);
+    QList<QTouchEvent::TouchPoint> touchPoints = convertToTouchPoints(target, Qt::TouchPointPressed, points, identifier);
     QTouchEvent* touchPress = new QTouchEvent(QEvent::TouchBegin, QTouchEvent::TouchScreen, Qt::NoModifier, Qt::TouchPointPressed, touchPoints);
     touchPress->setWidget(target);
     sendTouchEvent(target, touchPress);
 }
 
-void TasTouchEventGenerator::doTouchUpdate(QWidget* target, QGraphicsItem* targetItem, QList<TasTouchPoints> points)
+void TasTouchEventGenerator::doTouchUpdate(QWidget* target, QList<TasTouchPoints> points, QString identifier)
 {
-    QList<QTouchEvent::TouchPoint> touchPoints = convertToTouchPoints(target, targetItem, Qt::TouchPointMoved, points);
+    QList<QTouchEvent::TouchPoint> touchPoints = convertToTouchPoints(target, Qt::TouchPointMoved, points, identifier);
     QTouchEvent* touchMove = new QTouchEvent(QEvent::TouchUpdate, QTouchEvent::TouchScreen, Qt::NoModifier, Qt::TouchPointMoved, touchPoints);
     touchMove->setWidget(target);
     sendTouchEvent(target, touchMove);
 }
 
-void TasTouchEventGenerator::doTouchEnd(QWidget* target, QGraphicsItem* targetItem, QList<TasTouchPoints> points, 
-                                        QString extraIdentifier)
+void TasTouchEventGenerator::doTouchEnd(QWidget* target, QList<TasTouchPoints> points, QString identifier)
 {
-    QList<QTouchEvent::TouchPoint> touchPoints = convertToTouchPoints(target, targetItem, Qt::TouchPointReleased, points, extraIdentifier);
+    QList<QTouchEvent::TouchPoint> touchPoints = convertToTouchPoints(target, Qt::TouchPointReleased, points, identifier);
     QTouchEvent *touchRelease = new QTouchEvent(QEvent::TouchEnd, QTouchEvent::TouchScreen, Qt::NoModifier, Qt::TouchPointReleased, touchPoints);
     touchRelease->setWidget(target);
     sendTouchEvent(target, touchRelease);
@@ -90,31 +86,27 @@ void TasTouchEventGenerator::sendTouchEvent(QWidget* target, QTouchEvent* event)
 
 QList<QTouchEvent::TouchPoint> TasTouchEventGenerator::convertToTouchPoints(TargetData targetData, Qt::TouchPointState state)
 {
-    return convertToTouchPoints(targetData.target,targetData.targetItem, state, toTouchPoints(targetData.targetPoint, false));
+    return convertToTouchPoints(targetData.target, state, toTouchPoints(targetData.targetPoint, false), 
+                                TasCoreUtils::pointerId(targetData.targetItem));
 }
 
-QList<QTouchEvent::TouchPoint> TasTouchEventGenerator::convertToTouchPoints(QWidget* target, QGraphicsItem* targetItem, Qt::TouchPointState state,
-                                                                            QList<TasTouchPoints> points, QString extraIdentifier)
+QList<QTouchEvent::TouchPoint> TasTouchEventGenerator::convertToTouchPoints(QWidget* target, Qt::TouchPointState state,
+                                                                            QList<TasTouchPoints> points, QString identifier)
 {
     bool remove = false;
     QList<int> *pointIds;
     //we need to store the touchpoint ids, the same id must be attached for untill touch point released
-    if(targetItem) {
-        QString itemId = TasCoreUtils::pointerId(targetItem);
-        //extraIdentifier needed to differentiate taps that occur in the same item but different coordinates
-        //in normal object taps the identifier is empty
-        itemId.append(extraIdentifier);
-        
-        if(state == Qt::TouchPointReleased && mTouchIds.contains(itemId)){
-            pointIds = mTouchIds.take(itemId);
+    if(!identifier.isEmpty()){
+        if(state == Qt::TouchPointReleased && mTouchIds.contains(identifier)){
+            pointIds = mTouchIds.take(identifier);
             remove = true;
         }
-        else if(state == Qt::TouchPointMoved && mTouchIds.contains(itemId)){
-            pointIds = mTouchIds.value(itemId);
+        else if(state == Qt::TouchPointMoved && mTouchIds.contains(identifier)){
+            pointIds = mTouchIds.value(identifier);
         }
         else{
             pointIds = new QList<int>();
-            mTouchIds.insert(itemId, pointIds);
+            mTouchIds.insert(identifier, pointIds);
         }
     }
     else{
@@ -173,9 +165,13 @@ QTouchEvent::TouchPoint TasTouchEventGenerator::makeTouchPoint(QWidget* target, 
 QList<TasTouchPoints> TasTouchEventGenerator::toTouchPoints(QPoint point, bool primary)
 {
     QList<TasTouchPoints> points;
+    points.append(toTouchPoint(point, primary));
+    return points;
+}
+TasTouchPoints TasTouchEventGenerator::toTouchPoint(QPoint point, bool primary)
+{
     TasTouchPoints touchPoint;
     touchPoint.screenPoint = point;
     touchPoint.isPrimary = primary;
-    points.append(touchPoint);
-    return points;
+    return touchPoint;
 }

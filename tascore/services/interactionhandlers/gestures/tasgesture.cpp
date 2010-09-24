@@ -69,7 +69,7 @@ TasGesture::TasGesture(TargetData data)
 
     mTarget = data.target;
     mTargetItem = data.targetItem;
-
+    mTouchPointIdKey = TasCoreUtils::pointerId(mTargetItem);
     TasCommand& command = *data.command;
 
     if (!command.parameter("speed").isEmpty()) {

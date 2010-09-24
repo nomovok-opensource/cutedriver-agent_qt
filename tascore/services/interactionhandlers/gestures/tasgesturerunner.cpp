@@ -44,7 +44,7 @@ void TasGestureRunner::startGesture()
     mTimeLine.start();
     if(mGesture->isPress()){
         if(mGesture->isMultiTouch()){
-            mTouchGen.doTouchBegin(mGesture->getTarget(), mGesture->getTargetItem(), mGesture->startPoints());       
+            mTouchGen.doTouchBegin(mGesture->getTarget(), mGesture->startPoints(), mGesture->touchPointIdKey());       
         }
         else{
             mPreviousPoints = mGesture->startPoints();
@@ -53,7 +53,7 @@ void TasGestureRunner::startGesture()
                 mMouseGen.doMousePress(mGesture->getTarget(), mGesture->getMouseButton(), mGesture->startPoints().first().screenPoint);
             }
             if(mGesture->pointerType() == MouseHandler::TypeTouch || mGesture->pointerType() == MouseHandler::TypeBoth){
-                mTouchGen.doTouchBegin(mGesture->getTarget(), mGesture->getTargetItem(), mGesture->startPoints());       
+                mTouchGen.doTouchBegin(mGesture->getTarget(), mGesture->startPoints(), mGesture->touchPointIdKey());       
             }            
         }
     }
@@ -86,14 +86,14 @@ void TasGestureRunner::finished()
 void TasGestureRunner::releaseMouse()
 {
     if(mGesture->isMultiTouch() && mGesture->isRelease()){
-        mTouchGen.doTouchEnd(mGesture->getTarget(), mGesture->getTargetItem(), mGesture->endPoints());       
+        mTouchGen.doTouchEnd(mGesture->getTarget(), mGesture->endPoints(), mGesture->touchPointIdKey());       
     }
     else{
         if(mGesture->pointerType() == MouseHandler::TypeMouse || mGesture->pointerType() == MouseHandler::TypeBoth){
             mMouseGen.doMouseRelease(mGesture->getTarget(), mGesture->getMouseButton(), mGesture->endPoints().first().screenPoint);
         }        
         if(mGesture->pointerType() == MouseHandler::TypeTouch || mGesture->pointerType() == MouseHandler::TypeBoth){
-            mTouchGen.doTouchEnd(mGesture->getTarget(), mGesture->getTargetItem(), mGesture->endPoints());       
+            mTouchGen.doTouchEnd(mGesture->getTarget(), mGesture->endPoints(), mGesture->touchPointIdKey());       
         }   
     }
     qApp->removeEventFilter(this);
@@ -110,14 +110,14 @@ void TasGestureRunner::move(QList<TasTouchPoints> points, bool force)
         }
     }
     if(mGesture->isMultiTouch()){
-        mTouchGen.doTouchUpdate(mGesture->getTarget(), mGesture->getTargetItem(), points);       
+        mTouchGen.doTouchUpdate(mGesture->getTarget(), points, mGesture->touchPointIdKey());       
     }
     else{
         if(mGesture->pointerType() == MouseHandler::TypeMouse || mGesture->pointerType() == MouseHandler::TypeBoth){
             mMouseGen.doMouseMove(mGesture->getTarget(), points.first().screenPoint, mGesture->getMouseButton());
         }        
         if(mGesture->pointerType() == MouseHandler::TypeTouch || mGesture->pointerType() == MouseHandler::TypeBoth){
-            mTouchGen.doTouchUpdate(mGesture->getTarget(), mGesture->getTargetItem(), points);       
+            mTouchGen.doTouchUpdate(mGesture->getTarget(), points, mGesture->touchPointIdKey());       
         }
     }
 }

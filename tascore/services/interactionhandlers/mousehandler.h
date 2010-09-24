@@ -50,10 +50,10 @@ public:
 
 	struct TapDetails{
         QWidget* target;
-	    QGraphicsItem* targetItem;
 	    Qt::MouseButton button;
 	    QPoint point;
-	    QString extraIdentifier;
+   	    //for touch events to generate touch point ids
+	    QString identifier;
  	    MouseHandler::PointerType pointerType;
  	    TasCommand* command;
 	};

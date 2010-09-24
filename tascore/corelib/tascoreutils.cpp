@@ -362,12 +362,18 @@ void TasCoreUtils::wait(int millis)
 
 QString TasCoreUtils::objectId(QObject* object)
 {
-    return QString::number((quintptr)object);
+    if(object){
+        return QString::number((quintptr)object);
+    }
+    return "";
 }
 
 QString TasCoreUtils::pointerId(void* ptr)
 {
-    return QString::number((quintptr)ptr);
+    if(ptr){
+        return QString::number((quintptr)ptr);
+    }
+    return "";
 }
 
 /*!

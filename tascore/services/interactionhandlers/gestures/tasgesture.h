@@ -50,6 +50,7 @@ public:
 	bool isDrag(){return mIsDrag;}
 	bool isPress(){return mPress;}
 	bool isRelease(){return mRelease;}
+	QString touchPointIdKey(){return mTouchPointIdKey;}
 
 protected:
 	TasTouchPoints makeTouchPoint(QPoint pos, QPoint lastPos=QPoint(), QPoint startPos=QPoint());
@@ -62,7 +63,7 @@ protected:
 	int mDuration;
 	QWidget* mTarget;
 	QGraphicsItem* mTargetItem;
-
+	QString mTouchPointIdKey;
 	QPoint mStartPoint;
 	QPoint mLastPoint; 
 	//for multitouch

@@ -180,7 +180,7 @@ MouseHandler::TapDetails MouseHandler::makeDetails(TargetData data)
     details.command = data.command;
     details.target = data.target;
     details.point = data.targetPoint;
-    details.targetItem = data.targetItem;
+    details.identifier = TasCoreUtils::pointerId(data.targetItem);
     details.button = getMouseButton(command);
     details.pointerType = MouseHandler::TypeMouse;
     if(!command.parameter(POINTER_TYPE).isEmpty()){
@@ -199,7 +199,7 @@ void MouseHandler::press(TapDetails details)
     if(details.pointerType == TypeTouch || details.pointerType == TypeBoth){        
         //set primary only when mouse events are sent
         bool primary  = (details.pointerType == TypeBoth);
-        mTouchGen.doTouchBegin(details.target, details.targetItem, details.point, primary, details.extraIdentifier);
+        mTouchGen.doTouchBegin(details.target, details.point, primary, details.identifier);
     }
 }
 void MouseHandler::move(TapDetails details)
@@ -209,7 +209,7 @@ void MouseHandler::move(TapDetails details)
     }
     if(details.pointerType == TypeTouch || details.pointerType == TypeBoth){
         bool primary  = (details.pointerType == TypeBoth);
-        mTouchGen.doTouchUpdate(details.target, details.targetItem, details.point, primary);
+        mTouchGen.doTouchUpdate(details.target, details.point, primary, details.identifier);
     }
 }
 void MouseHandler::release(TapDetails details)
@@ -219,7 +219,7 @@ void MouseHandler::release(TapDetails details)
     }
     if(details.pointerType == TypeTouch || details.pointerType == TypeBoth){
         bool primary  = (details.pointerType == TypeBoth);
-        mTouchGen.doTouchEnd(details.target, details.targetItem, details.point, primary, details.extraIdentifier);
+        mTouchGen.doTouchEnd(details.target, details.point, primary, details.identifier);
     }
 }
 
@@ -258,7 +258,7 @@ void MouseHandler::setPoint(TasCommand& command, TapDetails& details)
         int y = command.parameter("y").toInt();
         details.point.setX(x);
         details.point.setY(y);           
-        details.extraIdentifier = QString::number(details.point.x()) +"_"+ QString::number(details.point.y());
+        details.identifier.append(QString::number(details.point.x()) +"_"+ QString::number(details.point.y()));
     }
 }
 
