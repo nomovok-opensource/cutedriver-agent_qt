@@ -29,6 +29,21 @@ DEFINES += BUILD_TAS
 linux:QMAKE_DISTCLEAN += /usr/lib/libqttestability.so
 
 
+DEPENDPATH += . corelib services services/interactionhandlers services/interactionhandlers/gestures services/interactionhandlers/eventgenerator
+INCLUDEPATH += . corelib services services/interactionhandlers services/interactionhandlers/gestures services/interactionhandlers/eventgenerator
+
+CONFIG(maemo){
+LIBS += -lqmsystem
+DEFINES += TAS_MAEMO
+}
+
+# Input
+include(corelib/uilib.pri)
+include(corelib/corelib.pri)
+include(services/services.pri)
+
+HEADERS += $$PUBLIC_HEADERS
+
 symbian: {	
     TARGET.CAPABILITY=CAP_GENERAL_DLL
     TARGET.EPOCALLOWDLLDATA = 1
@@ -46,22 +61,13 @@ symbian: {
 	LIBS += -llibegl
 #endif
 
+    for(PUBLIC_HEADER, PUBLIC_HEADERS) {
+        contains(QMAKE_HOST.os, Windows):PUBLIC_HEADER = $$section(PUBLIC_HEADER, ":", 1)
+        EXPORT_PATH = $$sprintf($$EXPORT_DIR, $$basename(PUBLIC_HEADER))
+		BLD_INF_RULES.prj_exports *= "$$PUBLIC_HEADER $$EXPORT_PATH"
+	}
+
 }
-
-DEPENDPATH += . corelib services services/interactionhandlers services/interactionhandlers/gestures services/interactionhandlers/eventgenerator
-INCLUDEPATH += . corelib services services/interactionhandlers services/interactionhandlers/gestures services/interactionhandlers/eventgenerator
-
-
-CONFIG(maemo){
-LIBS += -lqmsystem
-DEFINES += TAS_MAEMO
-}
-
-
-# Input
-include(corelib/uilib.pri)
-include(corelib/corelib.pri)
-include(services/services.pri)
 
 
 QT += network xml testlib gui webkit
@@ -84,12 +90,8 @@ unix:{
     DESKTOP.path = /etc/xdg/autostart/
     INSTALLS += DESKTOP
   }
-
-
-
-
-
 }
+
 macx: {
 	configuration.path = /etc/qt_testability
   HEADERS.path = /usr/include/tdriver/

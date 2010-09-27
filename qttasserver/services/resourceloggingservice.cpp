@@ -81,6 +81,7 @@ MemLogServerWaiter::~MemLogServerWaiter()
 
 void MemLogServerWaiter::clientRegistered(const QString& processId)
 {
+    Q_UNUSED(processId)
     TasLogger::logger()->debug("MemLogServerWaiter::clientRegistered send message");
     TasMessage message(REQUEST_MSG, false, new QByteArray(mCommandXml.toUtf8()), mMessageId);
     mSocket->messageAvailable(message);

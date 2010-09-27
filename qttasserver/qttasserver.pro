@@ -31,7 +31,7 @@ include(../tasbase.pri)
 TARGET = qttasserver
 DESTDIR = bin
 target.path = $$TAS_TARGET_BIN
-DEFINES += QTTASSERVER
+DEFINES += TDTASSERVER
 
 symbian: {
     TARGET.CAPABILITY=ALL -TCB
@@ -67,6 +67,7 @@ include(corelib/corelib.pri)
 include(services/services.pri)
 include(../tascore/corelib/corelib.pri)
 
+HEADERS += $$PUBLIC_HEADERS
 
 QT -= gui
 QT += network xml 

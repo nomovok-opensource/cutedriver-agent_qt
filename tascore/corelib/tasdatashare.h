@@ -31,7 +31,7 @@
 
 class TasSharedData;
 
-class TAS_EXPORT TasDataShare
+class TasDataShare
 {
    
 public:

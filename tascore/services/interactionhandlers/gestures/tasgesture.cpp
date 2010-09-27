@@ -327,7 +327,7 @@ QList<TasTouchPoints> MultiLineTasGesture::pointsAt(qreal value)
 {
     QList<TasTouchPoints> points;
     QList<QPoint> screenPoints;
-    for(int i ; i < mLines.size(); i++){
+    for(int i = 0 ; i < mLines.size(); i++){
         QLineF line = mLines.at(i);
         TasTouchPoints touchPoint = makeTouchPoint(line.pointAt(value).toPoint(), mLastPoints.at(i), mStartPoints.at(i));
         points.append(touchPoint);
@@ -341,7 +341,7 @@ QList<TasTouchPoints> MultiLineTasGesture::pointsAt(qreal value)
 QList<TasTouchPoints> MultiLineTasGesture::endPoints()
 {
     QList<TasTouchPoints> points;
-    for(int i ; i < mLines.size(); i++){
+    for(int i = 0 ; i < mLines.size(); i++){
         QLineF line = mLines.at(i);
         points.append(makeTouchPoint(line.p2().toPoint(), mLastPoints.at(i), mStartPoints.at(i)));
     }

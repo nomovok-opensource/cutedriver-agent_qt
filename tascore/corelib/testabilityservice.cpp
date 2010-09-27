@@ -35,6 +35,8 @@
 #include "confservice.h"
 #include "platformservice.h"
 #include "infoservice.h"
+#include "eventservice.h"
+#include "fixtureservice.h"
 
 const int SERVER_REGISTRATION_TIMEOUT = 12000;
 const int REGISTER_INTERVAL = 300;

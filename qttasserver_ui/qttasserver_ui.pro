@@ -30,6 +30,8 @@ include(../tasbase.pri)
 
 TARGET = qttas_ui
 DESTDIR = bin
+DEFINES += TDTASSERVER
+
 target.path = $$TAS_TARGET_BIN
 
 symbian: {
@@ -37,7 +39,13 @@ symbian: {
 	TARGET.VID = VID_DEFAULT
   	TARGET.EPOCALLOWDLLDATA = 1 
 	TARGET.EPOCHEAPSIZE = 0x20000 0x1400000
+    LIBS += -lhal
+    INCLUDEPATH += /epoc32/include/platform/memspy/driver
+#if ( NCP_COMMON_S60_VERSION_SUPPORT >= S60_VERSION_50 && NCP_COMMON_FAMILY_ID >= 70 )
+	LIBS += -llibegl
+#endif
 }
+
 
 
 INCLUDEPATH += . src
@@ -52,12 +60,12 @@ SOURCES += main.cpp
 SOURCES += servermonitor.cpp
 SOURCES += serverwindow.cpp
 
+include(../tascore/corelib/corelib.pri)
+HEADERS += $$PUBLIC_HEADERS
+
+
 QT += network xml 
 INSTALLS += target
- 
-LIBS += -L../tascore/lib/ -lqttestability
-
-
 
 unix:!symbian:!macx {
   LIBS += -lX11 -lXtst 

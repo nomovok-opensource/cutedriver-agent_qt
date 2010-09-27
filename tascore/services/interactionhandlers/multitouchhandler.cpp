@@ -52,7 +52,7 @@ MultitouchHandler::~MultitouchHandler()
   QTimeLine is used to make the gesture operations. The value from the valuechanged signal
   of timeline is used to determine the position.
  */
-bool MultitouchHandler::executeInteraction(TargetData data)
+bool MultitouchHandler::executeInteraction(TargetData /*data*/)
 {
     return false;
 }

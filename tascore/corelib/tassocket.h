@@ -60,7 +60,7 @@ public:
   virtual void serviceResponse(TasMessage& response) = 0;
 };
 
-class TAS_EXPORT TasSocket : public QObject
+class TasSocket : public QObject
 {
     Q_OBJECT
     

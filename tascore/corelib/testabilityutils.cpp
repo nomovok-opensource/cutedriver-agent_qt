@@ -19,9 +19,10 @@
  
 
 
-#include "testabilityutils.h"
+#include "testabilityutils.h "
 #include "taslogger.h"
 #include "testabilitysettings.h"
+#include "tasqtcommandmodel.h"
 
 /*!
   \class TestabilityUtils
@@ -281,17 +282,6 @@ bool TestabilityUtils::isBlackListed()
             if(filePath.contains(blackListed)){
                 return true;
             }
-        }
-    }
-    return false;
-}
-
-bool TestabilityUtils::autostart()
-{
-    QVariant value = TestabilitySettings::settings()->getValue(AUTO_START);
-    if(value.isValid() && value.canConvert<QString>()){
-        if(value.toString() == "on"){
-            return true;
         }
     }
     return false;

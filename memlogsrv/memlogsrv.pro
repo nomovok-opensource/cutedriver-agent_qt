@@ -30,6 +30,7 @@ include(../tasbase.pri)
 TARGET = qttasmemlog_srv
 DESTDIR = bin
 target.path = $$TAS_TARGET_BIN
+DEFINES += TDTASSERVER
 
 symbian: {
     TARGET.CAPABILITY = ReadUserData WriteUserData ReadDeviceData WriteDeviceData SwEvent PowerMgmt
@@ -38,6 +39,12 @@ symbian: {
 	TARGET.EPOCHEAPSIZE = 0x20000 0x1400000
     LIBS += -lMemSpyDriverClient
     INCLUDEPATH += /epoc32/include/platform/memspy/driver
+
+    LIBS += -lhal
+    INCLUDEPATH += /epoc32/include/platform/memspy/driver
+#if ( NCP_COMMON_S60_VERSION_SUPPORT >= S60_VERSION_50 && NCP_COMMON_FAMILY_ID >= 70 )
+	LIBS += -llibegl
+#endif
 }
 
 win32: {
@@ -47,8 +54,10 @@ win32: {
 INCLUDEPATH += .
 INCLUDEPATH += services corelib
 INCLUDEPATH += ../tascore/corelib
-
 DEPENDPATH += . services corelib
+
+include(../tascore/corelib/corelib.pri)
+HEADERS += $$PUBLIC_HEADERS
 
 # Input
 SOURCES += main.cpp
@@ -59,8 +68,6 @@ include(services/services.pri)
 QT -= gui
 QT += network xml 
 INSTALLS += target
-
-LIBS += -L../tascore/lib/ -lqttestability
 
 unix:!symbian:!macx {
   LIBS += -lX11 -lXtst

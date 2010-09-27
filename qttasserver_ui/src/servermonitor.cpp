@@ -20,16 +20,14 @@
 
 
 #include <QByteArray>
-#include <tascoreutils.h>
-#include <testabilityutils.h>
-#include <testabilitysettings.h>
-#include <taslogger.h>
 #include <QTcpSocket>
 #include <QDomElement>
 #include <QDomDocument>
 #include <QFile>
 
-
+#include "taslogger.h"
+#include "tascoreutils.h"
+#include "testabilitysettings.h"
 #include "servermonitor.h"
 
 #ifdef Q_OS_SYMBIAN
@@ -66,8 +64,7 @@ ServerMonitor::ServerMonitor(QObject* parent)
     connect(mClient, SIGNAL(info(const QString&)), this, SLOT(info(const QString&)));
     connect(mClient, SIGNAL(serverResponse(const QString&)), this, SLOT(serverResponse(const QString&)));
 
-    QString appName = TestabilityUtils::getApplicationName();
-    TasLogger::logger()->setLogFile(appName+".log");         
+    TasLogger::logger()->setLogFile("qttas_ui.log");         
     TasLogger::logger()->setLevel(DEBUG);                              
     TasLogger::logger()->clearLogFile();   
     
@@ -246,7 +243,7 @@ void ServerMonitor::setAutoStart(bool autostart)
 
 bool ServerMonitor::autostartState()
 {    
-    return TestabilityUtils::autostart();
+    return TasCoreUtils::autostart();
 }
 
 #endif

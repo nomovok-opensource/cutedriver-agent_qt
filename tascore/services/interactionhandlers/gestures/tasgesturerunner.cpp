@@ -124,6 +124,7 @@ void TasGestureRunner::move(QList<TasTouchPoints> points, bool force)
 
 bool TasGestureRunner::eventFilter(QObject *target, QEvent *event)
 {
+    Q_UNUSED(target);
     //for some reason the following event is sent 
     //and it will cause a mouse ungrab events to be propagated
     //which will lead to all future events to be ignored

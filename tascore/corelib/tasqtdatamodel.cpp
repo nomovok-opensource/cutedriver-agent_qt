@@ -23,6 +23,7 @@
 #include <QMutableListIterator>
 #include <QTextCodec>
 
+#include "tasxmlwriter.h"
 #include "version.h"
 #include "tasqtdatamodel.h"
 

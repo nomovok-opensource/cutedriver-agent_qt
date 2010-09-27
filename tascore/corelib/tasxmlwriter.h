@@ -27,7 +27,7 @@
 #include <QMap>
 #include "tasconstants.h"
 
-class TAS_EXPORT TasXmlWriter
+class TasXmlWriter
 {
 public:
   TasXmlWriter(QTextStream& out);

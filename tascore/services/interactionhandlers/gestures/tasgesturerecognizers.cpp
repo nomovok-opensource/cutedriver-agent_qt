@@ -25,7 +25,6 @@ const char* const DIST_TWO = "distance_2";
 const char* const DIFF     = "differential";
 const char* const TYPE     = "type";
 const char* const RADIUS   = "radius";
-const char* const ANGLE    = "angle";
 const char* const ROTATE_DIRECTION = "rotate_direction";
 
 /*!
@@ -178,7 +177,6 @@ bool PointsTasGestureRecognizer::isSupportedType(const QString& gestureType)
 TasGesture* PointsTasGestureRecognizer::create(TargetData data)
 {
     TasCommand& command = *data.command;
-    QPoint point = data.targetPoint;
     QWidget* target = data.target;
     
     QList<QPoint> gesturePoints;

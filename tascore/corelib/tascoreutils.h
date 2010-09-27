@@ -39,6 +39,7 @@ public:
 	static QString objectId(QObject* object);
 	static QString pointerId(void* ptr);
 	static bool startServer();
+	static bool autostart();
 };
 
 #endif

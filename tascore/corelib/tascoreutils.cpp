@@ -23,6 +23,7 @@
 #include <QTime>
 #include <QCoreApplication>
 #include <QThread>
+#include <QVariant>
 
 #if defined(Q_OS_UNIX) && !defined(Q_OS_SYMBIAN)
 #include <stdlib.h>
@@ -36,6 +37,7 @@
 
 #include "tascoreutils.h"
 #include "tasdeviceutils.h"
+#include "testabilitysettings.h"
 
 class Sleeper: public QThread {
 public:
@@ -383,4 +385,15 @@ bool TasCoreUtils::startServer()
         started = QProcess::startDetached("qttasserver");
     }
     return started;
+}
+
+bool TasCoreUtils::autostart()
+{
+    QVariant value = TestabilitySettings::settings()->getValue(AUTO_START);
+    if(value.isValid() && value.canConvert<QString>()){
+        if(value.toString() == "on"){
+            return true;
+        }
+    }
+    return false;
 }

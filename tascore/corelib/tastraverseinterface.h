@@ -28,7 +28,6 @@
 
 #include "tasqtdatamodel.h"
 #include "tasqtcommandmodel.h"
-//#include "tasbasetraverse.h"
 
 //class TasCommand;
 

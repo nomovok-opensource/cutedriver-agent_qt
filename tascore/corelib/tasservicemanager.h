@@ -30,7 +30,7 @@
 #include "tascommand.h"
 #include "tasmessages.h"
 
-class TAS_EXPORT TasServiceManager : public RequestHandler
+class TasServiceManager : public RequestHandler
 {
 
 public:
