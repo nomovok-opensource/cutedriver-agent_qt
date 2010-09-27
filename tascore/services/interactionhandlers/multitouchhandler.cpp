@@ -81,7 +81,6 @@ bool MultitouchHandler::executeMultitouchInteraction(QList<TargetData> dataList)
                         itemPressPoints.insert(identifier, new QList<TasTouchPoints>());
                     }
                     itemPressPoints.value(identifier)->append(mTouchGen.toTouchPoint(targetData.targetPoint, false));
-                    TasLogger::logger()->debug("Press points appended for " + identifier);
                 }
                 else{
                     touchPoints.append(mTouchGen.convertToTouchPoints(targetData, Qt::TouchPointPressed));                    
@@ -90,11 +89,10 @@ bool MultitouchHandler::executeMultitouchInteraction(QList<TargetData> dataList)
             if(mReleaseCommands.contains(targetData.command->name())){
                 if(targetData.targetItem){
                     QString identifier = idAndCoordinates(targetData);
-                    if(!itemPressPoints.contains(identifier)){
-                        itemPressPoints.insert(identifier, new QList<TasTouchPoints>());
+                    if(!itemReleasePoints.contains(identifier)){
+                        itemReleasePoints.insert(identifier, new QList<TasTouchPoints>());
                     }
                     itemReleasePoints.value(identifier)->append(mTouchGen.toTouchPoint(targetData.targetPoint, false));
-                    TasLogger::logger()->debug("Release points appended for " + identifier);
                 }
                 else{
                     touchReleasePoints.append(mTouchGen.convertToTouchPoints(targetData, Qt::TouchPointReleased));
@@ -112,14 +110,12 @@ bool MultitouchHandler::executeMultitouchInteraction(QList<TargetData> dataList)
         //make touch points from the collected points per graphicsitem
         QMutableHashIterator<QString, QList<TasTouchPoints>* > presses(itemPressPoints);
         while (presses.hasNext()) {
-            TasLogger::logger()->debug("Press points appended to touch list.");
             presses.next();
             touchPoints.append(mTouchGen.convertToTouchPoints(target, Qt::TouchPointPressed, *presses.value(), presses.key()));
         }
 
         QMutableHashIterator<QString, QList<TasTouchPoints>* > releases(itemReleasePoints);
         while (releases.hasNext()) {
-            TasLogger::logger()->debug("Release points appended to touch list.");
             releases.next();
             touchReleasePoints.append(mTouchGen.convertToTouchPoints(target, Qt::TouchPointReleased, *releases.value(), releases.key()));
         }
