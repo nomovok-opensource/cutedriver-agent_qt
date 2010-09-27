@@ -19,7 +19,7 @@
  
 
 
-#include "testabilityutils.h "
+#include "testabilityutils.h"
 #include "taslogger.h"
 #include "testabilitysettings.h"
 #include "tasqtcommandmodel.h"
