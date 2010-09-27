@@ -368,12 +368,16 @@ void TestabilityService::initializeServiceManager()
 
 void TestabilityService::loadStartUpParams(QString appName)
 {
+    TasLogger::logger()->error("TestabilityService::loadStartUpParams for app: " + appName);
     TasDataShare dataShare;
-    TasSharedData* data = dataShare.loadSharedData(appName);
+    QString errMsg = "";
+    TasSharedData* data = dataShare.loadSharedData(appName, errMsg);
     if(data){
+        TasLogger::logger()->error("TestabilityService::loadStartUpParams data");
         QStringList eventList = data->eventsToListen();
         QStringList signalList = data->signalsToListen();
         if(mEventService && !eventList.isEmpty()){
+            TasLogger::logger()->error("TestabilityService::loadStartUpParams enable events: " + eventList.join(";"));
             mEventService->enableEvents(QString::number(qApp->applicationPid()), qApp, eventList);
             mEventService->addProcessStartEvent(data->creationTime());
         }
@@ -383,6 +387,10 @@ void TestabilityService::loadStartUpParams(QString appName)
             }
         }
         delete data;
+    }
+    else {
+
+        TasLogger::logger()->error("TestabilityService::loadStartUpParams no data error:" + errMsg);
     }
 }
 

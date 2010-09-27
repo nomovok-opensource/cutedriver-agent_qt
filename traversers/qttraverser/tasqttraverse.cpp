@@ -98,6 +98,7 @@ void TasQtTraverse::traverseObject(TasObject* objectInfo, QObject* object, TasCo
         objectInfo->addAttribute("objectType", embeddedApp? TYPE_WEB : TYPE_GRAPHICS_VIEW);
         printGraphicsWidgetAction(objectInfo, graphicsWidget);
         mTraverseUtils->addGraphicsItemCoordinates(objectInfo, graphicsWidget, command);
+        mTraverseUtils->printGraphicsItemProperties(objectInfo, graphicsWidget);
         mTraverseUtils->addFont(objectInfo, graphicsWidget->font());
         // Elided format "this is a text" -> "this is a..." text for
         // items that have the "text" property.
@@ -110,7 +111,7 @@ void TasQtTraverse::traverseObject(TasObject* objectInfo, QObject* object, TasCo
         if (plainText.isValid()) {
             mTraverseUtils->addTextInfo(objectInfo, plainText.toString(), graphicsWidget->font(), graphicsWidget->size().width());
             
-        }
+        }        
     }    
     else{
         //make sure that we are dealing with a widget
@@ -255,6 +256,4 @@ void TasQtTraverse::printGraphicsWidgetAction(TasObject* parentObject, QGraphics
          }
     }     
 }
-
-
 

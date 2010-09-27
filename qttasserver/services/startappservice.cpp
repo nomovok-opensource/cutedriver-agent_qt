@@ -96,6 +96,9 @@ void StartAppService::setRuntimeParams(TasCommand& command)
         if(!TasClientManager::instance()->writeStartupData(identifier, startupData)){
             TasLogger::logger()->error("StartAppService::setRuntimeParams could not set run time params for identifier: " + identifier + "!");
         }
+        else {
+            TasLogger::logger()->error("StartAppService::setRuntimeParams set with identifier: " + identifier);
+        }
     }
 }
 

@@ -38,8 +38,8 @@ public:
     TasDataShare();       
     ~TasDataShare();
 
-	bool storeSharedData(const QString& identifier, const TasSharedData& data);
-	TasSharedData* loadSharedData(const QString& identifier);
+	bool storeSharedData(const QString& identifier, const TasSharedData& data, QString& errMsg);
+	TasSharedData* loadSharedData(const QString& identifier, QString& errMsg);
 	bool detachSharedData(const QString& identifier);
 	 
 private:
