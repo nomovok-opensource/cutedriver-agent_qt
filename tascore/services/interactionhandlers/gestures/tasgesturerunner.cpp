@@ -49,7 +49,6 @@ void TasGestureRunner::startGesture()
         else{
             mPreviousPoints = mGesture->startPoints();
             if(mGesture->pointerType() == MouseHandler::TypeMouse || mGesture->pointerType() == MouseHandler::TypeBoth){
-                mMouseGen.doMouseMove(mGesture->getTarget(), mGesture->startPoints().first().screenPoint, mGesture->getMouseButton());
                 mMouseGen.doMousePress(mGesture->getTarget(), mGesture->getMouseButton(), mGesture->startPoints().first().screenPoint);
             }
             if(mGesture->pointerType() == MouseHandler::TypeTouch || mGesture->pointerType() == MouseHandler::TypeBoth){
