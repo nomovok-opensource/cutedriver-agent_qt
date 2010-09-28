@@ -66,7 +66,9 @@ void TasMouseEventGenerator::doMouseDblClick(QWidget* target, Qt::MouseButton bu
 }
 void TasMouseEventGenerator::sendMouseEvent(QWidget* target, QMouseEvent* event)
 {
-    TasLogger::logger()->debug("TasMouseEventGenerator::sendMouseEvent");
+    TasLogger::logger()->debug("TasMouseEventGenerator::sendMouseEvent " + QString::number(event->type()));
+    TasLogger::logger()->debug("TasMouseEventGenerator::sendMouseEvent "+  QString::number(event->globalX()) +","+ QString::number(event->globalY()));
+
     if(mUseTapScreen){
         TasDeviceUtils::sendMouseEvent(event->globalX(), event->globalY(), event->button(), event->type());
     } else {

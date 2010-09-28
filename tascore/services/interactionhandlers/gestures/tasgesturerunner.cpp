@@ -20,6 +20,7 @@
 #include <QApplication>
 
 #include "tasgesturerunner.h" 
+#include "taslogger.h" 
 
 TasGestureRunner::TasGestureRunner(TasGesture* gesture, QObject* parent)
     :QObject(parent)
@@ -67,9 +68,8 @@ void TasGestureRunner::finished()
 {
     move(mGesture->endPoints());
     if(mGesture->isRelease()){
-        //send move event to the end point with intention to cause a stopping effect
-        if(mGesture->isDrag()){            
-            move(mGesture->endPoints(), true);
+        if(mGesture->isDrag()){                        
+            //pause for a moment
             QTimer::singleShot(50, this, SLOT(releaseMouse()));
         }
         else{
@@ -151,8 +151,10 @@ bool TasGestureRunner::noMovement(QList<TasTouchPoints> points)
         TasTouchPoints p = mPreviousPoints.at(i);
         if(p.screenPoint != t.screenPoint || t.lastScreenPoint != p.lastScreenPoint ||
            p.startScreenPoint != t.startScreenPoint){
+            TasLogger::logger()->debug("TasGestureRunner::noMovement movent");
             return false;
         }
     }
+    TasLogger::logger()->debug("TasGestureRunner::noMovement no movent");
     return true;
 }
