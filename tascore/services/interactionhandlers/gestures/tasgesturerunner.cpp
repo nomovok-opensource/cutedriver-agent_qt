@@ -25,10 +25,12 @@
 TasGestureRunner::TasGestureRunner(TasGesture* gesture, QObject* parent)
     :QObject(parent)
 {
+    TasLogger::logger()->debug("TasGestureRunner::TasGestureRunner");
     mGesture = gesture;
     connect(&mTimeLine, SIGNAL(valueChanged(qreal)), this, SLOT(timerEvent(qreal)));
     connect(&mTimeLine, SIGNAL(finished()), this, SLOT(finished()));
     qApp->installEventFilter(this);
+    TasLogger::logger()->debug("TasGestureRunner::TasGestureRunner start the gesture");
     startGesture();
 }
 
@@ -39,6 +41,7 @@ TasGestureRunner::~TasGestureRunner()
 
 void TasGestureRunner::startGesture()
 {
+    TasLogger::logger()->debug("TasGestureRunner::startGesture");
     mPreviousPoints = mGesture->startPoints();
     int duration = mGesture->getDuration();
     mTimeLine.setDuration(duration);
@@ -66,6 +69,7 @@ void TasGestureRunner::timerEvent(qreal value)
 }
 void TasGestureRunner::finished()
 {
+    TasLogger::logger()->debug("TasGestureRunner::finished");
     move(mGesture->endPoints());
     if(mGesture->isRelease()){
         if(mGesture->isDrag()){                        
@@ -101,6 +105,7 @@ void TasGestureRunner::releaseMouse()
 
 void TasGestureRunner::move(QList<TasTouchPoints> points, bool force)
 {
+    TasLogger::logger()->debug("TasGestureRunner::move");
     if(!force){
         //check that the point is not the same as before 
         //which could cause a long tap instead of a gesture
@@ -108,14 +113,17 @@ void TasGestureRunner::move(QList<TasTouchPoints> points, bool force)
             return;
         }
     }
+    TasLogger::logger()->debug("TasGestureRunner::move needed");
     if(mGesture->isMultiTouch()){
         mTouchGen.doTouchUpdate(mGesture->getTarget(), mGesture->getTargetItem(), points);       
     }
     else{
+        TasLogger::logger()->debug("TasGestureRunner::move touch not multi");
         if(mGesture->pointerType() == MouseHandler::TypeMouse || mGesture->pointerType() == MouseHandler::TypeBoth){
             mMouseGen.doMouseMove(mGesture->getTarget(), points.first().screenPoint, mGesture->getMouseButton());
         }        
         if(mGesture->pointerType() == MouseHandler::TypeTouch || mGesture->pointerType() == MouseHandler::TypeBoth){
+            TasLogger::logger()->debug("TasGestureRunner::move touch type send touch event");
             mTouchGen.doTouchUpdate(mGesture->getTarget(), mGesture->getTargetItem(), points);       
         }
     }
@@ -151,10 +159,8 @@ bool TasGestureRunner::noMovement(QList<TasTouchPoints> points)
         TasTouchPoints p = mPreviousPoints.at(i);
         if(p.screenPoint != t.screenPoint || t.lastScreenPoint != p.lastScreenPoint ||
            p.startScreenPoint != t.startScreenPoint){
-            TasLogger::logger()->debug("TasGestureRunner::noMovement movent");
             return false;
         }
     }
-    TasLogger::logger()->debug("TasGestureRunner::noMovement no movent");
     return true;
 }

@@ -29,6 +29,8 @@
 #ifndef TASTOUCHEVENTGENERATOR_H
 #define TASTOUCHEVENTGENERATOR_H
 
+class TasTouchIdStorage;
+
 struct TasTouchPoints
 {
     QPoint screenPoint;
@@ -50,7 +52,7 @@ public:
 	void doTouchEnd(QWidget* target, QGraphicsItem* targetItem, QPoint point, bool primary, QString extraIdentifier);
 
 	QList<QTouchEvent::TouchPoint> convertToTouchPoints(TargetData targetData, Qt::TouchPointState state);
-  
+ 
     QList<QTouchEvent::TouchPoint> convertToTouchPoints(QWidget* target, QGraphicsItem* targetItem, Qt::TouchPointState state,
                                                         QList<TasTouchPoints> points, QString extraIdentifier=QString());
     QTouchEvent::TouchPoint makeTouchPoint(QWidget* target, TasTouchPoints points, Qt::TouchPointState state, int id);
@@ -65,8 +67,27 @@ public slots:
 
 private:
     static int mTouchPointCounter;
-    QHash<QString,QList<int>* > mTouchIds;
-
+	TasTouchIdStorage* mStorage;
 };
+
+class TasTouchIdStorage
+{
+public:
+    static TasTouchIdStorage* loadStorage();
+	static void unLoadStorage();	
+
+	QList<int>* loadIds(QString id);
+	QList<int>* takeIds(QString id);
+	
+private:	
+	TasTouchIdStorage();
+	~TasTouchIdStorage();
+
+private:
+	static TasTouchIdStorage* mInstance;
+    QHash<QString,QList<int>* > mTouchIds;
+	static int mLoadCount;
+};
+
 
 #endif
