@@ -83,9 +83,12 @@ void TasTouchEventGenerator::doTouchEnd(QWidget* target, QGraphicsItem* targetIt
 
 void TasTouchEventGenerator::sendTouchEvent(QWidget* target, QTouchEvent* event)
 {
-    TasLogger::logger()->debug("TasTouchEventGenerator::sendTouchEvent");
     QSpontaneKeyEvent::setSpontaneous(event);
     qApp->postEvent(target, event);   
+#if (!defined(Q_OS_WIN32) && !defined(Q_OS_WINCE))
+        //qApp->processEvents();
+        qApp->sendPostedEvents(target, event->type());
+#endif
 }
 
 QList<QTouchEvent::TouchPoint> TasTouchEventGenerator::convertToTouchPoints(TargetData targetData, Qt::TouchPointState state)

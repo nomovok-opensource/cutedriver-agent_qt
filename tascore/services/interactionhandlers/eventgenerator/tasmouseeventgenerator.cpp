@@ -66,14 +66,16 @@ void TasMouseEventGenerator::doMouseDblClick(QWidget* target, Qt::MouseButton bu
 }
 void TasMouseEventGenerator::sendMouseEvent(QWidget* target, QMouseEvent* event)
 {
-    TasLogger::logger()->debug("TasMouseEventGenerator::sendMouseEvent " + QString::number(event->type()));
-    TasLogger::logger()->debug("TasMouseEventGenerator::sendMouseEvent "+  QString::number(event->globalX()) +","+ QString::number(event->globalY()));
-
     if(mUseTapScreen){
         TasDeviceUtils::sendMouseEvent(event->globalX(), event->globalY(), event->button(), event->type());
     } else {
         QSpontaneKeyEvent::setSpontaneous(event);
         qApp->postEvent(target, event);   
+    //in windows this causes unwanted beheviour in other vice versa    
+#if (!defined(Q_OS_WIN32) && !defined(Q_OS_WINCE))
+        //qApp->processEvents();
+        qApp->sendPostedEvents(target, event->type());
+#endif
     }
 }
 
@@ -83,7 +85,6 @@ void TasMouseEventGenerator::moveCursor(QPoint point)
         TasDeviceUtils::sendMouseEvent(point.x(), point.y(), Qt::NoButton, QEvent::MouseMove);                
     } else {
         QCursor::setPos(point);
-        qApp->processEvents();
     }
 }
 
