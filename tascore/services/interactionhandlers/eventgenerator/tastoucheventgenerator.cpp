@@ -85,9 +85,9 @@ void TasTouchEventGenerator::sendTouchEvent(QWidget* target, QTouchEvent* event)
 {
     QSpontaneKeyEvent::setSpontaneous(event);
     qApp->postEvent(target, event);   
+    //in windows this causes the events to be ignored 
 #if (!defined(Q_OS_WIN32) && !defined(Q_OS_WINCE))
-        //qApp->processEvents();
-        qApp->sendPostedEvents(target, event->type());
+    qApp->processEvents();
 #endif
 }
 
