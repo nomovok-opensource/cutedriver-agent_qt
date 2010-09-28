@@ -78,11 +78,13 @@ private:
 
 	MouseHandler::TapDetails makeDetails(TargetData data);
 	QAction* getAction(QWidget* widget, int id);
+	bool noMovement(TapDetails details);
 
 private:
 	TasMouseEventGenerator mMouseGen;
 	TasTouchEventGenerator mTouchGen;
 	QStringList mCommands;
+	TapDetails mPreviousDetails;
 	friend class Tapper;
 };
 

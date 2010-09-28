@@ -519,30 +519,16 @@ bool TasClientManager::writeStartupData(const QString& identifier, const TasShar
     TasLogger::logger()->debug("TasClientManager::writeStartupData for identifier " + identifier);
     QString errMsg = "";
     bool retVal = mDataShare->storeSharedData(identifier, data, errMsg);
-    TasLogger::logger()->debug("TasClientManager::writeStartupData written key:" + errMsg);
-
-    TasSharedData* dataTmp = mDataShare->loadSharedData(identifier, errMsg);
-    if(dataTmp){
-        TasLogger::logger()->error("TasClientManager::writeStartupData data");
-        QStringList eventList = dataTmp->eventsToListen();
-        QStringList signalList = dataTmp->signalsToListen();
-        if(!eventList.isEmpty()){
-            TasLogger::logger()->error("TasClientManager::writeStartupData enable events: " + eventList.join(";"));
-        }
-        delete dataTmp;
+    if(!retVal){
+        TasLogger::logger()->error("TasClientManager::writeStartupData error " + errMsg);
     }
-    else {
-
-        TasLogger::logger()->error("TasClientManager::writeStartupData no data error:" + errMsg);
-    }
-    TasLogger::logger()->debug("TasClientManager::writeStartupData for identifier " + identifier);
     return retVal;
 }
 
 bool TasClientManager::detachFromStartupData(const QString& identifier)
 {
     TasLogger::logger()->debug("TasClientManager::detachFromStartupData for identifier " + identifier);
-    //return mDataShare->detachSharedData(identifier);
+    return mDataShare->detachSharedData(identifier);
     return true;
 }
 

@@ -38,6 +38,7 @@ TasGestureRunner::~TasGestureRunner()
 
 void TasGestureRunner::startGesture()
 {
+    mPreviousPoints = mGesture->startPoints();
     int duration = mGesture->getDuration();
     mTimeLine.setDuration(duration);
     mTimeLine.setFrameRange(0,duration/FRAME_RANGE_DIV);    
@@ -47,7 +48,6 @@ void TasGestureRunner::startGesture()
             mTouchGen.doTouchBegin(mGesture->getTarget(), mGesture->getTargetItem(), mGesture->startPoints());       
         }
         else{
-            mPreviousPoints = mGesture->startPoints();
             if(mGesture->pointerType() == MouseHandler::TypeMouse || mGesture->pointerType() == MouseHandler::TypeBoth){
                 mMouseGen.doMousePress(mGesture->getTarget(), mGesture->getMouseButton(), mGesture->startPoints().first().screenPoint);
             }

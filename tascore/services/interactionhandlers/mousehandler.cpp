@@ -204,6 +204,16 @@ void MouseHandler::press(TapDetails details)
 }
 void MouseHandler::move(TapDetails details)
 {
+    //do not send the same movement twice since may cause unwanted mouse ungrabs
+    if(noMovement(details)){
+        return;
+    }
+    mPreviousDetails.target = details.target;
+    mPreviousDetails.targetItem = details.targetItem;
+    mPreviousDetails.point = details.point;
+    mPreviousDetails.button = details.button;
+
+
     if(details.pointerType == TypeMouse || details.pointerType == TypeBoth){
         mMouseGen.doMouseMove(details.target, details.point, details.button);
     }
@@ -221,6 +231,18 @@ void MouseHandler::release(TapDetails details)
         bool primary  = (details.pointerType == TypeBoth);
         mTouchGen.doTouchEnd(details.target, details.targetItem, details.point, primary, details.extraIdentifier);
     }
+}
+
+/*!
+  Check that the details do not cause the same movement
+ */
+bool MouseHandler::noMovement(TapDetails details)
+{
+    if(details.target == mPreviousDetails.target && details.targetItem == mPreviousDetails.targetItem &&
+       details.point == mPreviousDetails.point && details.button == mPreviousDetails.button){
+        return false;
+    }
+    return true;
 }
 
 

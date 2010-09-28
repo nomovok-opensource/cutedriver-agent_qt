@@ -382,6 +382,7 @@ void TestabilityService::loadStartUpParams(QString appName)
             mEventService->addProcessStartEvent(data->creationTime());
         }
         if(mEventService && !signalList.isEmpty()){
+            TasLogger::logger()->error("TestabilityService::loadStartUpParams listen signals: " + signalList.join(";"));
             for (int i = 0; i < signalList.size(); i++){
                 enableSignalTracking(signalList.at(i), data->creationTime().toString(DATE_FORMAT));
             }

@@ -222,7 +222,7 @@ void TasEventFilter::addStartTime(QDateTime startTime)
 
 bool TasEventFilter::eventFilter(QObject *target, QEvent *event)
 {
-    TasLogger::logger()->debug("TasEventFilter::eventFilter");
+    //    TasLogger::logger()->debug("TasEventFilter::eventFilter");
     if (mTasEvents){
         QString eventType = TestabilityUtils::eventType(event) ;
 
