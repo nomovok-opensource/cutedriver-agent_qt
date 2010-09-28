@@ -529,7 +529,6 @@ bool TasClientManager::detachFromStartupData(const QString& identifier)
 {
     TasLogger::logger()->debug("TasClientManager::detachFromStartupData for identifier " + identifier);
     return mDataShare->detachSharedData(identifier);
-    return true;
 }
 
 /*!
