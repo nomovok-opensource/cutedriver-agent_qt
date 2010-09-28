@@ -71,7 +71,7 @@ private:
 	void performActionEvent(TapDetails details);
     void checkMoveMouse(TasCommand& command);
     void setPoint(TasCommand& command, TapDetails& details);
-    void checkMoveMouse(TasCommand& command, QPoint point);   
+    void checkMoveMouse(TapDetails details);   
 	void press(TapDetails details);
 	void move(TapDetails details);
 	void release(TapDetails details);

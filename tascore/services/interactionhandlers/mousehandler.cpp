@@ -50,7 +50,7 @@ bool MouseHandler::executeInteraction(TargetData data)
         TapDetails details = makeDetails(data);
         setPoint(command, details);
         wasConsumed = true;        
-        checkMoveMouse(command, details.point);        
+        checkMoveMouse(details);        
         
         if (commandName == "MouseClick" || commandName == "Tap" || commandName == "TapScreen"){
             int count = 1;
@@ -240,11 +240,13 @@ Qt::MouseButton MouseHandler::getMouseButton(TasCommand& command)
     return btn;
 }
 
-void MouseHandler::checkMoveMouse(TasCommand& command, QPoint point)
+void MouseHandler::checkMoveMouse(TapDetails details)
 {
-    if(command.parameter("mouseMove") == "true"){                
-        mMouseGen.moveCursor(point);
-    }           
+    if(details.pointerType == TypeMouse || details.pointerType == TypeBoth){
+        if(details.command->parameter("mouseMove") == "true"){                
+            mMouseGen.doMouseMove(details.target, details.point, details.button);
+        }           
+    }
 }
 
 /*!
