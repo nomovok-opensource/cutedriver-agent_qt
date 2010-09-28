@@ -29,8 +29,6 @@
 #ifndef TASTOUCHEVENTGENERATOR_H
 #define TASTOUCHEVENTGENERATOR_H
 
-class TasTouchIdStorage;
-
 struct TasTouchPoints
 {
     QPoint screenPoint;
@@ -67,27 +65,6 @@ public slots:
 
 private:
     static int mTouchPointCounter;
-	TasTouchIdStorage* mStorage;
 };
-
-class TasTouchIdStorage
-{
-public:
-    static TasTouchIdStorage* loadStorage();
-	static void unLoadStorage();	
-
-	QList<int>* loadIds(QString id);
-	QList<int>* takeIds(QString id);
-	
-private:	
-	TasTouchIdStorage();
-	~TasTouchIdStorage();
-
-private:
-	static TasTouchIdStorage* mInstance;
-    QHash<QString,QList<int>* > mTouchIds;
-	static int mLoadCount;
-};
-
 
 #endif

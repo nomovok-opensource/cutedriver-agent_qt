@@ -29,13 +29,10 @@ int TasTouchEventGenerator::mTouchPointCounter = 0;
 TasTouchEventGenerator::TasTouchEventGenerator(QObject* parent)
     :QObject(parent)
 {
-    mStorage = TasTouchIdStorage::loadStorage();
 }
 
 TasTouchEventGenerator::~TasTouchEventGenerator()
 {
-    mStorage = 0;
-    TasTouchIdStorage::unLoadStorage();
 }
 
 void TasTouchEventGenerator::doTouchBegin(QWidget* target, QGraphicsItem* targetItem, 
@@ -67,9 +64,7 @@ void TasTouchEventGenerator::doTouchBegin(QWidget* target, QGraphicsItem* target
 
 void TasTouchEventGenerator::doTouchUpdate(QWidget* target, QGraphicsItem* targetItem, QList<TasTouchPoints> points)
 {
-    TasLogger::logger()->debug("TasTouchEventGenerator::doTouchUpdate");
     QList<QTouchEvent::TouchPoint> touchPoints = convertToTouchPoints(target, targetItem, Qt::TouchPointMoved, points);
-    TasLogger::logger()->debug("TasTouchEventGenerator::doTouchUpdate make touchevent");
     QTouchEvent* touchMove = new QTouchEvent(QEvent::TouchUpdate, QTouchEvent::TouchScreen, Qt::NoModifier, Qt::TouchPointMoved, touchPoints);
     touchMove->setWidget(target);
     sendTouchEvent(target, touchMove);
@@ -87,13 +82,9 @@ void TasTouchEventGenerator::doTouchEnd(QWidget* target, QGraphicsItem* targetIt
 
 void TasTouchEventGenerator::sendTouchEvent(QWidget* target, QTouchEvent* event)
 {
-    TasLogger::logger()->debug("TasTouchEventGenerator::sendTouchEvent");
     QSpontaneKeyEvent::setSpontaneous(event);
-    TasLogger::logger()->debug("TasTouchEventGenerator::sendTouchEvent post event");
     qApp->postEvent(target, event);   
-    TasLogger::logger()->debug("TasTouchEventGenerator::sendTouchEvent process events");
     qApp->processEvents();
-    TasLogger::logger()->debug("TasTouchEventGenerator::sendTouchEvent done");
 }
 
 QList<QTouchEvent::TouchPoint> TasTouchEventGenerator::convertToTouchPoints(TargetData targetData, Qt::TouchPointState state)
@@ -104,40 +95,41 @@ QList<QTouchEvent::TouchPoint> TasTouchEventGenerator::convertToTouchPoints(Targ
 QList<QTouchEvent::TouchPoint> TasTouchEventGenerator::convertToTouchPoints(QWidget* target, QGraphicsItem* targetItem, Qt::TouchPointState state,
                                                                             QList<TasTouchPoints> points, QString extraIdentifier)
 {
-    bool remove = false;
-    QList<int> *pointIds;
+    bool store = true;
+    QList<QVariant> pointIds;
+    QString itemId;
     //we need to store the touchpoint ids, the same id must be attached for untill touch point released
     if(targetItem) {
-        QString itemId = TasCoreUtils::pointerId(targetItem);
+        itemId = TasCoreUtils::pointerId(targetItem);        
         //extraIdentifier needed to differentiate taps that occur in the same item but different coordinates
         //in normal object taps the identifier is empty
-        itemId.append(extraIdentifier);
-        
+        itemId.append(extraIdentifier);        
+        QVariant pointStore = qApp->property(itemId.toAscii());
+        if(pointStore.isValid()){
+            pointIds = pointStore.toList();
+        }
         if(state == Qt::TouchPointReleased){
-            pointIds = mStorage->takeIds(itemId);
-            remove = true;
-        }
-        else{
-            pointIds = mStorage->loadIds(itemId);
-        }
+            //set invalid to remove the list
+            qApp->setProperty(itemId.toAscii(), QVariant());
+            store = false;
+        }       
     }
     else{
-        pointIds = new QList<int>();
-        remove = true;
+        store = false;                        
     }
-
     QList<QTouchEvent::TouchPoint> touchPoints;    
     if(!points.isEmpty()){
         for(int i = 0 ; i < points.size() ; i++){
-            if(pointIds->size() <= i ){
+            if(pointIds.size() <= i ){
                 mTouchPointCounter++;
-                pointIds->append(mTouchPointCounter);                
+                pointIds.append(QVariant(mTouchPointCounter));                
             }
-            touchPoints.append(makeTouchPoint(target, points.at(i), state, pointIds->at(i)));
+            touchPoints.append(makeTouchPoint(target, points.at(i), state, pointIds.at(i).toInt()));
         }
     }
-
-    if(remove) delete pointIds;
+    if(store && !itemId.isEmpty()){
+        qApp->setProperty(itemId.toAscii(), QVariant(pointIds));
+    }
 
     return touchPoints;
 }
@@ -185,52 +177,3 @@ QList<TasTouchPoints> TasTouchEventGenerator::toTouchPoints(QPoint point, bool p
 }
 
 
-TasTouchIdStorage* TasTouchIdStorage::mInstance = 0;
-int TasTouchIdStorage::mLoadCount = 0;
-
-TasTouchIdStorage::TasTouchIdStorage()
-{
-}
-TasTouchIdStorage::~TasTouchIdStorage()
-{
-    qDeleteAll(mTouchIds);
-    mTouchIds.clear();
-}
-
-TasTouchIdStorage* TasTouchIdStorage::loadStorage()
-{
-    if(!mInstance){
-        mInstance = new TasTouchIdStorage();
-    }
-    mLoadCount++;
-    return mInstance;
-}
-
-void TasTouchIdStorage::unLoadStorage()
-{
-    mLoadCount--;
-    if(mLoadCount == 0){
-        delete mInstance;
-    }
-}
-
-QList<int>* TasTouchIdStorage::loadIds(QString id)
-{
-    if(!mTouchIds.contains(id)){
-        mTouchIds.insert(id, new QList<int>());
-    }
-    return mTouchIds.value(id);
-}
-
-/*!
-  Ownership transferred.
- */
-QList<int>* TasTouchIdStorage::takeIds(QString id)
-{
-    if(mTouchIds.contains(id)){
-        return mTouchIds.value(id);
-    }
-    else{
-        return new QList<int>();
-    }
-}
