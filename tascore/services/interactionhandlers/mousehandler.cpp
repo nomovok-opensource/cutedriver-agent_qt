@@ -240,9 +240,9 @@ bool MouseHandler::noMovement(TapDetails details)
 {
     if(details.target == mPreviousDetails.target && details.targetItem == mPreviousDetails.targetItem &&
        details.point == mPreviousDetails.point && details.button == mPreviousDetails.button){
-        return false;
+        return true;
     }
-    return true;
+    return false;
 }
 
 
