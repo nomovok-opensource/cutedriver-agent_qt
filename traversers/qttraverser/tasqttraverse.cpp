@@ -93,7 +93,6 @@ void TasQtTraverse::traverseObject(TasObject* objectInfo, QObject* object, TasCo
     }
     //TasLogger::logger()->debug("TasQtTraverse::traverseObject in");
     mTraverseUtils->addObjectDetails(objectInfo, object);
-    //QGraphicsWidget* graphicsWidget = qobject_cast<QGraphicsWidget*>(object);               
     QGraphicsObject* graphicsObject = qobject_cast<QGraphicsObject*>(object);               
     if(graphicsObject){
         objectInfo->addAttribute("objectType", embeddedApp? TYPE_WEB : TYPE_GRAPHICS_VIEW);
