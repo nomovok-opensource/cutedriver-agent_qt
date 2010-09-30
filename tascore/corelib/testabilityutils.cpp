@@ -156,10 +156,10 @@ bool TestabilityUtils::verifyGraphicsItemMatch(const QString& targetId, QGraphic
     if (sourceId == targetId){
         doesMatch = true;
     }
-    else{        
+    else if(source){        
         //is object decendant
-        QGraphicsWidget* object = castToGraphicsWidget(source);
-        if (source) {            
+        QGraphicsObject* object = source->toGraphicsObject();
+        if (object) {            
             sourceId = TasCoreUtils::objectId(object);
             if (sourceId == targetId){
                 doesMatch = true;                        
