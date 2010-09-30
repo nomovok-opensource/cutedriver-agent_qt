@@ -98,11 +98,12 @@ Qt Test Automation Server plugins
 
 %package -n testability-driver
 Summary: Meta package to install the Testability Driver environment.
-Requires: qttas-server-libs qttas-server qttas-server-plugins
+Requires: qttas-server-libs qttas-server qttas-server-plugings
 Requires: rubygem-testability-driver rubygem-testability-driver-qt-sut-plugin
 %description -n testability-driver
 Qt TAS is a test automation server which provides testability 
 interface. Interface is used to access UI components to 
 verify and control them. This the metapackage that installs all necessary components.
-
+%files -n testability-driver
+%doc /usr/share/doc/qttas-server/*
 
