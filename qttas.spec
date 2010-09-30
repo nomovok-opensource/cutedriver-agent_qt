@@ -104,5 +104,6 @@ Requires: rubygem-testability-driver rubygem-testability-driver-qt-sut-plugin
 Qt TAS is a test automation server which provides testability 
 interface. Interface is used to access UI components to 
 verify and control them. This the metapackage that installs all necessary components.
-
+%files -n testability-driver
+%doc /usr/share/doc/qttas-server/*
 
