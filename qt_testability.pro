@@ -60,6 +60,10 @@ include(s60/s60.pri)
 }
 
 unix:!symbian {
+  COPYRIGHT.files = LICENSE.LGPL 
+  COPYRIGHT.path = /usr/share/doc/qttas-server/
+  INSTALLS += COPYRIGHT
+
 #  EXAMPLES = doc/
   EXAMPLES.files = doc/*
   EXAMPLES.path = /usr/share/doc/qttas-dev/
