@@ -141,10 +141,10 @@ void TasUiTraverser::traverseObject(TasObject& objectInfo, QObject* object, TasC
     if(object->inherits("QGraphicsView")){ 
         traverseGraphicsViewItems(objectInfo, qobject_cast<QGraphicsView*>(object), command);
     }
-    //2. is GraphicsWidget
-    QGraphicsWidget* graphicsWidget = qobject_cast<QGraphicsWidget*>(object);               
-    if(graphicsWidget){
-        traverseGraphicsItemList(objectInfo, graphicsWidget,command);
+    //2. is QGraphicsObject
+    QGraphicsObject* graphicsObject = qobject_cast<QGraphicsObject*>(object);               
+    if(graphicsObject){
+        traverseGraphicsItemList(objectInfo, graphicsObject,command);
     }
     //3. Widget children
     else{
@@ -168,7 +168,7 @@ void TasUiTraverser::traverseObject(TasObject& objectInfo, QObject* object, TasC
 
 void TasUiTraverser::traverseGraphicsItem(TasObject& objectInfo, QGraphicsItem* graphicsItem, TasCommand* command)
 {
-    QGraphicsWidget* object = TestabilityUtils::castToGraphicsWidget(graphicsItem);
+    QGraphicsObject* object = qgraphicsitem_cast<QGraphicsObject*>(graphicsItem);               
     if (object) {
         traverseObject(objectInfo, object, command);
         // Traverse the actual widget under the proxy, if available
