@@ -1,5 +1,5 @@
 Name: qttas-server
-Version: 0.9.0
+Version: 0.9.1
 Release:1%{?dist}
 Summary: Qt Test Automation Server
 Group: Development/Tools
@@ -90,14 +90,19 @@ Summary: Qt Test automation server plugins
 %description plugins
 Qt Test Automation Server plugins
 
+
 %files plugins
 %defattr(-,root,root,-)
 %{_libdir}/qt4/plugins/*
 
 
-%changelog
-* Mon Aug 16 2010 - ext-tatu.lahtela@nokia.com - 0.9.0.3
-- RPM Package for release
+%package -n testability-driver
+Summary: Meta package to install the Testability Driver environment.
+Requires: qttas-server-libs qttas-server qttas-server-plugings
+Requires: rubygem-testability-driver rubygem-testability-driver-qt-sut-plugin
+%description -n testability-driver
+Qt TAS is a test automation server which provides testability 
+interface. Interface is used to access UI components to 
+verify and control them. This the metapackage that installs all necessary components.
 
-* Thu Jun 17 2010 - ext-tatu.lahtela@nokia.com - 0.8.4
-- Testing RPM Packaging
+
