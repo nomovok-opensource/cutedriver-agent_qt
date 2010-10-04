@@ -19,6 +19,28 @@
 
 TEMPLATE = subdirs
 
+symbian: {	
+	!CONFIG(no_mobility)  {
+		CONFIG += mobility
+	}
+}
+windows: {	
+	!CONFIG(no_mobility)  {
+		CONFIG += mobility
+	}
+}
+
+CONFIG(maemo){
+	!CONFIG(no_mobility)  {
+		CONFIG += mobility
+	}
+}
+
+CONFIG(mobility){
+        SUBDIRS += mobilitysfwfixture
+        SUBDIRS += contactfixture
+}
+
 SUBDIRS += signalfixture
 
 SUBDIRS += tasfixture
@@ -26,11 +48,6 @@ SUBDIRS += tasfixture
 SUBDIRS += fpsfixture
 
 SUBDIRS += filefixture
-
-
-CONFIG(mobility){
-        SUBDIRS += mobilitysfwfixture
-}
 
 SUBDIRS += popupfixture
 
@@ -44,6 +61,5 @@ CONFIG(maemo){
 SUBDIRS += tapfixture
 
 SUBDIRS += dialogfixture
-
 
 CONFIG  += ordered
