@@ -69,7 +69,12 @@ TasGesture::TasGesture(TargetData data)
 
     mTarget = data.target;
     mTargetItem = data.targetItem;
-    mTouchPointIdKey = TasCoreUtils::pointerId(mTargetItem);
+    if(mTargetItem){
+        mTouchPointIdKey = TasCoreUtils::pointerId(mTargetItem);
+    }
+    else{
+        mTouchPointIdKey = TasCoreUtils::objectId(mTarget);
+    }
     TasCommand& command = *data.command;
 
     if (!command.parameter("speed").isEmpty()) {
@@ -92,6 +97,12 @@ TasGesture::TasGesture(TargetData data)
     if(!command.parameter(POINTER_TYPE).isEmpty()){
         setPointerType(static_cast<MouseHandler::PointerType>(command.parameter(POINTER_TYPE).toInt()));
     }
+    //if we know that the gesture a complete one (with press and release)
+    //set the id to be unique for the gesture
+    if(mPress && mRelease){
+        mTouchPointIdKey.append(QString::number(qrand()));
+    }
+
     mButton = MouseHandler::getMouseButton(command);
 }
 
@@ -297,58 +308,6 @@ void PointsTasGesture::calculateAnimation()
         mPoints = timedPoints;
     }
 }
-
-MultiLineTasGesture::MultiLineTasGesture(TargetData data, QList<QLineF> lines)
-    :TasGesture(data)
-{
-    mLines = lines;
-    mPointerType = MouseHandler::TypeTouch;
-}
-
-MultiLineTasGesture::~MultiLineTasGesture()
-{
-    mLines.clear();
-}
-
-QList<TasTouchPoints> MultiLineTasGesture::startPoints()
-{
-    mLastPoints.clear();
-    QList<TasTouchPoints> points;
-    foreach(QLineF line, mLines){
-        QPoint point = line.p1().toPoint();
-        points.append(makeTouchPoint(point));
-        mLastPoints.append(point);
-    }
-    mStartPoints = QList<QPoint>(mLastPoints);
-    return points;
-}
-
-QList<TasTouchPoints> MultiLineTasGesture::pointsAt(qreal value)
-{
-    QList<TasTouchPoints> points;
-    QList<QPoint> screenPoints;
-    for(int i ; i < mLines.size(); i++){
-        QLineF line = mLines.at(i);
-        TasTouchPoints touchPoint = makeTouchPoint(line.pointAt(value).toPoint(), mLastPoints.at(i), mStartPoints.at(i));
-        points.append(touchPoint);
-        screenPoints.append(touchPoint.screenPoint);
-    }
-    mLastPoints.clear();
-    mLastPoints.append(screenPoints);
-    return points;
-}
-
-QList<TasTouchPoints> MultiLineTasGesture::endPoints()
-{
-    QList<TasTouchPoints> points;
-    for(int i ; i < mLines.size(); i++){
-        QLineF line = mLines.at(i);
-        points.append(makeTouchPoint(line.p2().toPoint(), mLastPoints.at(i), mStartPoints.at(i)));
-    }
-    return points;
-}
-
-
 
 PinchZoomTasGesture::PinchZoomTasGesture(TargetData data, QLineF line1, QLineF line2)
     :TasGesture(data)

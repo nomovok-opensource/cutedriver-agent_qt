@@ -109,21 +109,6 @@ private:
 	bool mUseIntervals;
 };
 
-class MultiLineTasGesture : public TasGesture
-{
-public:
-    MultiLineTasGesture(TargetData data, QList<QLineF> lines);
-    ~MultiLineTasGesture();
-  
-	QList<TasTouchPoints> startPoints();
-	QList<TasTouchPoints> pointsAt(qreal value);
-	QList<TasTouchPoints> endPoints();
-	bool isMultiTouch(){return true;}
-
-private:
-	QList<QLineF> mLines;
-};  
-
 class PinchZoomTasGesture : public TasGesture
 {
 public:

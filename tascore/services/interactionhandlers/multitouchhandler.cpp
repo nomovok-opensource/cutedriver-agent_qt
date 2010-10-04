@@ -22,6 +22,7 @@
 #include <testabilityutils.h>
 
 #include "taslogger.h"
+#include "tasmultigesturerunner.h"
 #include "multitouchhandler.h"
 
 /*!
@@ -52,7 +53,7 @@ MultitouchHandler::~MultitouchHandler()
   QTimeLine is used to make the gesture operations. The value from the valuechanged signal
   of timeline is used to determine the position.
  */
-bool MultitouchHandler::executeInteraction(TargetData data)
+bool MultitouchHandler::executeInteraction(TargetData /*data*/)
 {
     return false;
 }
@@ -75,28 +76,18 @@ bool MultitouchHandler::executeMultitouchInteraction(QList<TargetData> dataList)
         TargetData targetData;
         foreach(targetData, dataList){
             if(mPressCommands.contains(targetData.command->name())){            
-                if(targetData.targetItem){
-                    QString identifier = idAndCoordinates(targetData);
-                    if(!itemPressPoints.contains(identifier)){
-                        itemPressPoints.insert(identifier, new QList<TasTouchPoints>());
-                    }
-                    itemPressPoints.value(identifier)->append(mTouchGen.toTouchPoint(targetData.targetPoint, false));
+                QString identifier = idAndCoordinates(targetData);
+                if(!itemPressPoints.contains(identifier)){
+                    itemPressPoints.insert(identifier, new QList<TasTouchPoints>());
                 }
-                else{
-                    touchPoints.append(mTouchGen.convertToTouchPoints(targetData, Qt::TouchPointPressed));                    
-                }
+                itemPressPoints.value(identifier)->append(mTouchGen.toTouchPoint(targetData.targetPoint, false));
             }
             if(mReleaseCommands.contains(targetData.command->name())){
-                if(targetData.targetItem){
-                    QString identifier = idAndCoordinates(targetData);
-                    if(!itemReleasePoints.contains(identifier)){
-                        itemReleasePoints.insert(identifier, new QList<TasTouchPoints>());
-                    }
-                    itemReleasePoints.value(identifier)->append(mTouchGen.toTouchPoint(targetData.targetPoint, false));
+                QString identifier = idAndCoordinates(targetData);
+                if(!itemReleasePoints.contains(identifier)){
+                    itemReleasePoints.insert(identifier, new QList<TasTouchPoints>());
                 }
-                else{
-                    touchReleasePoints.append(mTouchGen.convertToTouchPoints(targetData, Qt::TouchPointReleased));
-                }
+                itemReleasePoints.value(identifier)->append(mTouchGen.toTouchPoint(targetData.targetPoint, false));
             }            
             TasGesture* gesture = mFactory->makeGesture(targetData);
             if(gesture){
@@ -137,6 +128,10 @@ bool MultitouchHandler::executeMultitouchInteraction(QList<TargetData> dataList)
             mTouchGen.sendTouchEvent(target, touchRelease);            
         }
         //add support for gestures...
+        if(!gestures.isEmpty()){
+            //removes itself after done
+            new TasMultiGestureRunner(gestures);
+        }
 
         //cleanup
         qDeleteAll(itemPressPoints);
@@ -148,9 +143,15 @@ bool MultitouchHandler::executeMultitouchInteraction(QList<TargetData> dataList)
     return consumed;
 }
 
-QString MultitouchHandler::idAndCoordinates(TargetData data)
-{
-    QString id = TasCoreUtils::pointerId(data.targetItem);
+QString MultitouchHandler::idAndCoordinates(TargetData& data)
+{    
+    QString id;
+    if(data.targetItem){
+        id = TasCoreUtils::pointerId(data.targetItem);
+    }
+    else{
+        id = TasCoreUtils::pointerId(data.target);
+    }
     if(data.command->parameter("useCoordinates") == "true"){ 
         data.targetPoint.setX(data.command->parameter("x").toInt());
         data.targetPoint.setY(data.command->parameter("y").toInt());        

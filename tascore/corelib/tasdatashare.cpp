@@ -50,7 +50,7 @@ TasDataShare::~TasDataShare()
     mStoredDataBlocks.clear();
 }
 
-bool TasDataShare::storeSharedData(const QString& identifier, const TasSharedData& data)
+bool TasDataShare::storeSharedData(const QString& identifier, const TasSharedData& data, QString& errMsg)
 {
     QSharedMemory* storage = new QSharedMemory(identifier);
     QByteArray array = data.asArray();
@@ -66,15 +66,18 @@ bool TasDataShare::storeSharedData(const QString& identifier, const TasSharedDat
     memcpy(to, from, qMin(storage->size(), size));
     storage->unlock();
     mStoredDataBlocks.insert(identifier, storage);
+    errMsg = " key:" + storage->key();
     return true;
 }
 
-TasSharedData* TasDataShare::loadSharedData(const QString& identifier)
+TasSharedData* TasDataShare::loadSharedData(const QString& identifier, QString& errMsg)
 {
     QSharedMemory storage(identifier);
     if(!storage.attach()){
+        errMsg = storage.errorString() + " key:" + storage.key();
         return 0;
     }
+    errMsg = " key:" + storage.key();
     storage.lock();
     QByteArray array((char*)storage.constData(), storage.size());
     TasSharedData* sharedData = new TasSharedData(QString::fromAscii((array.data())));

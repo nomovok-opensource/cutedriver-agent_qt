@@ -77,6 +77,7 @@ void TasViewItemTraverse::endTraverse()
 */
 void TasViewItemTraverse::traverseObject(TasObject* objectInfo, QObject* object, TasCommand* command)
 {
+    Q_UNUSED(command)
     if(object->inherits("QAbstractItemView")){          
         //traverse the different types of viewitems 
         //1. QTreeWidget 

@@ -27,8 +27,9 @@
 #include <QWidget>
 #include <QAction>
 
-#include "tascommand.h"
 #include "tascoreutils.h"
+
+class TasCommand;
 
 struct ItemLocationDetails
 {
@@ -53,7 +54,6 @@ public:
 	static ItemLocationDetails getItemLocationDetails(QGraphicsItem* graphicsItem, TasCommand* command=0);
 	static bool isCustomTraverse();
 	static QString graphicsItemId(QGraphicsItem* graphicsItem);
-	static bool autostart();
 	static QGraphicsWidget* castToGraphicsWidget(QGraphicsItem* graphicsItem);
 
 protected:

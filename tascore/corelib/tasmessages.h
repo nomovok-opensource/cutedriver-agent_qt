@@ -28,7 +28,7 @@
 
 class TasSocket;
 
-class TAS_EXPORT TasMessage
+class TasMessage
 {
  public:
     TasMessage();
@@ -63,7 +63,7 @@ private:
 	bool mIsError;
 };
 
-class TAS_EXPORT TasResponse : public TasMessage
+class TasResponse : public TasMessage
 {
 public:
 
@@ -78,7 +78,7 @@ private:
 	TasSocket* mSocket;
 };
 
-class TAS_EXPORT ResponseFilter
+class ResponseFilter
 {
 public:
     virtual ~ResponseFilter(){};

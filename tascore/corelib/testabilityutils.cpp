@@ -22,6 +22,7 @@
 #include "testabilityutils.h"
 #include "taslogger.h"
 #include "testabilitysettings.h"
+#include "tasqtcommandmodel.h"
 
 /*!
   \class TestabilityUtils
@@ -155,10 +156,10 @@ bool TestabilityUtils::verifyGraphicsItemMatch(const QString& targetId, QGraphic
     if (sourceId == targetId){
         doesMatch = true;
     }
-    else{        
+    else if(source){        
         //is object decendant
-        QGraphicsWidget* object = castToGraphicsWidget(source);
-        if (source) {            
+        QGraphicsObject* object = source->toGraphicsObject();
+        if (object) {            
             sourceId = TasCoreUtils::objectId(object);
             if (sourceId == targetId){
                 doesMatch = true;                        
@@ -281,17 +282,6 @@ bool TestabilityUtils::isBlackListed()
             if(filePath.contains(blackListed)){
                 return true;
             }
-        }
-    }
-    return false;
-}
-
-bool TestabilityUtils::autostart()
-{
-    QVariant value = TestabilitySettings::settings()->getValue(AUTO_START);
-    if(value.isValid() && value.canConvert<QString>()){
-        if(value.toString() == "on"){
-            return true;
         }
     }
     return false;

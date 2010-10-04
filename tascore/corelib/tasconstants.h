@@ -203,7 +203,7 @@ const char* const BLACK_LISTED = "black_list";
 const char* const AUTO_START = "autostart";
 
 
-#ifdef QTTASSERVER
+#ifdef TDTASSERVER
  #define TAS_EXPORT 
 #else
  #ifdef BUILD_TAS

@@ -93,23 +93,28 @@ void TasQtTraverse::traverseObject(TasObject* objectInfo, QObject* object, TasCo
     }
     //TasLogger::logger()->debug("TasQtTraverse::traverseObject in");
     mTraverseUtils->addObjectDetails(objectInfo, object);
-    QGraphicsWidget* graphicsWidget = qobject_cast<QGraphicsWidget*>(object);               
-    if(graphicsWidget){
+    QGraphicsObject* graphicsObject = qobject_cast<QGraphicsObject*>(object);               
+    if(graphicsObject){
         objectInfo->addAttribute("objectType", embeddedApp? TYPE_WEB : TYPE_GRAPHICS_VIEW);
-        printGraphicsWidgetAction(objectInfo, graphicsWidget);
-        mTraverseUtils->addGraphicsItemCoordinates(objectInfo, graphicsWidget, command);
-        mTraverseUtils->addFont(objectInfo, graphicsWidget->font());
-        // Elided format "this is a text" -> "this is a..." text for
-        // items that have the "text" property.
-        QVariant text = graphicsWidget->property("text");
-        if (text.isValid()) {
-            mTraverseUtils->addTextInfo(objectInfo, text.toString(), graphicsWidget->font(), graphicsWidget->size().width());
-            
-        }
-        QVariant plainText = graphicsWidget->property("plainText");
-        if (plainText.isValid()) {
-            mTraverseUtils->addTextInfo(objectInfo, plainText.toString(), graphicsWidget->font(), graphicsWidget->size().width());
-            
+        mTraverseUtils->addGraphicsItemCoordinates(objectInfo, graphicsObject, command);
+        mTraverseUtils->printGraphicsItemProperties(objectInfo, graphicsObject);
+
+        //add details only for graphicsitems
+        QGraphicsWidget* graphicsWidget = qobject_cast<QGraphicsWidget*>(object);   
+        if(graphicsWidget){
+            printGraphicsWidgetAction(objectInfo, graphicsWidget);
+            mTraverseUtils->addFont(objectInfo, graphicsWidget->font());
+            // Elided format "this is a text" -> "this is a..." text for
+            // items that have the "text" property.
+            QVariant text = graphicsWidget->property("text");
+            if (text.isValid()) {
+                mTraverseUtils->addTextInfo(objectInfo, text.toString(), graphicsWidget->font(), graphicsWidget->size().width());
+                
+            }
+            QVariant plainText = graphicsWidget->property("plainText");
+            if (plainText.isValid()) {
+                mTraverseUtils->addTextInfo(objectInfo, plainText.toString(), graphicsWidget->font(), graphicsWidget->size().width());
+            }        
         }
     }    
     else{
@@ -255,6 +260,4 @@ void TasQtTraverse::printGraphicsWidgetAction(TasObject* parentObject, QGraphics
          }
     }     
 }
-
-
 

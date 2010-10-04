@@ -516,11 +516,18 @@ TasClient* TasClientManager::logMemClient()
 
 bool TasClientManager::writeStartupData(const QString& identifier, const TasSharedData& data)
 {
-    return mDataShare->storeSharedData(identifier, data);
+    TasLogger::logger()->debug("TasClientManager::writeStartupData for identifier " + identifier);
+    QString errMsg = "";
+    bool retVal = mDataShare->storeSharedData(identifier, data, errMsg);
+    if(!retVal){
+        TasLogger::logger()->error("TasClientManager::writeStartupData error " + errMsg);
+    }
+    return retVal;
 }
 
 bool TasClientManager::detachFromStartupData(const QString& identifier)
 {
+    TasLogger::logger()->debug("TasClientManager::detachFromStartupData for identifier " + identifier);
     return mDataShare->detachSharedData(identifier);
 }
 

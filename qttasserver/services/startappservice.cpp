@@ -90,11 +90,15 @@ void StartAppService::setRuntimeParams(TasCommand& command)
     QString applicationPath = command.parameter("application_path");    
     QString eventList = command.parameter("events_to_listen");
     QString signalList = command.parameter("signals_to_listen");    
+    TasLogger::logger()->error("StartAppService::setRuntimeParams signals: " + signalList);
     if(!eventList.isEmpty() || !signalList.isEmpty()){
         TasSharedData startupData(eventList.split(","), signalList.split(","));
         QString identifier = TasCoreUtils::parseExecutable(applicationPath);
         if(!TasClientManager::instance()->writeStartupData(identifier, startupData)){
             TasLogger::logger()->error("StartAppService::setRuntimeParams could not set run time params for identifier: " + identifier + "!");
+        }
+        else {
+            TasLogger::logger()->error("StartAppService::setRuntimeParams set with identifier: " + identifier);
         }
     }
 }

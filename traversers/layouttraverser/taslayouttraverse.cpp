@@ -71,6 +71,7 @@ void TasLayoutTraverse::endTraverse()
 */
 void TasLayoutTraverse::traverseGraphicsItem(TasObject* objectInfo, QGraphicsItem* graphicsItem, TasCommand* command)
 {
+    Q_UNUSED(command)
     if (graphicsItem->isWindow() || graphicsItem->isWidget()) {
         QGraphicsWidget* widget = (QGraphicsWidget*)graphicsItem;        
         if(widget && widget->layout()){
@@ -83,6 +84,7 @@ void TasLayoutTraverse::traverseGraphicsItem(TasObject* objectInfo, QGraphicsIte
 */
 void TasLayoutTraverse::traverseObject(TasObject* objectInfo, QObject* object, TasCommand* command)
 {
+    Q_UNUSED(command)
     if (object->isWidgetType()){
         QWidget* widget = qobject_cast<QWidget*>(object);            
         if(widget){

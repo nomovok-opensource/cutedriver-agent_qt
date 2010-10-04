@@ -21,11 +21,13 @@ HEADERS += $$PWD/tasgesture.h
 HEADERS += $$PWD/tasgesturerecognizers.h
 HEADERS += $$PWD/tasgesturefactory.h
 HEADERS += $$PWD/tasgesturerunner.h
+HEADERS += $$PWD/tasmultigesturerunner.h
 
 SOURCES += $$PWD/tasgesture.cpp 
 SOURCES += $$PWD/tasgesturerecognizers.cpp
 SOURCES += $$PWD/tasgesturefactory.cpp
 SOURCES += $$PWD/tasgesturerunner.cpp
+SOURCES += $$PWD/tasmultigesturerunner.cpp
 
 
 

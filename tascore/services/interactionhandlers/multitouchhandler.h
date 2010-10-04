@@ -39,7 +39,7 @@ public:
 	bool executeMultitouchInteraction(QList<TargetData> dataList);
 
 private:
-	QString idAndCoordinates(TargetData data);
+	QString idAndCoordinates(TargetData& data);
 
 
 private:

@@ -35,6 +35,8 @@
 #include "confservice.h"
 #include "platformservice.h"
 #include "infoservice.h"
+#include "eventservice.h"
+#include "fixtureservice.h"
 
 const int SERVER_REGISTRATION_TIMEOUT = 12000;
 const int REGISTER_INTERVAL = 300;
@@ -366,21 +368,30 @@ void TestabilityService::initializeServiceManager()
 
 void TestabilityService::loadStartUpParams(QString appName)
 {
+    TasLogger::logger()->error("TestabilityService::loadStartUpParams for app: " + appName);
     TasDataShare dataShare;
-    TasSharedData* data = dataShare.loadSharedData(appName);
+    QString errMsg = "";
+    TasSharedData* data = dataShare.loadSharedData(appName, errMsg);
     if(data){
+        TasLogger::logger()->error("TestabilityService::loadStartUpParams data");
         QStringList eventList = data->eventsToListen();
         QStringList signalList = data->signalsToListen();
         if(mEventService && !eventList.isEmpty()){
+            TasLogger::logger()->error("TestabilityService::loadStartUpParams enable events: " + eventList.join(";"));
             mEventService->enableEvents(QString::number(qApp->applicationPid()), qApp, eventList);
             mEventService->addProcessStartEvent(data->creationTime());
         }
         if(mEventService && !signalList.isEmpty()){
+            TasLogger::logger()->error("TestabilityService::loadStartUpParams listen signals: " + signalList.join(";"));
             for (int i = 0; i < signalList.size(); i++){
                 enableSignalTracking(signalList.at(i), data->creationTime().toString(DATE_FORMAT));
             }
         }
         delete data;
+    }
+    else {
+
+        TasLogger::logger()->error("TestabilityService::loadStartUpParams no data error:" + errMsg);
     }
 }
 

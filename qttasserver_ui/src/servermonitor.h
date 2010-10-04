@@ -26,8 +26,8 @@
 #include <QProcess>
 #include <QTimer>
 
-#include <tassocket.h>
-#include <tasconstants.h>
+#include "tassocket.h"
+#include "tasconstants.h"
 
 #include <QTcpSocket>
 #include <QLocalSocket>

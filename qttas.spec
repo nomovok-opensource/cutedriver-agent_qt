@@ -1,5 +1,5 @@
 Name: qttas-server
-Version: 0.9.0
+Version: 0.9.1
 Release:1%{?dist}
 Summary: Qt Test Automation Server
 Group: Development/Tools
@@ -94,10 +94,3 @@ Qt Test Automation Server plugins
 %defattr(-,root,root,-)
 %{_libdir}/qt4/plugins/*
 
-
-%changelog
-* Mon Aug 16 2010 - ext-tatu.lahtela@nokia.com - 0.9.0.3
-- RPM Package for release
-
-* Thu Jun 17 2010 - ext-tatu.lahtela@nokia.com - 0.8.4
-- Testing RPM Packaging

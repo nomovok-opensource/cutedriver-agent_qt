@@ -26,7 +26,7 @@
 #include <QSettings>
 #include "tasconstants.h"
 
-class TAS_EXPORT TestabilitySettings
+class TestabilitySettings
 {
 private:
     TestabilitySettings();

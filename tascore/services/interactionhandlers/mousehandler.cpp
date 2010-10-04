@@ -50,7 +50,7 @@ bool MouseHandler::executeInteraction(TargetData data)
         TapDetails details = makeDetails(data);
         setPoint(command, details);
         wasConsumed = true;        
-        checkMoveMouse(command, details.point);        
+        checkMoveMouse(details);        
         
         if (commandName == "MouseClick" || commandName == "Tap" || commandName == "TapScreen"){
             int count = 1;
@@ -180,7 +180,12 @@ MouseHandler::TapDetails MouseHandler::makeDetails(TargetData data)
     details.command = data.command;
     details.target = data.target;
     details.point = data.targetPoint;
-    details.identifier = TasCoreUtils::pointerId(data.targetItem);
+    if(data.targetItem){
+        details.identifier = TasCoreUtils::pointerId(data.targetItem);
+    }
+    else{
+        details.identifier = TasCoreUtils::objectId(data.target);
+    }
     details.button = getMouseButton(command);
     details.pointerType = MouseHandler::TypeMouse;
     if(!command.parameter(POINTER_TYPE).isEmpty()){
@@ -193,36 +198,35 @@ MouseHandler::TapDetails MouseHandler::makeDetails(TargetData data)
 
 void MouseHandler::press(TapDetails details)
 {
-    if(details.pointerType == TypeMouse || details.pointerType == TypeBoth){
-        mMouseGen.doMousePress(details.target, details.button, details.point);
-    }
     if(details.pointerType == TypeTouch || details.pointerType == TypeBoth){        
         //set primary only when mouse events are sent
         bool primary  = (details.pointerType == TypeBoth);
         mTouchGen.doTouchBegin(details.target, details.point, primary, details.identifier);
     }
+    if(details.pointerType == TypeMouse || details.pointerType == TypeBoth){
+        mMouseGen.doMousePress(details.target, details.button, details.point);
+    }
 }
 void MouseHandler::move(TapDetails details)
 {
-    if(details.pointerType == TypeMouse || details.pointerType == TypeBoth){
-        mMouseGen.doMouseMove(details.target, details.point, details.button);
-    }
     if(details.pointerType == TypeTouch || details.pointerType == TypeBoth){
         bool primary  = (details.pointerType == TypeBoth);
         mTouchGen.doTouchUpdate(details.target, details.point, primary, details.identifier);
     }
+    if(details.pointerType == TypeMouse || details.pointerType == TypeBoth){
+        mMouseGen.doMouseMove(details.target, details.point, details.button);
+    }
 }
 void MouseHandler::release(TapDetails details)
 {
-    if(details.pointerType == TypeMouse || details.pointerType == TypeBoth){
-        mMouseGen.doMouseRelease(details.target, details.button, details.point);
-    }
     if(details.pointerType == TypeTouch || details.pointerType == TypeBoth){
         bool primary  = (details.pointerType == TypeBoth);
         mTouchGen.doTouchEnd(details.target, details.point, primary, details.identifier);
     }
+    if(details.pointerType == TypeMouse || details.pointerType == TypeBoth){
+        mMouseGen.doMouseRelease(details.target, details.button, details.point);
+    }
 }
-
 
 Qt::MouseButton MouseHandler::getMouseButton(TasCommand& command)
 {
@@ -241,11 +245,13 @@ Qt::MouseButton MouseHandler::getMouseButton(TasCommand& command)
     return btn;
 }
 
-void MouseHandler::checkMoveMouse(TasCommand& command, QPoint point)
+void MouseHandler::checkMoveMouse(TapDetails details)
 {
-    if(command.parameter("mouseMove") == "true"){                
-        mMouseGen.moveCursor(point);
-    }           
+    if(details.pointerType == TypeMouse || details.pointerType == TypeBoth){
+        if(details.command->parameter("mouseMove") == "true"){                
+            mMouseGen.doMouseMove(details.target, details.point, details.button);
+        }           
+    }
 }
 
 /*!

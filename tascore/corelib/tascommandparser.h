@@ -28,7 +28,7 @@
 
 #include "tasqtcommandmodel.h"
 
-class TAS_EXPORT TasCommandParser 
+class TasCommandParser 
 {    
 public:
     static TasCommandModel* parseCommandXml(const QString& commandXml);   

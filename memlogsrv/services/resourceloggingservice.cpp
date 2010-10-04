@@ -111,6 +111,7 @@ int ResourceLoggingService::startLogging(
         ResourceLoggingService::ResourceType resourceType, 
         TasCommand& command)
 {
+    Q_UNUSED(resourceType)
     TasLogger::logger()->debug("> ResourceLoggingService::startLogging: " + command.name());
     
     QString processName = command.parameter("thread_name");
@@ -159,6 +160,7 @@ int ResourceLoggingService::stopLogging(
         TasCommand& command,
         QString& responseData)
 {
+    Q_UNUSED(resourceType)
     TasLogger::logger()->debug("> ResourceLoggingService::stopLogging: " + command.name());
 
     QString processName = command.parameter("thread_name");

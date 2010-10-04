@@ -17,14 +17,15 @@
 ## 
 ############################################################################
 
+PUBLIC_HEADERS += $$PWD/tastraverserloader.h 
+PUBLIC_HEADERS += $$PWD/tastraverseutils.h
+PUBLIC_HEADERS += $$PWD/tasuitraverser.h 
+PUBLIC_HEADERS += $$PWD/testabilityutils.h 
+
 HEADERS += $$PWD/tastraverseinterface.h 
 HEADERS += $$PWD/tasservicebase.h 
 HEADERS += $$PWD/tasservicemanager.h 
 HEADERS += $$PWD/testabilityservice.h 
-HEADERS += $$PWD/testabilityutils.h 
-HEADERS += $$PWD/tastraverserloader.h 
-HEADERS += $$PWD/tasuitraverser.h 
-HEADERS += $$PWD/tastraverseutils.h
 
 SOURCES += $$PWD/testabilityservice.cpp 
 SOURCES += $$PWD/testabilityutils.cpp 

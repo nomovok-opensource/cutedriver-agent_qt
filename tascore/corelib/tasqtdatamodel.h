@@ -31,12 +31,12 @@
 #include <QTextStream>
 
 #include "tasconstants.h"
-#include "tasxmlwriter.h"
 
 class TasAttribute;
 class TasObject;
 class TasObjectContainer;
 class TasDataModel;
+class TasXmlWriter;
 
 class TAS_EXPORT SerializeFilter
 {

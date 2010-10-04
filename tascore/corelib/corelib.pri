@@ -17,25 +17,27 @@
 ## 
 ############################################################################
 
-HEADERS += $$PWD/tascommand.h 
+PUBLIC_HEADERS += $$PWD/tasconstants.h 
+PUBLIC_HEADERS += $$PWD/tascoreutils.h 
+PUBLIC_HEADERS += $$PWD/taslogger.h 
+PUBLIC_HEADERS += $$PWD/tasqtcommandmodel.h 
+PUBLIC_HEADERS += $$PWD/tasqtdatamodel.h 
+PUBLIC_HEADERS += $$PWD/tasqtfixtureplugininterface.h
+PUBLIC_HEADERS += $$PWD/tastraverseinterface.h
+PUBLIC_HEADERS += $$PWD/taspluginloader.h 
+
 HEADERS += $$PWD/tasmessages.h 
-HEADERS += $$PWD/tascommandparser.h 
-HEADERS += $$PWD/tasconstants.h 
-HEADERS += $$PWD/taslogger.h 
-HEADERS += $$PWD/taspluginloader.h 
-HEADERS += $$PWD/tasqtcommandmodel.h 
-HEADERS += $$PWD/tasqtdatamodel.h 
-HEADERS += $$PWD/tasservicemanager.h 
-HEADERS += $$PWD/tassocket.h 
-HEADERS += $$PWD/tasxmlwriter.h 
-HEADERS += $$PWD/testabilityutils.h 
-HEADERS += $$PWD/tasdatashare.h 
 HEADERS += $$PWD/testabilitysettings.h 
-HEADERS += $$PWD/tascoreutils.h 
+HEADERS += $$PWD/tasdatashare.h 
+HEADERS += $$PWD/tascommand.h 
 HEADERS += $$PWD/tasfixtureplugininterface.h 
 HEADERS += $$PWD/tasqtfixtureplugininterface.h 
-HEADERS += $$PWD/tasdeviceutils.h 
 HEADERS += $$PWD/infologger.h 
+HEADERS += $$PWD/tasservicemanager.h 
+HEADERS += $$PWD/tasxmlwriter.h 
+HEADERS += $$PWD/tassocket.h 
+HEADERS += $$PWD/tasdeviceutils.h 
+HEADERS += $$PWD/tascommandparser.h 
 
 SOURCES += $$PWD/tasmessages.cpp
 SOURCES += $$PWD/tascommandparser.cpp 

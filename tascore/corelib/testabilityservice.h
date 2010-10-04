@@ -39,11 +39,10 @@
 
 #include "tassocket.h"
 #include "tasqtcommandmodel.h"
-#include "closeappservice.h"
 #include "tasservicemanager.h"
-#include "eventservice.h"
-#include "fixtureservice.h"
 
+class EventService;
+class FixtureService;
 
 class TestabilityService : public QObject, public ResponseHandler
 {

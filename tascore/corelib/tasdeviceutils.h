@@ -46,7 +46,7 @@ public:
     virtual GpuMemDetails gpuData() = 0;
 };
 
-class TAS_EXPORT TasDeviceUtils 
+class TasDeviceUtils 
 {
 public:
     TasDeviceUtils();

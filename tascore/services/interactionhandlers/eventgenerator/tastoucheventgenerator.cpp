@@ -28,12 +28,11 @@ int TasTouchEventGenerator::mTouchPointCounter = 0;
 
 TasTouchEventGenerator::TasTouchEventGenerator(QObject* parent)
     :QObject(parent)
-{}
+{
+}
 
 TasTouchEventGenerator::~TasTouchEventGenerator()
 {
-    qDeleteAll(mTouchIds);
-    mTouchIds.clear();
 }
 
 void TasTouchEventGenerator::doTouchBegin(QWidget* target, QPoint point, bool primary, QString identifier)
@@ -79,9 +78,9 @@ void TasTouchEventGenerator::doTouchEnd(QWidget* target, QList<TasTouchPoints> p
 
 void TasTouchEventGenerator::sendTouchEvent(QWidget* target, QTouchEvent* event)
 {
-    TasLogger::logger()->debug("TasTouchEventGenerator::sendTouchEvent");
     QSpontaneKeyEvent::setSpontaneous(event);
     qApp->postEvent(target, event);   
+    qApp->processEvents();
 }
 
 QList<QTouchEvent::TouchPoint> TasTouchEventGenerator::convertToTouchPoints(TargetData targetData, Qt::TouchPointState state)
@@ -93,40 +92,37 @@ QList<QTouchEvent::TouchPoint> TasTouchEventGenerator::convertToTouchPoints(Targ
 QList<QTouchEvent::TouchPoint> TasTouchEventGenerator::convertToTouchPoints(QWidget* target, Qt::TouchPointState state,
                                                                             QList<TasTouchPoints> points, QString identifier)
 {
-    bool remove = false;
-    QList<int> *pointIds;
-    //we need to store the touchpoint ids, the same id must be attached for untill touch point released
-    if(!identifier.isEmpty()){
-        if(state == Qt::TouchPointReleased && mTouchIds.contains(identifier)){
-            pointIds = mTouchIds.take(identifier);
-            remove = true;
+    bool store = true;
+    QList<QVariant> pointIds;
+    if(!identifier.isEmpty()) {
+        QVariant pointStore = qApp->property(identifier.toAscii());
+        if(pointStore.isValid()){
+            pointIds = pointStore.toList();
         }
-        else if(state == Qt::TouchPointMoved && mTouchIds.contains(identifier)){
-            pointIds = mTouchIds.value(identifier);
-        }
-        else{
-            pointIds = new QList<int>();
-            mTouchIds.insert(identifier, pointIds);
-        }
+        if(state == Qt::TouchPointReleased){
+            //set invalid to remove the list
+            qApp->setProperty(identifier.toAscii(), QVariant());
+            store = false;
+        }       
     }
     else{
-        pointIds = new QList<int>();
-        remove = true;
+        store = false;                        
     }
-
     QList<QTouchEvent::TouchPoint> touchPoints;    
     if(!points.isEmpty()){
         for(int i = 0 ; i < points.size() ; i++){
-            if(pointIds->size() <= i ){
+            if(pointIds.size() <= i ){
                 mTouchPointCounter++;
-                pointIds->append(mTouchPointCounter);                
+                pointIds.append(QVariant(mTouchPointCounter));                
             }
-            touchPoints.append(makeTouchPoint(target, points.at(i), state, pointIds->at(i)));
+            touchPoints.append(makeTouchPoint(target, points.at(i), state, pointIds.at(i).toInt()));
         }
     }
-
-    if(remove) delete pointIds;
-
+    if(store && !identifier.isEmpty()){
+        //we store the point id to the app as property
+        //this allows new gestures to use the ids when needed
+        qApp->setProperty(identifier.toAscii(), QVariant(pointIds));
+    }
     return touchPoints;
 }
 
@@ -138,6 +134,7 @@ QTouchEvent::TouchPoint TasTouchEventGenerator::makeTouchPoint(QWidget* target, 
     if(points.isPrimary){
         states |= Qt::TouchPointPrimary;
     }
+    touchPoint.setPressure(1.0);
     touchPoint.setState(states);
     touchPoint.setPos(target->mapFromGlobal(points.screenPoint));    
     touchPoint.setScreenPos(points.screenPoint);    
@@ -174,4 +171,21 @@ TasTouchPoints TasTouchEventGenerator::toTouchPoint(QPoint point, bool primary)
     touchPoint.screenPoint = point;
     touchPoint.isPrimary = primary;
     return touchPoint;
+}
+
+bool TasTouchEventGenerator::areIdentical(QList<TasTouchPoints> points1, QList<TasTouchPoints> points2)
+{
+    if(points1.size() != points2.size()){
+        return false;
+    }
+    //loop points to detect differences
+    for(int i = 0 ; i < points1.size() ; i++){
+        TasTouchPoints t = points1.at(i);
+        TasTouchPoints p = points2.at(i);
+        if(p.screenPoint != t.screenPoint || t.lastScreenPoint != p.lastScreenPoint ||
+           p.startScreenPoint != t.startScreenPoint){
+            return false;
+        }
+    }
+    return true;
 }
