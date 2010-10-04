@@ -1,22 +1,22 @@
-/*************************************************************************** 
-** 
-** Copyright (C) 2010 Nokia Corporation and/or its subsidiary(-ies). 
-** All rights reserved. 
-** Contact: Nokia Corporation (testabilitydriver@nokia.com) 
-** 
+/***************************************************************************
+**
+** Copyright (C) 2010 Nokia Corporation and/or its subsidiary(-ies).
+** All rights reserved.
+** Contact: Nokia Corporation (testabilitydriver@nokia.com)
+**
 ** This file is part of Testability Driver Qt Agent
-** 
-** If you have questions regarding the use of this file, please contact 
-** Nokia at testabilitydriver@nokia.com . 
-** 
-** This library is free software; you can redistribute it and/or 
-** modify it under the terms of the GNU Lesser General Public 
-** License version 2.1 as published by the Free Software Foundation 
-** and appearing in the file LICENSE.LGPL included in the packaging 
-** of this file. 
-** 
-****************************************************************************/ 
- 
+**
+** If you have questions regarding the use of this file, please contact
+** Nokia at testabilitydriver@nokia.com .
+**
+** This library is free software; you can redistribute it and/or
+** modify it under the terms of the GNU Lesser General Public
+** License version 2.1 as published by the Free Software Foundation
+** and appearing in the file LICENSE.LGPL included in the packaging
+** of this file.
+**
+****************************************************************************/
+
 
 
 #ifndef MOUSEHANDLER_H
@@ -31,7 +31,7 @@
 #include <QAction>
 
 #include "uicommandservice.h"
-#include "tasmouseeventgenerator.h"          
+#include "tasmouseeventgenerator.h"
 #include "tastoucheventgenerator.h"
 
 class Tapper;
@@ -43,10 +43,10 @@ class MouseHandler : public InteractionHandler
 {
 public:
     enum PointerType{
- 	    TypeMouse = 0,
-		TypeTouch = 1,
-		TypeBoth = 2
-	};
+            TypeMouse = 0,
+                TypeTouch = 1,
+                TypeBoth = 2
+        };
 
 	struct TapDetails{
         QWidget* target;
@@ -61,29 +61,30 @@ public:
 public:
      MouseHandler();
     ~MouseHandler();
-  	
-	
-    virtual bool executeInteraction(TargetData data);
-  
-	static Qt::MouseButton getMouseButton(TasCommand& command);
+
+
+     virtual QString handlerName() { return QString("MouseHandler"); }
+     virtual bool executeInteraction(TargetData data);
+
+     static Qt::MouseButton getMouseButton(TasCommand& command);
 
 private:
-	void performActionEvent(TapDetails details);
+        bool performActionEvent(TapDetails details);
     void checkMoveMouse(TasCommand& command);
     void setPoint(TasCommand& command, TapDetails& details);
-    void checkMoveMouse(TapDetails details);   
-	void press(TapDetails details);
-	void move(TapDetails details);
-	void release(TapDetails details);
+    void checkMoveMouse(TapDetails details);
+        void press(TapDetails details);
+        void move(TapDetails details);
+        void release(TapDetails details);
 
-	MouseHandler::TapDetails makeDetails(TargetData data);
-	QAction* getAction(QWidget* widget, int id);
+        MouseHandler::TapDetails makeDetails(TargetData data);
+        QAction* getAction(QWidget* widget, int id);
 
 private:
-	TasMouseEventGenerator mMouseGen;
-	TasTouchEventGenerator mTouchGen;
-	QStringList mCommands;
-	friend class Tapper;
+        TasMouseEventGenerator mMouseGen;
+        TasTouchEventGenerator mTouchGen;
+        QStringList mCommands;
+        friend class Tapper;
 };
 
 class Tapper : public QObject
@@ -91,14 +92,14 @@ class Tapper : public QObject
     Q_OBJECT
 public:
     Tapper(MouseHandler* handler, MouseHandler::TapDetails details, int count, int interval);
-	
+
 private slots:
     void tap();
-	
+
 private:
-	MouseHandler* mHandler;
+        MouseHandler* mHandler;
     QTimer mTimer;
-	MouseHandler::TapDetails mDetails;
+        MouseHandler::TapDetails mDetails;
     int mMaxCount;
     int mTapCount;
 };
