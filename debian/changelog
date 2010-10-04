@@ -1,8 +1,8 @@
 qttas (0.9.1-2) unstable; urgency=low
 
-  * New release tag
+  * Fixed localisation & sqlite bug
 
- -- Petri Kiiskinen <ext-petri.ak.kiiskinen@nokia.com>  Tue, 28 Sep 2010 15:30:38 +0300
+ -- Petri Kiiskinen <ext-petri.ak.kiiskinen@nokia.com>  Mon, 04 Oct 2010 08:00:00 +0300
 
 qttas (0.9.1-1) unstable; urgency=low
 
