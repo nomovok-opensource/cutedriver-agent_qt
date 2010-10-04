@@ -1,22 +1,22 @@
-/*************************************************************************** 
-** 
-** Copyright (C) 2010 Nokia Corporation and/or its subsidiary(-ies). 
-** All rights reserved. 
-** Contact: Nokia Corporation (testabilitydriver@nokia.com) 
-** 
+/***************************************************************************
+**
+** Copyright (C) 2010 Nokia Corporation and/or its subsidiary(-ies).
+** All rights reserved.
+** Contact: Nokia Corporation (testabilitydriver@nokia.com)
+**
 ** This file is part of Testability Driver Qt Agent
-** 
-** If you have questions regarding the use of this file, please contact 
-** Nokia at testabilitydriver@nokia.com . 
-** 
-** This library is free software; you can redistribute it and/or 
-** modify it under the terms of the GNU Lesser General Public 
-** License version 2.1 as published by the Free Software Foundation 
-** and appearing in the file LICENSE.LGPL included in the packaging 
-** of this file. 
-** 
-****************************************************************************/ 
- 
+**
+** If you have questions regarding the use of this file, please contact
+** Nokia at testabilitydriver@nokia.com .
+**
+** This library is free software; you can redistribute it and/or
+** modify it under the terms of the GNU Lesser General Public
+** License version 2.1 as published by the Free Software Foundation
+** and appearing in the file LICENSE.LGPL included in the packaging
+** of this file.
+**
+****************************************************************************/
+
 
 #include <QApplication>
 #include <QListIterator>
@@ -29,19 +29,13 @@
 #include "webkitcommandservice.h"
 #include "tassocket.h"
 
-#include "actionhandler.h"
-#include "gesturehandler.h"
-#include "keyhandler.h"
-#include "mousehandler.h"
-#include "multitouchhandler.h"
-
 #include "tasdeviceutils.h"
 
 /*!
   \class WebkitCommandService
   \brief WebkitCommandService manages ui commands send to the app
 
-*/    
+*/
 
 WebkitCommandService::WebkitCommandService()
     :counter(0)
@@ -51,7 +45,7 @@ WebkitCommandService::~WebkitCommandService()
 {}
 
 bool WebkitCommandService::executeService(TasCommandModel& model, TasResponse& response)
-{    
+{
     TasLogger::logger()->debug("WebkitCommandService::executeService " + model.service());
     //starting new id round
     counter = 0;
@@ -60,7 +54,7 @@ bool WebkitCommandService::executeService(TasCommandModel& model, TasResponse& r
 //            TasLogger::logger()->debug("WebkitCommandService::executeService " + target->type());
 //            if (target->type() == TYPE_WEB) {
 
-            	foreach (TasCommand* command, target->commandList()) {
+                foreach (TasCommand* command, target->commandList()) {
 //                    TasLogger::logger()->debug("WebkitCommandService::executeService command name:" + command->name());
                     bool ret = true;
 
@@ -193,7 +187,7 @@ bool WebkitCommandService::executeJavaScriptQWebFrame(TasTarget* target, TasComm
 
 
 bool WebkitCommandService::executeJavascriptOnWebElement(QWebFrame* webFrame, QString webFrameId, QString javaScript, QString elementId)
-{    
+{
     bool success = false;
     QWebFrame* targetFrame = 0;
     //this is the frame we want
@@ -209,14 +203,14 @@ bool WebkitCommandService::executeJavascriptOnWebElement(QWebFrame* webFrame, QS
         QWebElement element = lookForWebElement(targetFrame->documentElement(), elementId, webFrameId);
         if(!element.isNull()){
             element.evaluateJavaScript(javaScript);
-            success = true;   
+            success = true;
         }
         else{
             mErrorMessage = "When executing JavaScript to WebElement: QWebElement not found";
         }
-    }            
+    }
     else{
-        mErrorMessage = "When executing JavaScript to WebElement: QWebFrame not found";        
+        mErrorMessage = "When executing JavaScript to WebElement: QWebFrame not found";
     }
     return success;
 }
@@ -244,7 +238,7 @@ QWebElement WebkitCommandService::lookForWebElement(const QWebElement &parentEle
     TasLogger::logger()->debug("WebkitCommandService::lookForWebElement elementid " + elementId);
     QWebElement match;
     QWebElement element = parentElement.firstChild();
-    while (!element.isNull()) {        
+    while (!element.isNull()) {
         TasLogger::logger()->debug("WebkitCommandService::lookForWebElement candidate " + TasCoreUtils::pointerId(&element));
         QString candidateId = QString::number(qHash(element.toOuterXml() + webFrameId));
         if(elementId == candidateId){
@@ -261,7 +255,7 @@ QWebElement WebkitCommandService::lookForWebElement(const QWebElement &parentEle
     }
     return match;
 }
-                                                          
+
 bool WebkitCommandService::traverseJavaScriptToWebElement(QWebFrame* webFrame,
                                                           QString webFrameId,
                                                           QString javaScript,
@@ -399,12 +393,12 @@ QList<QWebFrame*> WebkitCommandService::traverseObject(QObject* object)
     else // support for Symbian CWRT 9.2 and 10.1 - Fullscreen mode only
     if (object->inherits("WRT__WrtWebView")) {
         TasLogger::logger()->debug("WebKitCommandService::traverseObject WRT__WrtWebView");
-        
-        QGraphicsWebView* web = 0;    
+
+        QGraphicsWebView* web = 0;
         QMetaObject::invokeMethod(object, "view", Qt::DirectConnection, Q_RETURN_ARG(QGraphicsWebView*, web));
-                
+
         if (web) {
-            TasLogger::logger()->debug(" QGraphicsWebView found " + QString(object->metaObject()->className()) );            
+            TasLogger::logger()->debug(" QGraphicsWebView found " + QString(object->metaObject()->className()) );
             list.append(web->page()->mainFrame());
         }
     }
