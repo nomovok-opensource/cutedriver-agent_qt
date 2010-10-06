@@ -19,26 +19,11 @@
 
 TEMPLATE = subdirs
 
-symbian: {	
-	!CONFIG(no_mobility)  {
-		CONFIG += mobility
-	}
-}
-windows: {	
-	!CONFIG(no_mobility)  {
-		CONFIG += mobility
-	}
-}
 
-CONFIG(maemo){
-	!CONFIG(no_mobility)  {
-		CONFIG += mobility
-	}
-}
-
-CONFIG(mobility){
-        SUBDIRS += mobilitysfwfixture
-        SUBDIRS += contactfixture
+!CONFIG(no_mobility)  {
+	CONFIG += mobility
+    SUBDIRS += mobilitysfwfixture
+    SUBDIRS += contactfixture
 }
 
 SUBDIRS += signalfixture
