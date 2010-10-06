@@ -63,7 +63,8 @@ public:
   static void deleteInstance();
 
   TasClient* addClient(const QString& processId, const QString& processName=QString(), QProcess *process=0);  
-  TasClient* addRegisteredClient(const QString& processId, const QString& processName, TasSocket* socket, const QString& type=TAS_PLUGIN);  
+  TasClient* addRegisteredClient(const QString& processId, const QString& processName, TasSocket* socket, 
+								 const QString& type=TAS_PLUGIN, QString applicationUid=QString());  
 
   TasClientManager::CloseStatus removeClient(const QString& processId, bool kill=false, int time=0);
   void removeAllClients();
