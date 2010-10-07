@@ -67,7 +67,7 @@ TasCommandModel* TasCommandParser::parseCommandXml(const QString& commandXml)
         model->setSourceString(commandXml);
         QDomElement root = doc.documentElement();
         model->setId(root.attribute("id"));
-        model->setUId(root.attribute("uid"));
+        model->setUId(root.attribute("applicationUid"));
         model->setName(root.attribute("name"));
         model->setService(root.attribute("service"));        
         if(root.attribute("async") == "true"){
