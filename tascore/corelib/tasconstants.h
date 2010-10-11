@@ -48,6 +48,7 @@ const char* const LIST_CRASHED_APPS          = "listCrashedApps";
 const char* const BRING_TO_FOREGROUND        = "bringToForeground";
 const char* const SYSTEM_INFO_SERVICE        = "systemInfo";
 const char* const RESOURCE_LOGGING_SERVICE   = "resourceLogging";
+const char* const CPU_LOAD_SERVICE           = "cpuLoad";
 
 /*
  Message flags 
