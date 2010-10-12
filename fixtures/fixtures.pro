@@ -21,7 +21,6 @@ TEMPLATE = subdirs
 
 
 !CONFIG(no_mobility)  {
-	CONFIG += mobility
     SUBDIRS += mobilitysfwfixture
     SUBDIRS += contactfixture
 }
