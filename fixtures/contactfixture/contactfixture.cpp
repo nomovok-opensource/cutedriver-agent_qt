@@ -144,7 +144,7 @@ bool ContactFixture::execute(void * objectInstance, QString actionName, QHash<QS
                         break;
                     default:
                         stdOut.append("Invalid parameters for number, should be \"number;type;context\"");
-                        false;
+                        return false;
                     }
                     curr.saveDetail(&phn);
                 }
@@ -164,8 +164,8 @@ bool ContactFixture::execute(void * objectInstance, QString actionName, QHash<QS
                         email.setEmailAddress(emailDetails[0]);
                         break;
                     default:
-                        stdOut.append("Invalid parameters for number, should be \"email;context\"");
-                        false;
+                        stdOut.append("Invalid parameters for email, should be \"email;context\"");
+                        return false;
                     }
                     curr.saveDetail(&email);
                 }
@@ -213,8 +213,8 @@ bool ContactFixture::execute(void * objectInstance, QString actionName, QHash<QS
                         }
                         break;
                     default:
-                        stdOut.append("Invalid parameters for number, should be \"street;postcode;locality;region;country;postofficebox;context\"");
-                        false;
+                        stdOut.append("Invalid parameters for address, should be \"street;postcode;locality;region;country;postofficebox;context\"");
+                        return false;
                     }
                     curr.saveDetail(&address);
                 }
