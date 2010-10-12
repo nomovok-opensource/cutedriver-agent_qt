@@ -266,9 +266,10 @@ void TestabilityService::connectionClosed()
 #ifdef Q_OS_SYMBIAN
     mSocket->closeConnection();
 #else
-    //make new connections
-    delete mSocket;
-    delete mServerConnection;
+    // make new connections, deleting current once later. Deleting the current object inside the slot 
+    // caused random crashes.
+    mSocket->deleteLater();
+    mServerConnection->deleteLater();
     initializeConnections();
 #endif
     mRegisterWatchDog.start(SERVER_REGISTRATION_TIMEOUT);     
