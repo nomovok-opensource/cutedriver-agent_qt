@@ -359,6 +359,23 @@ QString TasCommandModel::id() const
 {
     return mModelId;
 }
+
+/*!
+    Set id to the model.
+*/
+void TasCommandModel::setUId(const QString& uid)
+{
+    mModelUid = uid;
+}
+
+/*!
+    Return the model id, can be null.
+*/
+QString TasCommandModel::uid() const
+{
+    return mModelUid;
+}
+
 /*!
     Set name to the model.
 */

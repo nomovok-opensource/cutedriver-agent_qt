@@ -83,6 +83,7 @@ void TasClientManager::deleteInstance()
 /*!
   Add a new client with QProcess handle.
 */
+
 TasClient* TasClientManager::addClient(const QString& processId, const QString& processName, QProcess *process)
 {
     QMutexLocker locker(&mMutex);
@@ -121,7 +122,8 @@ TasClient* TasClientManager::addClient(const QString& processId, const QString& 
   Adds a new client to the pluginmanager's internal list. If a client with the process id
   already exists only the data will be updated.
  */
-TasClient* TasClientManager::addRegisteredClient(const QString& processId, const QString& processName, TasSocket* socket, const QString& type)
+TasClient* TasClientManager::addRegisteredClient(const QString& processId, const QString& processName, TasSocket* socket, 
+                                                 const QString& type, QString applicationUid)
 {
     QMutexLocker locker(&mMutex);   
     TasLogger::logger()->info("TasClientManager::addRegisteredClient " + processName);
@@ -139,8 +141,11 @@ TasClient* TasClientManager::addRegisteredClient(const QString& processId, const
 #ifdef Q_OS_SYMBIAN 
     if(app == 0 && !processName.isEmpty()){
         app = findByApplicationName(processName, true);
-        if(app){
+        if(app && app->applicationUid() == applicationUid){
             TasLogger::logger()->debug("TasClientManager::addRegisteredClient existing client found by name!");
+        }
+        else{
+            app = 0;
         }
     }
 #endif   
@@ -155,6 +160,11 @@ TasClient* TasClientManager::addRegisteredClient(const QString& processId, const
     if(socket){
         app->setSocket(socket);
     }
+
+#ifdef Q_OS_SYMBIAN 
+    app->setApplicationUid(applicationUid);
+#endif
+
     app->setPluginType(type);
     app->setRegistered();
     return app;
@@ -222,6 +232,11 @@ TasClient* TasClientManager::findClient(TasCommandModel& request)
     //look for the client
     TasClient* client = 0;   
     client = findByProcessId(request.id());
+#ifdef Q_OS_SYMBIAN   
+    if(client == 0){
+        client = findByApplicationUid(request.uid());
+    }
+#endif
     if(client == 0){
         client = findByApplicationName(request.name());
     }

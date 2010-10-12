@@ -77,12 +77,12 @@ void RegisterService::registerQueuedClients()
                                   + client.processId + " name: " + client.processName +", type: "+
                                   client.pluginType);
 
-        TasClient* tasClient = TasClientManager::instance()->addRegisteredClient(client.processId, client.processName,
-                                                                                 client.socket, client.pluginType);
+
 #ifdef Q_OS_SYMBIAN
-        tasClient->setApplicationUid(client.applicationUid);
+        TasClientManager::instance()->addRegisteredClient(client.processId, client.processName,
+                                                          client.socket, client.pluginType, client.applicationUid);
 #else
-        (void)tasClient;
+        TasClientManager::instance()->addRegisteredClient(client.processId, client.processName, client.socket, client.pluginType);
 #endif
 
         TasClientManager::instance()->detachFromStartupData(client.processName);

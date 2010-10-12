@@ -96,6 +96,8 @@ public:
     TasTarget& addTarget(const QString& id);
     void setId(const QString& id);
     QString id() const;
+    void setUId(const QString& uid);
+    QString uid() const;
     void setName(const QString& name);
     QString name() const;
     void setService(const QString& service);
@@ -120,6 +122,7 @@ public:
 private:
     QList<TasTarget*> mTargets;
     QString mModelId;    
+    QString mModelUid;    
     QString mModelName;    
     QString mModelService;    
 	QString mSourceString;

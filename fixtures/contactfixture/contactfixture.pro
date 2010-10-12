@@ -23,19 +23,13 @@ TARGET = contactfixture
 CONFIG += plugin
 CONFIG += mobility
 
-message(Before adding contacts)
 MOBILITY += contacts
-message(After adding contacts)
 
 
 
 include(../../tasbase.pri)
 
 target.path = $$TAS_TARGET_PLUGIN/tasfixtures
-
-
-message($$APP_LAYER_SYSTEMINCLUDE)
-message($$MOBILITY_INCLUDE)
 
 symbian: {
 	TARGET.EPOCALLOWDLLDATA = 1
@@ -64,7 +58,3 @@ DESTDIR = lib
 INSTALLS += target
 
 LIBS += -L../../tascore/lib/ -lqttestability
-
-
-
-message(In contact pro File include path: $${INCLUDEPATH})
