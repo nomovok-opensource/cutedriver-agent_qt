@@ -183,26 +183,12 @@ bool MouseHandler::performActionEvent(TapDetails details)
         }
         else{
             //skip since we are not sure what to do...
-            TasLogger::logger()->info(QString("%1 error: class %2 unsupported")
-                                      .arg(__PRETTY_FUNCTION__)
-                                      .arg(details.target->metaObject()->className()));
+            TasLogger::logger()->info("Unsupported class");
             stateOk = false;
         }
     }
 
     if (stateOk) {
-#if 0
-        TasLogger::logger()->debug(QString("%1 MIDDLE1: %2 for class %3, global point (%4,%5)")
-                                   .arg(__PRETTY_FUNCTION__)
-                                   .arg(details.command->name())
-                                   .arg(details.target->metaObject()->className())
-                                   .arg(details.point.x()).arg(details.point.y()));
-        TasLogger::logger()->debug(QString("%1 MIDDLE2: pointertype %2 button %3 extra '%4'")
-                                   .arg(__PRETTY_FUNCTION__)
-                                   .arg(details.pointerType)
-                                   .arg(details.button)
-                                   .arg(details.extraIdentifier));
-#endif
         //add mouse events tha match the action type
         if ( details.command->name() == "Hover"){
             details.button = Qt::NoButton;
