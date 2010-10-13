@@ -43,13 +43,11 @@ TInt LoadGeneratingThreadFunc(TAny* aLoadInPercentage)
     }
     
     TInt sleepTime = 100;
-    while(ETrue)
-    {
+    while(ETrue) {
         // Calculate something relatively time consuming 
         TReal x = 4;
         TReal y = 0;
-        for(TInt i = 0; i < 100000; i++)
-        {
+        for(TInt i = 0; i < 100000; i++) {
             Math::Sqrt(y, x);
             Math::Pow(x, y, 2);
         }
