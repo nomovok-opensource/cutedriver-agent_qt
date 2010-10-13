@@ -35,6 +35,7 @@
 #endif
 
 static const QString DETACH_MODE = "detached";
+static const QString SET_PARAMS_ONLY = "set_params_only";
 
 StartAppService::StartAppService()
 {}
@@ -69,13 +70,18 @@ bool StartAppService::executeService(TasCommandModel& model, TasResponse& respon
 void StartAppService::startApplication(TasCommand& command, TasResponse& response)
 {
     QString applicationPath = command.parameter("application_path");    
-    QString args = command.parameter("arguments");                                
+    QString args = command.parameter("arguments");
     TasLogger::logger()->debug("TasServer::startApplication: " + applicationPath);
     QStringList arguments = args.split(",");
 
     setRuntimeParams(command);
 
-    if(arguments.contains(DETACH_MODE)){
+    if(arguments.contains(SET_PARAMS_ONLY)){
+        // do not start app, just need to set the parameters
+        response.requester()->sendResponse(response.messageId(), "0");
+
+    }
+    else if(arguments.contains(DETACH_MODE)){
         arguments.removeAll(DETACH_MODE);
         launchDetached(applicationPath, arguments, response);
     }
@@ -90,11 +96,15 @@ void StartAppService::setRuntimeParams(TasCommand& command)
     QString applicationPath = command.parameter("application_path");    
     QString eventList = command.parameter("events_to_listen");
     QString signalList = command.parameter("signals_to_listen");    
+    TasLogger::logger()->error("StartAppService::setRuntimeParams signals: " + signalList);
     if(!eventList.isEmpty() || !signalList.isEmpty()){
         TasSharedData startupData(eventList.split(","), signalList.split(","));
         QString identifier = TasCoreUtils::parseExecutable(applicationPath);
         if(!TasClientManager::instance()->writeStartupData(identifier, startupData)){
             TasLogger::logger()->error("StartAppService::setRuntimeParams could not set run time params for identifier: " + identifier + "!");
+        }
+        else {
+            TasLogger::logger()->error("StartAppService::setRuntimeParams set with identifier: " + identifier);
         }
     }
 }
@@ -172,11 +182,11 @@ void StartAppService::launchDetached(const QString& applicationPath, const QStri
 
 RegisterWaiter::RegisterWaiter(TasSocket* socket, TasClient *target, qint32 messageId)
 {
-    messageId = messageId;
+    mMessageId = messageId;
     mSocket = socket;
     mProcessId = target->processId();
     mProcessName = target->applicationName();
-    TasLogger::logger()->debug("RegisterWaiter::RegisterWaiter " + mProcessId);
+    //TasLogger::logger()->debug("RegisterWaiter::RegisterWaiter " + mProcessId + " messageId " + QString::number(mMessageId));
 
     connect(target, SIGNAL(registered(const QString&)), this, SLOT(clientRegistered(const QString&)));       
     connect(target, SIGNAL(crashed()), this, SLOT(crashed()));
@@ -195,6 +205,7 @@ RegisterWaiter::RegisterWaiter(TasSocket* socket, TasClient *target, qint32 mess
 void RegisterWaiter::clientRegistered(const QString& processId)
  {
     TasLogger::logger()->debug("RegisterWaiter::clientRegistered " + processId);    
+    //    TasLogger::logger()->debug("RegisterWaiter::clientRegistered respond with id " + QString::number(mMessageId));    
     mSocket->sendResponse(mMessageId, processId);
     mWaiter.stop();
     deleteLater();
