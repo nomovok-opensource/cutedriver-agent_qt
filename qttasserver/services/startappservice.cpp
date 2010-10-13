@@ -35,6 +35,7 @@
 #endif
 
 static const QString DETACH_MODE = "detached";
+static const QString SET_PARAMS_ONLY = "set_params_only";
 
 StartAppService::StartAppService()
 {}
@@ -69,13 +70,18 @@ bool StartAppService::executeService(TasCommandModel& model, TasResponse& respon
 void StartAppService::startApplication(TasCommand& command, TasResponse& response)
 {
     QString applicationPath = command.parameter("application_path");    
-    QString args = command.parameter("arguments");                                
+    QString args = command.parameter("arguments");
     TasLogger::logger()->debug("TasServer::startApplication: " + applicationPath);
     QStringList arguments = args.split(",");
 
     setRuntimeParams(command);
 
-    if(arguments.contains(DETACH_MODE)){
+    if(arguments.contains(SET_PARAMS_ONLY)){
+        // do not start app, just need to set the parameters
+        response.requester()->sendResponse(response.messageId(), "0");
+
+    }
+    else if(arguments.contains(DETACH_MODE)){
         arguments.removeAll(DETACH_MODE);
         launchDetached(applicationPath, arguments, response);
     }
