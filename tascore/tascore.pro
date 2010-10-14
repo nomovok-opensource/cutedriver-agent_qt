@@ -78,11 +78,6 @@ unix:{
 	configuration.path = /etc/qt_testability 
 
   HEADERS.path = /usr/include/tdriver/
-  
-  HEADERS_OLD.path = /usr/include/matti/
-  HEADERS_OLD.files = $$HEADERS
-  INSTALLS += HEADERS_OLD
-
 
   # include desktop file into rpm
   CONFIG(RPM) { 
@@ -96,9 +91,6 @@ macx: {
 	configuration.path = /etc/qt_testability
   HEADERS.path = /usr/include/tdriver/
 
-  HEADERS_OLD.path = /usr/include/matti/
-  HEADERS_OLD.files = $$HEADERS
-  INSTALLS += HEADERS_OLD
 }
 win32:{
 	configuration.path=/qttas/conf

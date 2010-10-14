@@ -1,6 +1,6 @@
 Name: qttas-server
 Version: 0.9.1
-Release:1%{?dist}
+Release: 1
 Summary: Qt Test Automation Server
 Group: Development/Tools
 License: LGPL
@@ -34,7 +34,8 @@ make %{?_smp_mflags}
 rm -rf %{buildroot}
 make install INSTALL_ROOT=%{buildroot}
 
-
+# remove executable bits from examples
+find ${buildroot} -name "*examples*" -type f|xargs chmod a-x
 
 %clean
 rm -rf %{buildroot}
@@ -47,8 +48,8 @@ rm -rf %{buildroot}
 %files
 %defattr(-,root,root,-)
 %{_bindir}/qttas*
-%{_sysconfdir}/qt_testability/*
-%{_sysconfdir}/xdg/autostart/qttasserver.desktop
+%config %{_sysconfdir}/qt_testability/*
+%config %{_sysconfdir}/xdg/autostart/qttasserver.desktop
 
 
 %package libs
@@ -62,8 +63,10 @@ Qt TAS development library files
 %{_libdir}/lib*
 
 # other
-%post libs -p /sbin/ldconfig
-%postun libs -p /sbin/ldconfig
+%post libs 
+/sbin/ldconfig
+%postun libs 
+/sbin/ldconfig
 
 
 #
@@ -79,9 +82,9 @@ Qt TAS development header.
 
 %files devel
 %defattr(-,root,root,-)
-%{_includedir}/*
+%{_includedir}/tdriver/*
 /usr/share/qt4/mkspecs/features/*
-%doc /usr/share/doc/qttas-dev/examples/hellotraverse/*
+/usr/share/doc/qttas-dev/examples/hellotraverse/*
 
 
 
@@ -95,15 +98,4 @@ Qt Test Automation Server plugins
 %defattr(-,root,root,-)
 %{_libdir}/qt4/plugins/*
 
-
-%package -n testability-driver
-Summary: Meta package to install the Testability Driver environment.
-Requires: qttas-server-libs qttas-server qttas-server-plugins
-Requires: rubygem-testability-driver rubygem-testability-driver-qt-sut-plugin
-%description -n testability-driver
-Qt TAS is a test automation server which provides testability 
-interface. Interface is used to access UI components to 
-verify and control them. This the metapackage that installs all necessary components.
-%files -n testability-driver
-%doc /usr/share/doc/qttas-server/*
 
