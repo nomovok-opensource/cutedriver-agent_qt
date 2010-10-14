@@ -47,6 +47,7 @@ private:
    QPushButton* resetButton;
    QPushButton* pluginButton;
    QCheckBox* autoStart;
+   QPushButton* loadPluginsButton;
    ServerMonitor* monitor;
 };
 
