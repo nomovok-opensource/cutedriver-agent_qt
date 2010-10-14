@@ -37,6 +37,12 @@
     
     <TasCommands id="4320" service="uiState" async="true">
         <Target TasId="102859040" type="graphicsView">
+            <object objectName="" className="">
+               <searchParams text=""/>
+               <object objectName="" className="">
+                  <searchParams/>
+               </object>
+            </object>
             <Command name="MouseClick" button="1" delay="0">
             </Command>
         </Target>
@@ -90,7 +96,11 @@ TasCommandModel* TasCommandParser::parseCommandXml(const QString& commandXml)
             QString targetType = target.attribute("type");
             TasTarget& targetData = model->addTarget(targetId);
             targetData.setType(targetType);
-            
+            //get search params for target object(s)
+            QDomElement searchParams = target.firstChildElement(QString("object"));
+            for(; !searchParams.isNull(); searchParams = searchParams.firstChildElement(QString("object"))){
+                
+            }
             //get commands for target
             QDomNodeList commands = target.elementsByTagName(QString("Command"));
             int commandCount = commands.count();

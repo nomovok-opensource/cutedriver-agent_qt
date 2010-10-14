@@ -180,6 +180,74 @@ QHash<QString, QString> TasCommand::getApiParameters() const
     return params;
 }
 
+/*! 
+  \class TasTargetObject
+  \brief Search details about the target object or objecttree.
+
+  TasTargetObject provides the details to search for the object 
+  accessed from host side. Details used are object name, class name and
+  a variety of search parameters (properties).
+
+ */
+
+TasTargetObject::TasTargetObject()
+{
+    mChild = 0;
+}
+
+TasTargetObject::TasTargetObject(TasTargetObject& object)
+{
+    setObjectName(object.objectName());
+    setClassName(object.className());
+    setChild(object.child());
+}
+
+TasTargetObject::~TasTargetObject()
+{
+    if(mChild){
+        delete mChild;
+    }
+}
+
+/*!
+  Object name of the object to be searched. Can be empty.
+ */
+QString TasTargetObject::objectName() const
+{
+    return mObjectName;
+}
+
+/*!
+  Class name of the object to be searched. Must be set.
+ */
+QString TasTargetObject::className() const
+{
+    return mClassName;
+}
+
+/*!
+  Set of search parameters.
+ */
+QHash<QString,QString> TasTargetObject::searchParameters() const
+{
+    return mSearchParams;
+}
+
+void TasTargetObject::setObjectName(const QString name)
+{
+    mObjectName = name;
+}
+
+void TasTargetObject::setClassName(const QString className)
+{
+    mClassName = className;
+}
+
+void TasTargetObject::addSearchParameter(QString name, QString value)
+{
+    mSearchParams.insert(name, value);
+}
+
 /*!
     \class TasTarget
     \brief TasTarget is the target object for the commands e.g QWidget     
@@ -194,6 +262,7 @@ QHash<QString, QString> TasCommand::getApiParameters() const
 TasTarget::TasTarget(const QString& id)
 {
     setId(id);
+    mTargetObject = 0;
 }
 
 /*!
@@ -207,6 +276,7 @@ TasTarget::TasTarget(const TasTarget& target)
     while (i.hasNext()){        
         mCommands.append(new TasCommand(*i.next()));  
     }
+    mTargetObject = target.targetObject();
 }
 
 /*!
@@ -216,6 +286,18 @@ TasTarget::~TasTarget()
 {
     qDeleteAll(mCommands);
     mCommands.clear();
+    if(mTargetObject){
+        delete mTargetObject;
+    }
+}
+
+TasTargetObject* TasTarget::targetObject() const
+{
+    return mTargetObject;
+}
+void TasTarget::setTasTargetObject(TasTargetObject* object)
+{
+    mTargetObject = object;
 }
 
 QList<TasCommand*> TasTarget::commandList() const

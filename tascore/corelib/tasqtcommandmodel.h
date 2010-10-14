@@ -63,6 +63,31 @@ private:
     QHash<QString, QPair<QString,QString> > apiParameters;
 };
 
+class TAS_EXPORT TasTargetObject
+{
+public:  
+    TasTargetObject();
+    TasTargetObject(TasTargetObject& object);
+	~TasTargetObject();
+
+public:
+	QString objectName() const;
+	QString className() const;
+	QHash<QString,QString> searchParameters() const;
+	void setObjectName(const QString name);
+	void setClassName(const QString className);
+	void addSearchParameter(QString name, QString value);
+	void setChild(TasTargetObject* child);
+	TasTargetObject* getChild() const;
+
+private:
+	QString mObjectName;
+	QString mClassName;
+	QHash<QString,QString> mSearchParams;
+	TasTargetObject* mChild;
+};
+
+
 class TAS_EXPORT TasTarget 
 {
 public:
@@ -78,11 +103,14 @@ public:
     QString id() const;
     QString type() const;
 	TasCommand* findCommand(const QString& commandName);
+	TasTargetObject* targetObject() const;
+	void setTasTargetObject(TasTargetObject* object);
 
 private:
     QList<TasCommand*> mCommands;
     QString mTargetId;
-    QString mTargetType;        
+    QString mTargetType;      
+	TasTargetObject* mTargetObject;  
 };
 
 class TAS_EXPORT TasCommandModel
