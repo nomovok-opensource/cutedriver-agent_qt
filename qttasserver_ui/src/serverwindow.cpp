@@ -43,6 +43,7 @@ ServerWindow::ServerWindow(QWidget* parent)
     stopButton = new QPushButton("Stop");
     startButton = new QPushButton("Start");
     resetButton =  new QPushButton ("Reset server");
+    loadPluginsButton = new QPushButton("Load Plugins");
 #ifdef Q_OS_SYMBIAN
     pluginButton = new QPushButton ("Enable tas");    
     autoStart = new QCheckBox("Autostart"); 
@@ -72,6 +73,7 @@ ServerWindow::ServerWindow(QWidget* parent)
     connect(stopButton, SIGNAL(clicked()), editField, SLOT(clear()));
     connect(resetButton, SIGNAL(clicked()), editField, SLOT(clear()));
     connect(statusButton, SIGNAL(clicked()), editField, SLOT(clear()));
+    connect(loadPluginsButton, SIGNAL(clicked()), editField, SLOT(clear()));
 
 #ifdef Q_OS_SYMBIAN
     connect(pluginButton, SIGNAL(clicked()), editField, SLOT(clear()));
@@ -82,6 +84,7 @@ ServerWindow::ServerWindow(QWidget* parent)
     connect(stopButton, SIGNAL(clicked()), monitor, SLOT(stopServer()));
     connect(startButton, SIGNAL(clicked()), monitor, SLOT(startServer()));
     connect(resetButton, SIGNAL(clicked()), monitor, SLOT(restartServer()));    
+    connect(loadPluginsButton, SIGNAL(clicked()),monitor, SLOT(loadPlugins()));
 
     QPushButton* quitButton = new QPushButton("Quit");
     connect(quitButton, SIGNAL(clicked()), qApp, SLOT(quit()));
@@ -96,14 +99,16 @@ ServerWindow::ServerWindow(QWidget* parent)
     mainLayout->addWidget(statusButton, 3, 0);
     mainLayout->addWidget(pluginButton, 3, 1);
 #else
-    mainLayout->addWidget(statusButton, 3, 0, 1, 2);
+    mainLayout->addWidget(statusButton, 3, 0);
+    mainLayout->addWidget(loadPluginsButton, 3, 1);
 #endif
     mainLayout->addWidget(stopButton, 4, 0);
     mainLayout->addWidget(startButton, 4, 1);
     mainLayout->addWidget(resetButton, 5, 0);
     mainLayout->addWidget(quitButton, 5, 1);
 #ifdef Q_OS_SYMBIAN
-    mainLayout->addWidget(autoStart, 6, 0, 1, 2);
+    mainLayout->addWidget(autoStart, 6, 0);
+    mainLayout->addWidget(loadPluginsButton, 6, 1);
 #endif
     setLayout(mainLayout);     
 
@@ -122,6 +127,7 @@ void ServerWindow::disableButtons()
     stopButton->setDisabled(true);
     startButton->setDisabled(true);
     resetButton->setDisabled(true);
+    loadPluginsButton->setDisabled(true);
 }
 void ServerWindow::enableButtons()
 {
@@ -129,6 +135,7 @@ void ServerWindow::enableButtons()
     stopButton->setDisabled(false);
     startButton->setDisabled(false);
     resetButton->setDisabled(false);
+    loadPluginsButton->setDisabled(false);
 }
 
 ServerWindow::~ServerWindow()
