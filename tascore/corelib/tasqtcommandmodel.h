@@ -67,7 +67,7 @@ class TAS_EXPORT TasTargetObject
 {
 public:  
     TasTargetObject();
-    TasTargetObject(TasTargetObject& object);
+    TasTargetObject(const TasTargetObject& object);
 	~TasTargetObject();
 
 public:
@@ -78,7 +78,7 @@ public:
 	void setClassName(const QString className);
 	void addSearchParameter(QString name, QString value);
 	void setChild(TasTargetObject* child);
-	TasTargetObject* getChild() const;
+	TasTargetObject* child() const;
 
 private:
 	QString mObjectName;

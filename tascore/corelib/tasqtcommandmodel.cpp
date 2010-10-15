@@ -195,11 +195,15 @@ TasTargetObject::TasTargetObject()
     mChild = 0;
 }
 
-TasTargetObject::TasTargetObject(TasTargetObject& object)
+TasTargetObject::TasTargetObject(const TasTargetObject& object)
 {
     setObjectName(object.objectName());
     setClassName(object.className());
-    setChild(object.child());
+    mChild = 0;
+    if(object.child()){
+        mChild = new TasTargetObject(*object.child());
+    }    
+    mSearchParams = QHash<QString,QString>(object.searchParameters());
 }
 
 TasTargetObject::~TasTargetObject()
@@ -245,8 +249,27 @@ void TasTargetObject::setClassName(const QString className)
 
 void TasTargetObject::addSearchParameter(QString name, QString value)
 {
-    mSearchParams.insert(name, value);
+    if(name == "className"){
+        setClassName(value);
+    }
+    else if(name == "objectName"){
+        setObjectName(value);
+    }
+    else{
+        mSearchParams.insert(name, value);
+    }
 }
+
+void TasTargetObject::setChild(TasTargetObject* child)
+{
+    mChild = child;
+}
+
+TasTargetObject* TasTargetObject::child() const
+{
+    return mChild;
+}
+
 
 /*!
     \class TasTarget
@@ -276,7 +299,10 @@ TasTarget::TasTarget(const TasTarget& target)
     while (i.hasNext()){        
         mCommands.append(new TasCommand(*i.next()));  
     }
-    mTargetObject = target.targetObject();
+    mTargetObject = 0;
+    if(target.targetObject()){
+        mTargetObject = new TasTargetObject(*target.targetObject());
+    }
 }
 
 /*!

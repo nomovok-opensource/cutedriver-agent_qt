@@ -36,16 +36,19 @@ public:
 	~TasUiTraverser();
 
 	TasDataModel* getUiState(TasCommand* command);
-	void traverseObject(TasObject& objectData, QObject* object, TasCommand* command);
-	void traverseGraphicsItem(TasObject& objectInfo, QGraphicsItem* graphicsItem, TasCommand* commad);
+	TasObject& addModelRoot(TasDataModel& model, TasCommand* command=0);
+	void traverseObject(TasObject& objectData, QObject* object, TasCommand* command, bool traverseChildren=true);
+	void traverseGraphicsItem(TasObject& objectInfo, QGraphicsItem* graphicsItem, TasCommand* commad, bool traverseChildren=true);
+	void setFilterLists(TasCommand* command);  	
+	void initializeTraverse(TasCommand* command);
+	void finalizeTraverse();
 
 private:
 	void addApplicationDetails(TasObject& application, TasCommand* command);
 	void traverseGraphicsItemList(TasObject& parent, QGraphicsItem* graphicsItem, TasCommand* command);
 	void traverseGraphicsViewItems(TasObject& parent, QGraphicsView* view, TasCommand* command);
-
-	void setFilterLists(TasCommand* command);  
 	bool filterPlugin(const QString& pluginName);
+
 
 private:
 	QHash<QString, TasTraverseInterface*> mTraversers;

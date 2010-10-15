@@ -96,11 +96,10 @@ TasCommandModel* TasCommandParser::parseCommandXml(const QString& commandXml)
             QString targetType = target.attribute("type");
             TasTarget& targetData = model->addTarget(targetId);
             targetData.setType(targetType);
+
             //get search params for target object(s)
-            QDomElement searchParams = target.firstChildElement(QString("object"));
-            for(; !searchParams.isNull(); searchParams = searchParams.firstChildElement(QString("object"))){
-                
-            }
+            targetData.setTasTargetObject(parseTargetDetails(target));
+
             //get commands for target
             QDomNodeList commands = target.elementsByTagName(QString("Command"));
             int commandCount = commands.count();
@@ -142,3 +141,19 @@ TasCommandModel* TasCommandParser::parseCommandXml(const QString& commandXml)
     return model;
 }
 
+TasTargetObject* TasCommandParser::parseTargetDetails(QDomElement root)
+{
+    TasTargetObject* obj = 0;
+    QDomElement objectDetails = root.firstChildElement(QString("object"));
+    if(!objectDetails.isNull()){
+        obj = new TasTargetObject();
+        QDomNamedNodeMap attributes = objectDetails.attributes();
+        int attributeCount = attributes.count();
+        for(int i = 0 ; i < attributeCount; i++){
+            QDomNode node = attributes.item(i);
+            obj->addSearchParameter(node.nodeName(), node.nodeValue());
+        } 
+        obj->setChild(parseTargetDetails(objectDetails));
+    }
+    return obj;
+}

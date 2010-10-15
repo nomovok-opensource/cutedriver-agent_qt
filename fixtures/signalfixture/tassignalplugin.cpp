@@ -187,7 +187,7 @@ bool TasSignalPlugin::listSignals(void* objectInstance, QString ptrType, QString
     else{
         stdOut = "No target object could be found.";
     }
-    return result;
+    breturn result;
 }
 
 /*!

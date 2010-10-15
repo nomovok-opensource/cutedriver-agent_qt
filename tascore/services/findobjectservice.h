@@ -19,23 +19,33 @@
  
 
 
-#ifndef TASCOMMANDPARSER_H
-#define TASCOMMANDPARSER_H
+#ifndef FINDOBJECTSERVICE_H
+#define FINDOBJECTSERVICE_H
 
-#include <QObject>
-#include <QDomElement>
-#include <QDomDocument>
+#include <QByteArray>
 
-#include "tasqtcommandmodel.h"
+#include "tasqtdatamodel.h"
+#include "tasuitraverser.h"
+#include "tastraverseinterface.h"
+#include "tasservicebase.h"
 
-class TasCommandParser 
-{    
+class FindObjectService : public TasServiceBase 
+{
 public:
-    static TasCommandModel* parseCommandXml(const QString& commandXml);   
+    FindObjectService();
+	~FindObjectService();
+
+	/*!
+	  From ServiceInterface
+	*/
+	bool executeService(TasCommandModel& model, TasResponse& response);
+	QString serviceName()const { return "findObject"; }
 
 private:
-	static TasTargetObject* parseTargetDetails(QDomElement root);
-};
+	bool propertiesMatch(QHash<QString,QString>, QObject* object);
 
+private:
+	TasUiTraverser* mTraverser;
+};
 
 #endif
