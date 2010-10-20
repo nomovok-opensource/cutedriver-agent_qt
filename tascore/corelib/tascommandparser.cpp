@@ -37,8 +37,7 @@
     
     <TasCommands id="4320" service="uiState" async="true">
         <Target TasId="102859040" type="graphicsView">
-            <object objectName="" className="">
-               <searchParams text=""/>
+            <object objectName="" className="" text=>"" ..>
                <object objectName="" className="">
                   <searchParams/>
                </object>
@@ -143,9 +142,11 @@ TasCommandModel* TasCommandParser::parseCommandXml(const QString& commandXml)
 
 TasTargetObject* TasCommandParser::parseTargetDetails(QDomElement root)
 {
-    TasTargetObject* obj = 0;
+    TasLogger::logger()->debug("TasCommandParser::parseTargetDetails");
+    TasTargetObject* obj = 0;    
     QDomElement objectDetails = root.firstChildElement(QString("object"));
     if(!objectDetails.isNull()){
+        TasLogger::logger()->debug("TasCommandParser::parseTargetDetails details found");
         obj = new TasTargetObject();
         QDomNamedNodeMap attributes = objectDetails.attributes();
         int attributeCount = attributes.count();

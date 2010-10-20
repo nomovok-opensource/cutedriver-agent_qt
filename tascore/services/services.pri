@@ -29,6 +29,7 @@ HEADERS += services/webkitcommandservice.h
 HEADERS += services/recorderservice.h
 HEADERS += services/confservice.h
 HEADERS += services/infoservice.h
+HEADERS += services/findobjectservice.h
 
 SOURCES += services/uistateservice.cpp
 SOURCES += services/closeappservice.cpp
@@ -42,5 +43,6 @@ SOURCES += services/webkitcommandservice.cpp
 SOURCES += services/recorderservice.cpp
 SOURCES += services/confservice.cpp
 SOURCES += services/infoservice.cpp
+SOURCES += services/findobjectservice.cpp
 
 include (./interactionhandlers/handlers.pri)

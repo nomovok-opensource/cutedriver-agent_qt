@@ -39,9 +39,13 @@ public:
 	  From ServiceInterface
 	*/
 	bool executeService(TasCommandModel& model, TasResponse& response);
-	QString serviceName()const { return "findObject"; }
+	QString serviceName()const { return FIND_OBJECT_SERVICE; }
 
 private:
+	bool addObjectDetails(TasObject& parent, TasTargetObject *targetObj, TasCommand* command);
+	QObject* searchForObject(TasTargetObject *targetObj);
+	QObject* findMatchingObject(QList<QObject*> objectList, TasTargetObject *targetObj);
+	bool isMatch(QObject* candidate, TasTargetObject *targetObj);
 	bool propertiesMatch(QHash<QString,QString>, QObject* object);
 
 private:

@@ -199,6 +199,7 @@ TasTargetObject::TasTargetObject(const TasTargetObject& object)
 {
     setObjectName(object.objectName());
     setClassName(object.className());
+    setObjectId(object.objectId());
     mChild = 0;
     if(object.child()){
         mChild = new TasTargetObject(*object.child());
@@ -247,6 +248,16 @@ void TasTargetObject::setClassName(const QString className)
     mClassName = className;
 }
 
+void TasTargetObject::setObjectId(const QString id)
+{
+    mObjectId = id;
+}
+
+QString TasTargetObject::objectId() const
+{
+    return mObjectId;
+}
+
 void TasTargetObject::addSearchParameter(QString name, QString value)
 {
     if(name == "className"){
@@ -254,6 +265,9 @@ void TasTargetObject::addSearchParameter(QString name, QString value)
     }
     else if(name == "objectName"){
         setObjectName(value);
+    }
+    else if(name == "tasId"){
+        setObjectId(value);
     }
     else{
         mSearchParams.insert(name, value);

@@ -152,10 +152,14 @@ void TasUiTraverser::traverseObject(TasObject& objectInfo, QObject* object, TasC
         }
     }
     if(traverseChildren){
+        printActions(objectInfo, object);
+    }
+    if(traverseChildren){
         //check decendants
         //1. is graphicsview
-        if(object->inherits("QGraphicsView")){ 
-            traverseGraphicsViewItems(objectInfo, qobject_cast<QGraphicsView*>(object), command);
+        QGraphicsView* gView = qobject_cast<QGraphicsView*>(object);
+        if(gView){ 
+            traverseGraphicsViewItems(objectInfo, gView, command);
         }
         //2. is QGraphicsObject
         QGraphicsObject* graphicsObject = qobject_cast<QGraphicsObject*>(object);               
@@ -225,8 +229,7 @@ void TasUiTraverser::traverseGraphicsViewItems(TasObject& parent, QGraphicsView*
     foreach(QGraphicsItem* item, view->items()){
         if(item->parentItem() == 0){
             // TODO This needs to be moved to plugins once OSS changes are done
-            if(TestabilityUtils::isCustomTraverse() || item->isVisible()  
-                ) {                
+            if(TestabilityUtils::isCustomTraverse() || item->isVisible()) {                
                 traverseGraphicsItem(parent.addObject(), item, command);
             }
         }
@@ -265,3 +268,38 @@ void TasUiTraverser::addApplicationDetails(TasObject& application, TasCommand* c
     application.addAttribute("localeCountry", defaultLocale.countryToString(defaultLocale.country()));
     application.addAttribute("localeLanguage", defaultLocale.languageToString(defaultLocale.language()));
 }
+
+
+/*!
+  
+  Prints all of the actions that a widget has under the widget. 
+  Makes it possible to easily map the correct action to the 
+  correct widget and also command the correct widget.
+  Returns true if an action was added.  
+  
+ */
+
+void TasUiTraverser::printActions(TasObject& objectInfo, QObject* object)
+{
+    QWidget* widget = qobject_cast<QWidget*>(object);
+    if(widget){
+        addActions(objectInfo, widget->actions());
+    }
+    else{
+        QGraphicsWidget* gWidget = qobject_cast<QGraphicsWidget*>(object);
+        if(gWidget){
+            addActions(objectInfo, gWidget->actions());
+        }
+    }
+}
+
+void TasUiTraverser::addActions(TasObject& parentObject, QList<QAction*> actions)
+{ 
+    if(actions.size() > 0){                   
+        for(int i = 0 ; i < actions.size(); i++){
+            QObject* action = actions.at(i);              
+            traverseObject(parentObject.addObject(), action, 0);
+        }
+    }     
+}
+

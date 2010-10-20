@@ -102,7 +102,6 @@ void TasQtTraverse::traverseObject(TasObject* objectInfo, QObject* object, TasCo
         //add details only for graphicsitems
         QGraphicsWidget* graphicsWidget = qobject_cast<QGraphicsWidget*>(object);   
         if(graphicsWidget){
-            printGraphicsWidgetAction(objectInfo, graphicsWidget);
             mTraverseUtils->addFont(objectInfo, graphicsWidget->font());
             // Elided format "this is a text" -> "this is a..." text for
             // items that have the "text" property.
@@ -131,7 +130,6 @@ void TasQtTraverse::traverseObject(TasObject* objectInfo, QObject* object, TasCo
             else if(object != qApp){
                 objectInfo->addAttribute("objectType", TYPE_STANDARD_VIEW );        
             }
-            printWidgetAction(objectInfo, widget);
             addWidgetCoordinates(objectInfo, widget,command);
             mTraverseUtils->addFont(objectInfo, widget->font());
             //check is the widget a viewport to graphicsscene
@@ -230,34 +228,3 @@ void TasQtTraverse::addWidgetCoordinates(TasObject* objectInfo, QWidget* widget,
     objectInfo->addAttribute("height", widget->height());
 }
     
-
-/*!
-  
-  Prints all of the actions that a widget has under the widget. 
-  Makes it possible to easily map the correct action to the 
-  correct widget and also command the correct widget.
-  Returns true if an action was added.  
-  
- */
-void TasQtTraverse::printWidgetAction(TasObject* parentObject, QWidget* widget)
-{ 
-    QList<QAction*> actions = widget->actions();
-    if(actions.size() > 0){                   
-        for(int i = 0 ; i < actions.size(); i++){
-            QObject* action = actions.at(i);              
-            traverseObject(&parentObject->addObject(), action);
-         }
-    }     
-}
-
-void TasQtTraverse::printGraphicsWidgetAction(TasObject* parentObject, QGraphicsWidget* widget)
-{
-    QList<QAction*> actions = widget->actions();
-    if(actions.size() > 0){                   
-        for(int i = 0 ; i < actions.size(); i++){
-            QObject* action = actions.at(i);              
-            traverseObject(&parentObject->addObject(), action);
-         }
-    }     
-}
-

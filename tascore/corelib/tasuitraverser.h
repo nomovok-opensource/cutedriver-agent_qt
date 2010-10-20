@@ -48,6 +48,8 @@ private:
 	void traverseGraphicsItemList(TasObject& parent, QGraphicsItem* graphicsItem, TasCommand* command);
 	void traverseGraphicsViewItems(TasObject& parent, QGraphicsView* view, TasCommand* command);
 	bool filterPlugin(const QString& pluginName);
+	void addActions(TasObject& parentObject, QList<QAction*> actions);
+	void printActions(TasObject& objectInfo, QObject* object);
 
 
 private:

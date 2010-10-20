@@ -79,10 +79,14 @@ public:
 	void addSearchParameter(QString name, QString value);
 	void setChild(TasTargetObject* child);
 	TasTargetObject* child() const;
+	void setObjectId(const QString id);
+	QString objectId() const;
+
 
 private:
 	QString mObjectName;
 	QString mClassName;
+	QString mObjectId;
 	QHash<QString,QString> mSearchParams;
 	TasTargetObject* mChild;
 };

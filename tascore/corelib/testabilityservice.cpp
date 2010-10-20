@@ -37,6 +37,7 @@
 #include "infoservice.h"
 #include "eventservice.h"
 #include "fixtureservice.h"
+#include "findobjectservice.h"
 
 const int SERVER_REGISTRATION_TIMEOUT = 12000;
 const int REGISTER_INTERVAL = 300;
@@ -360,6 +361,7 @@ void TestabilityService::initializeServiceManager()
     mServiceManager->registerCommand(new WebkitCommandService());
     mServiceManager->registerCommand(new UiStateService());
     mServiceManager->registerCommand(new RecorderService());    
+    mServiceManager->registerCommand(new FindObjectService());    
 
     mEventService = new EventService();
     mServiceManager->registerCommand(mEventService);
