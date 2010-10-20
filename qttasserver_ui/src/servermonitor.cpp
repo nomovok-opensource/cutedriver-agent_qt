@@ -24,11 +24,17 @@
 #include <QDomElement>
 #include <QDomDocument>
 #include <QFile>
+#include <QDir>
+#include <QLibrary>
+#include <QLibraryInfo>
 
 #include "taslogger.h"
 #include "tascoreutils.h"
 #include "testabilitysettings.h"
 #include "servermonitor.h"
+
+#include "taspluginloader.h"
+#include "tastraverseinterface.h"
 
 #ifdef Q_OS_SYMBIAN
 #include <e32base.h>
@@ -51,6 +57,10 @@ const static QString CONNECTED = "Connected";
 const static QString NOT_RESPONDING = "Not responding";
 
 const static QString RUNNING = "Running";
+
+const static QString FIXTURE_DIR = "tasfixtures";
+const static QString TRAVERSER_DIR = "traversers";
+
 
 #ifdef Q_OS_SYMBIAN
 const static QString SERVERINI =  "c:\\system\\data\\qttasserver.ini";
@@ -197,6 +207,61 @@ void ServerMonitor::killServer()
     connect(mClient, SIGNAL(serverResponse(const QString&)), this, SLOT(serverResponse(const QString&)));
 #endif
 }
+
+void ServerMonitor::loadPlugins()
+{
+    QString path = QLibraryInfo::location(QLibraryInfo::PluginsPath) + "/"+FIXTURE_DIR;
+
+    emit serverDebug("loading fixtures...");
+
+    TasPluginLoader loader;
+    QStringList fixList = loader.listPlugins(FIXTURE_DIR);
+    foreach(QString fixPlugin, fixList){
+        QString status;
+        TasFixturePluginInterface* fixture = 0;
+        QString filePath = QDir::cleanPath(path + QLatin1Char('/') + fixPlugin);
+
+        if(QLibrary::isLibrary(filePath)){
+            QObject *plugin = loader.loadPlugin(filePath);
+            if(plugin){
+                fixture = qobject_cast<TasFixturePluginInterface *>(plugin);
+            }
+        }
+        if(fixture){
+            status.append(" - ok");
+        }else {
+            status.append(" - failed");
+        }
+        emit serverDebug(fixPlugin + status);
+    }
+
+
+
+    emit serverDebug("loading traversers...");
+    path = QLibraryInfo::location(QLibraryInfo::PluginsPath) + "/"+TRAVERSER_DIR;
+
+    QStringList traList = loader.listPlugins(TRAVERSER_DIR);
+    foreach(QString traPlugin, traList){
+        QString status;
+        TasTraverseInterface* traverser = 0;
+        QString filePath = QDir::cleanPath(path + QLatin1Char('/') + traPlugin);
+
+        if(QLibrary::isLibrary(filePath)){
+            QObject *plugin = loader.loadPlugin(filePath);
+            if(plugin){
+                traverser = qobject_cast<TasTraverseInterface *>(plugin);
+            }
+        }
+
+        if(traverser){
+            status.append(" - ok");
+        }else {
+            status.append(" - failed");
+        }
+        emit serverDebug(traPlugin + status);
+    }
+}
+
 
 #ifdef Q_OS_SYMBIAN
 void ServerMonitor::enablePluginLoad()

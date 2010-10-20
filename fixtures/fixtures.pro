@@ -19,11 +19,11 @@
 
 TEMPLATE = subdirs
 
-
-!CONFIG(no_mobility)  {
-	CONFIG += mobility
-    SUBDIRS += mobilitysfwfixture
-    SUBDIRS += contactfixture
+!win32:{
+	!CONFIG(no_mobility)  {
+    	SUBDIRS += mobilitysfwfixture
+	    SUBDIRS += contactfixture
+	}
 }
 
 SUBDIRS += signalfixture

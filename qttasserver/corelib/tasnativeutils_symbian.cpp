@@ -71,12 +71,14 @@ int TasNativeUtils::pidOfActiveWindow(const QHash<QString, TasClient*> clients)
                 RThread foregroundAppThread;
                 if (KErrNone == foregroundAppThread.Open(foregroundApp.ThreadId().Id())) {
                     RProcess foregroundAppProcess;
-                    foregroundAppThread.Process(foregroundAppProcess);
-                    pid = foregroundAppProcess.Id().Id();
-                    if (!pids.contains(QString::number(pid))) {
-                        pid = TAS_ERROR_NOT_FOUND;
-                    }
-                    else {
+                    if(foregroundAppThread.Process(foregroundAppProcess) == KErrNone){
+                        pid = foregroundAppProcess.Id().Id();
+                        if (!pids.contains(QString::number(pid))) {
+                            pid = TAS_ERROR_NOT_FOUND;
+                        }
+                        else {
+                        }
+                        foregroundAppProcess.Close();
                     }
                     foregroundAppThread.Close();
                 } 

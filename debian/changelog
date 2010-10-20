@@ -1,6 +1,12 @@
+qttas (0.9.1-5) unstable; urgency=low
+
+  * new release tag
+
+ -- Petri Kiiskinen <ext-petri.ak.kiiskinen@nokia.com>  Tue, 12 Oct 2010 16:21:16 +0300
+
 qttas (0.9.1-4) unstable; urgency=low
 
-  * make event_type=0 the default for sut_qt_maemo
+  * touch pressure now 1 instead of 0
 
  -- Petri Kiiskinen <ext-petri.ak.kiiskinen@nokia.com>  Tue, 05 Oct 2010 08:10:00 +0300
 

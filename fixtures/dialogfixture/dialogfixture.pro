@@ -22,13 +22,13 @@ CONFIG += plugin
 include(../../tasbase.pri)
 target.path = $$TAS_TARGET_PLUGIN/tasfixtures
 
- symbian: {
- TARGET.EPOCALLOWDLLDATA = 1
- TARGET.CAPABILITY=CAP_GENERAL_DLL
- dialog_fixture_plugin.sources = dialogfixture.dll
- dialog_fixture_plugin.path = /resource/qt/plugins/tasfixtures
- DEPLOYMENT += dialog_fixture_plugin
- }
+symbian: {
+	 TARGET.EPOCALLOWDLLDATA = 1
+	 TARGET.CAPABILITY=CAP_GENERAL_DLL
+	 dialog_fixture_plugin.sources = dialogfixture.dll
+	 dialog_fixture_plugin.path = /resource/qt/plugins/tasfixtures
+	 DEPLOYMENT += dialog_fixture_plugin
+}
 DEPENDPATH += .
 INCLUDEPATH += . \
     ../../tascore/corelib
@@ -41,6 +41,7 @@ else {
     else {
         win32: {
             SOURCES += dialogfixture_win32.cpp
+            LIBS += -lUser32
             LIBS += -lPsapi
         }
         else {

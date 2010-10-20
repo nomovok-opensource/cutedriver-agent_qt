@@ -232,14 +232,20 @@ TasGesture* PinchZoomTasGestureRecognizer::create(TargetData data)
     int distance_1 = command.parameter(DIST_ONE).toInt();
     int distance_2 = command.parameter(DIST_TWO).toInt();
     int differential = command.parameter(DIFF).toInt();        
+    QLineF line1;
+    QLineF line2;
+    QPoint start1 = point;
+    QPoint start2 = point;
+    if(differential > 1){
+        QLineF line = mUtils.makeLine(point,differential/2, mUtils.getDirection(command));
+        start1 = line.p2().toPoint();
+        line.setAngle(mUtils.getDirection(command)+180);
+        start2 = line.p2().toPoint();
+    }
+    line1 = mUtils.makeLine(start1, distance_1, mUtils.getDirection(command));
+    line2 = mUtils.makeLine(start2, distance_2, mUtils.getDirection(command)+180);
 
     //this is the diff line
-    QLineF line = mUtils.makeLine(point,differential/2, mUtils.getDirection(command));
-
-    //actual gesture lines
-    QLineF line1 = mUtils.makeLine(line.p2().toPoint(), distance_1, line.angle());
-    line.setAngle(mUtils.getDirection(command)+180);
-    QLineF line2 = mUtils.makeLine(line.p2().toPoint(), distance_2, line.angle());
     if(command.parameter(TYPE) == "in"){
         return new PinchZoomTasGesture(data, line1, line2);
     }

@@ -114,34 +114,110 @@ bool ContactFixture::execute(void * objectInstance, QString actionName, QHash<QS
                 nm.setLastName(parameters.value(CONTACT_LASTNAME));
                 curr.saveDetail(&nm);
             }
-            // Manage numbers
-            if (parameters.contains(CONTACT_MOBILEHOMENUMBER))
+
+            QHashIterator<QString, QString> paramIterator(parameters);
+            QString paramKey;
+            while(paramIterator.hasNext())
             {
-                QContactPhoneNumber phn = curr.detail(QContactPhoneNumber::SubTypeMobile);
-                phn.setNumber(parameters.value(CONTACT_MOBILEHOMENUMBER));
-                phn.setContexts(QContactDetail::ContextHome);
-                curr.saveDetail(&phn);
-            }
-            if (parameters.contains(CONTACT_MOBILEWORKNUMBER))
-            {
-                QContactPhoneNumber phn = curr.detail(QContactPhoneNumber::SubTypeMobile);
-                phn.setNumber(parameters.value(CONTACT_MOBILEWORKNUMBER));
-                phn.setContexts(QContactDetail::ContextWork);
-                curr.saveDetail(&phn);
-            }
-            if (parameters.contains(CONTACT_LANDLINEHOMENUMBER))
-            {
-                QContactPhoneNumber phn = curr.detail(QContactPhoneNumber::SubTypeLandline);
-                phn.setNumber(parameters.value(CONTACT_LANDLINEHOMENUMBER));
-                phn.setContexts(QContactDetail::ContextHome);
-                curr.saveDetail(&phn);
-            }
-            if (parameters.contains(CONTACT_LANDLINEWORKNUMBER))
-            {
-                QContactPhoneNumber phn = curr.detail(QContactPhoneNumber::SubTypeLandline);
-                phn.setNumber(parameters.value(CONTACT_LANDLINEWORKNUMBER));
-                phn.setContexts(QContactDetail::ContextWork);
-                curr.saveDetail(&phn);
+                paramIterator.next();
+                paramKey = paramIterator.key();
+
+                // Manage numbers
+                if (paramKey.startsWith("number", Qt::CaseInsensitive))
+                {
+                    QStringList numberDetails = paramIterator.value().split(";");
+                    QContactPhoneNumber phn;
+                    switch(numberDetails.count())
+                    {
+                    case 3: // Context {Home/Work}
+                        if (numberDetails.at(2)!="")
+                        {
+                            phn.setContexts(numberDetails[2].toLatin1());
+                        }
+                    case 2: // Subtype
+                        if (numberDetails.at(1)!="")
+                        {
+                           phn.setSubTypes(numberDetails[1].toLatin1());
+                        }
+                    case 1:
+                        phn.setNumber(numberDetails[0]);
+                        break;
+                    default:
+                        stdOut.append("Invalid parameters for number, should be \"number;type;context\"");
+                        return false;
+                    }
+                    curr.saveDetail(&phn);
+                }
+                // Manage emails
+                if (paramKey.startsWith("email", Qt::CaseInsensitive))
+                {
+                    QStringList emailDetails = paramIterator.value().split(";");
+                    QContactEmailAddress email;
+                    switch(emailDetails.count())
+                    {
+                    case 2:
+                        if (emailDetails.at(1)!="")
+                        {
+                            email.setContexts(emailDetails[1].toLatin1());
+                        }
+                    case 1:
+                        email.setEmailAddress(emailDetails[0]);
+                        break;
+                    default:
+                        stdOut.append("Invalid parameters for email, should be \"email;context\"");
+                        return false;
+                    }
+                    curr.saveDetail(&email);
+                }
+                // Manage address
+                if (paramKey.startsWith("address", Qt::CaseInsensitive))
+                {
+                    QStringList addressDetails = paramIterator.value().split(";");
+                    QContactAddress address;
+                    switch(addressDetails.count())
+                    {
+                    case 7:
+                        if (addressDetails.at(6)!="")
+                        {
+                            address.setContexts(addressDetails[6].toLatin1());
+                        }
+                    case 6:
+                        if (addressDetails.at(5)!="")
+                        {
+                            address.setPostOfficeBox(addressDetails[5].toLatin1());
+                        }
+                    case 5:
+                        if (addressDetails.at(4)!="")
+                        {
+                            address.setCountry(addressDetails[4].toLatin1());
+                        }
+                    case 4:
+                        if (addressDetails.at(3)!="")
+                        {
+                            address.setRegion(addressDetails[3].toLatin1());
+                        }
+                    case 3:
+                        if (addressDetails.at(2)!="")
+                        {
+                            address.setLocality(addressDetails[2].toLatin1());
+                        }
+                    case 2:
+                        if (addressDetails.at(1)!="")
+                        {
+                            address.setPostcode(addressDetails[1].toLatin1());
+                        }
+                    case 1:
+                        if (addressDetails.at(0)!="")
+                        {
+                            address.setStreet(addressDetails[0]);
+                        }
+                        break;
+                    default:
+                        stdOut.append("Invalid parameters for address, should be \"street;postcode;locality;region;country;postofficebox;context\"");
+                        return false;
+                    }
+                    curr.saveDetail(&address);
+                }
             }
 
             // Append contact to the store
