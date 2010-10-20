@@ -17,7 +17,4 @@
 ## 
 ############################################################################
 HEADERS += services/resourceloggingservice.h
-HEADERS += services/cpuloadservice.h
-
 SOURCES += services/resourceloggingservice.cpp
-SOURCES += services/cpuloadservice.cpp

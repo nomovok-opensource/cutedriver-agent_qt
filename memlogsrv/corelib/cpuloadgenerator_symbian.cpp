@@ -28,7 +28,7 @@ TInt LoadGeneratingThreadFunc(TAny* aLoadInPercentage)
 {
     // The requested CPU load
     TInt* paramPtr = static_cast<TInt*>(aLoadInPercentage);
-    TReal load = *paramPtr / 100;
+    TReal load = TReal(*paramPtr) / TReal(100);
     
     // Initial time
     TTime time1;
@@ -56,11 +56,6 @@ TInt LoadGeneratingThreadFunc(TAny* aLoadInPercentage)
         TTime time2;
         time2.HomeTime();
         
-        // Calculate time difference
-        TTimeIntervalMicroSeconds timeDiff = time2.Int64() - time1.Int64();
-        TReal64 timeDiffDouble = timeDiff.Int64();
-        time1 = time2;
-                
         // Current used CPU time
         TTimeIntervalMicroSeconds cpuTime2;
         error = currentThread.GetCpuTime(cpuTime2);
@@ -68,6 +63,11 @@ TInt LoadGeneratingThreadFunc(TAny* aLoadInPercentage)
             currentThread.Panic(LoadGeneratorThreadName(), error);
         }
         
+        // Calculate time difference
+        TTimeIntervalMicroSeconds timeDiff = time2.Int64() - time1.Int64();
+        TReal64 timeDiffDouble = timeDiff.Int64();
+        time1 = time2;
+                
         // Calculate CPU time difference
         TTimeIntervalMicroSeconds cpuDiff = cpuTime2.Int64() - cpuTime1.Int64();
         TReal64 cpuDiffDouble = cpuDiff.Int64();
@@ -77,7 +77,7 @@ TInt LoadGeneratingThreadFunc(TAny* aLoadInPercentage)
         TReal cpuUsage = cpuDiffDouble / timeDiffDouble;
 
         // Calculate time to sleep to achieve the requested load
-        sleepTime = sleepTime * cpuUsage / load + 0.5;
+        sleepTime = sleepTime * cpuUsage / load + 0.3;
         User::AfterHighRes(sleepTime * 1000);
     }
 }
@@ -87,31 +87,38 @@ CpuLoadGenerator::CpuLoadGenerator()
 
 CpuLoadGenerator::~CpuLoadGenerator() 
 {
-    if (mLoadGenerationThread.ExitType() == EExitPending) {
-        mLoadGenerationThread.Kill(KErrNone);        
+    TasLogger::logger()->debug("  CpuLoadGenerator::~CpuLoadGenerator");
+    if (mLoadGeneratingThread.ExitType() == EExitPending) {
+        mLoadGeneratingThread.Kill(KErrNone);
     }
+    mLoadGeneratingThread.Close();
 }
 
 int CpuLoadGenerator::start(int loadInPercentage)
 {
+    TasLogger::logger()->debug("> CpuLoadGenerator::start");
     mLoadInPercentage = loadInPercentage;
-    int error = mLoadGenerationThread.Create(
+    int error = mLoadGeneratingThread.Create(
                     LoadGeneratorThreadName(), 
                     LoadGeneratingThreadFunc, 
                     0x2000, 
                     NULL, 
                     &mLoadInPercentage);
     if (!error) {
-        // SetPriority? Normal by default
-        mLoadGenerationThread.Resume();
+        TasLogger::logger()->debug("  Resuming thread");
+        mLoadGeneratingThread.Resume();
     }
     return error;
 }
 
 int CpuLoadGenerator::stop()
 {
-    if (mLoadGenerationThread.ExitType() == EExitPending) {
-        mLoadGenerationThread.Kill(KErrNone);
+    TasLogger::logger()->debug("> CpuLoadGenerator::stop");
+    if (mLoadGeneratingThread.ExitType() == EExitPending) {
+        TasLogger::logger()->debug("  Killing...");
+        mLoadGeneratingThread.Kill(KErrNone);
     }
-    return mLoadGenerationThread.ExitReason();
+    int status = mLoadGeneratingThread.ExitReason();
+    mLoadGeneratingThread.Close();
+    return status;
 }

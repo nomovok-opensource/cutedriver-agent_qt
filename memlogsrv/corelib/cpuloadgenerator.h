@@ -41,7 +41,7 @@ private: // Data
 
 private: // Platform specific data
 #ifdef Q_OS_SYMBIAN
-    RThread mLoadGenerationThread;    
+    RThread mLoadGeneratingThread;    
 #endif
     
 };

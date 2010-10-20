@@ -16,11 +16,10 @@
 ** of this file. 
 ** 
 ****************************************************************************/ 
- 
-
 
 #include "resourceloggingservice.h"
 #include "resourcedatagatherer.h"
+#include "cpuloadgenerator.h"
 #include <taslogger.h>
 #include <QTimer>
 
@@ -46,6 +45,7 @@ ResourceLoggingService::~ResourceLoggingService()
         timer = 0;
     }
     mLoggingTimers.clear();
+    delete mLoadGenerator;
 }
 
 bool ResourceLoggingService::executeService(
@@ -79,6 +79,29 @@ bool ResourceLoggingService::executeService(
             if (TAS_ERROR_NONE != error) {
                 TasLogger::logger()->error("  Error in logging stop: " + QString::number(error));
                 response.setErrorMessage("Error in logging stop: " + QString::number(error));
+            }
+            else {
+                response.setData(responseData);
+            }
+        }
+        /*
+         * Start process memory logging
+         */
+        else if(commandIs(model, "CpuLoadStart", command)) {
+            error = startLoad(*command);
+            if (TAS_ERROR_NONE != error) {
+                TasLogger::logger()->error("  Error in starting CPU load: " + QString::number(error));
+                response.setErrorMessage("Error in starting CPU load: " + QString::number(error));
+            }
+        }
+        /*
+         * Stop process memory logging
+         */
+        else if (commandIs(model, "CpuLoadStop", command)) {
+            error = stopLoad(*command, responseData);
+            if (TAS_ERROR_NONE != error) {
+                TasLogger::logger()->error("  Error in stopping CPU load: " + QString::number(error));
+                response.setErrorMessage("Error in stopping CPU load: " + QString::number(error));
             }
             else {
                 response.setData(responseData);
@@ -197,6 +220,41 @@ int ResourceLoggingService::stopLogging(
     
     TasLogger::logger()->debug("< ResourceLoggingService::stopLogging");
     return TAS_ERROR_NONE;
+}
+
+int ResourceLoggingService::startLoad(TasCommand& command)
+{
+    TasLogger::logger()->debug("> CpuLoadService::startLogging: " + command.name());
+    
+    bool ok;
+    int load = command.parameter("cpu_load").toInt(&ok);
+    int error = TAS_ERROR_NONE;
+    if (ok && load > 0) {
+        if (!mLoadGenerator) {
+            mLoadGenerator = new CpuLoadGenerator();
+        }
+        error = mLoadGenerator->start(load);
+    }
+    else {
+        error = TAS_ERROR_PARAMETER;
+    }
+    
+    TasLogger::logger()->debug("< CpuLoadService::startLogging");
+    return error;
+}
+
+int ResourceLoggingService::stopLoad(TasCommand& command, QString& responseData)
+{
+    Q_UNUSED(responseData);
+    TasLogger::logger()->debug("> CpuLoadService::stopLogging: " + command.name());
+
+    int error = TAS_ERROR_NONE;
+    if (mLoadGenerator) {
+        error = mLoadGenerator->stop();
+    }
+    
+    TasLogger::logger()->debug("< CpuLoadService::stopLogging");
+    return error;
 }
 
 void ResourceLoggingService::timerError(int errorCode, QString& resourceIdentifier)

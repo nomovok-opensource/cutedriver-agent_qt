@@ -20,6 +20,7 @@
 HEADERS += corelib/tasqtmemlogservice.h
 HEADERS += corelib/resourcedatagatherer.h
 HEADERS += corelib/cpuloadgenerator.h
+
 SOURCES += corelib/tasqtmemlogservice.cpp
 
 symbian: {

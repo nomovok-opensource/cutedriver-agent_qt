@@ -87,6 +87,7 @@ void ResourceDataGatherer::initializeMemLogging()
                 error = thread.Process(parentProcess);
                 if (KErrNone == error) {
                     mParentPid = parentProcess.Id().Id();
+                    parentProcess.Close();
                 }
                 mThreadFullName = QString((const QChar*) threadFullName.Ptr(), threadFullName.Length());
                 thread.Close();
