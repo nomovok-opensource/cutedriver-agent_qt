@@ -29,12 +29,6 @@
 #include "webkitcommandservice.h"
 #include "tassocket.h"
 
-//#include "actionhandler.h"
-#include "gesturehandler.h"
-#include "keyhandler.h"
-#include "mousehandler.h"
-#include "multitouchhandler.h"
-
 #include "tasdeviceutils.h"
 
 /*!
