@@ -16,7 +16,6 @@
 ** of this file. 
 ** 
 ****************************************************************************/ 
- 
 
 #ifndef RESOURCELOGGINGSERVICE_H_
 #define RESOURCELOGGINGSERVICE_H_
@@ -29,6 +28,7 @@ class QTimer;
 class QFile;
 class ResourceLoggingTimer;
 class ResourceDataGatherer;
+class CpuLoadGenerator;
 
 class ResourceLoggingService : public QObject, public TasServiceCommand
 {
@@ -58,6 +58,8 @@ private:
             ResourceLoggingService::ResourceType resourceType, 
             TasCommand& command, 
             QString& responseData);
+    int startLoad(TasCommand& command);
+    int stopLoad(TasCommand& command, QString& responseData);
     bool commandIs(
             TasCommandModel& commandModel, 
             const QString& commandName, 
@@ -66,6 +68,7 @@ private:
 private:
     QList<ResourceLoggingTimer*> mLoggingTimers;
     bool mResourceLoggerProcessRunning;
+    CpuLoadGenerator* mLoadGenerator;    
    
 };
 

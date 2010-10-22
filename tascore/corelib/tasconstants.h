@@ -49,6 +49,8 @@ const char* const BRING_TO_FOREGROUND        = "bringToForeground";
 const char* const SYSTEM_INFO_SERVICE        = "systemInfo";
 const char* const RESOURCE_LOGGING_SERVICE   = "resourceLogging";
 const char* const FIND_OBJECT_SERVICE        = "findObject";
+const char* const CPU_LOAD_SERVICE           = "cpuLoad";
+
 /*
  Message flags 
  */

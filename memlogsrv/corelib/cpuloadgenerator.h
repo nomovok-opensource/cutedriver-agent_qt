@@ -16,39 +16,34 @@
 ** of this file. 
 ** 
 ****************************************************************************/ 
- 
 
-#ifndef SERVERWINDOW_H
-#define SERVERWINDOW_H
+#ifndef CPULOADGENERATOR_H_
+#define CPULOADGENERATOR_H_
 
+#include <tasconstants.h>
 #include <QObject>
-#include <QWidget>
-#include <QPushButton>
-#include <QCheckBox>
+#include <QTime>
 
-#include "servermonitor.h"
-
-class ServerWindow : public QWidget
+class CpuLoadGenerator : public QObject
 {
     Q_OBJECT
-
-public:	  
-   ServerWindow(QWidget* parent=0);
-   ~ServerWindow();
-
-private slots:
-   void disableButtons();
-   void enableButtons();
-
+    
+public:
+    CpuLoadGenerator();
+    ~CpuLoadGenerator();
+    int start(int loadInPercentage);
+    int stop();
+    
 private:
-   QPushButton* statusButton;
-   QPushButton* stopButton;
-   QPushButton* startButton;
-   QPushButton* resetButton;
-   QPushButton* pluginButton;
-   QCheckBox* autoStart;
-   QPushButton* loadPluginsButton;
-   ServerMonitor* monitor;
+
+private: // Data
+    int mLoadInPercentage;
+
+private: // Platform specific data
+#ifdef Q_OS_SYMBIAN
+    RThread mLoadGeneratingThread;    
+#endif
+    
 };
 
-#endif
+#endif /* CPULOADGENERATOR_H_ */

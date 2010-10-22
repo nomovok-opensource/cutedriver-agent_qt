@@ -16,39 +16,24 @@
 ** of this file. 
 ** 
 ****************************************************************************/ 
- 
 
-#ifndef SERVERWINDOW_H
-#define SERVERWINDOW_H
+#include "cpuloadgenerator.h"
+#include <taslogger.h>
+#include <QString>
 
-#include <QObject>
-#include <QWidget>
-#include <QPushButton>
-#include <QCheckBox>
+CpuLoadGenerator::CpuLoadGenerator()
+{}
 
-#include "servermonitor.h"
+CpuLoadGenerator::~CpuLoadGenerator() 
+{}
 
-class ServerWindow : public QWidget
+int CpuLoadGenerator::start(int loadInPercentage)
 {
-    Q_OBJECT
+    Q_UNUSED(loadInPercentage);
+    return TAS_ERROR_NOT_IMPLEMENTED;
+}
 
-public:	  
-   ServerWindow(QWidget* parent=0);
-   ~ServerWindow();
-
-private slots:
-   void disableButtons();
-   void enableButtons();
-
-private:
-   QPushButton* statusButton;
-   QPushButton* stopButton;
-   QPushButton* startButton;
-   QPushButton* resetButton;
-   QPushButton* pluginButton;
-   QCheckBox* autoStart;
-   QPushButton* loadPluginsButton;
-   ServerMonitor* monitor;
-};
-
-#endif
+int CpuLoadGenerator::stop()
+{
+    return TAS_ERROR_NOT_IMPLEMENTED;
+}
