@@ -141,7 +141,7 @@ void TasTraverseUtils::printProperties(TasObject* objectInfo, QObject* object)
         if(includeAttribute(name)){
             TasAttribute& attr = objectInfo->addAttribute();
             //coordinates are always relative to something in the props
-            if(QString(name) != "y" && QString(name) != "x" && QString(name) != "width" && QString(name) != "height"){
+            if(QString(name) != "id" && QString(name) != "y" && QString(name) != "x" && QString(name) != "width" && QString(name) != "height"){
                 attr.setName(name);
             }
             else{

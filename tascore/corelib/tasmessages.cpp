@@ -20,6 +20,7 @@
 
 #include "tasmessages.h"
 #include "tassocket.h"
+#include "taslogger.h"
 
 TasMessage::TasMessage()
 {

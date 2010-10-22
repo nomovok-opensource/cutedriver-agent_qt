@@ -42,9 +42,9 @@ public:
 	QString serviceName()const { return FIND_OBJECT_SERVICE; }
 
 private:
-	bool addObjectDetails(TasObject& parent, TasTargetObject *targetObj, TasCommand* command);
-	QObject* searchForObject(TasTargetObject *targetObj);
-	QObject* findMatchingObject(QList<QObject*> objectList, TasTargetObject *targetObj);
+	bool addObjectDetails(TasObject& parent, TasTargetObject *targetObj, TasCommand* command, QObject* parentObject=0);
+	QList<QObject*> searchForObject(TasTargetObject *targetObj);
+	QList<QObject*> findMatchingObject(QList<QObject*> objectList, TasTargetObject *targetObj);
 	bool isMatch(QObject* candidate, TasTargetObject *targetObj);
 	bool propertiesMatch(QHash<QString,QString>, QObject* object);
 

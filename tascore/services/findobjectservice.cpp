@@ -48,6 +48,11 @@ bool FindObjectService::executeService(TasCommandModel& model, TasResponse& resp
 
         foreach(TasTarget* target, model.targetList()){
             TasTargetObject *targetObj = target->targetObject();
+            //app always returned so skip it
+            if(targetObj->className().isEmpty() && targetObj->objectName().isEmpty() && 
+               targetObj->searchParameters().contains("type") && targetObj->searchParameters().value("type") == "application"){
+                continue;
+            }
             TasCommand* command = 0;
             if(!target->commandList().isEmpty()){
                 command = target->commandList().at(0);
@@ -74,7 +79,7 @@ bool FindObjectService::executeService(TasCommandModel& model, TasResponse& resp
             uiModel = mTraverser->getUiState(command);
         }
         //        TasLogger::logger()->debug("FindObjectService::executeService make return message.");
-        QByteArray* xml = new QByteArray(); 
+        QByteArray* xml = new QByteArray();         
         uiModel->serializeModel(*xml);
         delete uiModel;
         response.setData(xml);
@@ -85,24 +90,33 @@ bool FindObjectService::executeService(TasCommandModel& model, TasResponse& resp
     }
 }
 
-bool FindObjectService::addObjectDetails(TasObject& parent, TasTargetObject *targetObj, TasCommand* command)
+bool FindObjectService::addObjectDetails(TasObject& parent, TasTargetObject *targetObj, TasCommand* command, QObject* parentObject)
 {
     //must be set
     if(targetObj->className().isEmpty()){
         return false;
     }
-
-    QObject* object = searchForObject(targetObj);
-    if(object){
-        TasObject& objectData = parent.addObject();
-        bool traverseChildren = false;
-        if(targetObj->child()){
-            //if the child object is not found we traverse everything from object found
-            if(!addObjectDetails(objectData, targetObj->child(), command)){
-                traverseChildren = true;
+    QList<QObject*> objects;
+    //first level look from app 
+    if(!parentObject){
+        objects = searchForObject(targetObj);
+    }
+    //look children of parent
+    else{
+        objects = findMatchingObject(parentObject->children(), targetObj);
+    }
+    if(!objects.isEmpty()){
+        foreach(QObject* object, objects){
+            TasObject& objectData = parent.addObject();
+            bool traverseChildren = false;
+            if(targetObj->child()){
+                //if the child object is not found we traverse everything from object found
+                if(!addObjectDetails(objectData, targetObj->child(), command, object)){
+                    traverseChildren = true;
+                }
             }
+            mTraverser->traverseObject(objectData, object, command, traverseChildren);
         }
-        mTraverser->traverseObject(objectData, object, command, traverseChildren);
         return true;
     }
     else{
@@ -110,59 +124,53 @@ bool FindObjectService::addObjectDetails(TasObject& parent, TasTargetObject *tar
     }
 }
 
-QObject* FindObjectService::searchForObject(TasTargetObject *targetObj)
+QList<QObject*> FindObjectService::searchForObject(TasTargetObject *targetObj)
 {
-    QObject* targetObject = 0;
+    QList<QObject*> targetObjects;
     foreach(QWidget* widget, qApp->allWidgets()){
-        //check if widget
+        if(targetObjects.contains(widget) || !widget->isVisible()){
+            continue;
+        }
+        //1. check if widget matches
         if(isMatch(widget, targetObj)){
-            targetObject = widget;
-            break;
+            targetObjects.append(widget);
+        }  
+      
+        //2.look from children
+        if(targetObjects.isEmpty() && !targetObj->className().isEmpty()){
+            targetObjects.append(findMatchingObject(widget->children(), targetObj));
         }
 
-        //look from children
-        //1. try finding using the object name
-        if(!targetObj->objectName().isEmpty()){
-            QList<QObject*> possibleTargets = widget->findChildren<QObject*>(targetObj->objectName());
-            targetObject = findMatchingObject(possibleTargets, targetObj);
-        }
-        //2. not found, look based on class name
-        if(!targetObject && !targetObj->className().isEmpty()){
-            targetObject = findMatchingObject(widget->children(), targetObj);
-        }
-        if(!targetObject){
-            //3. Maybe a graphicsView
-            QGraphicsView* view = qobject_cast<QGraphicsView*>(widget);
-            if(view){             
-                foreach(QGraphicsItem* item, view->items()){
-                    QGraphicsObject* object = item->toGraphicsObject();
-                    if (object){
-                        if(isMatch(object, targetObj)){
-                            targetObject = object;
-                            break;
-                        }           
-                    }
+        //3. Maybe a graphicsView
+        QGraphicsView* view = qobject_cast<QGraphicsView*>(widget);
+        if(view){             
+            foreach(QGraphicsItem* item, view->items()){
+                QGraphicsObject* object = item->toGraphicsObject();
+                if (object && object->isVisible() && TestabilityUtils::isItemInView(view, item)){
+                    if(isMatch(object, targetObj)){
+                        targetObjects.append(object);
+                    }           
                 }
-            }
-        }
-        if(targetObject){
-            break;
+            }        
         }
     }
-
-    return targetObject;
+    return targetObjects;
 }
 
-QObject* FindObjectService::findMatchingObject(QList<QObject*> objectList, TasTargetObject *targetObj)
+QList<QObject*> FindObjectService::findMatchingObject(QList<QObject*> objectList, TasTargetObject *targetObj)
 {
-    QObject* target = 0;    
+    QList<QObject*> targets ;    
     foreach(QObject* candidate, objectList){
+        QVariant visibility = candidate->property("visible");
+        //skip if property visible false
+        if(visibility.isValid() && visibility.type() == QVariant::Bool && visibility.toBool() == false){
+            continue;
+        }
         if(isMatch(candidate, targetObj)){
-            target = candidate;
-            break;                    
+            targets.append(candidate);
         }
     }   
-    return target;
+    return targets;
 }
 
 bool FindObjectService::isMatch(QObject* candidate, TasTargetObject *targetObj)

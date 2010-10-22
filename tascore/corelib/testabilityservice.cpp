@@ -176,11 +176,11 @@ TestabilityService::~TestabilityService()
         disconnect(mSocket, SIGNAL(socketClosed()), this, SLOT(connectionClosed()));
         mSocket->clearHandlers();
         mSocket->closeConnection();     
-        delete mSocket;
+        mSocket->deleteLater();
         mSocket = 0;
     }
     if(mServerConnection){
-        delete mServerConnection;    
+        mServerConnection->deleteLater();    
         mServerConnection = 0;
     }
     if(mServiceManager){
