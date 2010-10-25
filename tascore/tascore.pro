@@ -70,7 +70,7 @@ symbian: {
 }
 
 
-QT += network xml testlib gui webkit
+QT += network xml testlib gui webkit declarative
 
 #configuration file
 configuration.files = conf/qt_testability.ini

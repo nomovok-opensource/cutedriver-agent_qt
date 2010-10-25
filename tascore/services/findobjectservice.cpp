@@ -17,6 +17,7 @@
 ** 
 ****************************************************************************/ 
  
+#include <QDeclarativeItem>
 
 
 #include "taslogger.h"
@@ -186,7 +187,14 @@ bool FindObjectService::isMatch(QObject* candidate, TasTargetObject *targetObj)
     }
 
     bool isMatch = false;
-    if(candidate->metaObject()->className() == targetObj->className()){
+
+    //traverser strips _QML so need to strip it here also
+    QString className = candidate->metaObject()->className();
+    if(qobject_cast<QDeclarativeItem*>(candidate)){
+        className = className.split("_QML").first();
+    }
+
+    if(className == targetObj->className()){
         //class name ok, check props
         if(propertiesMatch(targetObj->searchParameters(), candidate)){
             isMatch = true;

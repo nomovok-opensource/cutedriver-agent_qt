@@ -20,6 +20,7 @@
 
 #include <QFontMetricsF>
 #include <QTextCodec>
+#include <QDeclarativeItem>
 
 #include "testabilityutils.h"
 #include "tastraverseutils.h"
@@ -62,6 +63,10 @@ void TasTraverseUtils::addObjectDetails(TasObject* objectInfo, QObject* object)
     if(objectInfo->getType().isEmpty()){
         QString objectType = object->metaObject()->className();
         objectType.replace(QString(":"), QString("_"));
+        //strip dynamic qml strings from the class name
+        if(qobject_cast<QDeclarativeItem*>(object)){
+            objectType = objectType.split("_QML").first();
+        }
         objectInfo->setType(objectType);    
     }
     if(includeAttribute("parent")){
@@ -141,7 +146,7 @@ void TasTraverseUtils::printProperties(TasObject* objectInfo, QObject* object)
         if(includeAttribute(name)){
             TasAttribute& attr = objectInfo->addAttribute();
             //coordinates are always relative to something in the props
-            if(QString(name) != "id" && QString(name) != "y" && QString(name) != "x" && QString(name) != "width" && QString(name) != "height"){
+            if(QString(name) != "y" && QString(name) != "x" && QString(name) != "width" && QString(name) != "height"){
                 attr.setName(name);
             }
             else{
