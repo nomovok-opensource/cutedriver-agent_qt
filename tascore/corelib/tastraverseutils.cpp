@@ -65,7 +65,10 @@ void TasTraverseUtils::addObjectDetails(TasObject* objectInfo, QObject* object)
         objectType.replace(QString(":"), QString("_"));
         //strip dynamic qml strings from the class name
         if(qobject_cast<QDeclarativeItem*>(object)){
-            objectType = objectType.split("_QML").first();
+            QStringList stringList = objectType.split("_QML");
+            QString strippedType = stringList.takeFirst();
+            objectInfo->addAttribute("QML_TYPE_EXTENSION",  objectType.remove(strippedType));    
+            objectType = strippedType;
         }
         objectInfo->setType(objectType);    
     }
