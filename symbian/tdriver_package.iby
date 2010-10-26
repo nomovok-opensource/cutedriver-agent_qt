@@ -1,0 +1,68 @@
+#ifndef __QTTESTABILITY_IBY__
+#define __QTTESTABILITY_IBY__
+
+#include <bldvariant.hrh>
+
+//needed for memlogsrv
+#include <memspy_rom.iby>
+#include <memspy.iby>
+
+#define TAS_UPGRADABLE_APP_REG_RSC(NAME) data=DATAZ_\PRIVATE\10003A3F\IMPORT\APPS\ ## NAME ## _reg.rsc        Private\10003a3f\import\apps\ ## NAME ## _reg.rsc
+#define TAS_PLUGIN_STUB(NAME, SUBDIR) data=\epoc32\data\z\resource\qt\plugins\##SUBDIR##\##NAME##.qtplugin RESOURCE_FILES_DIR\qt\plugins\##SUBDIR##\##NAME##.qtplugin
+
+//qttasserver
+file=ABI_DIR\BUILD_DIR\qttasserver.exe                    SHARED_LIB_DIR\qttasserver.exe 
+TAS_UPGRADABLE_APP_REG_RSC(qttasserver)
+S60_APP_RESOURCE(qttasserver)
+
+//qttas_ui
+file=ABI_DIR\BUILD_DIR\qttas_ui.exe                       SHARED_LIB_DIR\qttas_ui.exe 
+TAS_UPGRADABLE_APP_REG_RSC(qttas_ui)
+S60_APP_RESOURCE(qttas_ui)
+
+//qttasmemlog_srv
+file=ABI_DIR\BUILD_DIR\qttasmemlog_srv.exe                SHARED_LIB_DIR\qttasmemlog_srv.exe 
+TAS_UPGRADABLE_APP_REG_RSC(qttasmemlog_srv)
+S60_APP_RESOURCE(qttasmemlog_srv)
+
+//qt_testability dll
+file=ABI_DIR\BUILD_DIR\qttestability.dll                  SHARED_LIB_DIR\qttestability.dll 
+data=\epoc32\winscw\c\qt_testability\qt_testability.ini   qt_testability\qt_testability.ini   
+
+//traverser plugins
+file=ABI_DIR\BUILD_DIR\qttraverse.dll                     SHARED_LIB_DIR\qttraverse.dll
+file=ABI_DIR\BUILD_DIR\viewitemtraverse.dll               SHARED_LIB_DIR\viewitemtraverse.dll
+file=ABI_DIR\BUILD_DIR\layouttraverse.dll                 SHARED_LIB_DIR\layouttraverse.dll
+file=ABI_DIR\BUILD_DIR\webkittraverse.dll                 SHARED_LIB_DIR\webkittraverse.dll
+TAS_PLUGIN_STUB(qttraverse, traversers)
+TAS_PLUGIN_STUB(viewitemtraverse, traversers)
+TAS_PLUGIN_STUB(layouttraverse, traversers)
+TAS_PLUGIN_STUB(webkittraverse, traversers)
+
+//tasfixture plugins
+file=ABI_DIR\BUILD_DIR\tasfixture.dll                     SHARED_LIB_DIR\tasfixture.dll
+file=ABI_DIR\BUILD_DIR\tassignal.dll                      SHARED_LIB_DIR\tassignal.dll
+file=ABI_DIR\BUILD_DIR\fpsfixture.dll                     SHARED_LIB_DIR\fpsfixture.dll
+file=ABI_DIR\BUILD_DIR\popupfixture.dll                   SHARED_LIB_DIR\popupfixture.dll
+file=ABI_DIR\BUILD_DIR\filefixture.dll                    SHARED_LIB_DIR\filefixture.dll
+TAS_PLUGIN_STUB(tasfixture, tasfixtures)
+TAS_PLUGIN_STUB(tassignal, tasfixtures)
+TAS_PLUGIN_STUB(fpsfixture, tasfixtures)
+TAS_PLUGIN_STUB(popupfixture, tasfixtures)
+TAS_PLUGIN_STUB(filefixture, tasfixtures)
+
+//testability loader plugin
+file=ABI_DIR\BUILD_DIR\testability.dll                    SHARED_LIB_DIR\testability.dll
+file=ABI_DIR\BUILD_DIR\testabilitystyle.dll               SHARED_LIB_DIR\testabilitystyle.dll
+TAS_PLUGIN_STUB(testability, testability)
+TAS_PLUGIN_STUB(testabilitystyle, styles)
+
+// Stub SIS
+data=ZSYSTEM\Install\tdriver_package_stub.sis              system\install\tdriver_package_stub.sis
+
+#endif
+
+
+
+
+

@@ -47,6 +47,8 @@ symbian: {
 	!CONFIG(no_mobility)  {
 		CONFIG += mobility
 	}
+
+	SUBDIRS  += symbian
 }
 
 CONFIG(maemo){
