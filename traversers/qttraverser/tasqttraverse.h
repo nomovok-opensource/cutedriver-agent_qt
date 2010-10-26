@@ -49,9 +49,6 @@ class TasQtTraverse : public QObject, public TasTraverseInterface
 private:
 	 int getParentId(QObject* object);
 	 void printProperties(TasObject* objectData, QObject* object);
-	 void printWidgetAction(TasObject* parentObject, QWidget* widget);
-	 void printGraphicsWidgetAction(TasObject* parentObject, QGraphicsWidget* widget);
-
 	 void addWidgetCoordinates(TasObject* objectInfo, QWidget* widget, TasCommand* command);
 	 void printGraphicsItemProperties(TasObject* objectData, QGraphicsItem* graphicsItem);
 

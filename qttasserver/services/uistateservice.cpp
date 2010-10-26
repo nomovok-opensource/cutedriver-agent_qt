@@ -38,7 +38,7 @@ UiStateService::~UiStateService()
 
 bool UiStateService::executeService(TasCommandModel& model, TasResponse& response)
 {
-    if(model.service() == serviceName() ){
+    if(model.service() == serviceName() || model.service() == FIND_OBJECT_SERVICE){
         response.setData(serverUiState());
         response.setIsError(false);
         return true;

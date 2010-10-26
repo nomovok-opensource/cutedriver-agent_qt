@@ -92,7 +92,8 @@ void TasServerServiceManager::handleServiceRequest(TasCommandModel& commandModel
         }
     }
 
-    if(!targetClient && (commandModel.service() == APPLICATION_STATE || commandModel.service() == SCREEN_SHOT)){
+    if(!targetClient && (commandModel.service() == APPLICATION_STATE || commandModel.service() == SCREEN_SHOT 
+                         || commandModel.service() == FIND_OBJECT_SERVICE)){
         targetClient = mClientManager->findClient(commandModel);
     }
     else if (commandModel.service() == RESOURCE_LOGGING_SERVICE){

@@ -37,6 +37,7 @@
 #include "infoservice.h"
 #include "eventservice.h"
 #include "fixtureservice.h"
+#include "findobjectservice.h"
 
 const int SERVER_REGISTRATION_TIMEOUT = 12000;
 const int REGISTER_INTERVAL = 300;
@@ -175,11 +176,11 @@ TestabilityService::~TestabilityService()
         disconnect(mSocket, SIGNAL(socketClosed()), this, SLOT(connectionClosed()));
         mSocket->clearHandlers();
         mSocket->closeConnection();     
-        delete mSocket;
+        mSocket->deleteLater();
         mSocket = 0;
     }
     if(mServerConnection){
-        delete mServerConnection;    
+        mServerConnection->deleteLater();    
         mServerConnection = 0;
     }
     if(mServiceManager){
@@ -360,6 +361,7 @@ void TestabilityService::initializeServiceManager()
     mServiceManager->registerCommand(new WebkitCommandService());
     mServiceManager->registerCommand(new UiStateService());
     mServiceManager->registerCommand(new RecorderService());    
+    mServiceManager->registerCommand(new FindObjectService());    
 
     mEventService = new EventService();
     mServiceManager->registerCommand(mEventService);

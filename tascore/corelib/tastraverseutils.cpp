@@ -20,6 +20,7 @@
 
 #include <QFontMetricsF>
 #include <QTextCodec>
+#include <QDeclarativeItem>
 
 #include "testabilityutils.h"
 #include "tastraverseutils.h"
@@ -62,6 +63,13 @@ void TasTraverseUtils::addObjectDetails(TasObject* objectInfo, QObject* object)
     if(objectInfo->getType().isEmpty()){
         QString objectType = object->metaObject()->className();
         objectType.replace(QString(":"), QString("_"));
+        //strip dynamic qml strings from the class name
+        if(qobject_cast<QDeclarativeItem*>(object)){
+            QStringList stringList = objectType.split("_QML");
+            QString strippedType = stringList.takeFirst();
+            objectInfo->addAttribute("QML_TYPE_EXTENSION",  objectType.remove(strippedType));    
+            objectType = strippedType;
+        }
         objectInfo->setType(objectType);    
     }
     if(includeAttribute("parent")){

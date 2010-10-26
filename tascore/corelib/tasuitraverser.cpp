@@ -81,25 +81,44 @@ bool TasUiTraverser::filterPlugin(const QString& pluginName)
 }
 
 
-
-TasDataModel* TasUiTraverser::getUiState(TasCommand* command)
+void TasUiTraverser::initializeTraverse(TasCommand* command)
 {
     setFilterLists(command);
-
     //let traversers know that a new traverse operation is starting
     QHashIterator<QString, TasTraverseInterface*> traversers(mTraversers);
     while (traversers.hasNext()) {
         traversers.next();
         traversers.value()->beginTraverse(command);
     }
+}
 
+void TasUiTraverser::finalizeTraverse()
+{
+    //let traversers know that a new traverse operation is starting
+    QHashIterator<QString, TasTraverseInterface*> traversers(mTraversers);
+    while (traversers.hasNext()) {
+        traversers.next();
+        traversers.value()->endTraverse();
+    }
+}
 
-    TasDataModel* model = new TasDataModel();
+TasObject& TasUiTraverser::addModelRoot(TasDataModel& model, TasCommand* command)
+{
     QString qtVersion = "Qt" + QString(qVersion());
-    TasObjectContainer& container = model->addNewObjectContainer(1, qtVersion, "qt");
-
+    TasObjectContainer& container = model.addNewObjectContainer(1, qtVersion, "qt");
+    
     TasObject& application = container.addNewObject(QString::number(qApp->applicationPid()), getApplicationName(), "application");          
     addApplicationDetails(application, command);
+    return application;
+}
+
+
+TasDataModel* TasUiTraverser::getUiState(TasCommand* command)
+{
+    initializeTraverse(command);
+
+    TasDataModel* model = new TasDataModel();
+    TasObject& application = addModelRoot(*model, command);
 
     QWidgetList widgetList = qApp->topLevelWidgets();
     if (!widgetList.empty()){
@@ -117,16 +136,13 @@ TasDataModel* TasUiTraverser::getUiState(TasCommand* command)
         }
     }
 
-    //let traversers know that a new traverse operation is ending
-    while (traversers.hasPrevious()) {
-        traversers.previous();
-        traversers.value()->endTraverse();
-    }
-    
+    finalizeTraverse();
     return model;
 }
     
-void TasUiTraverser::traverseObject(TasObject& objectInfo, QObject* object, TasCommand* command)
+
+
+void TasUiTraverser::traverseObject(TasObject& objectInfo, QObject* object, TasCommand* command, bool traverseChildren)
 {
     QHashIterator<QString, TasTraverseInterface*> i(mTraversers);
     while (i.hasNext()) {
@@ -135,38 +151,42 @@ void TasUiTraverser::traverseObject(TasObject& objectInfo, QObject* object, TasC
             i.value()->traverseObject(&objectInfo, object, command);
         }
     }
-
-    //check decendants
-    //1. is graphicsview
-    if(object->inherits("QGraphicsView")){ 
-        traverseGraphicsViewItems(objectInfo, qobject_cast<QGraphicsView*>(object), command);
+    if(traverseChildren){
+        printActions(objectInfo, object);
     }
-    //2. is QGraphicsObject
-    QGraphicsObject* graphicsObject = qobject_cast<QGraphicsObject*>(object);               
-    if(graphicsObject){
-        traverseGraphicsItemList(objectInfo, graphicsObject,command);
-    }
-    //3. Widget children
-    else{
-        QObjectList children = object->children();                
-        if (!children.isEmpty()) {                    
-            for (int i = 0; i < children.size(); ++i){                    
-                QObject *obj = children.at(i);
-                //only include widgets
-                if (obj->isWidgetType() && obj->parent() == object){
-                    QWidget *widget = qobject_cast<QWidget*>(obj);
-                    // TODO This (and other similar hacks) needs to be moved to plugins once OSS changes are done
-                    if (TestabilityUtils::isCustomTraverse() || widget->isVisible() ) /*&& !wasTraversed(widget)*/{
-                        traverseObject(objectInfo.addObject(), widget, command);
+    if(traverseChildren){
+        //check decendants
+        //1. is graphicsview
+        QGraphicsView* gView = qobject_cast<QGraphicsView*>(object);
+        if(gView){ 
+            traverseGraphicsViewItems(objectInfo, gView, command);
+        }
+        //2. is QGraphicsObject
+        QGraphicsObject* graphicsObject = qobject_cast<QGraphicsObject*>(object);               
+        if(graphicsObject){
+            traverseGraphicsItemList(objectInfo, graphicsObject,command);
+        }
+        //3. Widget children
+        else{
+            QObjectList children = object->children();                
+            if (!children.isEmpty()) {                    
+                for (int i = 0; i < children.size(); ++i){                    
+                    QObject *obj = children.at(i);
+                    //only include widgets
+                    if (obj->isWidgetType() && obj->parent() == object){
+                        QWidget *widget = qobject_cast<QWidget*>(obj);
+                        // TODO This (and other similar hacks) needs to be moved to plugins once OSS changes are done
+                        if (TestabilityUtils::isCustomTraverse() || widget->isVisible() ) /*&& !wasTraversed(widget)*/{
+                            traverseObject(objectInfo.addObject(), widget, command);
+                        }
                     }
                 }
-            }
-        }        
-
+            }        
+        }
     }
 }
 
-void TasUiTraverser::traverseGraphicsItem(TasObject& objectInfo, QGraphicsItem* graphicsItem, TasCommand* command)
+void TasUiTraverser::traverseGraphicsItem(TasObject& objectInfo, QGraphicsItem* graphicsItem, TasCommand* command, bool traverseChildren)
 {
     QGraphicsObject* object = graphicsItem->toGraphicsObject();
     if (object) {
@@ -174,7 +194,7 @@ void TasUiTraverser::traverseGraphicsItem(TasObject& objectInfo, QGraphicsItem* 
         // Traverse the actual widget under the proxy, if available
         QGraphicsProxyWidget* proxy = qobject_cast<QGraphicsProxyWidget*>(object);
         if (proxy) {
-            traverseObject(objectInfo.addObject(), proxy->widget(), command);        
+            traverseObject(objectInfo.addObject(), proxy->widget(), command, traverseChildren);        
         }      
     }
     else{
@@ -186,7 +206,9 @@ void TasUiTraverser::traverseGraphicsItem(TasObject& objectInfo, QGraphicsItem* 
                 i.value()->traverseGraphicsItem(&objectInfo, graphicsItem, command);
             }
         }
-        traverseGraphicsItemList(objectInfo, graphicsItem, command);
+        if(traverseChildren){
+            traverseGraphicsItemList(objectInfo, graphicsItem, command);
+        }
     }    
 }
 
@@ -207,8 +229,7 @@ void TasUiTraverser::traverseGraphicsViewItems(TasObject& parent, QGraphicsView*
     foreach(QGraphicsItem* item, view->items()){
         if(item->parentItem() == 0){
             // TODO This needs to be moved to plugins once OSS changes are done
-            if(TestabilityUtils::isCustomTraverse() || item->isVisible()  
-                ) {                
+            if(TestabilityUtils::isCustomTraverse() || item->isVisible()) {                
                 traverseGraphicsItem(parent.addObject(), item, command);
             }
         }
@@ -219,7 +240,7 @@ void TasUiTraverser::traverseGraphicsViewItems(TasObject& parent, QGraphicsView*
 
 void TasUiTraverser::addApplicationDetails(TasObject& application, TasCommand* command)
 {
-    traverseObject(application, qApp, command);
+    traverseObject(application, qApp, command, false);
 
     //set these again cause properties overwrite them
     application.setName(getApplicationName());
@@ -247,3 +268,38 @@ void TasUiTraverser::addApplicationDetails(TasObject& application, TasCommand* c
     application.addAttribute("localeCountry", defaultLocale.countryToString(defaultLocale.country()));
     application.addAttribute("localeLanguage", defaultLocale.languageToString(defaultLocale.language()));
 }
+
+
+/*!
+  
+  Prints all of the actions that a widget has under the widget. 
+  Makes it possible to easily map the correct action to the 
+  correct widget and also command the correct widget.
+  Returns true if an action was added.  
+  
+ */
+
+void TasUiTraverser::printActions(TasObject& objectInfo, QObject* object)
+{
+    QWidget* widget = qobject_cast<QWidget*>(object);
+    if(widget){
+        addActions(objectInfo, widget->actions());
+    }
+    else{
+        QGraphicsWidget* gWidget = qobject_cast<QGraphicsWidget*>(object);
+        if(gWidget){
+            addActions(objectInfo, gWidget->actions());
+        }
+    }
+}
+
+void TasUiTraverser::addActions(TasObject& parentObject, QList<QAction*> actions)
+{ 
+    if(actions.size() > 0){                   
+        for(int i = 0 ; i < actions.size(); i++){
+            QObject* action = actions.at(i);              
+            traverseObject(parentObject.addObject(), action, 0);
+        }
+    }     
+}
+

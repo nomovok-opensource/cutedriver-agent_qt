@@ -16,26 +16,34 @@
 ** of this file. 
 ** 
 ****************************************************************************/ 
- 
 
+#ifndef CPULOADGENERATOR_H_
+#define CPULOADGENERATOR_H_
 
-#ifndef TASCOMMANDPARSER_H
-#define TASCOMMANDPARSER_H
-
+#include <tasconstants.h>
 #include <QObject>
-#include <QDomElement>
-#include <QDomDocument>
+#include <QTime>
 
-#include "tasqtcommandmodel.h"
-
-class TasCommandParser 
-{    
+class CpuLoadGenerator : public QObject
+{
+    Q_OBJECT
+    
 public:
-    static TasCommandModel* parseCommandXml(const QString& commandXml);   
-
+    CpuLoadGenerator();
+    ~CpuLoadGenerator();
+    int start(int loadInPercentage);
+    int stop();
+    
 private:
-	static TasTargetObject* parseTargetDetails(QDomElement root);
+
+private: // Data
+    int mLoadInPercentage;
+
+private: // Platform specific data
+#ifdef Q_OS_SYMBIAN
+    RThread mLoadGeneratingThread;    
+#endif
+    
 };
 
-
-#endif
+#endif /* CPULOADGENERATOR_H_ */

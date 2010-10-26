@@ -16,26 +16,24 @@
 ** of this file. 
 ** 
 ****************************************************************************/ 
- 
 
+#include "cpuloadgenerator.h"
+#include <taslogger.h>
+#include <QString>
 
-#ifndef TASCOMMANDPARSER_H
-#define TASCOMMANDPARSER_H
+CpuLoadGenerator::CpuLoadGenerator()
+{}
 
-#include <QObject>
-#include <QDomElement>
-#include <QDomDocument>
+CpuLoadGenerator::~CpuLoadGenerator() 
+{}
 
-#include "tasqtcommandmodel.h"
+int CpuLoadGenerator::start(int loadInPercentage)
+{
+    Q_UNUSED(loadInPercentage);
+    return TAS_ERROR_NOT_IMPLEMENTED;
+}
 
-class TasCommandParser 
-{    
-public:
-    static TasCommandModel* parseCommandXml(const QString& commandXml);   
-
-private:
-	static TasTargetObject* parseTargetDetails(QDomElement root);
-};
-
-
-#endif
+int CpuLoadGenerator::stop()
+{
+    return TAS_ERROR_NOT_IMPLEMENTED;
+}
