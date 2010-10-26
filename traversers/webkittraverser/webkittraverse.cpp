@@ -478,10 +478,25 @@ void WebKitTraverse::parseAttributes(QWebElement* webElement, TasObject* objInfo
     if(webElement->hasAttributes()) {
         foreach(QString attrib, webElement->attributeNames()) {
             //TasLogger::logger()->debug("  : " + attrib + "->" + webElement->attribute(attrib));
-            objInfo->addAttribute(attrib, webElement->attribute(attrib));
+
+            if(attrib!="id") {
+                if((attrib != "value" && attrib != "checked")
+                                      ||
+                   (webElement->localName().toLower()!="input"))
+                {
+                   objInfo->addAttribute(attrib, webElement->attribute(attrib));
+                }
+            }
         }
     }
-
+    if(webElement->localName().toLower() =="input"){
+        objInfo->addAttribute("value", webElement->evaluateJavaScript("this.value").toString());
+    }
+    if(webElement->attribute("type") =="radio" ||
+             webElement->attribute("type") =="checkbox") {
+        objInfo->addAttribute("checked", webElement->evaluateJavaScript("this.checked").toString());
+    }
+    objInfo->addAttribute("id", webElement->evaluateJavaScript("this.id").toString());
 }
 
 /*!
