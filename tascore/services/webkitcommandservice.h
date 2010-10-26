@@ -48,14 +48,14 @@ private:
     bool scrollQWebFrame(TasTarget* target, TasCommand* command);
     bool traverserScrollToQWebFrame(QWebFrame* webFrame, QString id, int dx, int dy);
 
-    bool executeJavaScriptWebElement(TasTarget* target, TasCommand* command);
-    bool executeJavaScriptQWebFrame(TasTarget* target, TasCommand* command);
+    bool executeJavaScriptWebElement(TasTarget* target, TasCommand* command,TasResponse& response);
+    bool executeJavaScriptQWebFrame(TasTarget* target, TasCommand* command,TasResponse& response);
 
-    bool traverseJavaScriptToQWebFrame(QWebFrame* webFrame, QString javaScript, QString id);
-    bool traverseJavaScriptToWebElement(QWebFrame* webFrame, QString webFrameId, QString javaScript, QString query, int &index, TasCommand* command,int parentFrames=0);
+    bool traverseJavaScriptToQWebFrame(QWebFrame* webFrame, QString javaScript, QString id,TasResponse& response);
+    bool traverseJavaScriptToWebElement(TasResponse& response, QWebFrame* webFrame, QString webFrameId, QString javaScript, QString query, int &index, TasCommand* command,int parentFrames=0);
 
 
-    bool executeJavascriptOnWebElement(QWebFrame* webFrame, QString webFrameId, QString javaScript, QString elementId);
+    bool executeJavascriptOnWebElement(QWebFrame* webFrame, QString webFrameId, QString javaScript, QString elementId,TasResponse& response);
     QWebElement lookForWebElement(const QWebElement &parentElement, QString elementId, QString webFrameId);
     QWebFrame* lookForWebFrame(QWebFrame* webFrame, QString webFrameId);
 

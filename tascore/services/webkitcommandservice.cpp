@@ -62,10 +62,10 @@ bool WebkitCommandService::executeService(TasCommandModel& model, TasResponse& r
                         ret = scrollQWebFrame(target, command);
                     }else
                     if (command->name() == COMMAND_EXEC_JS_ON_OBJ) {
-                        ret = executeJavaScriptWebElement(target, command);
+                        ret = executeJavaScriptWebElement(target, command, response);
                     }else
                     if (command->name() == COMMAND_EXEC_JS_ON_QWEBFRAME){
-                        ret = executeJavaScriptQWebFrame(target, command);
+                        ret = executeJavaScriptQWebFrame(target, command, response);
                     }
 
                     if(!ret) {
@@ -129,7 +129,7 @@ bool WebkitCommandService::traverserScrollToQWebFrame(QWebFrame* webFrame, QStri
 }
 
 
-bool WebkitCommandService::executeJavaScriptWebElement(TasTarget* target, TasCommand* command)
+bool WebkitCommandService::executeJavaScriptWebElement(TasTarget* target, TasCommand* command, TasResponse& response)
 {
     TasLogger::logger()->debug("WebkitCommandService::executeJavaScriptWebElement TasId("+ target->id() + ") JavaScript \"" + command->parameter("java_script")  + "\"");
     int index = command->parameter("index").toInt();
@@ -147,13 +147,13 @@ bool WebkitCommandService::executeJavaScriptWebElement(TasTarget* target, TasCom
 
     foreach(QWebFrame* frame, mainFrameList){
         if(query.isEmpty()){
-            if(executeJavascriptOnWebElement(frame, frameId, jScript, elementId)){
+            if(executeJavascriptOnWebElement(frame, frameId, jScript, elementId, response)){
                 return true;
             }
         }
         else{
             bool ret = false;
-            ret = traverseJavaScriptToWebElement(frame, frameId, jScript, query, index, command);
+            ret = traverseJavaScriptToWebElement(response, frame, frameId, jScript, query, index, command);
             if(ret) return ret;
         }
     }
@@ -162,7 +162,7 @@ bool WebkitCommandService::executeJavaScriptWebElement(TasTarget* target, TasCom
     return false;
 }
 
-bool WebkitCommandService::executeJavaScriptQWebFrame(TasTarget* target, TasCommand* command)
+bool WebkitCommandService::executeJavaScriptQWebFrame(TasTarget* target, TasCommand* command, TasResponse& response)
 {
     TasLogger::logger()->debug("WebkitCommandService::executeJavaScriptQWebFrame JavaScript \"" + command->parameter("java_script")  + "\"");
     QString id = target->id();
@@ -176,7 +176,8 @@ bool WebkitCommandService::executeJavaScriptQWebFrame(TasTarget* target, TasComm
         bool ret = false;
         ret = traverseJavaScriptToQWebFrame(frame,
                                             command->parameter("java_script"),
-                                            id);
+                                            id,
+                                            response);
         if(ret) return ret;
     }
 
@@ -186,7 +187,7 @@ bool WebkitCommandService::executeJavaScriptQWebFrame(TasTarget* target, TasComm
 }
 
 
-bool WebkitCommandService::executeJavascriptOnWebElement(QWebFrame* webFrame, QString webFrameId, QString javaScript, QString elementId)
+bool WebkitCommandService::executeJavascriptOnWebElement(QWebFrame* webFrame, QString webFrameId, QString javaScript, QString elementId, TasResponse& response)
 {
     bool success = false;
     QWebFrame* targetFrame = 0;
@@ -202,7 +203,7 @@ bool WebkitCommandService::executeJavascriptOnWebElement(QWebFrame* webFrame, QS
         //frame found! lets look for the element
         QWebElement element = lookForWebElement(targetFrame->documentElement(), elementId, webFrameId);
         if(!element.isNull()){
-            element.evaluateJavaScript(javaScript);
+            response.setData(element.evaluateJavaScript(javaScript).toByteArray());
             success = true;
         }
         else{
@@ -256,13 +257,15 @@ QWebElement WebkitCommandService::lookForWebElement(const QWebElement &parentEle
     return match;
 }
 
-bool WebkitCommandService::traverseJavaScriptToWebElement(QWebFrame* webFrame,
+bool WebkitCommandService::traverseJavaScriptToWebElement(TasResponse& response,
+                                                          QWebFrame* webFrame,
                                                           QString webFrameId,
                                                           QString javaScript,
                                                           QString query,
                                                           int &index,
                                                           TasCommand* command,
-                                                          int parentFrames)
+                                                          int parentFrames
+                                                          )
 {
     TasLogger::logger()->debug("WebkitCommandService::traverseJavaScriptToWebElement index(" + QString::number(index) +
                                ") webFrameId(" + webFrameId +
@@ -321,7 +324,7 @@ bool WebkitCommandService::traverseJavaScriptToWebElement(QWebFrame* webFrame,
     if(count > index)
     {
         QWebElement element = element_list.at(index);
-        element.evaluateJavaScript(javaScript);
+        response.setData(element.evaluateJavaScript(javaScript).toByteArray());
         return true;
     }
     else{
@@ -330,7 +333,8 @@ bool WebkitCommandService::traverseJavaScriptToWebElement(QWebFrame* webFrame,
         // find all direct children frames and traverse those too, return on first true
         foreach(QWebFrame* childFrame, webFrame->childFrames()) {
            bool ret = false;
-           ret = traverseJavaScriptToWebElement(childFrame,
+           ret = traverseJavaScriptToWebElement(response,
+                                                childFrame,
                                                 webFrameId,
                                                 javaScript,
                                                 query,
@@ -346,13 +350,13 @@ bool WebkitCommandService::traverseJavaScriptToWebElement(QWebFrame* webFrame,
     }
  }
 
-bool WebkitCommandService::traverseJavaScriptToQWebFrame(QWebFrame* webFrame, QString javaScript, QString id)
+bool WebkitCommandService::traverseJavaScriptToQWebFrame(QWebFrame* webFrame, QString javaScript, QString id, TasResponse& response)
 {
     TasLogger::logger()->debug("WebkitCommandService::traverseJavaScriptToQWebFrame id " + id + "cast id: " + TasCoreUtils::objectId(webFrame) + ".");
     if(TasCoreUtils::objectId(webFrame) == id)
     {
 //        TasLogger::logger()->debug("WebkitCommandService::traverseJavaScriptToQWebFrame found");
-        webFrame->evaluateJavaScript(javaScript);
+        response.setData(webFrame->evaluateJavaScript(javaScript).toByteArray());
         return true;
     }
     else
@@ -361,7 +365,7 @@ bool WebkitCommandService::traverseJavaScriptToQWebFrame(QWebFrame* webFrame, QS
         // find all direct children frames and traverse those too
         foreach(QWebFrame* childFrame, webFrame->childFrames()) {
             bool ret = false;
-            ret = traverseJavaScriptToQWebFrame(childFrame,javaScript,id);
+            ret = traverseJavaScriptToQWebFrame(childFrame,javaScript,id,response);
             if(ret) {
                 return ret;
             }
