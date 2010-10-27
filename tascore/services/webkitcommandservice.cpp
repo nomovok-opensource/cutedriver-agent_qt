@@ -91,7 +91,7 @@ bool WebkitCommandService::executeService(TasCommandModel& model, TasResponse& r
 bool WebkitCommandService::scrollQWebFrame(TasTarget* target, TasCommand* command)
 {
     TasLogger::logger()->debug("WebkitCommandService::scrollQWebFrame  x,y(" +command->parameter("dx") + "," + command->parameter("dy") + ")");
-    QString id = target->id();
+    QString id = command->parameter("target_webframe");
 
     QList<QWebFrame*> mainFrameList;
 
