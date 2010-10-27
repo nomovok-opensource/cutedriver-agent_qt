@@ -20,7 +20,10 @@
 
 #include <QFontMetricsF>
 #include <QTextCodec>
+
+#if QT_VERSION >= 0x040700
 #include <QDeclarativeItem>
+#endif
 
 #include "testabilityutils.h"
 #include "tastraverseutils.h"
@@ -63,6 +66,7 @@ void TasTraverseUtils::addObjectDetails(TasObject* objectInfo, QObject* object)
     if(objectInfo->getType().isEmpty()){
         QString objectType = object->metaObject()->className();
         objectType.replace(QString(":"), QString("_"));
+#if QT_VERSION >= 0x040700
         //strip dynamic qml strings from the class name
         if(qobject_cast<QDeclarativeItem*>(object)){
             QStringList stringList = objectType.split("_QML");
@@ -70,6 +74,7 @@ void TasTraverseUtils::addObjectDetails(TasObject* objectInfo, QObject* object)
             objectInfo->addAttribute("QML_TYPE_EXTENSION",  objectType.remove(strippedType));    
             objectType = strippedType;
         }
+#endif
         objectInfo->setType(objectType);    
     }
     if(includeAttribute("parent")){
