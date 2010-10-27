@@ -16,14 +16,19 @@
 ** of this file. 
 ** 
 ****************************************************************************/ 
- 
+
+#include <QObject>
+
+#if QT_VERSION >= 0x040700
 #include <QDeclarativeItem>
+#endif
 
 
 #include "taslogger.h"
 
 #include "findobjectservice.h"
 #include "tastraverserloader.h"
+
 
 FindObjectService::FindObjectService()
 {
@@ -190,9 +195,12 @@ bool FindObjectService::isMatch(QObject* candidate, TasTargetObject *targetObj)
 
     //traverser strips _QML so need to strip it here also
     QString className = candidate->metaObject()->className();
+
+#if QT_VERSION >= 0x040700
     if(qobject_cast<QDeclarativeItem*>(candidate)){
         className = className.split("_QML").first();
     }
+#endif
 
     if(className == targetObj->className()){
         //class name ok, check props
