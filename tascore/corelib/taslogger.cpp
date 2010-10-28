@@ -85,9 +85,10 @@ TasLogger::TasLogger()
  */
 void TasLogger::configureLogger(TasCommand& command)
 {
-    disableLogger();
-    
-    
+    bool wasLogging = mEnabled;
+    debug(command.parameter(CLEAR_LOG));
+    if(mEnabled) disableLogger();
+
     if(command.parameter(CLEAR_LOG) == "true"){
         clearLogFile();
     }
@@ -136,9 +137,10 @@ void TasLogger::configureLogger(TasCommand& command)
         mLogSize = command.parameter(LOG_FILE_SIZE).toInt();
     }
 
-    //by default logger is enabled always
-    if(command.parameter(LOG_ENABLE) != "false" && !mUseQDebug){
+    //enable the logger unless instructed not to or if it was not on to begin with   
+    if( ( (wasLogging && command.parameter(LOG_ENABLE) != "false") || command.parameter(LOG_ENABLE) == "true") && !mUseQDebug){
         enableLogger();        
+        debug("TasLogger::configureLogger configuration done and logging enabled.");
     }
 }
 
@@ -173,7 +175,7 @@ void TasLogger::enableLogger()
 	QMutexLocker locker(&mMutex);
     mLastLogRollCheck.restart();
     if(!mEnabled && QDir(mLogPath).exists()){
-        QString fileName = mLogPath+mLogFileName;
+        QString fileName = mLogPath+"/"+mLogFileName;
         mOut = new QFile(fileName);        
         if(mOut->exists(fileName) && mOut->size() > mLogSize){
             QString storageName = mLogPath + "old_" + mLogFileName;
@@ -209,7 +211,8 @@ void TasLogger::clearLogFile()
         mOut->open(QIODevice::WriteOnly | QIODevice::Text | QIODevice::Truncate);
     }
     else{
-        QFile::remove(mLogPath+mLogFileName);
+        QString fileName = mLogPath+"/"+mLogFileName;
+        QFile::remove(fileName);
     }
 }
 

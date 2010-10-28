@@ -70,7 +70,13 @@ symbian: {
 }
 
 
-QT += network xml testlib gui webkit declarative
+QT += network xml testlib gui webkit 
+contains(QT_VERSION, ^4\\.[0-6]\\..*) {
+	 message(Component declarative excluded from build due to old Qt version)
+} else {
+	QT += declarative
+}
+
 
 #configuration file
 configuration.files = conf/qt_testability.ini
