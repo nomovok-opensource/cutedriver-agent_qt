@@ -496,6 +496,12 @@ void WebKitTraverse::parseAttributes(QWebElement* webElement, TasObject* objInfo
              webElement->attribute("type") =="checkbox") {
         objInfo->addAttribute("checked", webElement->evaluateJavaScript("this.checked").toString());
     }
+    if(webElement->attribute("type") =="select" || webElement->localName().toLower() =="select") {
+        objInfo->addAttribute("value", webElement->evaluateJavaScript("this.value").toString());
+    }
+    if(webElement->attribute("type") =="option" || webElement->localName().toLower() =="option") {
+        objInfo->addAttribute("selected", webElement->evaluateJavaScript("this.selected").toString());
+    }    
     objInfo->addAttribute("id", webElement->evaluateJavaScript("this.id").toString());
 }
 
