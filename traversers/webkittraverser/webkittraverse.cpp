@@ -489,17 +489,16 @@ void WebKitTraverse::parseAttributes(QWebElement* webElement, TasObject* objInfo
             }
         }
     }
-    if(webElement->localName().toLower() =="input"){
+    if(webElement->localName().toLower() =="input" ||
+       webElement->localName().toLower() =="select"){
         objInfo->addAttribute("value", webElement->evaluateJavaScript("this.value").toString());
     }
-    if(webElement->attribute("type") =="radio" ||
-             webElement->attribute("type") =="checkbox") {
+    if(webElement->attribute("type") == "radio" ||
+       webElement->attribute("type") == "checkbox") {
         objInfo->addAttribute("checked", webElement->evaluateJavaScript("this.checked").toString());
     }
-    if(webElement->attribute("type") =="select" || webElement->localName().toLower() =="select") {
-        objInfo->addAttribute("value", webElement->evaluateJavaScript("this.value").toString());
-    }
-    if(webElement->attribute("type") =="option" || webElement->localName().toLower() =="option") {
+    if(webElement->attribute("type") == "option" ||
+       webElement->localName().toLower() =="option") {
         objInfo->addAttribute("selected", webElement->evaluateJavaScript("this.selected").toString());
     }    
     objInfo->addAttribute("id", webElement->evaluateJavaScript("this.id").toString());
