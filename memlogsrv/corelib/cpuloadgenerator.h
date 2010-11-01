@@ -34,8 +34,6 @@ public:
     int start(int loadInPercentage);
     int stop();
     
-private:
-
 private: // Data
     int mLoadInPercentage;
 
