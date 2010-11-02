@@ -19,5 +19,5 @@
  
 
 
-static QString TAS_VERSION = "0.9.1";
+static QString TAS_VERSION = "0.9.2";
 
