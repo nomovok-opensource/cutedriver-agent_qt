@@ -67,7 +67,8 @@ void ObjectService::performObjectService(TasCommandModel& model, TasResponse& re
 
         if(targetType == TYPE_GRAPHICS_VIEW){
             QGraphicsItem* item = findGraphicsItem(targetId);
-            target = TestabilityUtils::castToGraphicsWidget(item);
+            //target = TestabilityUtils::castToGraphicsWidget(item);
+            target = item->toGraphicsObject();
         }
         else if(targetType == TYPE_STANDARD_VIEW){
             target = findWidget(targetId);
