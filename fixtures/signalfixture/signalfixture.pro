@@ -22,7 +22,7 @@
 TEMPLATE = lib
 TARGET = tassignal
 CONFIG += plugin
-QT += testlib
+QT += testlib xml
 
 include(../../tasbase.pri)
 
@@ -37,7 +37,6 @@ symbian: {
 	DEPLOYMENT += signal_fixture_plugin
 	
 }
-
 
 DEPENDPATH += .
 INCLUDEPATH += . ../../tascore/corelib

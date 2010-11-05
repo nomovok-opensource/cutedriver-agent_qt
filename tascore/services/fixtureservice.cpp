@@ -60,10 +60,9 @@ bool FixtureService::executeService(TasCommandModel& model, TasResponse& respons
         }
         else{
             //needs some refactoring to avoid double parse...(luckily small docs..)
-            commandQueue.enqueue(TasCommandParser::parseCommandXml(model.sourceString()));            
+            commandQueue.enqueue(TasCommandModel::makeModel(model.sourceString()));            
             mTimer.start();            
         }
-        model.forceUiUpdate(true);
         return true;
     }
     else{

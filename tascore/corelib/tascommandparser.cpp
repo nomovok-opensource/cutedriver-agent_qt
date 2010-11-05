@@ -65,6 +65,7 @@
 TasCommandModel* TasCommandParser::parseCommandXml(const QString& commandXml)
 {    
     TasCommandModel* model = 0;        
+    /*
     QDomDocument doc("TasCommands");    
     QString errorMsg;
     if (doc.setContent(commandXml, &errorMsg)){        
@@ -137,6 +138,7 @@ TasCommandModel* TasCommandParser::parseCommandXml(const QString& commandXml)
         //TasLogger::logger()->error("[" + commandXml + "]");
     }    
     doc.clear();
+    */
     return model;
 }
 
@@ -144,17 +146,17 @@ TasTargetObject* TasCommandParser::parseTargetDetails(QDomElement root)
 {
     TasLogger::logger()->debug("TasCommandParser::parseTargetDetails");
     TasTargetObject* obj = 0;    
-    QDomElement objectDetails = root.firstChildElement(QString("object"));
-    if(!objectDetails.isNull()){
-        TasLogger::logger()->debug("TasCommandParser::parseTargetDetails details found");
-        obj = new TasTargetObject();
-        QDomNamedNodeMap attributes = objectDetails.attributes();
-        int attributeCount = attributes.count();
-        for(int i = 0 ; i < attributeCount; i++){
-            QDomNode node = attributes.item(i);
-            obj->addSearchParameter(node.nodeName(), node.nodeValue());
-        } 
-        obj->setChild(parseTargetDetails(objectDetails));
-    }
+//     QDomElement objectDetails = root.firstChildElement(QString("object"));
+//     if(!objectDetails.isNull()){
+//         TasLogger::logger()->debug("TasCommandParser::parseTargetDetails details found");
+//         obj = new TasTargetObject();
+//         QDomNamedNodeMap attributes = objectDetails.attributes();
+//         int attributeCount = attributes.count();
+//         for(int i = 0 ; i < attributeCount; i++){
+//             QDomNode node = attributes.item(i);
+//             obj->addSearchParameter(node.nodeName(), node.nodeValue());
+//         } 
+//         obj->setChild(parseTargetDetails(objectDetails));
+//     }
     return obj;
 }

@@ -23,6 +23,7 @@
 #include <QHashIterator>
 
 #include "tasqtcommandmodel.h"
+#include "taslogger.h"
 
 /*!
     \class TasCommand
@@ -36,20 +37,10 @@
 /*!
     Constructor for TasCommand. Name is required.
 */
-TasCommand::TasCommand(QDomElement& element)
+TasCommand::TasCommand(QDomElement element)
     :mElement(element)
 {
 }
-
-
-// TasCommand::TasCommand(const TasCommand& command)
-// {
-
-//     mElement = command.documentElement();
-// }
-
-QElement& TasCommand::documentElement()
-{}
 
 /*!
     Desstructor for TasCommand.
@@ -58,9 +49,9 @@ TasCommand::~TasCommand()
 {
 }
 
-QElement TasCommand::documentElement()
+QDomElement& TasCommand::documentElement()
 {
-    return mElement
+    return mElement;
 }
 
 /*!
@@ -96,7 +87,7 @@ QString TasCommand::parameter(const QString& name)
 QString TasCommand::apiParameter(const QString& name)
 {
     QString value;
-    QDomNodeList apiParams = target.elementsByTagName(QString("param"));
+    QDomNodeList apiParams = mElement.elementsByTagName(QString("param"));
     for(int i = 0 ; i < apiParams.count(); i++){
         QDomElement apiParam = apiParams.item(i).toElement();
         if(apiParam.attribute("name") == name){
@@ -106,6 +97,18 @@ QString TasCommand::apiParameter(const QString& name)
     }
     return value;
 }
+
+QHash<QString, QString> TasCommand::getApiParameters() const
+{
+    QHash<QString,QString> params;
+    QDomNodeList apiParams = mElement.elementsByTagName(QString("param"));
+    for(int i = 0 ; i < apiParams.count(); i++){
+        QDomElement apiParam = apiParams.item(i).toElement();
+        params.insert(apiParam.attribute("name"), apiParam.attribute("value"));
+    }    
+    return params;
+}
+
 
 /*! 
   \class TasTargetObject
@@ -117,12 +120,12 @@ QString TasCommand::apiParameter(const QString& name)
 
  */
 
-TasTargetObject::TasTargetObject(QDomElement& element)
-    :mDomElement(element)
+TasTargetObject::TasTargetObject(QDomElement element)
+    :mElement(element)
 {
     mChild = 0;
     if(!mElement.firstChildElement(QString("object")).isNull()){
-        mChild = new TasTargetObject(mElement.firstChildElement(QString("object")));
+        mChild = new TasTargetObject(mElement.firstChildElement(QString("object")).toElement());
     }
 }
 
@@ -138,7 +141,7 @@ TasTargetObject::~TasTargetObject()
  */
 QString TasTargetObject::objectName() const
 {
-    return mElement.attribute("objectName")
+    return mElement.attribute("objectName");
 }
 
 /*!
@@ -146,7 +149,7 @@ QString TasTargetObject::objectName() const
  */
 QString TasTargetObject::className() const
 {
-    return mElement.attribute("className")
+    return mElement.attribute("className");
 }
 
 /*!
@@ -155,7 +158,7 @@ QString TasTargetObject::className() const
 QHash<QString,QString> TasTargetObject::searchParameters() const
 {
     QHash<QString,QString> params;
-    QDomNamedNodeMap attributes = objectDetails.attributes();
+    QDomNamedNodeMap attributes = mElement.attributes();
     for(int i = 0 ; i < attributes.count(); i++){
         QDomNode node = attributes.item(i);
         //strip special attrs
@@ -168,7 +171,7 @@ QHash<QString,QString> TasTargetObject::searchParameters() const
 
 QString TasTargetObject::objectId() const
 {
-    return mElement.attribute("tasId")
+    return mElement.attribute("tasId");
 }
 
 TasTargetObject* TasTargetObject::child() const
@@ -176,7 +179,7 @@ TasTargetObject* TasTargetObject::child() const
     return mChild;
 }
 
-QElement& TasTargetObject::documentElement()
+QDomElement& TasTargetObject::documentElement()
 {
     return mElement;
 }
@@ -193,11 +196,11 @@ QElement& TasTargetObject::documentElement()
 /*!
     Constructor for TasTarget. Id required.
 */
-TasTarget::TasTarget(QDomElement& element)
+TasTarget::TasTarget(QDomElement element)
     :mElement(element)
 {
    if(!mElement.firstChildElement(QString("object")).isNull()){
-        mTargetObject = new TasTargetObject(mElement.firstChildElement(QString("object")));
+       mTargetObject = new TasTargetObject(mElement.firstChildElement(QString("object")).toElement());
    }
    QDomNodeList commands = mElement.elementsByTagName(QString("Command"));
    for(int i = 0 ; i < commands.count(); i++){
@@ -260,7 +263,7 @@ QString TasTarget::type() const
     return mElement.attribute("type");
 }
 
-QElement& TasTarget::documentElement()
+QDomElement& TasTarget::documentElement()
 {
     return mElement;
 }
@@ -279,25 +282,31 @@ QElement& TasTarget::documentElement()
 */
 TasCommandModel::TasCommandModel(QDomDocument* document)
 {
+    TasLogger::logger()->debug("TasCommandModel::TasCommandModel");
     mDocument = document;
     mElement = mDocument->documentElement();
-    QDomNodeList targets = doc.elementsByTagName (QString("Target"));
+    QDomNodeList targets = mElement.elementsByTagName (QString("Target"));
     for (int i = 0; i < targets.count(); i++){
         mTargets.append(new TasTarget(targets.item(i).toElement()));
     }
+    TasLogger::logger()->debug("TasCommandModel::TasCommandModel done");
 }
 
 TasCommandModel* TasCommandModel::makeModel(const QString& sourceXml)
 {
+    TasLogger::logger()->debug("TasCommandModel::makeModel");
     TasCommandModel* model = 0;
-    QDomDocument doc("TasCommands");    
+    QDomDocument *doc = new QDomDocument("TasCommands");    
     QString errorMsg;
-    if (doc.setContent(sourceXml, &errorMsg)){
+    if (doc->setContent(sourceXml, &errorMsg)){
         model = new TasCommandModel(doc);
     }
     else{
         TasLogger::logger()->error("TasCommandModel::makeModel Could not parse the xml. Reason: " + errorMsg);
+        delete doc;
     }
+    TasLogger::logger()->debug("TasCommandModel::makeModel done");
+    TasLogger::logger()->debug(sourceString());
     return model;
 }
 
@@ -338,7 +347,7 @@ TasTarget* TasCommandModel::findTarget(const QString& id)
 */
 QString TasCommandModel::id() const
 {
-    return mElement.attribute("id")
+    return mElement.attribute("id");
 }
 
 /*!
@@ -346,7 +355,7 @@ QString TasCommandModel::id() const
 */
 QString TasCommandModel::uid() const
 {
-    return mElement.attribute("applicationUid")
+    return mElement.attribute("applicationUid");
 }
 
 /*!
@@ -354,7 +363,7 @@ QString TasCommandModel::uid() const
 */
 QString TasCommandModel::name() const
 {
-    return mElement.attribute("name")
+    return mElement.attribute("name");
 }
 
 /*!
@@ -362,28 +371,27 @@ QString TasCommandModel::name() const
 */
 QString TasCommandModel::service() const
 {
-    return mElement.attribute("service")
+    return mElement.attribute("service");
 }
 
 int TasCommandModel::interval()
 {
-    return mElement.attribute("interval").toInt()
+    return mElement.attribute("interval").toInt();
 }
 
 QString TasCommandModel::sourceString() const
 {
-    return mSourceString;
+    return mDocument->toString(-1);
 }
 
 bool TasCommandModel::isAsynchronous()
 {
-    return if(mElement.attribute("async") == "true");
+    return mElement.attribute("async") == "true";
 }
 
 bool TasCommandModel::isMultitouch()
 {
-    return if(mElement.attribute("multitouch") == "true");
-
+    return mElement.attribute("multitouch") == "true";
 }
 
 

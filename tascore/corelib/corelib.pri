@@ -38,10 +38,10 @@ HEADERS += $$PWD/tasservicemanager.h
 HEADERS += $$PWD/tasxmlwriter.h 
 HEADERS += $$PWD/tassocket.h 
 HEADERS += $$PWD/tasdeviceutils.h 
-HEADERS += $$PWD/tascommandparser.h 
+#HEADERS += $$PWD/tascommandparser.h 
 
 SOURCES += $$PWD/tasmessages.cpp
-SOURCES += $$PWD/tascommandparser.cpp 
+#SOURCES += $$PWD/tascommandparser.cpp 
 SOURCES += $$PWD/taslogger.cpp 
 SOURCES += $$PWD/taspluginloader.cpp 
 SOURCES += $$PWD/tasqtcommandmodel.cpp 

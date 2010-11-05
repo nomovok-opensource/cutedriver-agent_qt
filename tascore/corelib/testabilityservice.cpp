@@ -400,6 +400,7 @@ void TestabilityService::loadStartUpParams(QString appName)
 
 void TestabilityService::enableSignalTracking(QString signal, QString timeStamp)
 {
+    /*
     TasCommandModel model;
     model.setService(FIXTURE);
     TasTarget& target = model.addTarget( TasCoreUtils::objectId( qApp ) );
@@ -413,6 +414,7 @@ void TestabilityService::enableSignalTracking(QString signal, QString timeStamp)
     if(!mFixtureService->performFixture(model, message)){
         TasLogger::logger()->error("TestabilityService::enableSignalTracking failed. " + message);
     }
+    */
 }
 
 bool TestabilityService::eventFilter(QObject *target, QEvent *event)

@@ -21,7 +21,7 @@
 #include <QDebug>
 #include <QMutexLocker>
 #include <QCoreApplication>
-
+#include "tasqtcommandmodel.h"
 #include "taslogger.h"
 #include "tascoreutils.h"
 

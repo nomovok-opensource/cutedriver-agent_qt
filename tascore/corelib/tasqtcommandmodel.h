@@ -38,7 +38,7 @@ class TasCommandModel;
 class TAS_EXPORT TasCommand 
 {
 public:
-    TasCommand(QElement& element);
+    TasCommand(QDomElement element);
     ~TasCommand();
     
 public:    
@@ -46,7 +46,8 @@ public:
     QString parameter(const QString& name);
     QString text() const;	
     QString apiParameter(const QString& name);
-	QElement& documentElement();
+	QDomElement& documentElement();
+	QHash<QString, QString> getApiParameters() const;
 
 private:    
 	QDomElement& mElement;
@@ -55,16 +56,17 @@ private:
 class TAS_EXPORT TasTargetObject
 {
 public:  
-    TasTargetObject(QDomElement& element);
+    TasTargetObject(QDomElement element);
 	~TasTargetObject();
 
 public:
 	QString objectName() const;
 	QString className() const;
+	QString objectId() const;
 	QHash<QString,QString> searchParameters() const;
 	void setChild(TasTargetObject* child);
 	TasTargetObject* child() const;
-	QElement& documentElement();
+	QDomElement& documentElement();
 
 private:
 	TasTargetObject* mChild;
@@ -86,7 +88,7 @@ public:
 	TasCommand* findCommand(const QString& commandName);
 	TasTargetObject* targetObject() const;
 	//	void setTasTargetObject(TasTargetObject* object);
-	QElement& documentElement();
+	QDomElement& documentElement();
 
 private:
     QList<TasCommand*> mCommands;
@@ -100,7 +102,7 @@ public:
     ~TasCommandModel();
 
 private:
-    TasCommandModel();
+    TasCommandModel(QDomDocument* document);
     
 public:
 	static TasCommandModel* makeModel(const QString& sourceXml);
@@ -119,9 +121,11 @@ public:
 	int interval();
 	bool isMultitouch();
 
+	TasCommandModel* clone();
+
 private:
     QList<TasTarget*> mTargets;
-	QDomDocument mDocument;
+	QDomDocument* mDocument;
 	QDomElement mElement;
 };
 

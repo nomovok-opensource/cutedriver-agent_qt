@@ -24,8 +24,9 @@
 
 #include <QObject>
 #include <QHash>
-#include "tastraverseinterface.h"
 #include "taspluginloader.h"
+
+class TasTraverseInterface;
 
 class TAS_EXPORT TasTraverserLoader : public TasPluginLoader
 {
