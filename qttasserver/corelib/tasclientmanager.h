@@ -131,10 +131,10 @@ public:
   void closeConnection();
   QDateTime crashTime();
   void stopProcessMonitor();
-#ifdef Q_OS_SYMBIAN
+
   void setApplicationUid(const QString& uid);
   QString applicationUid();
-#endif
+
   void setPluginType(const QString& pluginType);
   QString pluginType();
 
@@ -156,9 +156,7 @@ private:
   friend class TasClientManager;
   QTime mCreationTime;
   QDateTime mCrashTime;
-#ifdef Q_OS_SYMBIAN
   QString mApplicationUid;
-#endif
   QString mPluginType;
 };
 

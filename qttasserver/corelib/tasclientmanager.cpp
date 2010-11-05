@@ -756,7 +756,7 @@ void TasClient::setRegistered()
     emit registered(mProcessId);
 }
 
-#ifdef Q_OS_SYMBIAN
+
 /*!
   In symbian application are most often identified by uid instead of 
   process ids. Store symbian uid to make it possible to look for the 
@@ -774,7 +774,7 @@ QString TasClient::applicationUid()
 {
     return mApplicationUid;
 }
-#endif
+
 
 void TasClient::setPluginType(const QString& pluginType)
 {

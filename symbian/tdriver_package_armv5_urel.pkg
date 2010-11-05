@@ -45,7 +45,7 @@
 "/epoc32/data/z/private/10003a3f/import/apps/qttas_ui_reg.rsc"        - "$:\private\10003a3f\import\apps\qttas_ui_reg.rsc"
 
 "/epoc32/release/armv5/urel/qttestability.dll"                        - "$:\sys\bin\qttestability.dll"
-"..\tascore\conf\qt_testability.ini"                                  - "$:\qt_testability\qt_testability.ini"
+"/epoc32/winscw/c/qt_testability/qt_testability.ini"                  - "$:\qt_testability\qt_testability.ini"
 
 "/epoc32/release/armv5/urel/qttraverse.dll"                           - "$:\sys\bin\qttraverse.dll"
 "..\traversers\qttraverser\qmakepluginstubs\qttraverse.qtplugin"      - "$:\resource\qt\plugins\traversers\qttraverse.qtplugin"

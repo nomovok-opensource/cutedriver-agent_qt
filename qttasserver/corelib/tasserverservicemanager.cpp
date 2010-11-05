@@ -20,6 +20,11 @@
 
                       
 #include <QMutableListIterator>
+#include <QtPlugin>
+#include <QLibrary>
+#include <QLibraryInfo>
+#include <QDir>
+#include <QPluginLoader>
 
 #include "tasserverservicemanager.h"
 
@@ -53,6 +58,7 @@ TasServerServiceManager::TasServerServiceManager(QObject *parent)
     :QObject(parent)
 {
     mClientManager = TasClientManager::instance();
+    loadPlatformTraversers();
 }
 
 /*!
@@ -62,6 +68,7 @@ TasServerServiceManager::~TasServerServiceManager()
 {
     qDeleteAll(mCommands);
     mCommands.clear();
+    mPlatformTraversers.clear();
 }
 
 /*!
@@ -105,6 +112,17 @@ void TasServerServiceManager::handleServiceRequest(TasCommandModel& commandModel
     if(targetClient){
         //TasLogger::logger()->debug("TasServerServiceManager::handleServiceRequest set waiter " + QString::number(responseId));
         ResponseWaiter* waiter = new ResponseWaiter(responseId, requester);
+
+        if(commandModel.service() == APPLICATION_STATE || commandModel.service() == FIND_OBJECT_SERVICE){
+            foreach(TasApplicationTraverseInterface* traverser, mPlatformTraversers){
+                QByteArray data = traverser->traverseApplication(targetClient->processId(), targetClient->applicationName(), 
+                                                                 targetClient->applicationUid());
+                if(!data.isNull()){
+                    waiter->appendPlatformData(data);
+                }
+            }
+        }
+
         if(commandModel.service() == CLOSE_APPLICATION){
             waiter->setResponseFilter(new ClientRemoveFilter(commandModel));
         }
@@ -113,15 +131,70 @@ void TasServerServiceManager::handleServiceRequest(TasCommandModel& commandModel
         targetClient->socket()->sendRequest(responseId, commandModel.sourceString());            
     }
     else{
+
+        QByteArray states;
+        if(commandModel.service() == APPLICATION_STATE || commandModel.service() == FIND_OBJECT_SERVICE){
+            foreach(TasApplicationTraverseInterface* traverser, mPlatformTraversers){
+                QByteArray data = traverser->traverseApplication("", "", "");
+                if(!data.isNull()){
+                    states.append(data);
+                }
+            }
+        }
         TasResponse response(responseId);
-        response.setRequester(requester);
-        performService(commandModel, response);
-        //start app waits for register message and performs the response
-        if( (commandModel.service() != START_APPLICATION && commandModel.service() != RESOURCE_LOGGING_SERVICE) || response.isError()){
+
+        if(!states.isEmpty()){
+            response.setData(QString(states));
             requester->sendMessage(response);
+        }
+        else{
+            response.setRequester(requester);
+            performService(commandModel, response);
+            //start app waits for register message and performs the response
+            if( (commandModel.service() != START_APPLICATION && commandModel.service() != RESOURCE_LOGGING_SERVICE) || response.isError()){
+                requester->sendMessage(response);
+            }
         }
     }
 }
+
+void TasServerServiceManager::loadPlatformTraversers()
+{
+    TasLogger::logger()->debug("TasServerServiceManager::loadPlatformTraversers");
+    QString pluginDir = "platformtraversers";
+    QStringList plugins = mPluginLoader.listPlugins(pluginDir);
+    TasLogger::logger()->debug("TasServerServiceManager::loadPlatformTraversers plugins found: " + plugins.join("'"));
+    QString path = QLibraryInfo::location(QLibraryInfo::PluginsPath) + "/"+pluginDir;
+    for (int i = 0; i < plugins.count(); ++i) {
+        QString fileName = plugins.at(i);
+        QString filePath = QDir::cleanPath(path + QLatin1Char('/') + fileName);
+        if(QLibrary::isLibrary(filePath)){
+            loadTraverser(filePath);
+        }
+    }
+
+}
+
+/*!
+  Try to load a plugin from the given path. Returns null if no plugin loaded.
+ */
+void TasServerServiceManager::loadTraverser(const QString& filePath)
+{
+    TasApplicationTraverseInterface* interface = 0; 
+    QObject *plugin = mPluginLoader.loadPlugin(filePath);
+    if(plugin){
+        interface = qobject_cast<TasApplicationTraverseInterface *>(plugin);        
+        if (interface){
+            TasLogger::logger()->debug("TasServerServiceManager::loadTraverser added a traverser");
+            mPlatformTraversers.append(interface);
+        }
+        else{
+            TasLogger::logger()->warning("TasServerServiceManager::loadTraverser could not cast to TasApplicationTraverseInterface");
+        }
+    }    
+}
+
+
 
 void TasServerServiceManager::serviceResponse(TasMessage& response)
 {
@@ -156,6 +229,12 @@ ResponseWaiter::~ResponseWaiter()
     if(mFilter){
         delete mFilter;
     }
+}
+
+void ResponseWaiter::appendPlatformData(QByteArray data)
+{
+    TasLogger::logger()->debug(QString(data));
+    mPlatformData.append(data);
 }
 
 /*!
