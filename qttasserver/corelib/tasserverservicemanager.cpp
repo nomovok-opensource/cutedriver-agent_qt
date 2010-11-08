@@ -112,13 +112,14 @@ void TasServerServiceManager::handleServiceRequest(TasCommandModel& commandModel
     if(targetClient){
         //TasLogger::logger()->debug("TasServerServiceManager::handleServiceRequest set waiter " + QString::number(responseId));
         ResponseWaiter* waiter = new ResponseWaiter(responseId, requester);
-
+        bool needFragment = false;
         if(commandModel.service() == APPLICATION_STATE || commandModel.service() == FIND_OBJECT_SERVICE){
             foreach(TasApplicationTraverseInterface* traverser, mPlatformTraversers){
                 QByteArray data = traverser->traverseApplication(targetClient->processId(), targetClient->applicationName(), 
                                                                  targetClient->applicationUid());
                 if(!data.isNull()){
                     waiter->appendPlatformData(data);
+                    needFragment = true;
                 }
             }
         }
@@ -128,7 +129,14 @@ void TasServerServiceManager::handleServiceRequest(TasCommandModel& commandModel
         }
         connect(waiter, SIGNAL(responded(qint32)), this, SLOT(removeWaiter(qint32)));
         reponseQueue.insert(responseId, waiter);
-        targetClient->socket()->sendRequest(responseId, commandModel.sourceString());            
+        if(needFragment){
+            commandModel.addAttribute("needFragment", "true");
+            targetClient->socket()->sendRequest(responseId, commandModel.sourceString(false));            
+        }
+        else{
+            targetClient->socket()->sendRequest(responseId, commandModel.sourceString());            
+        }
+
     }
     else{
 

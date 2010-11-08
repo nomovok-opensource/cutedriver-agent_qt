@@ -478,6 +478,12 @@ void TasObjectContainer::setId(int id)
     this->id = QString::number(id);
 }
 
+void TasObjectContainer::setId(QString id)
+{
+    this->id = id;
+}
+
+
 /*!
     
     Set the name for the container. Can be for example "text" for a label object.
@@ -652,7 +658,7 @@ TasObjectContainer* TasDataModel::findObjectContainer(const QString& id)
     Filter ownership is assumed and it will be removed once
     the serializing has been completed.
 */
-void TasDataModel::serializeModel(QByteArray& xmlData, SerializeFilter* filter)
+void TasDataModel::serializeModel(QByteArray& xmlData, SerializeFilter* filter, bool containers)
 {
     if(!filter){
         filter = new SerializeFilter();
@@ -660,7 +666,12 @@ void TasDataModel::serializeModel(QByteArray& xmlData, SerializeFilter* filter)
     QTextStream stream(&xmlData, QIODevice::WriteOnly);
     stream.setCodec(QTextCodec::codecForName("UTF-8"));
     TasXmlWriter tasXmlWriter(stream);
-    serializeIntoString(tasXmlWriter, *filter);
+    if(containers){
+        serializeContainers(tasXmlWriter, *filter);
+    }
+    else{
+        serializeIntoString(tasXmlWriter, *filter);
+    }
     delete filter;
 }
 
@@ -670,15 +681,20 @@ void TasDataModel::serializeIntoString(TasXmlWriter& xmlWriter, SerializeFilter&
     attributes[VERSION] = TAS_VERSION; 
     attributes[DATE_TIME] = QDateTime::currentDateTime().toString("yyyy.MM.dd hh:mm:ss.zzz"); 
     xmlWriter.openElement(ROOT_NAME, attributes);
+    serializeContainers(xmlWriter, filter);
+    xmlWriter.closeElement(ROOT_NAME);
+}
+
+
+void TasDataModel::serializeContainers(TasXmlWriter& xmlWriter, SerializeFilter& filter)
+{
     for (int i = 0; i < containers.size(); ++i) {
         TasObjectContainer* container = containers.at(i);
         if ( filter.serializeContainer(*container)){
             container->serializeIntoString(xmlWriter, filter);
         }
     }       
-    xmlWriter.closeElement(ROOT_NAME);
 }
-
 
 /*!
 

@@ -104,9 +104,8 @@ void TasUiTraverser::finalizeTraverse()
 
 TasObject& TasUiTraverser::addModelRoot(TasDataModel& model, TasCommand* command)
 {
-    QString qtVersion = "Qt" + QString(qVersion());
-    TasObjectContainer& container = model.addNewObjectContainer(1, qtVersion, "qt");
-    
+    TasObjectContainer& container = model.addNewObjectContainer("uiState", "qt");
+    container.setId(qVersion());
     TasObject& application = container.addNewObject(QString::number(qApp->applicationPid()), getApplicationName(), "application");          
     addApplicationDetails(application, command);
     return application;

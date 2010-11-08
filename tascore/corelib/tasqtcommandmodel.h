@@ -35,10 +35,24 @@ class TasCommand;
 class TasTarget;
 class TasCommandModel;
 
-class TAS_EXPORT TasCommand 
+class TasDomObject
+{
+public:
+    void addAttribute(const QString& name, const QString& value);
+	void setText(const QString& text);
+    QDomElement domElement() const;
+
+protected:
+    QDomElement addChild(const QString& name);
+
+    QDomElement mElement;
+};
+
+class TAS_EXPORT TasCommand : public TasDomObject
 {
 public:
     TasCommand(QDomElement element);
+    TasCommand(const TasCommand& other);
     ~TasCommand();
     
 public:    
@@ -46,14 +60,12 @@ public:
     QString parameter(const QString& name);
     QString text() const;	
     QString apiParameter(const QString& name);
-	QDomElement& documentElement();
 	QHash<QString, QString> getApiParameters() const;
 
-private:    
-	QDomElement& mElement;
+	void addApiParameter(const QString& name, const QString& value, const QString& type);
 };
 
-class TAS_EXPORT TasTargetObject
+class TAS_EXPORT TasTargetObject : public TasDomObject
 {
 public:  
     TasTargetObject(QDomElement element);
@@ -66,37 +78,37 @@ public:
 	QHash<QString,QString> searchParameters() const;
 	void setChild(TasTargetObject* child);
 	TasTargetObject* child() const;
-	QDomElement& documentElement();
 
 private:
 	TasTargetObject* mChild;
-	QDomElement& mElement;
 };
 
 
-class TAS_EXPORT TasTarget 
+class TAS_EXPORT TasTarget : public TasDomObject
 {
 public:
     TasTarget(QDomElement element);
+    TasTarget(const TasTarget& other);
     ~TasTarget();
     
 public:    
     QList<TasCommand*> commandList() const;
-    //TasCommand& addCommand(const QString& name=0);    
     QString id() const;
     QString type() const;
 	TasCommand* findCommand(const QString& commandName);
 	TasTargetObject* targetObject() const;
-	//	void setTasTargetObject(TasTargetObject* object);
-	QDomElement& documentElement();
+
+	TasCommand& addCommand();
+
+private:
+	void initialize();
 
 private:
     QList<TasCommand*> mCommands;
 	TasTargetObject* mTargetObject;  
-	QDomElement mElement;
 };
 
-class TAS_EXPORT TasCommandModel
+class TAS_EXPORT TasCommandModel : public TasDomObject
 {    
 public:
     ~TasCommandModel();
@@ -106,6 +118,7 @@ private:
     
 public:
 	static TasCommandModel* makeModel(const QString& sourceXml);
+	static TasCommandModel* createModel();
 
     QList<TasTarget*> targetList();
 
@@ -114,19 +127,20 @@ public:
     QString name() const;
     QString service() const;
 
+	TasTarget& addTarget();
 	TasTarget* findTarget(const QString& id);
-	QString sourceString() const;
+	QString sourceString(bool original=true) const;
 	
 	bool isAsynchronous();
 	int interval();
 	bool isMultitouch();
+	bool onlyFragment();
 
 	TasCommandModel* clone();
-
 private:
     QList<TasTarget*> mTargets;
 	QDomDocument* mDocument;
-	QDomElement mElement;
+	QString mSource;	
 };
 
 #endif
