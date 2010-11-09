@@ -90,7 +90,7 @@ private:
 	QTimer mWaiter;
 	TasSocket *mSocket;
 	ResponseFilter* mFilter;
-	QList<QByteArray> mPlatformData;
+	QByteArray *mPlatformData;
 };
 
 #endif

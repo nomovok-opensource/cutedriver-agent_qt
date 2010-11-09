@@ -24,10 +24,8 @@
 
 #include "tasqtcommandmodel.h"
 #include "taslogger.h"
+#include "tasconstants.h"
 
-const char* const DOC_ROOT = "TasCommands";
-const char* const TAS_TARGET = "Target";
-const char* const TAS_COMMAND = "Command";
 
 QDomElement TasDomObject::domElement() const
 {
@@ -85,7 +83,7 @@ TasCommand::~TasCommand()
 */
 QString TasCommand::name() const
 {
-    return mElement.attribute("name");
+    return mElement.attribute(COMMAND_TYPE_NAME);
 }
 
 /*!
@@ -109,7 +107,7 @@ QString TasCommand::parameter(const QString& name)
 void TasCommand::addApiParameter(const QString& name, const QString& value, const QString& type)
 {
     QDomElement element = addChild("param");
-    element.setAttribute("name", name);
+    element.setAttribute(COMMAND_TYPE_NAME, name);
     element.setAttribute("value", value);
     element.setAttribute("type", type);
 }
@@ -125,7 +123,7 @@ QString TasCommand::apiParameter(const QString& name)
     for(int i = 0 ; i < apiParams.count(); i++){
         QDomElement apiParam = apiParams.item(i).toElement();
         if(!apiParam.isNull()){
-            if(apiParam.attribute("name") == name){
+            if(apiParam.attribute(COMMAND_TYPE_NAME) == name){
                 value = apiParam.attribute("value");
                 break;
             }
@@ -141,7 +139,7 @@ QHash<QString, QString> TasCommand::getApiParameters() const
     for(int i = 0 ; i < apiParams.count(); i++){
         QDomElement apiParam = apiParams.item(i).toElement();
         if(!apiParam.isNull())
-            params.insert(apiParam.attribute("name"), apiParam.attribute("value"));
+            params.insert(apiParam.attribute(COMMAND_TYPE_NAME), apiParam.attribute("value"));
     }    
     return params;
 }
@@ -247,7 +245,7 @@ void TasTarget::initialize()
     if(!mElement.firstChildElement(QString("object")).isNull()){
         mTargetObject = new TasTargetObject(mElement.firstChildElement(QString("object")).toElement());
     }
-    QDomNodeList commands = mElement.elementsByTagName(TAS_COMMAND);
+    QDomNodeList commands = mElement.elementsByTagName(COMMAND_TYPE);
     for(int i = 0 ; i < commands.count(); i++){
         QDomElement e = commands.item(i).toElement();
         mCommands.append(new TasCommand(e));
@@ -298,7 +296,7 @@ TasCommand* TasTarget::findCommand(const QString& commandName)
 */
 QString TasTarget::id() const 
 {
-    return mElement.attribute("TasId");
+    return mElement.attribute(COMMAND_TARGET_ID);
 }
 
 /*!
@@ -311,7 +309,7 @@ QString TasTarget::type() const
 
 TasCommand& TasTarget::addCommand()
 { 
-    TasCommand* command = new TasCommand(addChild(TAS_COMMAND));
+    TasCommand* command = new TasCommand(addChild(COMMAND_TYPE));
     mCommands.append(command);
     return *command;
 }
@@ -332,7 +330,7 @@ TasCommandModel::TasCommandModel(QDomDocument* document)
 {
     mDocument = document;
     mElement = mDocument->documentElement();
-    QDomNodeList targets = mElement.elementsByTagName(TAS_TARGET);
+    QDomNodeList targets = mElement.elementsByTagName(COMMAND_TARGET);
     for (int i = 0; i < targets.count(); i++){
         QDomElement e = targets.item(i).toElement();
         mTargets.append(new TasTarget(e));
@@ -342,7 +340,7 @@ TasCommandModel::TasCommandModel(QDomDocument* document)
 TasCommandModel* TasCommandModel::makeModel(const QString& sourceXml)
 {
     TasCommandModel* model = 0;
-    QDomDocument *doc = new QDomDocument(DOC_ROOT);    
+    QDomDocument *doc = new QDomDocument(COMMAND_ROOT);    
     QString errorMsg;
     if (doc->setContent(sourceXml, &errorMsg)){
         model = new TasCommandModel(doc);
@@ -357,8 +355,8 @@ TasCommandModel* TasCommandModel::makeModel(const QString& sourceXml)
 
 TasCommandModel* TasCommandModel::createModel()
 {
-    QDomDocument *doc = new QDomDocument(DOC_ROOT);        
-    QDomElement root = doc->createElement(DOC_ROOT);
+    QDomDocument *doc = new QDomDocument(COMMAND_ROOT);        
+    QDomElement root = doc->createElement(COMMAND_ROOT);
     doc->appendChild(root);
     return new TasCommandModel(doc);
 }
@@ -380,7 +378,7 @@ QList<TasTarget*> TasCommandModel::targetList()
 
 TasTarget& TasCommandModel::addTarget()
 {    
-    TasTarget* target = new TasTarget(addChild(TAS_TARGET));
+    TasTarget* target = new TasTarget(addChild(COMMAND_TARGET));
     mTargets.append(target);
     return *target;
 }
@@ -423,7 +421,7 @@ QString TasCommandModel::uid() const
 */
 QString TasCommandModel::name() const
 {
-    return mElement.attribute("name");
+    return mElement.attribute(COMMAND_TYPE_NAME);
 }
 
 /*!
@@ -431,7 +429,7 @@ QString TasCommandModel::name() const
 */
 QString TasCommandModel::service() const
 {
-    return mElement.attribute("service");
+    return mElement.attribute(COMMAND_SERVICE);
 }
 
 int TasCommandModel::interval()

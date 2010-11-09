@@ -31,6 +31,7 @@
 #include "tascommandparser.h"
 #include "tasconstants.h"
 #include "taslogger.h"
+#include "version.h"
 
 /*!
   \class TasServerServiceManager
@@ -110,15 +111,18 @@ void TasServerServiceManager::handleServiceRequest(TasCommandModel& commandModel
     }
 
     if(targetClient){
-        //TasLogger::logger()->debug("TasServerServiceManager::handleServiceRequest set waiter " + QString::number(responseId));
+        TasLogger::logger()->debug("TasServerServiceManager::handleServiceRequest set waiter " + QString::number(responseId));
         ResponseWaiter* waiter = new ResponseWaiter(responseId, requester);
         bool needFragment = false;
         if(commandModel.service() == APPLICATION_STATE || commandModel.service() == FIND_OBJECT_SERVICE){
+            TasLogger::logger()->debug("TasServerServiceManager::handleServiceRequest search plat traversers for " + targetClient->applicationUid());
             foreach(TasApplicationTraverseInterface* traverser, mPlatformTraversers){
+                TasLogger::logger()->debug("TasServerServiceManager::handleServiceRequest plat plugin found");
                 QByteArray data = traverser->traverseApplication(targetClient->processId(), targetClient->applicationName(), 
                                                                  targetClient->applicationUid());
                 if(!data.isNull()){
                     waiter->appendPlatformData(data);
+                    TasLogger::logger()->debug("TasServerServiceManager::handleServiceRequest platform data appended");
                     needFragment = true;
                 }
             }
@@ -130,6 +134,7 @@ void TasServerServiceManager::handleServiceRequest(TasCommandModel& commandModel
         connect(waiter, SIGNAL(responded(qint32)), this, SLOT(removeWaiter(qint32)));
         reponseQueue.insert(responseId, waiter);
         if(needFragment){
+            TasLogger::logger()->debug("TasServerServiceManager::handleServiceRequest fragment only");
             commandModel.addAttribute("needFragment", "true");
             targetClient->socket()->sendRequest(responseId, commandModel.sourceString(false));            
         }
@@ -222,6 +227,7 @@ void TasServerServiceManager::removeWaiter(qint32 responseId)
 
 ResponseWaiter::ResponseWaiter(qint32 responseId, TasSocket* relayTarget, int timeout)
 {
+    mPlatformData = 0;
     mFilter = 0;
     mSocket = relayTarget;
     mResponseId = responseId;
@@ -237,12 +243,22 @@ ResponseWaiter::~ResponseWaiter()
     if(mFilter){
         delete mFilter;
     }
+    if(mPlatformData){
+        delete mPlatformData;
+    }
 }
 
 void ResponseWaiter::appendPlatformData(QByteArray data)
 {
-    TasLogger::logger()->debug(QString(data));
-    mPlatformData.append(data);
+    if(!mPlatformData){
+        TasLogger::logger()->debug("ResponseWaiter::appendPlatformData make data container and add root");
+        //make header for the document made from fragments
+        QString header = "<tasMessage dateTime=\"" +
+            QDateTime::currentDateTime().toString("yyyy.MM.dd hh:mm:ss.zzz") + 
+            "\" version=\""+TAS_VERSION+"\">";
+        mPlatformData = new QByteArray(header.toUtf8());
+    }
+    mPlatformData->append(data);
 }
 
 /*!
@@ -261,6 +277,16 @@ void ResponseWaiter::sendResponse(TasMessage& response)
     if(mFilter){
         mFilter->filterResponse(response);
     }
+    if(mPlatformData && !mPlatformData->isEmpty()){
+        TasLogger::logger()->debug("ResponseWaiter::sendResponse add plat stuf");
+        response.uncompressData();
+        mPlatformData->append(response.data()->data());
+        mPlatformData->append(QString("</tasMessage>").toUtf8());
+        response.setData(mPlatformData);
+        //ownership transferred to response
+        mPlatformData = 0;
+    }
+    //TasLogger::logger()->debug(response.dataAsString());
     if(!mSocket->sendMessage(response)){
         TasLogger::logger()->error("ResponseWaiter::sendResponse socket not writable!");
     }
