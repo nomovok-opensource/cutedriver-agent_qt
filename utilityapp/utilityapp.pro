@@ -28,59 +28,38 @@ mac {
 
 include(../tasbase.pri)
 
-TARGET = qttasserver
+TARGET = qttasutilapp
 DESTDIR = bin
-target.path = $$TAS_TARGET_BIN
 DEFINES += TDTASSERVER
+
+target.path = $$TAS_TARGET_BIN
 
 symbian: {
     TARGET.CAPABILITY=ALL -TCB
-    TARGET.VID = VID_DEFAULT
-    TARGET.EPOCALLOWDLLDATA = 1 
-    TARGET.EPOCHEAPSIZE = 0x20000 0x3400000
-
-    LIBS += -leuser
-    LIBS += -lws32
-    LIBS += -lapgrfx
-    LIBS += -lMemSpyDriverClient
-    LIBS += -lhal
-    INCLUDEPATH += /epoc32/include/platform/memspy/driver
-#if ( NCP_COMMON_S60_VERSION_SUPPORT >= S60_VERSION_50 && NCP_COMMON_FAMILY_ID >= 70 )
-	LIBS += -llibegl
-#endif
+	TARGET.VID = VID_DEFAULT
+  	TARGET.EPOCALLOWDLLDATA = 1 
+	TARGET.EPOCHEAPSIZE = 0x20000 0x1400000
 }
 
-win32: {
-	LIBS +=  -lUser32
-}
 
-INCLUDEPATH += .
-INCLUDEPATH += services corelib
+INCLUDEPATH += . src
 INCLUDEPATH += ../tascore/corelib
 
-DEPENDPATH += . inc src services corelib
+DEPENDPATH += . src
 
 # Input
+HEADERS += utilityapp.h
 SOURCES += main.cpp
+SOURCES += utilityapp.cpp
 
-include(corelib/corelib.pri)
-include(services/services.pri)
 include(../tascore/corelib/corelib.pri)
-
 HEADERS += $$PUBLIC_HEADERS
 
-QT -= gui
 QT += network xml 
-
-unix: {
-	QT += testlib
-}
-
-CONFIG(maemo){
-DEFINES += TAS_MAEMO
-}
-
 INSTALLS += target
 
+unix:!symbian:!macx {
+  LIBS += -lX11 -lXtst 
+}
 
 

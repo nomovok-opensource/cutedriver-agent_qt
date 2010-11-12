@@ -166,7 +166,15 @@ void TasServerServiceManager::handleServiceRequest(TasCommandModel& commandModel
             response.setData(states);
             requester->sendMessage(response);
         }
-        else{
+        else if(commandModel.service() == SCREEN_SHOT){
+            ResponseWaiter* waiter = new ResponseWaiter(responseId, requester);
+            connect(waiter, SIGNAL(responded(qint32)), this, SLOT(removeWaiter(qint32)));
+            reponseQueue.insert(responseId, waiter);
+            QStringList args;
+            args << "-i" << QString::number(responseId) << "-a" << "screenshot";
+            QProcess::startDetached("qttasutilapp", args);
+        }
+        else{            
             response.setRequester(requester);
             performService(commandModel, response);
             //start app waits for register message and performs the response

@@ -35,6 +35,8 @@ SUBDIRS += traversers
 
 SUBDIRS += loaders
 
+SUBDIRS += utilityapp
+
 CONFIG(maemo) {
 SUBDIRS  += xsession
 }
