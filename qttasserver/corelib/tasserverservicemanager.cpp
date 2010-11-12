@@ -145,19 +145,25 @@ void TasServerServiceManager::handleServiceRequest(TasCommandModel& commandModel
     }
     else{
 
-        QByteArray states;
+        QByteArray* states = 0;
         if(commandModel.service() == APPLICATION_STATE || commandModel.service() == FIND_OBJECT_SERVICE){
             foreach(TasApplicationTraverseInterface* traverser, mPlatformTraversers){
                 QByteArray data = traverser->traverseApplication("", "", "");
                 if(!data.isNull()){
-                    states.append(data);
-                }
+                    if(!states){
+                        states = new QByteArray(responseHeader());
+                    }
+                    states->append(data);
+                }         
             }
-        }
+            if(states){
+                states->append(QString("</tasMessage>").toUtf8());
+            }
+        }       
         TasResponse response(responseId);
 
-        if(!states.isEmpty()){
-            response.setData(QString(states));
+        if(states && !states->isEmpty()){
+            response.setData(states);
             requester->sendMessage(response);
         }
         else{
@@ -225,6 +231,15 @@ void TasServerServiceManager::removeWaiter(qint32 responseId)
     reponseQueue.remove(responseId);
 }
 
+QByteArray TasServerServiceManager::responseHeader()
+{
+    QString header = "<tasMessage dateTime=\"" +
+        QDateTime::currentDateTime().toString("yyyy.MM.dd hh:mm:ss.zzz") + 
+        "\" version=\""+TAS_VERSION+"\">";
+    return header.toUtf8();
+    
+}
+
 ResponseWaiter::ResponseWaiter(qint32 responseId, TasSocket* relayTarget, int timeout)
 {
     mPlatformData = 0;
@@ -253,10 +268,7 @@ void ResponseWaiter::appendPlatformData(QByteArray data)
     if(!mPlatformData){
         TasLogger::logger()->debug("ResponseWaiter::appendPlatformData make data container and add root");
         //make header for the document made from fragments
-        QString header = "<tasMessage dateTime=\"" +
-            QDateTime::currentDateTime().toString("yyyy.MM.dd hh:mm:ss.zzz") + 
-            "\" version=\""+TAS_VERSION+"\">";
-        mPlatformData = new QByteArray(header.toUtf8());
+        mPlatformData = new QByteArray(TasServerServiceManager::responseHeader());
     }
     mPlatformData->append(data);
 }

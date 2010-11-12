@@ -47,6 +47,8 @@ public:
 
 	void serviceResponse(TasMessage& response);
 
+	static QByteArray responseHeader();
+
 protected:
 	void handleServiceRequest(TasCommandModel& commandModel, TasSocket* requester, qint32 responseId);
 	QString serviceErrorMessage(){return "QtTasserver does not support the given service: ";}
