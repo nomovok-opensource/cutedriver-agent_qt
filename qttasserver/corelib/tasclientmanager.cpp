@@ -491,6 +491,9 @@ TasClient* TasClientManager::latestClient(bool includeSocketless)
             }
         }        
     }        
+#ifdef Q_OS_SYMBIAN 
+    return 0;
+#endif
 
     //find latest
     TasClient* match = 0;

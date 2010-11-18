@@ -111,18 +111,14 @@ void TasServerServiceManager::handleServiceRequest(TasCommandModel& commandModel
     }
 
     if(targetClient){
-        TasLogger::logger()->debug("TasServerServiceManager::handleServiceRequest set waiter " + QString::number(responseId));
         ResponseWaiter* waiter = new ResponseWaiter(responseId, requester);
         bool needFragment = false;
         if(commandModel.service() == APPLICATION_STATE || commandModel.service() == FIND_OBJECT_SERVICE){
-            TasLogger::logger()->debug("TasServerServiceManager::handleServiceRequest search plat traversers for " + targetClient->applicationUid());
             foreach(TasApplicationTraverseInterface* traverser, mPlatformTraversers){
-                TasLogger::logger()->debug("TasServerServiceManager::handleServiceRequest plat plugin found");
                 QByteArray data = traverser->traverseApplication(targetClient->processId(), targetClient->applicationName(), 
                                                                  targetClient->applicationUid());
                 if(!data.isNull()){
                     waiter->appendPlatformData(data);
-                    TasLogger::logger()->debug("TasServerServiceManager::handleServiceRequest platform data appended");
                     needFragment = true;
                 }
             }

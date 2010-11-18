@@ -44,6 +44,14 @@
 "/epoc32/data/z/resource/apps/qttas_ui.rsc"                           - "$:\resource\apps\qttas_ui.rsc"
 "/epoc32/data/z/private/10003a3f/import/apps/qttas_ui_reg.rsc"        - "$:\private\10003a3f\import\apps\qttas_ui_reg.rsc"
 
+"/epoc32/release/armv5/urel/qttasmemlog_srv.exe"                      - "$:\sys\bin\qttasmemlog_srv.exe"
+"/epoc32/data/z/resource/apps/qttasmemlog_srv.rsc"                    - "$:\resource\apps\qttasmemlog_srv.rsc"
+"/epoc32/data/z/private/10003a3f/import/apps/qttasmemlog_srv_reg.rsc" - "$:\private\10003a3f\import\apps\qttasmemlog_srv_reg.rsc"
+
+"/epoc32/release/armv5/urel/qttasutilapp.exe"                         - "$:\sys\bin\qttasutilapp.exe"
+"/epoc32/data/z/resource/apps/qttasutilapp.rsc"                       - "$:\resource\apps\qttasutilapp.rsc"
+"/epoc32/data/z/private/10003a3f/import/apps/qttasutilapp_reg.rsc"    - "$:\private\10003a3f\import\apps\qttasutilapp_reg.rsc"
+
 "/epoc32/release/armv5/urel/qttestability.dll"                        - "$:\sys\bin\qttestability.dll"
 "/epoc32/winscw/c/qt_testability/qt_testability.ini"                  - "$:\qt_testability\qt_testability.ini"
 
@@ -55,9 +63,6 @@
 
 "/epoc32/release/armv5/urel/layouttraverse.dll"                             - "$:\sys\bin\layouttraverse.dll"
 "..\traversers\layouttraverser\qmakepluginstubs\layouttraverse.qtplugin"    - "$:\resource\qt\plugins\traversers\layouttraverse.qtplugin"
-
-
-
 
 "/epoc32/release/armv5/urel/tasfixture.dll"                           - "$:\sys\bin\tasfixture.dll"
 "..\fixtures\tasfixture\qmakepluginstubs\tasfixture.qtplugin"         - "$:\resource\qt\plugins\tasfixtures\tasfixture.qtplugin"

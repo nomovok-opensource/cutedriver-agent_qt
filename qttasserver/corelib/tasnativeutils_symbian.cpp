@@ -48,19 +48,6 @@ int TasNativeUtils::pidOfActiveWindow(const QHash<QString, TasClient*> clients)
         return TAS_ERROR_NOT_FOUND;
     }
     
-    //check for dialogs
-    const TUid PropertyCategoryUid = {0x20022FC5};
-    const TUint StatusKey = 'Stat';
-    TInt shown = 0;
-    RProperty::Get(PropertyCategoryUid, StatusKey, shown);
-    if(shown == 1){
-        foreach (TasClient* app, clients){
-            if( app->applicationUid() == QString::number(PropertyCategoryUid.iUid)){
-                return app->processId().toInt();
-            }
-        }
-    }
-
     const QList<QString>& pids = clients.keys();
     int pid = TAS_ERROR_NOT_FOUND;
     RWsSession wsSession;
@@ -80,11 +67,6 @@ int TasNativeUtils::pidOfActiveWindow(const QHash<QString, TasClient*> clients)
                     RProcess foregroundAppProcess;
                     if(foregroundAppThread.Process(foregroundAppProcess) == KErrNone){
                         pid = foregroundAppProcess.Id().Id();
-                        if (!pids.contains(QString::number(pid))) {
-                            pid = TAS_ERROR_NOT_FOUND;
-                        }
-                        else {
-                        }
                         foregroundAppProcess.Close();
                     }
                     foregroundAppThread.Close();

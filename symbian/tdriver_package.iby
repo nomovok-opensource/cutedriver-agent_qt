@@ -21,9 +21,14 @@ TAS_UPGRADABLE_APP_REG_RSC(qttas_ui)
 S60_APP_RESOURCE(qttas_ui)
 
 //qttasmemlog_srv
-file=ABI_DIR\BUILD_DIR\qttasmemlog_srv.exe                SHARED_LIB_DIR\qttasmemlog_srv.exe 
+file=ABI_DIR\BUILD_DIR\qttasmemlog_srv.exe                SHARED_LIB_DIR\qttasmemlog_srv.exe
 TAS_UPGRADABLE_APP_REG_RSC(qttasmemlog_srv)
 S60_APP_RESOURCE(qttasmemlog_srv)
+
+//qttasutilityap
+file=ABI_DIR\BUILD_DIR\qttasutilapp.exe                   SHARED_LIB_DIR\qttasutilapp.exe 
+TAS_UPGRADABLE_APP_REG_RSC(qttasutilapp)
+S60_APP_RESOURCE(qttasutilapp)
 
 //qt_testability dll
 file=ABI_DIR\BUILD_DIR\qttestability.dll                  SHARED_LIB_DIR\qttestability.dll 
