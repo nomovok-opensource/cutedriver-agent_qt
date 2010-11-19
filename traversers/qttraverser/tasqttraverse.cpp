@@ -198,29 +198,29 @@ void TasQtTraverse::addWidgetCoordinates(TasObject* objectInfo, QWidget* widget,
         objectInfo->addAttribute("x_absolute", windowPoint.x());
         objectInfo->addAttribute("y_absolute", windowPoint.y());           
     } 
-    else {
-         //print window coordinates
-        QPoint windowPoint = widget->mapTo(widget->window(),QPoint(0, 0));
-        objectInfo->addAttribute("x", windowPoint.x());
-        objectInfo->addAttribute("y", windowPoint.y());
-            
-        
+    else {      
+        QPoint screenPoint;            
         if (command && command->parameter("x_parent_absolute") != "" &&
             command->parameter("y_parent_absolute") != "") {
             //TasLogger::logger()->debug("TasQtTraverse::addWidgetCoordinates moving point");
             QPoint p(command->parameter("x_parent_absolute").toInt(), 
                      command->parameter("y_parent_absolute").toInt());
-            QPoint transP = widget->mapToGlobal(p);
+            screenPoint = widget->mapToGlobal(p);
             
-            objectInfo->addAttribute("x_absolute", transP.x());
-            objectInfo->addAttribute("y_absolute", transP.y());
+            objectInfo->addAttribute("x_absolute", screenPoint.x());
+            objectInfo->addAttribute("y_absolute", screenPoint.y());
             
         } else {
             //TasLogger::logger()->debug("TasQtTraverse::addWidgetCoordinates using regular coords");
-            QPoint screenPoint = widget->mapToGlobal(QPoint(0, 0));
+            screenPoint = widget->mapToGlobal(QPoint(0, 0));
             objectInfo->addAttribute("x_absolute", screenPoint.x());
             objectInfo->addAttribute("y_absolute", screenPoint.y());
         }
+         //print window coordinates
+        
+        QPoint windowPoint = widget->window()->mapFromGlobal(screenPoint);
+        objectInfo->addAttribute("x", windowPoint.x());
+        objectInfo->addAttribute("y", windowPoint.y());
         
     }
     // Explicitly add width and height (property added changes name)
