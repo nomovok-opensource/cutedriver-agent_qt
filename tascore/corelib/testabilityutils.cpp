@@ -189,9 +189,9 @@ QWidget* TestabilityUtils::viewPortAndPosition(QGraphicsItem* graphicsItem, QPoi
             QTransform transform = view->viewportTransform();
             sceneRect = transform.mapRect(sceneRect);
         }
-        QRect viewPortRect = widget->rect();        
-        QRect interSection = viewPortRect.intersected(sceneRect.toRect());
-        point = widget->mapToGlobal(interSection.center());
+        QRectF viewPortRect(widget->rect());        
+        QRectF interSection = viewPortRect.intersected(sceneRect);
+        point = widget->mapToGlobal(interSection.center().toPoint());
     }
     return widget;
 }   
