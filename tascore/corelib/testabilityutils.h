@@ -35,6 +35,7 @@ struct ItemLocationDetails
 {
   QPoint scenePoint;
   QPoint screenPoint;
+  QPoint windowPoint;
   int width;
   int height;
   bool visible;

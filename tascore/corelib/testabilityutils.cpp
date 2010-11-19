@@ -189,9 +189,9 @@ QWidget* TestabilityUtils::viewPortAndPosition(QGraphicsItem* graphicsItem, QPoi
             QTransform transform = view->viewportTransform();
             sceneRect = transform.mapRect(sceneRect);
         }
-        QRect viewPortRect = widget->rect();        
-        QRect interSection = viewPortRect.intersected(sceneRect.toRect());
-        point = widget->mapToGlobal(interSection.center());
+        QRectF viewPortRect(widget->rect());        
+        QRectF interSection = viewPortRect.intersected(sceneRect);
+        point = widget->mapToGlobal(interSection.center().toPoint());
     }
     return widget;
 }   
@@ -325,6 +325,7 @@ ItemLocationDetails TestabilityUtils::getItemLocationDetails(QGraphicsItem* grap
     QGraphicsView* view = getViewForItem(graphicsItem);
     ItemLocationDetails locationDetails;
     if(view){
+        // for webkit
         // If the window is embedded into a another app, wee need to figure out if the widget is visible
         QPoint windowSize(0,0);
         if (command && command->parameter("parent_size") != "") {
@@ -343,14 +344,17 @@ ItemLocationDetails TestabilityUtils::getItemLocationDetails(QGraphicsItem* grap
             }
             QPoint point = sceneRect.topLeft().toPoint();
             QPoint screenPoint = view->viewport()->mapToGlobal(point);
+            QPoint windowPoint = view->viewport()->window()->mapFromGlobal(screenPoint);
 
+            // for webkit
+            // If the window is embedded into a another app, wee need to figure out if the widget is visible
             if (command && command->parameter("x_parent_absolute") != "" &&
                 command->parameter("y_parent_absolute") != "") {
                 QPoint p(command->parameter("x_parent_absolute").toInt(), 
                          command->parameter("y_parent_absolute").toInt());
                 screenPoint += p;
                 point += p;
-              
+                windowPoint += p;
             } 
 
             int height = sceneRect.height();
@@ -395,6 +399,7 @@ ItemLocationDetails TestabilityUtils::getItemLocationDetails(QGraphicsItem* grap
 
             locationDetails.scenePoint = point;        
             locationDetails.screenPoint = screenPoint;
+            locationDetails.windowPoint = windowPoint;
             locationDetails.width = width;
             locationDetails.height = height;
         }
