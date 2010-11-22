@@ -240,12 +240,11 @@ bool TestabilityUtils::isItemInView(QGraphicsView* view, QGraphicsItem* graphics
         QRect viewPortRect = view->viewport()->rect();
 
         if(viewPortRect.intersects(sceneRect.toRect())) {
-            QRegion clippedVisibleRegion = view->visibleRegion().intersected(graphicsItem->boundingRect().toRect());
+            QRegion clippedVisibleRegion = viewPortRect.intersected(sceneRect.toRect());
             if (!clippedVisibleRegion.isEmpty()) {
-                QPoint resultPoint = clippedVisibleRegion.rects().at(0).center();
-                
+                QPoint resultPoint = clippedVisibleRegion.rects().at(0).center();                
                 QGraphicsItem* topItem = view->itemAt(resultPoint);
-                if (topItem == graphicsItem || topItem->isAncestorOf(graphicsItem)) {
+                if (topItem && (topItem == graphicsItem || topItem->isAncestorOf(graphicsItem))) {
                     return true;
                 }
                 else {
