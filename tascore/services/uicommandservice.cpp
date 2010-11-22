@@ -176,7 +176,11 @@ TargetData UiCommandService::makeInteractionData(TasTarget* commandTarget)
         if (j.hasNext()){
             TasCommand* command = j.next();
             target = qApp->widgetAt(command->parameter("x").toInt(), command->parameter("y").toInt());
-            if(!target) {
+            if(target) {
+                point.setX(command->parameter("x").toInt());
+                point.setY(command->parameter("y").toInt());
+            }
+            else {
                 TasLogger::logger()->warning("UiCommandService::performUiCommands target not found x:" +
                                              command->parameter("x") + " y:" + command->parameter("y"));
             }

@@ -254,7 +254,7 @@ QObject* TasSignalPlugin::castToObject(void* objectInstance, QString ptrType)
     }
     else if( ptrType == GRAPHICS_ITEM_TYPE ){
         QGraphicsItem* item = reinterpret_cast<QGraphicsItem*>(objectInstance);   
-        target = TestabilityUtils::castToGraphicsWidget(item);
+        target = item->toGraphicsObject();
     }
     else if( ptrType == APPLICATION_TYPE ){
         target = qApp;

@@ -27,6 +27,13 @@
 #include <memspydriverclient.h>
 #include <e32property.h>
 
+
+class NativeUtils_p
+{
+public:
+    static TBool bringAppToForeground(TApaTask app);
+};
+
 /*!
   \class TasNativeUtils
   \brief Symbian platform specific implementation of the interface.
@@ -118,19 +125,31 @@ int TasNativeUtils::bringAppToForeground(TasClient& client)
     if (KErrNone == error) {
         TasLogger::logger()->debug("   Connected to WS");
         TApaTaskList applicationList(wsSession);
-    
+        TBool isOk = EFalse;
         // Find app by UID
-        bool ok = false;
         QString applicationUid = client.applicationUid();
-        TUid appUid = TUid::Uid(applicationUid.toInt(&ok, 10));
-        TApaTask app = applicationList.FindApp(appUid);
-        if (app.Exists()) {
-            app.BringToForeground();
-        } 
-        else {
+        int uidi = applicationUid.toInt();
+        //we must chect the uid since in some situation the uid seems 
+        //to be too big for TInt32 which TUId.iUid is
+        //name used if uid cannot be
+        if(uidi != 0){
+            TasLogger::logger()->debug("App uid ok look for app");
+            TUid appUid = TUid::Uid(uidi);
+            isOk = NativeUtils_p::bringAppToForeground(applicationList.FindApp(appUid));            
+        }
+        else{
+            TasLogger::logger()->debug("App uid invalid look with name " + client.applicationName());
+            TPtrC16 str(reinterpret_cast<const TUint16*>(client.applicationName().utf16()));            
+            HBufC* buffer = str.Alloc(); 
+            isOk = NativeUtils_p::bringAppToForeground(applicationList.FindApp(*buffer));
+            delete buffer;            
+        }        
+
+        if(!isOk){
             TasLogger::logger()->error("Application found but it does not exist!");
             error = TAS_ERROR_NOT_FOUND;
         }
+        
         wsSession.Close();    
     }
     else {
@@ -140,3 +159,13 @@ int TasNativeUtils::bringAppToForeground(TasClient& client)
     return error;
 }
 
+TBool NativeUtils_p::bringAppToForeground(TApaTask app)
+{
+    TBool value = EFalse;
+    if (app.Exists()) {
+        TasLogger::logger()->debug("App found bring to foreground");
+        app.BringToForeground();
+        value = ETrue;
+    }
+    return value;
+}

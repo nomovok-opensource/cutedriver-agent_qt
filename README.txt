@@ -1,5 +1,12 @@
 Build instructions for Qt agent (qttas):
 
+Important note:
+Mobility fixture is now default in the Agent_Qt, so now in Windows and Linux one needs to install mobility API.
+
+If one needs to compile without mobility, "qmake -r CONFIG+=no_mobility" disables mobility fixture in Agent_Qt build.
+
+1.0 version sources can be found from:
+http://qt.nokia.com/products/appdev/add-on-products/catalog/4/new-qt-apis/mobility
 
 Plain Qt:
 1. qmake
