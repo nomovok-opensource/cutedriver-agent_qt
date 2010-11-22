@@ -238,7 +238,29 @@ bool TestabilityUtils::isItemInView(QGraphicsView* view, QGraphicsItem* graphics
             sceneRect = transform.mapRect(sceneRect);
         }
         QRect viewPortRect = view->viewport()->rect();
-        return viewPortRect.intersects(sceneRect.toRect());
+
+        if(viewPortRect.intersects(sceneRect.toRect())) {
+            QRegion clippedVisibleRegion = view->visibleRegion().intersected(graphicsItem->boundingRect().toRect());
+            if (!clippedVisibleRegion.isEmpty()) {
+                QPoint resultPoint = view->mapToGlobal(clippedVisibleRegion.rects().at(0).center());
+                
+                QGraphicsItem* topItem = view->itemAt(resultPoint);
+                if (topItem == graphicsItem || topItem->isAncestorOf(graphicsItem)) {
+                    return true;
+                }
+                else {
+                    return false;
+                }
+            }
+            else {
+                return false;
+            }
+        }
+        else {
+            return false;
+        }
+
+        
     }
     else{
         return false;
