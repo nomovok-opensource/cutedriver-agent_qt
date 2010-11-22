@@ -244,6 +244,7 @@ bool TestabilityUtils::isItemInView(QGraphicsView* view, QGraphicsItem* graphics
             if (!clippedVisibleRegion.isEmpty()) {
                 QPoint resultPoint = clippedVisibleRegion.rects().at(0).center();                
                 QGraphicsItem* topItem = view->itemAt(resultPoint);
+                TasLogger::logger()->debug("TestabilityUtils::isItemInView top item with id " + QString::number((quintptr)topItem));
                 if (topItem && (topItem == graphicsItem || topItem->isAncestorOf(graphicsItem))) {
                     return true;
                 }
