@@ -243,9 +243,22 @@ bool TestabilityUtils::isItemInView(QGraphicsView* view, QGraphicsItem* graphics
             QRegion clippedVisibleRegion = viewPortRect.intersected(sceneRect.toRect());
             if (!clippedVisibleRegion.isEmpty()) {
                 QPoint resultPoint = clippedVisibleRegion.rects().at(0).center();                
-                QGraphicsItem* topItem = view->itemAt(resultPoint);
-                TasLogger::logger()->debug("TestabilityUtils::isItemInView top item with id " + QString::number((quintptr)topItem));
-                if (topItem && (topItem == graphicsItem || topItem->isAncestorOf(graphicsItem))) {
+                QList<QGraphicsItem*> topItems = view->items(resultPoint);
+
+                QGraphicsItem* topItem = NULL;
+
+                for (int i = 0; i < topItems.size(); ++i) {
+                    topItem = topItems.at(i);
+                    QGraphicsObject* topObject = topItem->toGraphicsObject();
+                    if (topObject && topObject->objectName() == "glass")
+                        continue;
+                    else
+                        break;      
+                }
+
+                //QGraphicsObject* topObject = topItem->toGraphicsObject();
+                //TasLogger::logger()->debug("TestabilityUtils::isItemInView top item with id " + QString::number((quintptr)topObject));
+                if (topItem && (topItem == graphicsItem || graphicsItem->isAncestorOf(topItem))) {
                     return true;
                 }
                 else {
