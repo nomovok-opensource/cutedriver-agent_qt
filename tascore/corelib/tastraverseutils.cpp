@@ -269,13 +269,13 @@ QPair<QPoint,QPoint> TasTraverseUtils::addGraphicsItemCoordinates(TasObject* obj
 
     QPair<QPoint,QPoint> coords;
     if(locationDetails.visible){
-        objectInfo->addAttribute("x", locationDetails.scenePoint.x());
-        objectInfo->addAttribute("y", locationDetails.scenePoint.y());
-    
+        objectInfo->addAttribute("x", locationDetails.windowPoint.x());
+        objectInfo->addAttribute("y", locationDetails.windowPoint.y());   
+
         objectInfo->addAttribute("x_absolute", locationDetails.screenPoint.x());
         objectInfo->addAttribute("y_absolute", locationDetails.screenPoint.y());
     
-        coords.first = locationDetails.scenePoint;
+        coords.first = locationDetails.windowPoint;
         coords.second = locationDetails.screenPoint;
     
         objectInfo->addAttribute("width", locationDetails.width);

@@ -189,9 +189,9 @@ QWidget* TestabilityUtils::viewPortAndPosition(QGraphicsItem* graphicsItem, QPoi
             QTransform transform = view->viewportTransform();
             sceneRect = transform.mapRect(sceneRect);
         }
-        QRect viewPortRect = widget->rect();        
-        QRect interSection = viewPortRect.intersected(sceneRect.toRect());
-        point = widget->mapToGlobal(interSection.center());
+        QRectF viewPortRect(widget->rect());        
+        QRectF interSection = viewPortRect.intersected(sceneRect);
+        point = widget->mapToGlobal(interSection.center().toPoint());
     }
     return widget;
 }   
@@ -238,7 +238,42 @@ bool TestabilityUtils::isItemInView(QGraphicsView* view, QGraphicsItem* graphics
             sceneRect = transform.mapRect(sceneRect);
         }
         QRect viewPortRect = view->viewport()->rect();
-        return viewPortRect.intersects(sceneRect.toRect());
+
+        if(viewPortRect.intersects(sceneRect.toRect())) {
+            QRegion clippedVisibleRegion = viewPortRect.intersected(sceneRect.toRect());
+            if (!clippedVisibleRegion.isEmpty()) {
+                QPoint resultPoint = clippedVisibleRegion.rects().at(0).center();                
+                QList<QGraphicsItem*> topItems = view->items(resultPoint);
+
+                QGraphicsItem* topItem = NULL;
+
+                for (int i = 0; i < topItems.size(); ++i) {
+                    topItem = topItems.at(i);
+                    QGraphicsObject* topObject = topItem->toGraphicsObject();
+                    if (topObject && topObject->objectName() == "glass")
+                        continue;
+                    else
+                        break;      
+                }
+
+                //QGraphicsObject* topObject = topItem->toGraphicsObject();
+                //TasLogger::logger()->debug("TestabilityUtils::isItemInView top item with id " + QString::number((quintptr)topObject));
+                if (topItem && (topItem == graphicsItem || graphicsItem->isAncestorOf(topItem))) {
+                    return true;
+                }
+                else {
+                    return false;
+                }
+            }
+            else {
+                return false;
+            }
+        }
+        else {
+            return false;
+        }
+
+        
     }
     else{
         return false;
@@ -325,6 +360,7 @@ ItemLocationDetails TestabilityUtils::getItemLocationDetails(QGraphicsItem* grap
     QGraphicsView* view = getViewForItem(graphicsItem);
     ItemLocationDetails locationDetails;
     if(view){
+        // for webkit
         // If the window is embedded into a another app, wee need to figure out if the widget is visible
         QPoint windowSize(0,0);
         if (command && command->parameter("parent_size") != "") {
@@ -343,14 +379,17 @@ ItemLocationDetails TestabilityUtils::getItemLocationDetails(QGraphicsItem* grap
             }
             QPoint point = sceneRect.topLeft().toPoint();
             QPoint screenPoint = view->viewport()->mapToGlobal(point);
+            QPoint windowPoint = view->viewport()->window()->mapFromGlobal(screenPoint);
 
+            // for webkit
+            // If the window is embedded into a another app, wee need to figure out if the widget is visible
             if (command && command->parameter("x_parent_absolute") != "" &&
                 command->parameter("y_parent_absolute") != "") {
                 QPoint p(command->parameter("x_parent_absolute").toInt(), 
                          command->parameter("y_parent_absolute").toInt());
                 screenPoint += p;
                 point += p;
-              
+                windowPoint += p;
             } 
 
             int height = sceneRect.height();
@@ -395,6 +434,7 @@ ItemLocationDetails TestabilityUtils::getItemLocationDetails(QGraphicsItem* grap
 
             locationDetails.scenePoint = point;        
             locationDetails.screenPoint = screenPoint;
+            locationDetails.windowPoint = windowPoint;
             locationDetails.width = width;
             locationDetails.height = height;
         }
