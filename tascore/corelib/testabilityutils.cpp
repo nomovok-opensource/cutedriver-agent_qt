@@ -282,38 +282,39 @@ bool TestabilityUtils::isItemInView(QGraphicsView* view, QGraphicsItem* graphics
 QWidget* TestabilityUtils::getApplicationWindow()
 {
     //attemp to find a window type widget
-    QWidget* popWid = qApp->activePopupWidget();
-    QWidget* modWid = qApp->activeModalWidget();
-    QWidget* actWin = qApp->activeWindow();
+    QWidget* target = qApp->activePopupWidget();
 
-    if (popWid || modWid) {
-        TasLogger::logger()->debug(
-                    qPrintable(QString("TestabilityUtils::getApplicationWindow got activePopup 0x%1, activeModal 0x%2, activeWindow 0x%3")
-                               .arg((quintptr)popWid, 0, 16)
-                               .arg((quintptr)modWid, 0, 16)
-                               .arg((quintptr)actWin, 0, 16)));
-    }
+    if (!target) {
 
-    if (popWid) return popWid;
-    if (modWid) return modWid;
+        target = qApp->activeModalWidget();
 
-    if(!actWin || !actWin->isWindow() || actWin->graphicsProxyWidget()){
-        TasLogger::logger()->debug("TestabilityUtils::getApplicationWindow no active window - look for suitable");
-        //no active, take first from list and use it
-        QWidgetList list = qApp->topLevelWidgets();
-        QListIterator<QWidget*> iter(qApp->topLevelWidgets());
-        while(iter.hasNext()){
-            QWidget* w = iter.next();
-            if((w->isVisible() ||
-                (isCustomTraverse() && w->inherits("QGraphicsView")) )
-               && w->isWindow() && w->graphicsProxyWidget() == 0){
-                TasLogger::logger()->debug("TestabilityUtils::getApplicationWindow window found");
-                actWin = w;
-                break;
+        if (!target) {
+
+            target = qApp->activeWindow();
+
+            if(!target || !target->isWindow() || target->graphicsProxyWidget()){
+
+                TasLogger::logger()->debug("TestabilityUtils::getApplicationWindow no active window - look for suitable");
+
+                //no active, take first from list and use it
+                QWidgetList list = qApp->topLevelWidgets();
+                QListIterator<QWidget*> iter(qApp->topLevelWidgets());
+
+                while(iter.hasNext()){
+                    QWidget* w = iter.next();
+                    if((w->isVisible() ||
+
+                        (isCustomTraverse() && w->inherits("QGraphicsView")) )
+                            && w->isWindow() && w->graphicsProxyWidget() == 0){
+                        TasLogger::logger()->debug("TestabilityUtils::getApplicationWindow window found");
+                        target = w;
+                        break;
+                    }
+                }
             }
         }
     }
-    return actWin;
+    return target;
 }
 
 
