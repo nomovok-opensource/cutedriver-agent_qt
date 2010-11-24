@@ -17,8 +17,6 @@
 ** 
 ****************************************************************************/ 
  
-
-
 #include <hal.h>
 #include <hal_data.h>
 #if ( NCP_COMMON_BRANCH_IN_USE == MCL )
@@ -60,14 +58,15 @@ void TasDeviceUtils::resetInactivity()
 }
   
 /*!
-  Returns the heap size of the process. 
-  -1 means not supported.
+  Returns the size of the heap's default thread. 
 */
 int TasDeviceUtils::currentProcessHeapSize()
 {
-    return User::Heap().Size();
+    TInt size = 0;
+    RAllocator& allocator = User::Allocator();
+    allocator.AllocSize(size);
+    return size;
 }
-
 
 /*!
   add total mem details
@@ -95,7 +94,6 @@ qreal TasDeviceUtils::currentProcessCpuTime()
     }
     return cpuTime.Int64()/1000.0;
 }
-
 
 /*!
   Add details available from mobility apis
