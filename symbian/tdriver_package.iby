@@ -32,7 +32,8 @@ S60_APP_RESOURCE(qttasutilapp)
 
 //qt_testability dll
 file=ABI_DIR\BUILD_DIR\qttestability.dll                  SHARED_LIB_DIR\qttestability.dll 
-data=\epoc32\winscw\c\qt_testability\qt_testability.ini   qt_testability\qt_testability.ini   
+data=\epoc32\data\z\system\data\qt_testability.ini        qt_testability\qt_testability.ini   
+
 
 //traverser plugins
 file=ABI_DIR\BUILD_DIR\qttraverse.dll                     SHARED_LIB_DIR\qttraverse.dll

@@ -113,6 +113,7 @@ public:
     void setId(const QString& id);
     void setName(const QString& name);
     void setType(const QString& type);
+	void setEnv(const QString& env);
 	QString getType();
     void setParentId(const QString& id );
         
@@ -126,7 +127,7 @@ private:
     QString parentId;
     QString type;    
     QString name;
-    
+    QString env;
     friend class TasObjectContainer; 
     friend class SerializeFilter;
 };

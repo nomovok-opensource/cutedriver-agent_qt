@@ -32,6 +32,7 @@ const char* const VERSION = "version";
 const char* const DATE_TIME = "dateTime";
 const char* const NAME = "name";
 const char* const TYPE = "type";
+const char* const ENV = "env";
 const char* const DATA_TYPE = "dataType";
 const char* const ID = "id";
 const char* const ROOT_NAME = "tasMessage";
@@ -236,6 +237,11 @@ QString TasObject::getType()
     return type;
 }
 
+void TasObject::setEnv(const QString& env)
+{
+    this->env = env;
+}
+
 /*!
     
     Set the name for the attribute. Names are very usefull since they can be used
@@ -417,6 +423,9 @@ void TasObject::serializeIntoString(TasXmlWriter& xmlWriter ,SerializeFilter& fi
     attrs[ID] = id; 
     attrs[NAME] = name;
     attrs[TYPE] = type;     
+    if(!env.isEmpty()){
+        attrs[ENV] = env;   
+    }  
     if(!parentId.isEmpty()){
         attrs[PARENT] = parentId;     
     }

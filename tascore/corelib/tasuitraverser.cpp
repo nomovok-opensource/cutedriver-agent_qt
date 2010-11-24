@@ -240,7 +240,7 @@ void TasUiTraverser::traverseGraphicsViewItems(TasObject& parent, QGraphicsView*
 void TasUiTraverser::addApplicationDetails(TasObject& application, TasCommand* command)
 {
     traverseObject(application, qApp, command, false);
-
+    application.setEnv("qt");
     //set these again cause properties overwrite them
     application.setName(getApplicationName());
     application.setId(QString::number(qApp->applicationPid()));
