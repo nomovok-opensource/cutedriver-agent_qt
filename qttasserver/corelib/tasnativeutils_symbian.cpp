@@ -26,7 +26,7 @@
 #include <QTimer>
 #include <memspydriverclient.h>
 #include <e32property.h>
-
+#include <cfclient.h>
 
 class NativeUtils_p
 {
@@ -168,4 +168,23 @@ TBool NativeUtils_p::bringAppToForeground(TApaTask app)
         value = ETrue;
     }
     return value;
+}
+
+void TasNativeUtils::changeOrientation()
+{
+    _LIT( KContextSource, "Sensor" );
+    _LIT( KSensorSourceEventOrientation, "Event.Orientation" );
+    _LIT( KContextValue, "DisplayRightUp?" );
+    CCFContextObject* co = CCFContextObject::NewLC();
+    co->SetSourceL( KContextSource );
+    co->SetTypeL( KSensorSourceEventOrientation );
+    co->SetValueL( KContextValue );
+    CCFClient* client = CCFClient::NewLC( *this );
+    TInt err = client->PublishContext( *co );
+    if( err != KErrNone )
+        {
+        TasLogger::logger()->error("TasNativeUtils::changeOrientation failed: " +  QString::number(err));
+        }
+    CleanupStack::PopAndDestroy( client );
+    CleanupStack::PopAndDestroy( co );
 }

@@ -44,7 +44,7 @@ symbian: {
     LIBS += -lapgrfx
     LIBS += -lMemSpyDriverClient
     LIBS += -lhal
-    INCLUDEPATH += /epoc32/include/platform/memspy/driver
+    INCLUDEPATH += /epoc32/include/platform/memspy/driver /epoc32/include/platform/mw
 #if ( NCP_COMMON_S60_VERSION_SUPPORT >= S60_VERSION_50 && NCP_COMMON_FAMILY_ID >= 70 )
 	LIBS += -llibegl
 #endif
