@@ -239,6 +239,7 @@ bool TestabilityUtils::isItemInView(QGraphicsView* view, QGraphicsItem* graphics
         }
         QRect viewPortRect = view->viewport()->rect();
 
+        // if item intersect with view
         if(viewPortRect.intersects(sceneRect.toRect())) {
             QRegion clippedVisibleRegion = viewPortRect.intersected(sceneRect.toRect());
             if (!clippedVisibleRegion.isEmpty()) {
@@ -247,17 +248,31 @@ bool TestabilityUtils::isItemInView(QGraphicsView* view, QGraphicsItem* graphics
 
                 QGraphicsItem* topItem = NULL;
 
+                // check top most item in item coordinates
                 for (int i = 0; i < topItems.size(); ++i) {
                     topItem = topItems.at(i);
                     QGraphicsObject* topObject = topItem->toGraphicsObject();
-                    if (topObject && topObject->objectName() == "glass")
+                    QRectF sceneRect = topItem->sceneBoundingRect();
+
+                    // ignore special overlay items
+                    if (topObject && (topObject->objectName() == "glass" || QString(topObject->metaObject()->className()).startsWith("SDeclarativeWindowDecoration"))) {
                         continue;
-                    else
+                    }
+                    // ignore items with no width or height - should not get these when using point??
+                    else if(sceneRect.width() == 0 || sceneRect.height() == 0) {
+                        continue;
+                    }
+                    // found the top most item
+                    else {
                         break;
+                    }
                 }
 
                 //QGraphicsObject* topObject = topItem->toGraphicsObject();
-                //TasLogger::logger()->debug("TestabilityUtils::isItemInView top item with id " + QString::number((quintptr)topObject));
+                //QGraphicsObject* itemObject = graphicsItem->toGraphicsObject();
+                //TasLogger::logger()->debug("TestabilityUtils::isItemInView top item with id " + QString::number((quintptr)topObject) + " name " + topObject->metaObject()->className() + " item " + QString::number((quintptr)itemObject) + " itemname " + itemObject->metaObject()->className());
+
+                // if the item itself is the top most item or item is father of topmost item
                 if (topItem && (topItem == graphicsItem || graphicsItem->isAncestorOf(topItem))) {
                     return true;
                 }
@@ -382,7 +397,7 @@ ItemLocationDetails TestabilityUtils::getItemLocationDetails(QGraphicsItem* grap
         }
         isVisible = isItemInView(view, graphicsItem);
 
-        if(isVisible){
+        if(true /*isVisible*/){
             //add coordinates also
             QRectF sceneRect = graphicsItem->sceneBoundingRect();
             if(!view->viewportTransform().isIdentity()){
