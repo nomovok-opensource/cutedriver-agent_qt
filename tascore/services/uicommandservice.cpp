@@ -175,14 +175,14 @@ TargetData UiCommandService::makeInteractionData(TasTarget* commandTarget)
         QListIterator<TasCommand*> j(commandTarget->commandList());
         if (j.hasNext()){
             TasCommand* command = j.next();
-            target = qApp->widgetAt(command->parameter("x").toInt(), command->parameter("y").toInt());
+            target = qApp->widgetAt(command->parameter("obj_x").toInt(), command->parameter("obj_y").toInt());
             if(target) {
-                point.setX(command->parameter("x").toInt());
-                point.setY(command->parameter("y").toInt());
+                point.setX(command->parameter("obj_x").toInt());
+                point.setY(command->parameter("obj_y").toInt());
             }
             else {
                 TasLogger::logger()->warning("UiCommandService::performUiCommands target not found x:" +
-                                             command->parameter("x") + " y:" + command->parameter("y"));
+                                             command->parameter("obj_x") + " y:" + command->parameter("obj_y"));
             }
         }
     }
