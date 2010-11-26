@@ -197,7 +197,9 @@ void TasAttribute::serializeIntoString(TasXmlWriter& xmlWriter ,SerializeFilter&
     
 */
 TasObject::TasObject()
-{}
+{
+    setEnv("qt");
+}
 
 /*!
     Destructor
