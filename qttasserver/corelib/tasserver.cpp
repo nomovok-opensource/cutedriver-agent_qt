@@ -45,7 +45,6 @@
 #include "listappsservice.h"
 #include "confservice.h"
 #include "uicommandservice.h"
-#include "webkitcommandservice.h"
 #include "foregroundservice.h"
 #include "systeminfoservice.h"
 #include "resourceloggingservice.h"
@@ -101,7 +100,6 @@ TasServer::TasServer(QObject *parent)
     mServiceManager->registerCommand(new ConfService());
     mServiceManager->registerCommand(new RegisterService());
     mServiceManager->registerCommand(new UiCommandService());
-    mServiceManager->registerCommand(new WebkitCommandService());
     mServiceManager->registerCommand(new ForegroundService());
     mServiceManager->registerCommand(new SystemInfoService());
     mServiceManager->registerCommand(new ResourceLoggingService());    
