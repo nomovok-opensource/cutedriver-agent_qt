@@ -25,7 +25,7 @@ PUBLIC_HEADERS += $$PWD/tasqtdatamodel.h
 PUBLIC_HEADERS += $$PWD/tasqtfixtureplugininterface.h
 PUBLIC_HEADERS += $$PWD/tastraverseinterface.h
 PUBLIC_HEADERS += $$PWD/taspluginloader.h 
-PUBLIC_HEADERS += $$PWD/tasapplicationtraverseinterface.h
+PUBLIC_HEADERS += $$PWD/tasextensioninterface.h
 
 HEADERS += $$PWD/tasmessages.h 
 HEADERS += $$PWD/testabilitysettings.h 

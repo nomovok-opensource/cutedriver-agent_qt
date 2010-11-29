@@ -339,6 +339,8 @@ void TasClientManager::removeGhostClients()
             if(app->upTime() > 600000){
                 TasLogger::logger()->debug("TasClientManager::removeGhostClients removing client " + app->processId() +  " " 
                                            + app->applicationName());
+
+                detachFromStartupData(app->applicationName());
                 app->killProcess();
                 mClients.remove(iter.key());
                 delete app;

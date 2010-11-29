@@ -59,7 +59,7 @@ TasServerServiceManager::TasServerServiceManager(QObject *parent)
     :QObject(parent)
 {
     mClientManager = TasClientManager::instance();
-    loadPlatformTraversers();
+    loadExtensions();
 }
 
 /*!
@@ -69,7 +69,7 @@ TasServerServiceManager::~TasServerServiceManager()
 {
     qDeleteAll(mCommands);
     mCommands.clear();
-    mPlatformTraversers.clear();
+    mExtensions.clear();
 }
 
 /*!
@@ -91,13 +91,28 @@ void TasServerServiceManager::handleServiceRequest(TasCommandModel& commandModel
         }
          
         targetClient = mClientManager->findByProcessId(commandModel.id());
+
+        //no registered client check for platform specific handles for the process id
         if(!targetClient){
+            foreach(TasExtensionInterface* extension, mExtensions){            
+                QByteArray data;
+                if(extension->performCommand(commandModel, data)){
+                    TasResponse response(responseId, new QByteArray(data));
+                    requester->sendMessage(response);
+                    return;
+                }
+            }
+        }
+
+        if(!targetClient){
+            TasLogger::logger()->debug("TasServerServiceManager::handleServiceRequest: no target client send error...");
             TasResponse response(responseId);
             response.setIsError(true);
             response.setErrorMessage("The application with Id " + commandModel.id() + " is no longer available.");
             requester->sendMessage(response);
             return;
         }
+
     }
 
     if(!targetClient && (commandModel.service() == APPLICATION_STATE || commandModel.service() == SCREEN_SHOT 
@@ -114,7 +129,7 @@ void TasServerServiceManager::handleServiceRequest(TasCommandModel& commandModel
         ResponseWaiter* waiter = new ResponseWaiter(responseId, requester);
         bool needFragment = false;
         if(commandModel.service() == APPLICATION_STATE || commandModel.service() == FIND_OBJECT_SERVICE){
-            foreach(TasApplicationTraverseInterface* traverser, mPlatformTraversers){
+            foreach(TasExtensionInterface* traverser, mExtensions){
                 QByteArray data = traverser->traverseApplication(targetClient->processId(), targetClient->applicationName(), 
                                                                  targetClient->applicationUid());
                 if(!data.isNull()){
@@ -143,7 +158,7 @@ void TasServerServiceManager::handleServiceRequest(TasCommandModel& commandModel
 
         QByteArray* states = 0;
         if(commandModel.service() == APPLICATION_STATE || commandModel.service() == FIND_OBJECT_SERVICE){
-            foreach(TasApplicationTraverseInterface* traverser, mPlatformTraversers){
+            foreach(TasExtensionInterface* traverser, mExtensions){
                 QByteArray data = traverser->traverseApplication("", "", "");
                 if(!data.isNull()){
                     if(!states){
@@ -181,10 +196,10 @@ void TasServerServiceManager::handleServiceRequest(TasCommandModel& commandModel
     }
 }
 
-void TasServerServiceManager::loadPlatformTraversers()
+void TasServerServiceManager::loadExtensions()
 {
     TasLogger::logger()->debug("TasServerServiceManager::loadPlatformTraversers");
-    QString pluginDir = "platformtraversers";
+    QString pluginDir = "tasextensions";
     QStringList plugins = mPluginLoader.listPlugins(pluginDir);
     TasLogger::logger()->debug("TasServerServiceManager::loadPlatformTraversers plugins found: " + plugins.join("'"));
     QString path = QLibraryInfo::location(QLibraryInfo::PluginsPath) + "/"+pluginDir;
@@ -192,7 +207,7 @@ void TasServerServiceManager::loadPlatformTraversers()
         QString fileName = plugins.at(i);
         QString filePath = QDir::cleanPath(path + QLatin1Char('/') + fileName);
         if(QLibrary::isLibrary(filePath)){
-            loadTraverser(filePath);
+            loadExtension(filePath);
         }
     }
 
@@ -201,15 +216,15 @@ void TasServerServiceManager::loadPlatformTraversers()
 /*!
   Try to load a plugin from the given path. Returns null if no plugin loaded.
  */
-void TasServerServiceManager::loadTraverser(const QString& filePath)
+void TasServerServiceManager::loadExtension(const QString& filePath)
 {
-    TasApplicationTraverseInterface* interface = 0; 
+    TasExtensionInterface* interface = 0; 
     QObject *plugin = mPluginLoader.loadPlugin(filePath);
     if(plugin){
-        interface = qobject_cast<TasApplicationTraverseInterface *>(plugin);        
+        interface = qobject_cast<TasExtensionInterface *>(plugin);        
         if (interface){
             TasLogger::logger()->debug("TasServerServiceManager::loadTraverser added a traverser");
-            mPlatformTraversers.append(interface);
+            mExtensions.append(interface);
         }
         else{
             TasLogger::logger()->warning("TasServerServiceManager::loadTraverser could not cast to TasApplicationTraverseInterface");

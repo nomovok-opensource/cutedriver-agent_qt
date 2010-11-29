@@ -33,7 +33,7 @@
 #include "tasclientmanager.h"
 #include "tasservercommand.h"
 #include "tasservercommand.h"
-#include "tasapplicationtraverseinterface.h"
+#include "tasextensioninterface.h"
 
 class ResponseWaiter;
 
@@ -57,13 +57,13 @@ private slots:
 	void removeWaiter(qint32 responseId);
 
 private:
-	void loadPlatformTraversers();
-	void loadTraverser(const QString& filePath);
+	void loadExtensions();
+	void loadExtension(const QString& filePath);
 
 private:	
 	QHash<qint32, ResponseWaiter*> reponseQueue;
 	TasClientManager* mClientManager;
-	QList<TasApplicationTraverseInterface*> mPlatformTraversers;
+	QList<TasExtensionInterface*> mExtensions;
     TasPluginLoader mPluginLoader;    
 };
 
