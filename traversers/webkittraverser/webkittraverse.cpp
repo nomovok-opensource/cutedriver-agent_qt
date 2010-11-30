@@ -432,8 +432,8 @@ void WebKitTraverse::traverseWebElement(TasObject* parent, QPoint parentPos, QPo
     childInfo.addAttribute("height", webElement->geometry().height());
     childInfo.addAttribute("objectType", TYPE_WEB);
     childInfo.addBooleanAttribute("visible",
-        (webElement->styleProperty("visibility", QWebElement::ComputedStyle).toLower() == "visible") ||
-            (webElement->styleProperty("display", QWebElement::ComputedStyle).toLower() != "none"));
+        (webElement->styleProperty("visibility", QWebElement::ComputedStyle).toLower() == "visible") &&
+           (webElement->styleProperty("display", QWebElement::ComputedStyle).toLower() != "none"));
     childInfo.addBooleanAttribute("hasFocus", webElement->hasFocus());
 
     if(webElement->hasAttributes()) {
