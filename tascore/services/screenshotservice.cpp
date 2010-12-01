@@ -64,7 +64,7 @@ void ScreenshotService::getScreenshot(TasCommandModel& model, TasResponse& respo
 {
     QListIterator<TasTarget*> i(model.targetList());
     QString errorMsg = PARSE_ERROR;
-    QPixmap screenshot;
+    QImage screenshot;
     QString pictureFormat = "PNG";
     while (i.hasNext()){
         TasTarget* commandTarget = i.next();
@@ -102,14 +102,18 @@ void ScreenshotService::getScreenshot(TasCommandModel& model, TasResponse& respo
                     QPoint windowPoint = view->mapTo(view->window(), point);
                     QRectF itemRect = item->boundingRect();
                     ItemLocationDetails locationDetails = TestabilityUtils::getItemLocationDetails(item);
-                    if(draw){
 
+                    if(draw){
                         screenshot = QPixmap::grabWidget(view->window(), locationDetails.scenePoint.x(), locationDetails.scenePoint.y(),
-                                                         locationDetails.width, locationDetails.height);
+                                                         locationDetails.width, locationDetails.height).toImage();
                     }
                     else{
                         screenshot = QPixmap::grabWindow(view->window()->winId(), locationDetails.scenePoint.x(), locationDetails.scenePoint.y(),
-                                                         locationDetails.width, locationDetails.height);
+                                                         locationDetails.width, locationDetails.height).toImage();
+                    }
+
+                    if (!screenshot.isNull()) {
+                        screenshot.setText("tas_id", objectId(view->window()));
                     }
                 }
                 else{
@@ -134,20 +138,28 @@ void ScreenshotService::getScreenshot(TasCommandModel& model, TasResponse& respo
                     target = qApp->desktop();
                 }
             }
+
             if(target){
+
                 if ( (target->isWindow() && !draw) || target->inherits("QDesktopWidget")){
-                    screenshot = QPixmap::grabWindow(target->winId());
+                    screenshot = QPixmap::grabWindow(target->winId()).toImage();
                 }
+
                 else{
                     if(draw){
-                        screenshot = QPixmap::grabWidget(target);
+                        screenshot = QPixmap::grabWidget(target).toImage();
                     }
+
                     else{
                         QPoint point = target->mapToGlobal(QPoint(0,0));
                         QPoint windowPoint = target->window()->mapFromGlobal(point);
                         screenshot = QPixmap::grabWindow(target->window()->winId(), windowPoint.x(), windowPoint.y(),
-                                                         target->rect().width(), target->rect().height());
+                                                         target->rect().width(), target->rect().height()).toImage();
                     }
+                }
+
+                if (!screenshot.isNull()) {
+                    screenshot.setText("tas_id", objectId(target));
                 }
             }
             else{

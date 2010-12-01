@@ -43,11 +43,11 @@ TInt LoadGeneratingThreadFunc(TAny* aLoadInPercentage)
     }
     
     TInt sleepTime = 100;
-    while(ETrue) {
+    while (ETrue) {
         // Calculate something relatively time consuming 
         TReal x = 4;
         TReal y = 0;
-        for(TInt i = 0; i < 100000; i++) {
+        for (TInt i = 0; i < 100000; i++) {
             Math::Sqrt(y, x);
             Math::Pow(x, y, 2);
         }
@@ -77,7 +77,7 @@ TInt LoadGeneratingThreadFunc(TAny* aLoadInPercentage)
         TReal cpuUsage = cpuDiffDouble / timeDiffDouble;
 
         // Calculate time to sleep to achieve the requested load
-        sleepTime = sleepTime * cpuUsage / load + 0.3;
+        sleepTime = sleepTime * cpuUsage / load;
         User::AfterHighRes(sleepTime * 1000);
     }
 }
@@ -87,16 +87,16 @@ CpuLoadGenerator::CpuLoadGenerator()
 
 CpuLoadGenerator::~CpuLoadGenerator() 
 {
-    TasLogger::logger()->debug("  CpuLoadGenerator::~CpuLoadGenerator");
+    TasLogger::logger()->debug("CpuLoadGenerator::~CpuLoadGenerator");
     if (mLoadGeneratingThread.ExitType() == EExitPending) {
         mLoadGeneratingThread.Kill(KErrNone);
+        mLoadGeneratingThread.Close();
     }
-    mLoadGeneratingThread.Close();
 }
 
 int CpuLoadGenerator::start(int loadInPercentage)
 {
-    TasLogger::logger()->debug("> CpuLoadGenerator::start");
+    TasLogger::logger()->debug("> CpuLoadGenerator::start: " + QString::number(loadInPercentage));
     mLoadInPercentage = loadInPercentage;
     int error = mLoadGeneratingThread.Create(
                     LoadGeneratorThreadName(), 
@@ -104,8 +104,9 @@ int CpuLoadGenerator::start(int loadInPercentage)
                     0x2000, 
                     NULL, 
                     &mLoadInPercentage);
+    TasLogger::logger()->debug("Thread create: " + QString::number(error));
     if (!error) {
-        TasLogger::logger()->debug("  Resuming thread");
+        TasLogger::logger()->debug("Resuming thread");
         mLoadGeneratingThread.Resume();
     }
     return error;
@@ -115,10 +116,11 @@ int CpuLoadGenerator::stop()
 {
     TasLogger::logger()->debug("> CpuLoadGenerator::stop");
     if (mLoadGeneratingThread.ExitType() == EExitPending) {
-        TasLogger::logger()->debug("  Killing...");
+        TasLogger::logger()->debug("Killing...");
         mLoadGeneratingThread.Kill(KErrNone);
     }
     int status = mLoadGeneratingThread.ExitReason();
+    TasLogger::logger()->debug("Closing...");
     mLoadGeneratingThread.Close();
     return status;
 }
