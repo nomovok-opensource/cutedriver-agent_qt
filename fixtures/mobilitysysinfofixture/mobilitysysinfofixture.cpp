@@ -69,11 +69,11 @@ bool MobilitySysInfoFixture::execute(void * objectInstance, QString actionName, 
     if (actionName == ACTION_GET_IMEI) {
         stdOut.append(di->imei());
         retVal = true;
-    } if (actionName == ACTION_GET_IMSI) {
+    } else if (actionName == ACTION_GET_IMSI) {
         stdOut.append(di->imsi());
         retVal = true;
     } else {
-        stdOut.append("Invalid contact fixture command: "+ actionName);
+        stdOut.append("Invalid mobility sysinfo command: "+ actionName);
         return false;
     }
 
