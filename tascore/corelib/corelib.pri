@@ -59,7 +59,7 @@ unix: {
        SOURCES += $$PWD/tasdeviceutils_symbian.cpp
        SOURCES += $$PWD/gpuinfo_symbian.cpp
     } else {
-       macx:{
+       macx|CONFIG(no_x):{
          SOURCES += $$PWD/tasdeviceutils.cpp	
        }
        else{	

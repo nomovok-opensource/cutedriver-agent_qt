@@ -29,7 +29,7 @@ SOURCES += corelib/tasserver.cpp
 SOURCES += corelib/tasservercommand.cpp 
 SOURCES += corelib/tasserverservicemanager.cpp 
 
-unix:!symbian:!macx {
+unix:!symbian:!macx:!CONFIG(no_x) {
     SOURCES += corelib/tasnativeutils_unix.cpp                             
 } else {
     symbian: {
