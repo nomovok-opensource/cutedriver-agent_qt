@@ -129,21 +129,6 @@ void TasServerServiceManager::handleServiceRequest(TasCommandModel& commandModel
         ResponseWaiter* waiter = new ResponseWaiter(responseId, requester);
         bool needFragment = false;
         if(commandModel.service() == APPLICATION_STATE || commandModel.service() == FIND_OBJECT_SERVICE){
-            //HACK
-            TasDataModel* model = new TasDataModel();
-            TasObjectContainer& container = model->addNewObjectContainer("uiState", "symbian");
-            container.setId(qVersion());
-
-            QString name = TasCoreUtils::getApplicationName();
-            TasObject& application = container.addNewObject(targetClient->processId(), targetClient->applicationName(), "application");
-            application.setEnv("symbian");
-            application.addAttribute("processId", targetClient->processId());
-            application.addAttribute("objectType", TYPE_APPLICATION_VIEW);
-            QByteArray xml;
-            model->serializeModel(xml, 0, true);
-            waiter->appendPlatformData(xml);
-            //END HACK
-            needFragment = true;
             foreach(TasExtensionInterface* traverser, mExtensions){
                 QByteArray data = traverser->traverseApplication(targetClient->processId(), targetClient->applicationName(), 
                                                                  targetClient->applicationUid());
