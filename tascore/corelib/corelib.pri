@@ -77,6 +77,6 @@ LIBS += -lqmsystem
 }
 
 
-unix:!symbian:!macx {
+unix:!symbian:!macx:!CONFIG(no_x) {
   LIBS += -lX11 -lXtst 
 }

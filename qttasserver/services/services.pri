@@ -46,7 +46,7 @@ SOURCES += services/systeminfoservice.cpp
 SOURCES += services/resourceloggingservice.cpp
 SOURCES += services/shelltask.cpp
 
-unix:!symbian:!macx {
+unix:!symbian:!macx:!CONFIG(no_x) {
    SOURCES += services/uicommandservice_unix.cpp
 } else {
     symbian: {
