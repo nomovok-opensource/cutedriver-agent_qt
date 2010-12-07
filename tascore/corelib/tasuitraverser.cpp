@@ -104,9 +104,8 @@ void TasUiTraverser::finalizeTraverse()
 
 TasObject& TasUiTraverser::addModelRoot(TasDataModel& model, TasCommand* command)
 {
-    QString qtVersion = "Qt" + QString(qVersion());
-    TasObjectContainer& container = model.addNewObjectContainer(1, qtVersion, "qt");
-    
+    TasObjectContainer& container = model.addNewObjectContainer("uiState", "qt");
+    container.setId(qVersion());
     TasObject& application = container.addNewObject(QString::number(qApp->applicationPid()), getApplicationName(), "application");          
     addApplicationDetails(application, command);
     return application;
@@ -241,7 +240,7 @@ void TasUiTraverser::traverseGraphicsViewItems(TasObject& parent, QGraphicsView*
 void TasUiTraverser::addApplicationDetails(TasObject& application, TasCommand* command)
 {
     traverseObject(application, qApp, command, false);
-
+    application.setEnv("qt");
     //set these again cause properties overwrite them
     application.setName(getApplicationName());
     application.setId(QString::number(qApp->applicationPid()));

@@ -24,7 +24,7 @@
 #include <QPluginLoader>
 #include <QLibraryInfo>
 #include <QDir>
-
+#include "tastraverseinterface.h"
 #include "tastraverserloader.h"
 
 static QString TRAVERSE_DIR = "traversers";

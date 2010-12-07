@@ -28,6 +28,8 @@
 #include "testabilityutils.h"
 #include "tastraverseutils.h"
 #include "taslogger.h"
+#include "tasqtdatamodel.h"
+#include "tasqtcommandmodel.h"
 
 TasTraverseUtils::TasTraverseUtils()
 {

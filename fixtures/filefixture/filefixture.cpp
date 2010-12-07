@@ -26,7 +26,6 @@
 
 #include <taslogger.h>
 #include <testabilityutils.h>
-#include <tasqtdatamodel.h>
 
 #include "filefixture.h"
 

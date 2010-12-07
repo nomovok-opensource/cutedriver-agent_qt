@@ -19,38 +19,47 @@
 
 
 
-TEMPLATE = lib
-TARGET = popupfixture
-CONFIG += plugin
+TEMPLATE = app
 
-include(../../tasbase.pri)
-
-target.path = $$TAS_TARGET_PLUGIN/tasfixtures
-
-symbian: {
-	TARGET.EPOCALLOWDLLDATA = 1
-    TARGET.CAPABILITY=CAP_GENERAL_DLL
-	popup_fixture_plugin.sources = popupfixture.dll
-	popup_fixture_plugin.path = /resource/qt/plugins/tasfixtures
- 
-	DEPLOYMENT += popup_fixture_plugin
-	
+mac {
+   CONFIG -= app_bundle
 }
 
 
-DEPENDPATH += . 
-INCLUDEPATH += . ../../tascore/corelib 
+include(../tasbase.pri)
+
+TARGET = qttasutilapp
+DESTDIR = bin
+DEFINES += TDTASSERVER
+
+target.path = $$TAS_TARGET_BIN
+
+symbian: {
+    TARGET.CAPABILITY=ALL -TCB
+	TARGET.VID = VID_DEFAULT
+  	TARGET.EPOCALLOWDLLDATA = 1 
+	TARGET.EPOCHEAPSIZE = 0x20000 0x1400000
+}
+
+
+INCLUDEPATH += . src
+INCLUDEPATH += ../tascore/corelib
+
+DEPENDPATH += . src
 
 # Input
+HEADERS += utilityapp.h
+SOURCES += main.cpp
+SOURCES += utilityapp.cpp
 
+include(../tascore/corelib/corelib.pri)
+HEADERS += $$PUBLIC_HEADERS
 
-HEADERS += popupfixture.h
-SOURCES += popupfixture.cpp
-
-DESTDIR = lib
-
+QT += network xml 
 INSTALLS += target
 
-LIBS += -L../../tascore/lib/ -lqttestability
+unix:!symbian:!macx {
+  LIBS += -lX11 -lXtst 
+}
 
-QT += xml
+

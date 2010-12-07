@@ -30,6 +30,7 @@
 #include <taslogger.h>
 #include <QProcess>
 #include <QMutexLocker>
+#include <QMetaType>
 
 #ifdef Q_OS_WIN32
 #include <Windows.h>

@@ -339,6 +339,8 @@ void TasClientManager::removeGhostClients()
             if(app->upTime() > 600000){
                 TasLogger::logger()->debug("TasClientManager::removeGhostClients removing client " + app->processId() +  " " 
                                            + app->applicationName());
+
+                detachFromStartupData(app->applicationName());
                 app->killProcess();
                 mClients.remove(iter.key());
                 delete app;
@@ -491,6 +493,9 @@ TasClient* TasClientManager::latestClient(bool includeSocketless)
             }
         }        
     }        
+#ifdef Q_OS_SYMBIAN 
+    return 0;
+#endif
 
     //find latest
     TasClient* match = 0;
@@ -756,7 +761,7 @@ void TasClient::setRegistered()
     emit registered(mProcessId);
 }
 
-#ifdef Q_OS_SYMBIAN
+
 /*!
   In symbian application are most often identified by uid instead of 
   process ids. Store symbian uid to make it possible to look for the 
@@ -774,7 +779,7 @@ QString TasClient::applicationUid()
 {
     return mApplicationUid;
 }
-#endif
+
 
 void TasClient::setPluginType(const QString& pluginType)
 {

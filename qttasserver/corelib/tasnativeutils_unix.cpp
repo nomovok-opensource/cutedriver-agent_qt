@@ -257,3 +257,6 @@ int TasNativeUtils::bringAppToForeground(TasClient& app)
     Q_UNUSED(app);
     return -1;
 }
+
+void TasNativeUtils::changeOrientation()
+{}

@@ -34,8 +34,9 @@
 #include <windows.h>
 #endif
 
-static const QString DETACH_MODE = "detached";
-static const QString SET_PARAMS_ONLY = "set_params_only";
+const char* const DETACH_MODE = "detached";
+const char* const SET_PARAMS_ONLY = "set_params_only";
+const char* const NO_WAIT = "noWait";
 
 StartAppService::StartAppService()
 {}
@@ -83,7 +84,9 @@ void StartAppService::startApplication(TasCommand& command, TasResponse& respons
     }
     else if(arguments.contains(DETACH_MODE)){
         arguments.removeAll(DETACH_MODE);
-        launchDetached(applicationPath, arguments, response);
+        bool noWait = arguments.contains(NO_WAIT);
+        arguments.removeAll(NO_WAIT);
+        launchDetached(applicationPath, arguments, response, noWait);
     }
     else{
         launchAttached(applicationPath, arguments, response, parseEnvironmentVariables(command.parameter("environment")));   
@@ -168,11 +171,13 @@ void StartAppService::launchAttached(const QString& applicationPath,const QStrin
     TasLogger::logger()->debug("StartAppService::launchAttached out");
 }
 
-void StartAppService::launchDetached(const QString& applicationPath, const QStringList& arguments, TasResponse& response)
+void StartAppService::launchDetached(const QString& applicationPath, const QStringList& arguments, TasResponse& response, bool noWait)
 {
     qint64 pid;
     if(QProcess::startDetached(applicationPath, arguments, ".", &pid)){
-        new RegisterWaiter(response.requester(), TasClientManager::instance()->addClient(QString::number(pid)), response.messageId());
+        QString processName = TasCoreUtils::parseExecutable(applicationPath);
+        new RegisterWaiter(response.requester(), TasClientManager::instance()->addClient(QString::number(pid), processName),
+                           response.messageId(), noWait);
     }
     else{
         TasLogger::logger()->error("TasServer::launchDetached: count not start the application " + applicationPath);
@@ -180,7 +185,7 @@ void StartAppService::launchDetached(const QString& applicationPath, const QStri
     }            
 }
 
-RegisterWaiter::RegisterWaiter(TasSocket* socket, TasClient *target, qint32 messageId)
+RegisterWaiter::RegisterWaiter(TasSocket* socket, TasClient *target, qint32 messageId, bool noWait)
 {
     mMessageId = messageId;
     mSocket = socket;
@@ -197,7 +202,8 @@ RegisterWaiter::RegisterWaiter(TasSocket* socket, TasClient *target, qint32 mess
     connect(mSocket, SIGNAL(socketClosed()), this, SLOT(socketClosed()));
 
     //maybe the app already is registered (e.g symbian only allows one instance of each app)
-    if(target->socket()){
+    //or wait not wanted (starting a native app)
+    if(target->socket() || noWait ){
         clientRegistered(mProcessId);
     }
 }
