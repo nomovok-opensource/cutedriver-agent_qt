@@ -88,4 +88,5 @@
 "/epoc32/release/armv5/urel/testabilitystyle.dll"                     - "$:\sys\bin\testabilitystyle.dll"
 "..\loaders\style\qmakepluginstubs\testabilitystyle.qtplugin"         - "$:\resource\qt\plugins\styles\testabilitystyle.qtplugin"
 
-
+"/epoc32/release/armv5/urel/mobilitysysinfofixture.dll"               - "$:\sys\bin\mobilitysysinfofixture.dll"
+"..\fixtures\mobilitysysinfofixture\qmakepluginstubs\mobilitysysinfofixture.qtplugin"   - "$:\resource\qt\plugins\tasfixtures\mobilitysysinfofixture.qtplugin"

@@ -23,6 +23,7 @@ TEMPLATE = subdirs
 	!CONFIG(no_mobility)  {
     	SUBDIRS += mobilitysfwfixture
 	    SUBDIRS += contactfixture
+		SUBDIRS += mobilitysysinfofixture
 	}
 }
 
