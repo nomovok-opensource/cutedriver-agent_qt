@@ -400,19 +400,23 @@ void TestabilityService::loadStartUpParams(QString appName)
 
 void TestabilityService::enableSignalTracking(QString signal, QString timeStamp)
 {
-    TasCommandModel model;
-    model.setService(FIXTURE);
-    TasTarget& target = model.addTarget( TasCoreUtils::objectId( qApp ) );
-    target.setType(TYPE_APPLICATION_VIEW);
-    TasCommand& command = target.addCommand("Fixture");
-    command.addParameter("plugin","tassignal");
-    command.addParameter("method","enable_signal");
-    command.addApiParameter(SIGNAL_KEY,signal);    
-    command.addApiParameter(PROCESS_START_TIME,timeStamp);
+    //need to make a commandmodel for the fixture
+    TasCommandModel* model = TasCommandModel::createModel();
+    model->addAttribute("service", FIXTURE);
+    TasTarget& target = model->addTarget();
+    target.addAttribute("TasId", TasCoreUtils::objectId( qApp ));
+    target.addAttribute("type", TYPE_APPLICATION_VIEW);
+    TasCommand& command = target.addCommand();
+    command.addAttribute("name", "Fixture");
+    command.addAttribute("plugin","tassignal");
+    command.addAttribute("method","enable_signal");
+    command.addApiParameter(SIGNAL_KEY,signal, "QString");    
+    command.addApiParameter(PROCESS_START_TIME,timeStamp, "QString");
     QString message;
-    if(!mFixtureService->performFixture(model, message)){
+    if(!mFixtureService->performFixture(*model, message)){
         TasLogger::logger()->error("TestabilityService::enableSignalTracking failed. " + message);
     }
+    delete model;
 }
 
 bool TestabilityService::eventFilter(QObject *target, QEvent *event)

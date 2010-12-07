@@ -25,12 +25,15 @@
 #include <QList>
 #include <QHash>
 #include <QTimer>
-#include <tasservicemanager.h>
-#include <tasqtcommandmodel.h>
-#include <tassocket.h>
 
+#include "tasservicemanager.h"
+#include "tasqtcommandmodel.h"
+#include "tassocket.h"
+#include "taspluginloader.h"
 #include "tasclientmanager.h"
 #include "tasservercommand.h"
+#include "tasservercommand.h"
+#include "tasextensioninterface.h"
 
 class ResponseWaiter;
 
@@ -44,6 +47,8 @@ public:
 
 	void serviceResponse(TasMessage& response);
 
+	static QByteArray responseHeader();
+
 protected:
 	void handleServiceRequest(TasCommandModel& commandModel, TasSocket* requester, qint32 responseId);
 	QString serviceErrorMessage(){return "QtTasserver does not support the given service: ";}
@@ -51,9 +56,15 @@ protected:
 private slots:
 	void removeWaiter(qint32 responseId);
 
+private:
+	void loadExtensions();
+	void loadExtension(const QString& filePath);
+
 private:	
 	QHash<qint32, ResponseWaiter*> reponseQueue;
 	TasClientManager* mClientManager;
+	QList<TasExtensionInterface*> mExtensions;
+    TasPluginLoader mPluginLoader;    
 };
 
 class ResponseWaiter : public QObject
@@ -65,8 +76,9 @@ public:
     ~ResponseWaiter();
 
 	void setResponseFilter(ResponseFilter* filter);
-
 	void sendResponse(TasMessage& response);
+
+	void appendPlatformData(QByteArray data);
 
 signals:
 	void responded(qint32 responseId);
@@ -80,6 +92,7 @@ private:
 	QTimer mWaiter;
 	TasSocket *mSocket;
 	ResponseFilter* mFilter;
+	QByteArray *mPlatformData;
 };
 
 #endif

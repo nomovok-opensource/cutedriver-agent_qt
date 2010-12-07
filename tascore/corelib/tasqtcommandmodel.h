@@ -26,142 +26,121 @@
 #include <QHash>
 #include <QPair>
 #include <QVariant>
+#include <QDomElement>
+#include <QDomDocument>
+
 #include "tasconstants.h"
 
 class TasCommand;
 class TasTarget;
 class TasCommandModel;
 
-class TAS_EXPORT TasCommand 
+class TasDomObject
 {
 public:
-    TasCommand(const QString& name=0);
-    TasCommand(const TasCommand& command);
+    void addAttribute(const QString& name, const QString& value);
+	void setText(const QString& text);
+    QDomElement domElement() const;
+
+protected:
+    QDomElement addChild(const QString& name);
+
+    QDomElement mElement;
+};
+
+class TAS_EXPORT TasCommand : public TasDomObject
+{
+public:
+    TasCommand(QDomElement element);
+    TasCommand(const TasCommand& other);
     ~TasCommand();
     
 public:    
-    void setName(const QString& name);
     QString name() const;    
-    void addParameter(const QString& name, const QString& value);
     QString parameter(const QString& name);
-    void setText(const QString& text);
     QString text() const;	
-	void addApiParameter(const QString& name, const QString& value, const QString& type=QVariant::typeToName(QVariant::String));
     QString apiParameter(const QString& name);
-	QPair<QString,QString> apiParameterAndType(const QString& name);
 	QHash<QString, QString> getApiParameters() const;
-	QHash<QString, QPair<QString,QString> > getApiParametersAndTypes() const;
 
-protected:
-	QHash<QString, QString> getParameters() const;
-
-
-private:    
-    QString commandName;
-    QString valueText;
-    QHash<QString, QString> parameters;
-    QHash<QString, QPair<QString,QString> > apiParameters;
+	void addApiParameter(const QString& name, const QString& value, const QString& type);
 };
 
-class TAS_EXPORT TasTargetObject
+class TAS_EXPORT TasTargetObject : public TasDomObject
 {
 public:  
-    TasTargetObject();
-    TasTargetObject(const TasTargetObject& object);
+    TasTargetObject(QDomElement element);
 	~TasTargetObject();
 
 public:
 	QString objectName() const;
 	QString className() const;
+	QString objectId() const;
 	QHash<QString,QString> searchParameters() const;
-	void setObjectName(const QString name);
-	void setClassName(const QString className);
-	void addSearchParameter(QString name, QString value);
 	void setChild(TasTargetObject* child);
 	TasTargetObject* child() const;
-	void setObjectId(const QString id);
-	QString objectId() const;
-
 
 private:
-	QString mObjectName;
-	QString mClassName;
-	QString mObjectId;
-	QHash<QString,QString> mSearchParams;
 	TasTargetObject* mChild;
 };
 
 
-class TAS_EXPORT TasTarget 
+class TAS_EXPORT TasTarget : public TasDomObject
 {
 public:
-    TasTarget(const QString& id);
-    TasTarget(const TasTarget& target);
+    TasTarget(QDomElement element);
+    TasTarget(const TasTarget& other);
     ~TasTarget();
     
 public:    
     QList<TasCommand*> commandList() const;
-    TasCommand& addCommand(const QString& name=0);    
-    void setId(const QString& id);
-    void setType(const QString& type);
     QString id() const;
     QString type() const;
 	TasCommand* findCommand(const QString& commandName);
 	TasTargetObject* targetObject() const;
-	void setTasTargetObject(TasTargetObject* object);
+
+	TasCommand& addCommand();
+
+private:
+	void initialize();
 
 private:
     QList<TasCommand*> mCommands;
-    QString mTargetId;
-    QString mTargetType;      
 	TasTargetObject* mTargetObject;  
 };
 
-class TAS_EXPORT TasCommandModel
+class TAS_EXPORT TasCommandModel : public TasDomObject
 {    
 public:
-    TasCommandModel();
     ~TasCommandModel();
-    
-public:
-    QList<TasTarget*> targetList();
-    TasTarget& addTarget(const QString& id);
-    void setId(const QString& id);
-    QString id() const;
-    void setUId(const QString& uid);
-    QString uid() const;
-    void setName(const QString& name);
-    QString name() const;
-    void setService(const QString& service);
-    QString service() const;
-
-	TasTarget* findTarget(const QString& id);
-
-	void setSourceString(const QString& sourceXml);
-	QString sourceString() const;
-	
-	void setAsynchronous(bool asynchronous);
-	bool isAsynchronous();
-	void forceUiUpdate(bool force);
-	bool forceUiUpdate();
-	
-	void setInterval(int interval);
-	int interval();
-
-	bool isMultitouch();
-	void setMultitouch(bool multitouch);
 
 private:
+    TasCommandModel(QDomDocument* document);
+    
+public:
+	static TasCommandModel* makeModel(const QString& sourceXml);
+	static TasCommandModel* createModel();
+
+    QList<TasTarget*> targetList();
+
+    QString id() const;
+    QString uid() const;
+    QString name() const;
+    QString service() const;
+
+	TasTarget& addTarget();
+	TasTarget* findTarget(const QString& id);
+	QString sourceString(bool original=true) const;
+	
+	bool isAsynchronous();
+	int interval();
+	bool isMultitouch();
+	bool onlyFragment();
+
+	TasCommandModel* clone();
+private:
     QList<TasTarget*> mTargets;
-    QString mModelId;    
-    QString mModelUid;    
-    QString mModelName;    
-    QString mModelService;    
-	QString mSourceString;
-	bool mAsynchronous;
-	bool mForceUiUpdate;
-	bool mMultitouch;
-	int mInterval;
+	QDomDocument* mDocument;
+	QString mSource;	
 };
 
 #endif

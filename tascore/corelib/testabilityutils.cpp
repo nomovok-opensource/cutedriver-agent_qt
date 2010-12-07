@@ -1,22 +1,22 @@
-/*************************************************************************** 
-** 
-** Copyright (C) 2010 Nokia Corporation and/or its subsidiary(-ies). 
-** All rights reserved. 
-** Contact: Nokia Corporation (testabilitydriver@nokia.com) 
-** 
+/***************************************************************************
+**
+** Copyright (C) 2010 Nokia Corporation and/or its subsidiary(-ies).
+** All rights reserved.
+** Contact: Nokia Corporation (testabilitydriver@nokia.com)
+**
 ** This file is part of Testability Driver Qt Agent
-** 
-** If you have questions regarding the use of this file, please contact 
-** Nokia at testabilitydriver@nokia.com . 
-** 
-** This library is free software; you can redistribute it and/or 
-** modify it under the terms of the GNU Lesser General Public 
-** License version 2.1 as published by the Free Software Foundation 
-** and appearing in the file LICENSE.LGPL included in the packaging 
-** of this file. 
-** 
-****************************************************************************/ 
- 
+**
+** If you have questions regarding the use of this file, please contact
+** Nokia at testabilitydriver@nokia.com .
+**
+** This library is free software; you can redistribute it and/or
+** modify it under the terms of the GNU Lesser General Public
+** License version 2.1 as published by the Free Software Foundation
+** and appearing in the file LICENSE.LGPL included in the packaging
+** of this file.
+**
+****************************************************************************/
+
 
 
 #include "testabilityutils.h"
@@ -27,45 +27,45 @@
 /*!
   \class TestabilityUtils
   \brief TasServiveBase is an abstract base class for tasplugin services
-    
+
 */
 
 /*!
   Casting direclty from the id does not work so we need to look
-  for the object with a matching id.   
+  for the object with a matching id.
 */
 QWidget* TestabilityUtils::findWidget(const QString& id)
 {
     TasLogger::logger()->debug("TestabilityUtils::findWidget id:" + id);
     QWidget* widget = NULL;
-    QWidgetList widgetList = qApp->allWidgets();        
-    if (!widgetList.empty()){        
+    QWidgetList widgetList = qApp->allWidgets();
+    if (!widgetList.empty()){
         QWidgetList::iterator i;
-        for (i = widgetList.begin(); i != widgetList.end(); ++i){        
-            QWidget* current = *i;        
+        for (i = widgetList.begin(); i != widgetList.end(); ++i){
+            QWidget* current = *i;
             QString currentId = TasCoreUtils::objectId(current);
             if(currentId == id){
                 widget = current;
                 break;
             }
-        }    
-    }    
-    return widget;  
+        }
+    }
+    return widget;
 }
 
 /*!
   Casting direclty from the id does not work so we need to look
   for the object with a matching id.
-    
+
   Get the correct QGraphicsItem for the given object id.
-  Looks for the item from graphicsviews and scenes     
+  Looks for the item from graphicsviews and scenes
 */
 QGraphicsItem* TestabilityUtils::findGraphicsItem(const QString& id)
 {
     QGraphicsItem* item = NULL;
-    QWidgetList widgetList = qApp->topLevelWidgets();        
+    QWidgetList widgetList = qApp->topLevelWidgets();
     if (!widgetList.empty()){
-        QList<QWidget*>::iterator iter;        
+        QList<QWidget*>::iterator iter;
         for (iter = widgetList.begin(); iter != widgetList.end(); iter++){
             QWidget *current = *iter;
             item = findFromObject(id, current);
@@ -74,10 +74,10 @@ QGraphicsItem* TestabilityUtils::findGraphicsItem(const QString& id)
             }
         }
     }
-    else { 
-	    qDebug("TasCommander::getGraphicsItem the list of top level widgets is empty!");
-    }    
-    return item;    
+    else {
+            qDebug("TasCommander::getGraphicsItem the list of top level widgets is empty!");
+    }
+    return item;
 }
 
 /*!
@@ -91,9 +91,9 @@ QGraphicsItem* TestabilityUtils::findFromObject(const QString& id, QObject* obje
     if (!object) return NULL;
 
     QGraphicsView* view = qobject_cast<QGraphicsView*>(object);
-    if (view){                
+    if (view){
         item = lookForMatch(view->items(), id);
-        if(!item){    
+        if(!item){
             QGraphicsScene* scene = view->scene();
             if (scene) {
                 item = lookForMatch(scene->items(), id);
@@ -103,12 +103,12 @@ QGraphicsItem* TestabilityUtils::findFromObject(const QString& id, QObject* obje
     //look from possible scenes
     QGraphicsScene* scene = qobject_cast<QGraphicsScene*>(object);
     if (!item && scene) {
-        item = lookForMatch(scene->items(), id);  
+        item = lookForMatch(scene->items(), id);
     }
     //look from child objects if item not on top level
     if(!item){
         QList<QObject*> objList = object->children();
-        QList<QObject*>::iterator iter;        
+        QList<QObject*>::iterator iter;
         for (iter = objList.begin(); iter != objList.end(); iter++){
             QObject* obj = *iter;
             if (obj->isWidgetType()){
@@ -134,44 +134,44 @@ QGraphicsItem* TestabilityUtils::lookForMatch(QList<QGraphicsItem*> itemList, co
             if(verifyGraphicsItemMatch(targetId, child)){
                 item = child;
                 break;
-            }            
+            }
         }
-    }    
+    }
     return item;
 }
 
 /*!
   Verifys that a given GraphicsItem refences matches to the given id.
-  If the item is a decendant of QObject (e.g. GraphicsWIdget) then 
-  the verification is done by casting the item to object and then 
+  If the item is a decendant of QObject (e.g. GraphicsWIdget) then
+  the verification is done by casting the item to object and then
   making the comparison.
-  Returns true if the given item matches. 
+  Returns true if the given item matches.
 */
 bool TestabilityUtils::verifyGraphicsItemMatch(const QString& targetId, QGraphicsItem* source)
-{    
+{
     bool doesMatch = false;
     //first check simple match
     QString sourceId = TestabilityUtils::graphicsItemId(source);
-    
+
     if (sourceId == targetId){
         doesMatch = true;
     }
-    else if(source){        
+    else if(source){
         //is object decendant
         QGraphicsObject* object = source->toGraphicsObject();
-        if (object) {            
+        if (object) {
             sourceId = TasCoreUtils::objectId(object);
             if (sourceId == targetId){
-                doesMatch = true;                        
-            }   
+                doesMatch = true;
+            }
         }
-    }    
+    }
     return doesMatch;
 }
 
-/*!        
-    Gets the viewport widget for the item through the scene and 
-    graphics view. Can be null if the viewport could not be determined. 
+/*!
+    Gets the viewport widget for the item through the scene and
+    graphics view. Can be null if the viewport could not be determined.
     Sets the point to be the screen coordinate at the center point of the
     QGraphicsitem.
  */
@@ -180,21 +180,21 @@ QWidget* TestabilityUtils::viewPortAndPosition(QGraphicsItem* graphicsItem, QPoi
     QGraphicsView* view = getViewForItem(graphicsItem);
     QWidget* widget = NULL;
     if(view){
-        widget = view->viewport();            
+        widget = view->viewport();
     }
 
-    if (widget){                    
+    if (widget){
         QRectF sceneRect = graphicsItem->sceneBoundingRect();
         if(!view->viewportTransform().isIdentity()){
             QTransform transform = view->viewportTransform();
             sceneRect = transform.mapRect(sceneRect);
         }
-        QRectF viewPortRect(widget->rect());        
+        QRectF viewPortRect(widget->rect());
         QRectF interSection = viewPortRect.intersected(sceneRect);
         point = widget->mapToGlobal(interSection.center().toPoint());
     }
     return widget;
-}   
+}
 
 QGraphicsView* TestabilityUtils::getViewForItem(QGraphicsItem* graphicsItem)
 {
@@ -205,7 +205,7 @@ QGraphicsView* TestabilityUtils::getViewForItem(QGraphicsItem* graphicsItem)
 
     QGraphicsScene* scene = graphicsItem->scene();
     if(scene){
-        QList<QGraphicsView*> list = scene->views();    
+        QList<QGraphicsView*> list = scene->views();
         foreach(QGraphicsView* view, scene->views()){
             if(view->items().indexOf(graphicsItem) != -1){
                 match = view;
@@ -217,7 +217,7 @@ QGraphicsView* TestabilityUtils::getViewForItem(QGraphicsItem* graphicsItem)
 }
 
 
-/*! Return true if widgets belongs to custom traversed object, i.e. 
+/*! Return true if widgets belongs to custom traversed object, i.e.
  * Will be traversed even if not visible */
 bool TestabilityUtils::isCustomTraverse() {
     return getApplicationName() == "webwidgetrunner" ||
@@ -239,25 +239,40 @@ bool TestabilityUtils::isItemInView(QGraphicsView* view, QGraphicsItem* graphics
         }
         QRect viewPortRect = view->viewport()->rect();
 
+        // if item intersect with view
         if(viewPortRect.intersects(sceneRect.toRect())) {
             QRegion clippedVisibleRegion = viewPortRect.intersected(sceneRect.toRect());
             if (!clippedVisibleRegion.isEmpty()) {
-                QPoint resultPoint = clippedVisibleRegion.rects().at(0).center();                
+                QPoint resultPoint = clippedVisibleRegion.rects().at(0).center();
                 QList<QGraphicsItem*> topItems = view->items(resultPoint);
 
                 QGraphicsItem* topItem = NULL;
 
+                // check top most item in item coordinates
                 for (int i = 0; i < topItems.size(); ++i) {
                     topItem = topItems.at(i);
                     QGraphicsObject* topObject = topItem->toGraphicsObject();
-                    if (topObject && topObject->objectName() == "glass")
+                    QRectF sceneRect = topItem->sceneBoundingRect();
+
+                    // ignore special overlay items
+                    if (topObject && (topObject->objectName() == "glass" || QString(topObject->metaObject()->className()).startsWith("SDeclarativeWindowDecoration"))) {
                         continue;
-                    else
-                        break;      
+                    }
+                    // ignore items with no width or height - should not get these when using point??
+                    else if(sceneRect.width() == 0 || sceneRect.height() == 0) {
+                        continue;
+                    }
+                    // found the top most item
+                    else {
+                        break;
+                    }
                 }
 
                 //QGraphicsObject* topObject = topItem->toGraphicsObject();
-                //TasLogger::logger()->debug("TestabilityUtils::isItemInView top item with id " + QString::number((quintptr)topObject));
+                //QGraphicsObject* itemObject = graphicsItem->toGraphicsObject();
+                //TasLogger::logger()->debug("TestabilityUtils::isItemInView top item with id " + QString::number((quintptr)topObject) + " name " + topObject->metaObject()->className() + " item " + QString::number((quintptr)itemObject) + " itemname " + itemObject->metaObject()->className());
+
+                // if the item itself is the top most item or item is father of topmost item
                 if (topItem && (topItem == graphicsItem || graphicsItem->isAncestorOf(topItem))) {
                     return true;
                 }
@@ -272,8 +287,6 @@ bool TestabilityUtils::isItemInView(QGraphicsView* view, QGraphicsItem* graphics
         else {
             return false;
         }
-
-        
     }
     else{
         return false;
@@ -281,27 +294,41 @@ bool TestabilityUtils::isItemInView(QGraphicsView* view, QGraphicsItem* graphics
 }
 
 
-
 QWidget* TestabilityUtils::getApplicationWindow()
 {
     //attemp to find a window type widget
-    QWidget* target = qApp->activeWindow();
-    if(!target || !target->isWindow() || target->graphicsProxyWidget()){
-        TasLogger::logger()->debug("TestabilityUtils::getApplicationWindow no active window - look for suitable");
-        //no active, take first from list and use it
-        QWidgetList list = qApp->topLevelWidgets();
-        QListIterator<QWidget*> iter(qApp->topLevelWidgets());
-        while(iter.hasNext()){
-            QWidget* w = iter.next();
-            if((w->isVisible() || 
-                (isCustomTraverse() && w->inherits("QGraphicsView")) )
-               && w->isWindow() && w->graphicsProxyWidget() == 0){
-                TasLogger::logger()->debug("TestabilityUtils::getApplicationWindow window found");
-                target = w;
-                break;
+    QWidget* target = qApp->activePopupWidget();
+
+    if (!target) {
+
+        target = qApp->activeModalWidget();
+
+        if (!target) {
+
+            target = qApp->activeWindow();
+
+            if(!target || !target->isWindow() || target->graphicsProxyWidget()){
+
+                TasLogger::logger()->debug("TestabilityUtils::getApplicationWindow no active window - look for suitable");
+
+                //no active, take first from list and use it
+                QWidgetList list = qApp->topLevelWidgets();
+                QListIterator<QWidget*> iter(qApp->topLevelWidgets());
+
+                while(iter.hasNext()){
+                    QWidget* w = iter.next();
+                    if((w->isVisible() ||
+
+                        (isCustomTraverse() && w->inherits("QGraphicsView")) )
+                            && w->isWindow() && w->graphicsProxyWidget() == 0){
+                        TasLogger::logger()->debug("TestabilityUtils::getApplicationWindow window found");
+                        target = w;
+                        break;
+                    }
+                }
             }
-        }                    
-    }        
+        }
+    }
     return target;
 }
 
@@ -322,7 +349,7 @@ bool TestabilityUtils::isBlackListed()
     return false;
 }
 
-/*!        
+/*!
     Returns the Proxy Widget if any parent widget has a proxy
  */
 QGraphicsProxyWidget* TestabilityUtils::parentProxy(QWidget* widget) {
@@ -339,7 +366,7 @@ QGraphicsProxyWidget* TestabilityUtils::parentProxy(QWidget* widget) {
 }
 
 
-QPoint TestabilityUtils::proxyCoordinates(QGraphicsItem* item, bool absolute) 
+QPoint TestabilityUtils::proxyCoordinates(QGraphicsItem* item, bool absolute)
 {
     QRectF sceneRect = item->sceneBoundingRect();
     QGraphicsView* view = TestabilityUtils::getViewForItem(item);
@@ -370,8 +397,8 @@ ItemLocationDetails TestabilityUtils::getItemLocationDetails(QGraphicsItem* grap
         }
         isVisible = isItemInView(view, graphicsItem);
 
-        if(isVisible){
-            //add coordinates also            
+        if(true /*isVisible*/){
+            //add coordinates also
             QRectF sceneRect = graphicsItem->sceneBoundingRect();
             if(!view->viewportTransform().isIdentity()){
                 QTransform transform = view->viewportTransform();
@@ -385,12 +412,12 @@ ItemLocationDetails TestabilityUtils::getItemLocationDetails(QGraphicsItem* grap
             // If the window is embedded into a another app, wee need to figure out if the widget is visible
             if (command && command->parameter("x_parent_absolute") != "" &&
                 command->parameter("y_parent_absolute") != "") {
-                QPoint p(command->parameter("x_parent_absolute").toInt(), 
+                QPoint p(command->parameter("x_parent_absolute").toInt(),
                          command->parameter("y_parent_absolute").toInt());
                 screenPoint += p;
                 point += p;
                 windowPoint += p;
-            } 
+            }
 
             int height = sceneRect.height();
             int width = sceneRect.width();
@@ -425,14 +452,14 @@ ItemLocationDetails TestabilityUtils::getItemLocationDetails(QGraphicsItem* grap
                     if (width < 0 || height < 0) {
                         isVisible = false;
                     }
-                    
+
                 }
 
             }
             screenPoint.setX(xAbs);
             screenPoint.setY(yAbs);
 
-            locationDetails.scenePoint = point;        
+            locationDetails.scenePoint = point;
             locationDetails.screenPoint = screenPoint;
             locationDetails.windowPoint = windowPoint;
             locationDetails.width = width;

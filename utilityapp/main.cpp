@@ -17,21 +17,36 @@
 ** 
 ****************************************************************************/ 
  
-
-
-#ifndef TASTRAVERSERLOADER_H
-#define TASTRAVERSERLOADER_H
-
-#include <QObject>
+ 
+#include <QApplication>
 #include <QHash>
-#include "taspluginloader.h"
+#include <QStringList>
 
-class TasTraverseInterface;
+#include "utilityapp.h"
 
-class TAS_EXPORT TasTraverserLoader : public TasPluginLoader
-{
-public:
-   QHash<QString, TasTraverseInterface*> loadTraversers();
-};
+int main(int argc, char *argv[])
+{   
+    QApplication app(argc, argv);            
+    QString action;
+    uint id = 0;
+    QStringList args = app.arguments();
+    for(int i = 0; i < args.size(); i++){
+        if(args.at(i) == "-i" && args.size() > (i+1) ){
+            i++;
+            id = args.at(i).toUInt();
+        }
+        if(args.at(i) == "-a" && args.size() > (i+1) ){
+            i++;
+            action = args.at(i);
+        }
+    }
+    if(action.isEmpty()){
+        return 0;
+    }
 
-#endif
+    if(action == "screenshot"){
+        TasUtilityApp util;
+        util.sendScreenShot(id);
+    }
+    return 0;
+}

@@ -16,22 +16,32 @@
 ** of this file. 
 ** 
 ****************************************************************************/ 
- 
 
 
-#ifndef TASTRAVERSERLOADER_H
-#define TASTRAVERSERLOADER_H
+#ifndef MOBILITYSYSINFOFIXTUREPLUGIN_H
+#define MOBILITYSYSINFOFIXTUREPLUGIN_H
+
 
 #include <QObject>
 #include <QHash>
-#include "taspluginloader.h"
+#include <tasqtfixtureplugininterface.h>
 
-class TasTraverseInterface;
+#include <qsysteminfo.h>
 
-class TAS_EXPORT TasTraverserLoader : public TasPluginLoader
+QTM_USE_NAMESPACE
+
+class MobilitySysInfoFixture : public QObject, public TasFixturePluginInterface
 {
+    Q_OBJECT
+    Q_INTERFACES(TasFixturePluginInterface)
+ 
 public:
-   QHash<QString, TasTraverseInterface*> loadTraversers();
-};
+     MobilitySysInfoFixture(QObject* parent=0);
+     ~MobilitySysInfoFixture();
+     bool execute(void* objectInstance, QString actionName, QHash<QString, QString> parameters, QString & stdOut);
 
-#endif
+private:
+ };
+
+#endif //MOBILITYSYSINFOFIXTUREPLUGIN_H
+ 

@@ -113,6 +113,7 @@ public:
     void setId(const QString& id);
     void setName(const QString& name);
     void setType(const QString& type);
+	void setEnv(const QString& env);
 	QString getType();
     void setParentId(const QString& id );
         
@@ -126,7 +127,7 @@ private:
     QString parentId;
     QString type;    
     QString name;
-    
+    QString env;
     friend class TasObjectContainer; 
     friend class SerializeFilter;
 };
@@ -140,6 +141,7 @@ public:
     ~TasObjectContainer();
 
     void setId(int id);
+    void setId(QString id);
     void setName(const QString& name);
     void setType(const QString& type);
     TasObject& addNewObject();
@@ -169,13 +171,13 @@ public:
     TasObjectContainer& addNewObjectContainer(const QString& name, const QString& type);
     TasObjectContainer& addNewObjectContainer(int id, const QString& name, const QString& type);	
 
-    QString serializeModel(SerializeFilter* filter = 0);    
-    void serializeModel(QByteArray& xmlData, SerializeFilter* filter = 0);    
+    void serializeModel(QByteArray& xmlData, SerializeFilter* filter = 0, bool containers=false);    
 	void clearModel();
 
 	TasObjectContainer* findObjectContainer(const QString& id);
 
 private:
+	void serializeContainers(TasXmlWriter& xmlWriter, SerializeFilter& filter);
     void serializeIntoString(TasXmlWriter& xmlWriter, SerializeFilter& filter);
 
 private:

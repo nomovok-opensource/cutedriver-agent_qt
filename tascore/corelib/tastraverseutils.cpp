@@ -28,6 +28,8 @@
 #include "testabilityutils.h"
 #include "tastraverseutils.h"
 #include "taslogger.h"
+#include "tasqtdatamodel.h"
+#include "tasqtcommandmodel.h"
 
 TasTraverseUtils::TasTraverseUtils()
 {
@@ -266,7 +268,7 @@ QPair<QPoint,QPoint> TasTraverseUtils::addGraphicsItemCoordinates(TasObject* obj
     ItemLocationDetails locationDetails = TestabilityUtils::getItemLocationDetails(graphicsItem, command);
 
     QPair<QPoint,QPoint> coords;
-    if(locationDetails.visible){
+    if(true /*locationDetails.visible*/){
         objectInfo->addAttribute("x", locationDetails.windowPoint.x());
         objectInfo->addAttribute("y", locationDetails.windowPoint.y());   
 

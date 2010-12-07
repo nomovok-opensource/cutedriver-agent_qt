@@ -17,24 +17,49 @@
 ## 
 ############################################################################
 
-HEADERS += corelib/tasclientmanager.h
-HEADERS += corelib/tasserver.h 
-HEADERS += corelib/tasservercommand.h 
-HEADERS += corelib/tasnativeutils.h 
 
-HEADERS += corelib/tasserverservicemanager.h 
 
-SOURCES += corelib/tasclientmanager.cpp
-SOURCES += corelib/tasserver.cpp
-SOURCES += corelib/tasservercommand.cpp 
-SOURCES += corelib/tasserverservicemanager.cpp 
+TEMPLATE = app
 
-unix:!symbian:!macx:!CONFIG(no_x) {
-    SOURCES += corelib/tasnativeutils_unix.cpp                             
-} else {
-    symbian: {
-        SOURCES += corelib/tasnativeutils_symbian.cpp
-    } else {
-        SOURCES += corelib/tasnativeutils.cpp
-    }
+mac {
+   CONFIG -= app_bundle
 }
+
+
+include(../tasbase.pri)
+
+TARGET = qttasutilapp
+DESTDIR = bin
+DEFINES += TDTASSERVER
+
+target.path = $$TAS_TARGET_BIN
+
+symbian: {
+    TARGET.CAPABILITY=ALL -TCB
+	TARGET.VID = VID_DEFAULT
+  	TARGET.EPOCALLOWDLLDATA = 1 
+	TARGET.EPOCHEAPSIZE = 0x20000 0x1400000
+}
+
+
+INCLUDEPATH += . src
+INCLUDEPATH += ../tascore/corelib
+
+DEPENDPATH += . src
+
+# Input
+HEADERS += utilityapp.h
+SOURCES += main.cpp
+SOURCES += utilityapp.cpp
+
+include(../tascore/corelib/corelib.pri)
+HEADERS += $$PUBLIC_HEADERS
+
+QT += network xml 
+INSTALLS += target
+
+unix:!symbian:!macx {
+  LIBS += -lX11 -lXtst 
+}
+
+

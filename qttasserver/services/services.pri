@@ -27,7 +27,6 @@ HEADERS += services/killservice.h
 HEADERS += services/listappsservice.h
 HEADERS += services/confservice.h
 HEADERS += services/uicommandservice.h
-HEADERS += services/webkitcommandservice.h
 HEADERS += services/foregroundservice.h
 HEADERS += services/systeminfoservice.h
 HEADERS += services/resourceloggingservice.h
@@ -44,7 +43,6 @@ SOURCES += services/listappsservice.cpp
 SOURCES += services/confservice.cpp
 SOURCES += services/foregroundservice.cpp
 SOURCES += services/systeminfoservice.cpp
-SOURCES += services/webkitcommandservice.cpp
 SOURCES += services/resourceloggingservice.cpp
 SOURCES += services/shelltask.cpp
 

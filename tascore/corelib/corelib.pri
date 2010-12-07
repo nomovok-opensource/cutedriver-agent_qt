@@ -25,6 +25,7 @@ PUBLIC_HEADERS += $$PWD/tasqtdatamodel.h
 PUBLIC_HEADERS += $$PWD/tasqtfixtureplugininterface.h
 PUBLIC_HEADERS += $$PWD/tastraverseinterface.h
 PUBLIC_HEADERS += $$PWD/taspluginloader.h 
+PUBLIC_HEADERS += $$PWD/tasextensioninterface.h
 
 HEADERS += $$PWD/tasmessages.h 
 HEADERS += $$PWD/testabilitysettings.h 
@@ -37,10 +38,10 @@ HEADERS += $$PWD/tasservicemanager.h
 HEADERS += $$PWD/tasxmlwriter.h 
 HEADERS += $$PWD/tassocket.h 
 HEADERS += $$PWD/tasdeviceutils.h 
-HEADERS += $$PWD/tascommandparser.h 
+#HEADERS += $$PWD/tascommandparser.h 
 
 SOURCES += $$PWD/tasmessages.cpp
-SOURCES += $$PWD/tascommandparser.cpp 
+#SOURCES += $$PWD/tascommandparser.cpp 
 SOURCES += $$PWD/taslogger.cpp 
 SOURCES += $$PWD/taspluginloader.cpp 
 SOURCES += $$PWD/tasqtcommandmodel.cpp 
@@ -59,7 +60,7 @@ unix: {
        SOURCES += $$PWD/tasdeviceutils_symbian.cpp
        SOURCES += $$PWD/gpuinfo_symbian.cpp
     } else {
-       macx:{
+       macx|CONFIG(no_x):{
          SOURCES += $$PWD/tasdeviceutils.cpp	
        }
        else{	

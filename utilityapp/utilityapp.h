@@ -17,37 +17,21 @@
 ** 
 ****************************************************************************/ 
  
+#ifndef UTILITYAPP_H
+#define UTILITYAPP_H
 
-
-#ifndef WEBKITCOMMANDSERVICE_QTTAS_H
-#define WEBKITCOMMANDSERVICE_QTTAS_H
-
-#include "tasservercommand.h"
-#include "tasconstants.h"
-
-#include <QObject>
-
-
-class WebkitCommandService : public QObject, public TasServerCommand
+class TasUtilityApp
 {
-    Q_OBJECT
-
 public:
-    WebkitCommandService();
-    ~WebkitCommandService();
+    TasUtilityApp();
+	~TasUtilityApp();
 
-    /*!
-      From ServiceInterface
-    */
-    bool executeService(TasCommandModel& model, TasResponse& response);
-    QString serviceName() const { return WEBKIT_COMMAND; }
-
+	void sendScreenShot(uint id);
 
 private:
-    
-    void executeJavaScript(TasCommand* command);
-
-
+	void sendData(QByteArray* data, uint id);
 };
 
+
 #endif
+

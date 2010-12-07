@@ -20,8 +20,11 @@
 
 
 TEMPLATE = lib
-TARGET = popupfixture
+TARGET = mobilitysysinfofixture
 CONFIG += plugin
+CONFIG += mobility
+
+MOBILITY += systeminfo
 
 include(../../tasbase.pri)
 
@@ -29,28 +32,25 @@ target.path = $$TAS_TARGET_PLUGIN/tasfixtures
 
 symbian: {
 	TARGET.EPOCALLOWDLLDATA = 1
-    TARGET.CAPABILITY=CAP_GENERAL_DLL
-	popup_fixture_plugin.sources = popupfixture.dll
-	popup_fixture_plugin.path = /resource/qt/plugins/tasfixtures
+        TARGET.CAPABILITY = CAP_GENERAL_DLL LocalServices NetworkServices ReadUserData UserEnvironment Location  ReadDeviceData
+
+        mobilitysysinfo_fixture_plugin.sources = mobilitysysinfofixture.dll
+        mobilitysysinfo_fixture_plugin.path = /resource/qt/plugins/tasfixtures
  
-	DEPLOYMENT += popup_fixture_plugin
+        DEPLOYMENT += mobilitysysinfo_fixture_plugin
 	
 }
 
 
 DEPENDPATH += . 
-INCLUDEPATH += . ../../tascore/corelib 
+INCLUDEPATH += . ../../tascore/corelib
 
 # Input
-
-
-HEADERS += popupfixture.h
-SOURCES += popupfixture.cpp
+HEADERS += mobilitysysinfofixture.h
+SOURCES += mobilitysysinfofixture.cpp
 
 DESTDIR = lib
 
 INSTALLS += target
 
 LIBS += -L../../tascore/lib/ -lqttestability
-
-QT += xml

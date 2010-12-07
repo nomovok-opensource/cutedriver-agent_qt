@@ -75,7 +75,7 @@ void FixtureService::performServerFixture(TasCommandModel &model, TasResponse& r
     }
     else{
         //needs some refactoring to avoid double parse...(luckily small docs..)
-        commandQueue.enqueue(TasCommandParser::parseCommandXml(model.sourceString()));            
+        commandQueue.enqueue(TasCommandModel::makeModel(model.sourceString()));            
         mTimer->start();            
     }
 }

@@ -51,8 +51,6 @@ class TasMessage
 	quint8 flag() const;
     bool isCompressed() const;
 	qint32 messageId();
-
-private:
 	void uncompressData();
 	
 private:

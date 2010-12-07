@@ -48,7 +48,7 @@ public:
 private:
 	void startApplication(TasCommand& command, TasResponse& response);
     void launchAttached(const QString& applicationPath,const QStringList& arguments, TasResponse& response, QHash<QString, QString> environmentVariables);
-	void launchDetached(const QString& applicationPath,const QStringList& arguments, TasResponse& response);
+	void launchDetached(const QString& applicationPath,const QStringList& arguments, TasResponse& response, bool noWait);
 	void setRuntimeParams(TasCommand& command);
 
 private:
@@ -64,7 +64,7 @@ class RegisterWaiter : public QObject
 {
   Q_OBJECT
 public:
-    RegisterWaiter(TasSocket* requester, TasClient *target, qint32 messageId);
+  RegisterWaiter(TasSocket* requester, TasClient *target, qint32 messageId, bool noWait=false);
 	
 private slots:
 	void clientRegistered(const QString& processId);

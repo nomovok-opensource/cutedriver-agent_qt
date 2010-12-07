@@ -80,7 +80,6 @@ CONFIG(maemo){
 DEFINES += TAS_MAEMO
 }
 
-
 INSTALLS += target
 
 

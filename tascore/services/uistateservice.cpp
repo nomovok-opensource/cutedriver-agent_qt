@@ -61,7 +61,7 @@ QByteArray* UiStateService::makeUiState(TasCommandModel& model)
     }
     QByteArray* xml = new QByteArray(); 
     TasDataModel* uiModel = mTraverser->getUiState(command);
-    uiModel->serializeModel(*xml);
+    uiModel->serializeModel(*xml, 0, model.onlyFragment());
     delete uiModel;
     return xml;
 }
