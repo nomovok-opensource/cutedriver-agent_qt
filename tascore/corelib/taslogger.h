@@ -29,9 +29,9 @@
 #include <QMutex>
 
 #include "tasconstants.h"
-#include "tasqtcommandmodel.h"
 
 class EventLogger;
+class TasCommand;
 
 enum LogType
 {

@@ -18,6 +18,7 @@
 ############################################################################
 
 
+
 TEMPLATE = app
 
 mac {
@@ -27,50 +28,38 @@ mac {
 
 include(../tasbase.pri)
 
-TARGET = qttasmemlog_srv
+TARGET = qttasutilapp
 DESTDIR = bin
-target.path = $$TAS_TARGET_BIN
 DEFINES += TDTASSERVER
 
+target.path = $$TAS_TARGET_BIN
+
 symbian: {
-    TARGET.CAPABILITY = ReadUserData WriteUserData ReadDeviceData WriteDeviceData SwEvent PowerMgmt
+    TARGET.CAPABILITY=ALL -TCB
 	TARGET.VID = VID_DEFAULT
   	TARGET.EPOCALLOWDLLDATA = 1 
 	TARGET.EPOCHEAPSIZE = 0x20000 0x1400000
-    LIBS += -lMemSpyDriverClient
-    INCLUDEPATH += /epoc32/include/platform/memspy/driver
-
-    LIBS += -lhal
-    INCLUDEPATH += /epoc32/include/platform/memspy/driver
-#if ( NCP_COMMON_S60_VERSION_SUPPORT >= S60_VERSION_50 && NCP_COMMON_FAMILY_ID >= 70 )
-	LIBS += -llibegl
-#endif
 }
 
-win32: {
-	LIBS +=  -lUser32
-}
 
-INCLUDEPATH += .
-INCLUDEPATH += services corelib
+INCLUDEPATH += . src
 INCLUDEPATH += ../tascore/corelib
-DEPENDPATH += . services corelib
+
+DEPENDPATH += . src
+
+# Input
+HEADERS += utilityapp.h
+SOURCES += main.cpp
+SOURCES += utilityapp.cpp
 
 include(../tascore/corelib/corelib.pri)
 HEADERS += $$PUBLIC_HEADERS
 
-# Input
-SOURCES += main.cpp
-
-include(corelib/corelib.pri)
-include(services/services.pri)
-
-QT -= gui
 QT += network xml 
 INSTALLS += target
 
 unix:!symbian:!macx:!CONFIG(no_x) {
-  LIBS += -lX11 -lXtst
+  LIBS += -lX11 -lXtst 
 }
 
 

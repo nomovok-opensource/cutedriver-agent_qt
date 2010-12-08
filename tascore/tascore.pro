@@ -47,8 +47,8 @@ HEADERS += $$PUBLIC_HEADERS
 symbian: {	
     TARGET.CAPABILITY=CAP_GENERAL_DLL
     TARGET.EPOCALLOWDLLDATA = 1
-
     BLD_INF_RULES.prj_exports += "conf/qt_testability.ini /epoc32/winscw/c/qt_testability/qt_testability.ini"
+    BLD_INF_RULES.prj_exports += "conf/qt_testability.ini /epoc32/data/z/system/data/qt_testability.ini"	
 	!CONFIG(no_mobility){
 	  MOBILITY += systeminfo
       CONFIG += mobility

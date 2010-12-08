@@ -66,5 +66,8 @@ bool ForegroundService::executeService(TasCommandModel& model, TasResponse& resp
             response.setErrorMessage("   Unknown command: " + model.name());
         }
     }
+    else if (model.service() == "changeOrientation" ){
+        TasNativeUtils::changeOrientation();
+    }
     return status;
 }

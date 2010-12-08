@@ -17,21 +17,21 @@
 ** 
 ****************************************************************************/ 
  
+#ifndef UTILITYAPP_H
+#define UTILITYAPP_H
 
-
-#ifndef TASTRAVERSERLOADER_H
-#define TASTRAVERSERLOADER_H
-
-#include <QObject>
-#include <QHash>
-#include "taspluginloader.h"
-
-class TasTraverseInterface;
-
-class TAS_EXPORT TasTraverserLoader : public TasPluginLoader
+class TasUtilityApp
 {
 public:
-   QHash<QString, TasTraverseInterface*> loadTraversers();
+    TasUtilityApp();
+	~TasUtilityApp();
+
+	void sendScreenShot(uint id);
+
+private:
+	void sendData(QByteArray* data, uint id);
 };
 
+
 #endif
+

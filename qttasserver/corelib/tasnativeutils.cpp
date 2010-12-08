@@ -45,3 +45,6 @@ int TasNativeUtils::bringAppToForeground(TasClient& app)
 {
     return -1;
 }
+
+void TasNativeUtils::changeOrientation()
+{}

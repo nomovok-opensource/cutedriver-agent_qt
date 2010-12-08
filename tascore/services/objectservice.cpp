@@ -46,7 +46,6 @@ bool ObjectService::executeService(TasCommandModel& model, TasResponse& response
 {
     if(model.service() == serviceName() ){
         performObjectService(model, response);
-        model.forceUiUpdate(true);
         return true;
     }
     else{

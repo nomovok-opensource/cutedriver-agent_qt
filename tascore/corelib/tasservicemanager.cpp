@@ -126,7 +126,8 @@ void TasServiceManager::performService(TasCommandModel& commandModel, TasRespons
 */
 TasCommandModel* TasServiceManager::parseMessageString(const QString& messageBody, QString& errorMessage)
 {
-    TasCommandModel* commandModel = TasCommandParser::parseCommandXml(messageBody);       
+    //    TasCommandModel* commandModel = TasCommandParser::parseCommandXml(messageBody);       
+    TasCommandModel* commandModel = TasCommandModel::makeModel(messageBody);
     if(!commandModel){
         TasLogger::logger()->fatal("TasServiceManager::parseMessageString could not parse message.");
         errorMessage = PARSE_ERROR;        

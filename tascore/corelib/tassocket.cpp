@@ -168,14 +168,8 @@ void TasSocket::clearHandlers()
 
 
 /*!
-    Send a message over the connection represented by this socket. If there is no response 
-    before the given timeout is exceeded this function will return false. Response will be placed in the response
-    QByteArray. 
-    Note that that reading the response may take longer than the given timeout. The timeout is only
-    linked to the readyRead signal which means that as soon as some data is available the timeout will
-    not be exceeded.    
-    Will return false if there are errors in reading the response.
-    The returnRaw=true flag will not attempt to inflate a compressed message.
+  Send a message over the connection represented by this socket. Returns false if the connection 
+  is not writable.
 */
 bool TasSocket::sendRequest(const qint32& messageId, const QString& message)
 {
@@ -184,15 +178,8 @@ bool TasSocket::sendRequest(const qint32& messageId, const QString& message)
 
 
 /*!
-    Send a message over the connection represented by this socket. If there is no response 
-    before the given timeout is exceeded this function will return false. Response will be placed in the response
-    QByteArray. 
-    Note that that reading the response may take longer than the given timeout. The timeout is only
-    linked to the readyRead signal which means that as soon as some data is available the timeout will
-    not be exceeded.    
-    Will return false if there are errors in reading the response.
-    The returnRaw=true flag will not attempt to inflate a compressed message.
-
+  Send a message over the connection represented by this socket. Returns false if the connection 
+  is not writable. Message will be deleted once message is sent.
 */
 bool TasSocket::sendRequest(const qint32& messageId, QByteArray* message)
 {
@@ -222,6 +209,7 @@ bool TasSocket::sendResponse(const qint32& messageId, QString message, bool comp
 
 bool TasSocket::sendError(const qint32& messageId, QByteArray* message, bool compressed)
 {
+    //wil delete the message
     TasMessage msg(ERROR_MSG, compressed, message, messageId);
     return sendMessage(msg);
 }

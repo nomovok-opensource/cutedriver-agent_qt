@@ -27,11 +27,12 @@
 #include <QStringList>
 #include <QPair>
 
-#include "tasqtdatamodel.h"
 #include "tasconstants.h"
 
 class TraverseFilter;
 class TasCommand;
+class TasObject;
+class TasAttribute;
 class QGraphicsItem;
 class QFont;
 class TasDataFilter;

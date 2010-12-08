@@ -32,6 +32,7 @@ const char* const VERSION = "version";
 const char* const DATE_TIME = "dateTime";
 const char* const NAME = "name";
 const char* const TYPE = "type";
+const char* const ENV = "env";
 const char* const DATA_TYPE = "dataType";
 const char* const ID = "id";
 const char* const ROOT_NAME = "tasMessage";
@@ -196,7 +197,9 @@ void TasAttribute::serializeIntoString(TasXmlWriter& xmlWriter ,SerializeFilter&
     
 */
 TasObject::TasObject()
-{}
+{
+    setEnv("qt");
+}
 
 /*!
     Destructor
@@ -234,6 +237,11 @@ void TasObject::setType(const QString& type)
 QString TasObject::getType()
 {
     return type;
+}
+
+void TasObject::setEnv(const QString& env)
+{
+    this->env = env;
 }
 
 /*!
@@ -417,6 +425,9 @@ void TasObject::serializeIntoString(TasXmlWriter& xmlWriter ,SerializeFilter& fi
     attrs[ID] = id; 
     attrs[NAME] = name;
     attrs[TYPE] = type;     
+    if(!env.isEmpty()){
+        attrs[ENV] = env;   
+    }  
     if(!parentId.isEmpty()){
         attrs[PARENT] = parentId;     
     }
@@ -477,6 +488,12 @@ void TasObjectContainer::setId(int id)
 {
     this->id = QString::number(id);
 }
+
+void TasObjectContainer::setId(QString id)
+{
+    this->id = id;
+}
+
 
 /*!
     
@@ -652,7 +669,7 @@ TasObjectContainer* TasDataModel::findObjectContainer(const QString& id)
     Filter ownership is assumed and it will be removed once
     the serializing has been completed.
 */
-void TasDataModel::serializeModel(QByteArray& xmlData, SerializeFilter* filter)
+void TasDataModel::serializeModel(QByteArray& xmlData, SerializeFilter* filter, bool containers)
 {
     if(!filter){
         filter = new SerializeFilter();
@@ -660,7 +677,12 @@ void TasDataModel::serializeModel(QByteArray& xmlData, SerializeFilter* filter)
     QTextStream stream(&xmlData, QIODevice::WriteOnly);
     stream.setCodec(QTextCodec::codecForName("UTF-8"));
     TasXmlWriter tasXmlWriter(stream);
-    serializeIntoString(tasXmlWriter, *filter);
+    if(containers){
+        serializeContainers(tasXmlWriter, *filter);
+    }
+    else{
+        serializeIntoString(tasXmlWriter, *filter);
+    }
     delete filter;
 }
 
@@ -670,15 +692,20 @@ void TasDataModel::serializeIntoString(TasXmlWriter& xmlWriter, SerializeFilter&
     attributes[VERSION] = TAS_VERSION; 
     attributes[DATE_TIME] = QDateTime::currentDateTime().toString("yyyy.MM.dd hh:mm:ss.zzz"); 
     xmlWriter.openElement(ROOT_NAME, attributes);
+    serializeContainers(xmlWriter, filter);
+    xmlWriter.closeElement(ROOT_NAME);
+}
+
+
+void TasDataModel::serializeContainers(TasXmlWriter& xmlWriter, SerializeFilter& filter)
+{
     for (int i = 0; i < containers.size(); ++i) {
         TasObjectContainer* container = containers.at(i);
         if ( filter.serializeContainer(*container)){
             container->serializeIntoString(xmlWriter, filter);
         }
     }       
-    xmlWriter.closeElement(ROOT_NAME);
 }
-
 
 /*!
 
