@@ -26,7 +26,7 @@
 #include <testabilityutils.h>
 #include <tasqtdatamodel.h>
 
-#include "MobilitySysInfoFixture.h"
+#include "mobilitysysinfofixture.h"
 
 
 static const QString ACTION_GET_IMEI = "imei";
