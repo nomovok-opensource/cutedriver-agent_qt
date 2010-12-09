@@ -36,57 +36,57 @@
 [0x1028315F],0,0,0,{"S60ProductID"}
 
 ; Executable and default resource files
-"/epoc32/release/armv5/urel/qttasserver.exe"                          - "$:\sys\bin\qttasserver.exe"
+"\epoc32\release\armv5\urel\qttasserver.exe"                          - "$:\sys\bin\qttasserver.exe"
 "\epoc32\data\z\resource\apps\qttasserver.rsc"                        - "$:\resource\apps\qttasserver.rsc"
 "\epoc32\data\z\private\10003a3f\import\apps\qttasserver_reg.rsc"     - "$:\private\10003a3f\import\apps\qttasserver_reg.rsc"
 
-"/epoc32/release/armv5/urel/qttas_ui.exe"                             - "$:\sys\bin\qttas_ui.exe"
-"/epoc32/data/z/resource/apps/qttas_ui.rsc"                           - "$:\resource\apps\qttas_ui.rsc"
-"/epoc32/data/z/private/10003a3f/import/apps/qttas_ui_reg.rsc"        - "$:\private\10003a3f\import\apps\qttas_ui_reg.rsc"
+"\epoc32\release\armv5\urel\qttas_ui.exe"                             - "$:\sys\bin\qttas_ui.exe"
+"\epoc32\data\z\resource\apps\qttas_ui.rsc"                           - "$:\resource\apps\qttas_ui.rsc"
+"\epoc32\data\z\private\10003a3f\import\apps\qttas_ui_reg.rsc"        - "$:\private\10003a3f\import\apps\qttas_ui_reg.rsc"
 
-"/epoc32/release/armv5/urel/qttasmemlog_srv.exe"                      - "$:\sys\bin\qttasmemlog_srv.exe"
-"/epoc32/data/z/resource/apps/qttasmemlog_srv.rsc"                    - "$:\resource\apps\qttasmemlog_srv.rsc"
-"/epoc32/data/z/private/10003a3f/import/apps/qttasmemlog_srv_reg.rsc" - "$:\private\10003a3f\import\apps\qttasmemlog_srv_reg.rsc"
+"\epoc32\release\armv5\urel\qttasmemlog_srv.exe"                      - "$:\sys\bin\qttasmemlog_srv.exe"
+"\epoc32\data\z\resource\apps\qttasmemlog_srv.rsc"                    - "$:\resource\apps\qttasmemlog_srv.rsc"
+"\epoc32\data\z\private\10003a3f\import\apps\qttasmemlog_srv_reg.rsc" - "$:\private\10003a3f\import\apps\qttasmemlog_srv_reg.rsc"
 
-"/epoc32/release/armv5/urel/qttasutilapp.exe"                         - "$:\sys\bin\qttasutilapp.exe"
-"/epoc32/data/z/resource/apps/qttasutilapp.rsc"                       - "$:\resource\apps\qttasutilapp.rsc"
-"/epoc32/data/z/private/10003a3f/import/apps/qttasutilapp_reg.rsc"    - "$:\private\10003a3f\import\apps\qttasutilapp_reg.rsc"
+"\epoc32\release\armv5\urel\qttasutilapp.exe"                         - "$:\sys\bin\qttasutilapp.exe"
+"\epoc32\data\z\resource\apps\qttasutilapp.rsc"                       - "$:\resource\apps\qttasutilapp.rsc"
+"\epoc32\data\z\private\10003a3f\import\apps\qttasutilapp_reg.rsc"    - "$:\private\10003a3f\import\apps\qttasutilapp_reg.rsc"
 
-"/epoc32/release/armv5/urel/qttestability.dll"                        - "$:\sys\bin\qttestability.dll"
-"/epoc32/winscw/c/qt_testability/qt_testability.ini"                  - "$:\qt_testability\qt_testability.ini"
+"\epoc32\release\armv5\urel\qttestability.dll"                        - "$:\sys\bin\qttestability.dll"
+"\epoc32\winscw\c\qt_testability\qt_testability.ini"                  - "$:\qt_testability\qt_testability.ini"
 
-"/epoc32/release/armv5/urel/qttraverse.dll"                           - "$:\sys\bin\qttraverse.dll"
-"..\traversers\qttraverser\qmakepluginstubs\qttraverse.qtplugin"      - "$:\resource\qt\plugins\traversers\qttraverse.qtplugin"
+"\epoc32\release\armv5\urel\qttraverse.dll"                           - "$:\sys\bin\qttraverse.dll"
+"\epoc32\data\z\resource\qt\plugins\traversers\qttraverse.qtplugin"      - "$:\resource\qt\plugins\traversers\qttraverse.qtplugin"
 
-"/epoc32/release/armv5/urel/viewitemtraverse.dll"                               - "$:\sys\bin\viewitemtraverse.dll"
-"..\traversers\viewitemtraverser\qmakepluginstubs\viewitemtraverse.qtplugin"    - "$:\resource\qt\plugins\traversers\viewitemtraverse.qtplugin"
+"\epoc32\release\armv5\urel\viewitemtraverse.dll"                               - "$:\sys\bin\viewitemtraverse.dll"
+"\epoc32\data\z\resource\qt\plugins\traversers\viewitemtraverse.qtplugin"    - "$:\resource\qt\plugins\traversers\viewitemtraverse.qtplugin"
 
-"/epoc32/release/armv5/urel/layouttraverse.dll"                             - "$:\sys\bin\layouttraverse.dll"
-"..\traversers\layouttraverser\qmakepluginstubs\layouttraverse.qtplugin"    - "$:\resource\qt\plugins\traversers\layouttraverse.qtplugin"
+"\epoc32\release\armv5\urel\layouttraverse.dll"                             - "$:\sys\bin\layouttraverse.dll"
+"\epoc32\data\z\resource\qt\plugins\traversers\layouttraverse.qtplugin"    - "$:\resource\qt\plugins\traversers\layouttraverse.qtplugin"
 
-"/epoc32/release/armv5/urel/tasfixture.dll"                           - "$:\sys\bin\tasfixture.dll"
-"..\fixtures\tasfixture\qmakepluginstubs\tasfixture.qtplugin"         - "$:\resource\qt\plugins\tasfixtures\tasfixture.qtplugin"
+"\epoc32\release\armv5\urel\tasfixture.dll"                           - "$:\sys\bin\tasfixture.dll"
+"\epoc32\data\z\resource\qt\plugins\tasfixtures\tasfixture.qtplugin"         - "$:\resource\qt\plugins\tasfixtures\tasfixture.qtplugin"
 
-"/epoc32/release/armv5/urel/tassignal.dll"                            - "$:\sys\bin\tassignal.dll"
-"..\fixtures\signalfixture\qmakepluginstubs\tassignal.qtplugin"       - "$:\resource\qt\plugins\tasfixtures\tassignal.qtplugin"
+"\epoc32\release\armv5\urel\tassignal.dll"                            - "$:\sys\bin\tassignal.dll"
+"\epoc32\data\z\resource\qt\plugins\tasfixtures\tassignal.qtplugin"       - "$:\resource\qt\plugins\tasfixtures\tassignal.qtplugin"
 
-"/epoc32/release/armv5/urel/fpsfixture.dll"                           - "$:\sys\bin\fpsfixture.dll"
-"..\fixtures\fpsfixture\qmakepluginstubs\fpsfixture.qtplugin"         - "$:\resource\qt\plugins\tasfixtures\fpsfixture.qtplugin"
+"\epoc32\release\armv5\urel\fpsfixture.dll"                           - "$:\sys\bin\fpsfixture.dll"
+"\epoc32\data\z\resource\qt\plugins\tasfixtures\fpsfixture.qtplugin"         - "$:\resource\qt\plugins\tasfixtures\fpsfixture.qtplugin"
 
-"/epoc32/release/armv5/urel/filefixture.dll"                          - "$:\sys\bin\filefixture.dll"
-"..\fixtures\filefixture\qmakepluginstubs\filefixture.qtplugin"       - "$:\resource\qt\plugins\tasfixtures\filefixture.qtplugin"
+"\epoc32\release\armv5\urel\filefixture.dll"                          - "$:\sys\bin\filefixture.dll"
+"\epoc32\data\z\resource\qt\plugins\tasfixtures\filefixture.qtplugin"       - "$:\resource\qt\plugins\tasfixtures\filefixture.qtplugin"
 
-"/epoc32/release/armv5/urel/popupfixture.dll"                         - "$:\sys\bin\popupfixture.dll"
-"..\fixtures\popupfixture\qmakepluginstubs\popupfixture.qtplugin"     - "$:\resource\qt\plugins\tasfixtures\popupfixture.qtplugin"
+"\epoc32\release\armv5\urel\popupfixture.dll"                         - "$:\sys\bin\popupfixture.dll"
+"\epoc32\data\z\resource\qt\plugins\tasfixtures\popupfixture.qtplugin"     - "$:\resource\qt\plugins\tasfixtures\popupfixture.qtplugin"
 
-;"/epoc32/release/armv5/urel/utilfixture.dll"                          - "$:\sys\bin\utilfixture.dll"
-;"/epoc32/data/z/resource/qt/plugins/tasfixtures/utilfixture.qtplugin" - "$:\resource\qt\plugins\tasfixtures\utilfixture.qtplugin"
+;"\epoc32\release\armv5\urel\utilfixture.dll"                          - "$:\sys\bin\utilfixture.dll"
+;"\epoc32\data\z\resource\qt\plugins\tasfixtures\utilfixture.qtplugin" - "$:\resource\qt\plugins\tasfixtures\utilfixture.qtplugin"
 
-"/epoc32/release/armv5/urel/testability.dll"                          - "$:\sys\bin\testability.dll"
-"..\loaders\testability\qmakepluginstubs\testability.qtplugin"        - "$:\resource\qt\plugins\testability\testability.qtplugin"
+"\epoc32\release\armv5\urel\testability.dll"                          - "$:\sys\bin\testability.dll"
+"\epoc32\data\z\resource\qt\plugins\testability\testability.qtplugin"        - "$:\resource\qt\plugins\testability\testability.qtplugin"
 
-"/epoc32/release/armv5/urel/testabilitystyle.dll"                     - "$:\sys\bin\testabilitystyle.dll"
-"..\loaders\style\qmakepluginstubs\testabilitystyle.qtplugin"         - "$:\resource\qt\plugins\styles\testabilitystyle.qtplugin"
+"\epoc32\release\armv5\urel\testabilitystyle.dll"                     - "$:\sys\bin\testabilitystyle.dll"
+"\epoc32\data\z\resource\qt\plugins\styles\testabilitystyle.qtplugin"         - "$:\resource\qt\plugins\styles\testabilitystyle.qtplugin"
 
-"/epoc32/release/armv5/urel/mobilitysysinfofixture.dll"               - "$:\sys\bin\mobilitysysinfofixture.dll"
-"..\fixtures\mobilitysysinfofixture\qmakepluginstubs\mobilitysysinfofixture.qtplugin"   - "$:\resource\qt\plugins\tasfixtures\mobilitysysinfofixture.qtplugin"
+"\epoc32\release\armv5\urel\mobilitysysinfofixture.dll"               - "$:\sys\bin\mobilitysysinfofixture.dll"
+"\epoc32\data\z\resource\qt\plugins\tasfixtures\mobilitysysinfofixture.qtplugin"   - "$:\resource\qt\plugins\tasfixtures\mobilitysysinfofixture.qtplugin"

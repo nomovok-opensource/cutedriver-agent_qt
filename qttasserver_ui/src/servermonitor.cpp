@@ -32,6 +32,7 @@
 #include "tascoreutils.h"
 #include "testabilitysettings.h"
 #include "servermonitor.h"
+#include "tasextensioninterface.h"
 
 #include "taspluginloader.h"
 #include "tastraverseinterface.h"
@@ -185,15 +186,14 @@ void ServerMonitor::killServer()
             TInt err = process.Open( findProcess );
             if( err == KErrNone)
                 {
-                if( process.ExitType() != EExitPending )
-                    {
-                    process.Close();
-                    }
-                else
-                    {
+                if( process.ExitType() == EExitPending ){
                     process.Kill(0);
                     process.Close();
                     break;
+                }
+                else
+                    {
+                    process.Close();
                     }
                 }              
             }
@@ -260,7 +260,32 @@ void ServerMonitor::loadPlugins()
         }
         emit serverDebug(traPlugin + status);
     }
+
+
+    QString pluginDir = "tasextensions";
+    QStringList plugins = loader.listPlugins(pluginDir);
+    path = QLibraryInfo::location(QLibraryInfo::PluginsPath) + "/"+pluginDir;
+    foreach(QString fileName, plugins){
+        QString filePath = QDir::cleanPath(path + QLatin1Char('/') + fileName);
+        TasExtensionInterface* interface = 0;
+        if(QLibrary::isLibrary(filePath)){
+            QObject *plugin = loader.loadPlugin(filePath);
+            if(plugin){
+                interface = qobject_cast<TasExtensionInterface *>(plugin);
+            }
+        }
+        QString status;
+        if(interface){
+            status.append(" - ok");
+        }else {
+            status.append(" - failed");
+        }
+        emit serverDebug(fileName + status);        
+    }
+
 }
+
+
 
 
 #ifdef Q_OS_SYMBIAN

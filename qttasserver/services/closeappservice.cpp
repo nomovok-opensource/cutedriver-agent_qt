@@ -68,15 +68,12 @@ bool CloseAppService::executeService(TasCommandModel& model, TasResponse& respon
  */
 void CloseAppService::stopApplication(TasCommandModel& model, TasResponse& response)
 {
-    Q_UNUSED(response);
-
     TasCommand* command = getCommandParameters(model, "Close");
-
     QString applicationId = command->parameter("uid");    
 
     if(applicationId == "0"){
         TasLogger::logger()->info("CloseAppService::stopApplication server close requested.");       
-        QTimer::singleShot(500, QCoreApplication::instance(), SLOT(quit()));
+        response.requester()->connect(response.requester(), SIGNAL(messageSent()), QCoreApplication::instance(), SLOT(quit()));   
         return;
     }
 }
