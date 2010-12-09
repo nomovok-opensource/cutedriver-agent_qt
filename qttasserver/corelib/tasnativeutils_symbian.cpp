@@ -26,7 +26,14 @@
 #include <QTimer>
 #include <memspydriverclient.h>
 #include <e32property.h>
+
+//rotation include and defines
 #include <cfclient.h>
+_LIT( KContextSource, "Sensor" );
+_LIT( KSensorSourceEventOrientation, "Event.Orientation" );
+_LIT( KContextValueRightUp, "DisplayRightUp" );
+_LIT( KContextValueTopUp, "DisplayUp" );
+
 
 class NativeUtils_p
 {
@@ -48,6 +55,19 @@ int TasNativeUtils::pidOfActiveWindow(const QHash<QString, TasClient*> clients)
         return TAS_ERROR_NOT_FOUND;
     }
     
+    //check for dialogs
+    const TUid PropertyCategoryUid = {0x20022FC5};
+    const TUint StatusKey = 'Stat';
+    TInt shown = 0;
+    RProperty::Get(PropertyCategoryUid, StatusKey, shown);
+    if(shown == 1){
+        foreach (TasClient* app, clients){
+            if( app->applicationUid() == QString::number(PropertyCategoryUid.iUid)){
+                return app->processId().toInt();
+            }
+        }
+    }
+
     const QList<QString>& pids = clients.keys();
     int pid = TAS_ERROR_NOT_FOUND;
     RWsSession wsSession;
@@ -67,6 +87,11 @@ int TasNativeUtils::pidOfActiveWindow(const QHash<QString, TasClient*> clients)
                     RProcess foregroundAppProcess;
                     if(foregroundAppThread.Process(foregroundAppProcess) == KErrNone){
                         pid = foregroundAppProcess.Id().Id();
+                        if (!pids.contains(QString::number(pid))) {
+                            pid = TAS_ERROR_NOT_FOUND;
+                        }
+                        else {
+                        }
                         foregroundAppProcess.Close();
                     }
                     foregroundAppThread.Close();
@@ -141,6 +166,34 @@ int TasNativeUtils::bringAppToForeground(TasClient& client)
     return error;
 }
 
+void TasNativeUtils::changeOrientation(QString direction)
+{
+    //T R A P D starts
+    TRAPD(err,
+        if(direction == "rotate_right_up"){
+            MCFListener *cfListener= NULL;
+            CCFClient* client = CCFClient::NewLC( *cfListener );
+            CCFContextObject* co = CCFContextObject::NewLC();
+            co->SetSourceL( KContextSource() );
+            co->SetTypeL( KSensorSourceEventOrientation() );
+            co->SetValueL( KContextValueRightUp() );
+            TInt err = client->PublishContext( *co );
+            CleanupStack::PopAndDestroy(2);
+
+        } else if(direction == "rotate_top_up"){
+            MCFListener *cfListener= NULL;
+            CCFClient* client = CCFClient::NewLC( *cfListener );
+            CCFContextObject* co = CCFContextObject::NewLC();
+            co->SetSourceL( KContextSource() );
+            co->SetTypeL( KSensorSourceEventOrientation() );
+            co->SetValueL( KContextValueTopUp() );
+            TInt err = client->PublishContext( *co );
+            CleanupStack::PopAndDestroy(2);
+        }
+    );
+    // T R A P D ends
+}
+
 TBool NativeUtils_p::bringAppToForeground(TApaTask app)
 {
     TBool value = EFalse;
@@ -150,8 +203,4 @@ TBool NativeUtils_p::bringAppToForeground(TApaTask app)
         value = ETrue;
     }
     return value;
-}
-
-void TasNativeUtils::changeOrientation()
-{
 }

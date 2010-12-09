@@ -31,6 +31,7 @@ const char* const START_APPLICATION          = "startApplication";
 const char* const CLOSE_APPLICATION          = "closeApplication";
 const char* const UI_COMMAND                 = "uiCommand";
 const char* const APPLICATION_STATE          = "uiState";
+const char* const CHANGE_ORIENTATION         = "newOrientation";
 const char* const WEBKIT_COMMAND             = "webkitCommand";
 const char* const SCREEN_SHOT                = "screenShot";
 const char* const FIXTURE                    = "fixture";
