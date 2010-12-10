@@ -21,6 +21,7 @@
                  
 #include <QDebug>
 #include <QTcpSocket>
+#include <QCoreApplication>
 
 #include <tasqtdatamodel.h>
 #include <tascommandparser.h>
@@ -111,14 +112,21 @@ TasServer::TasServer(QObject *parent)
     mInternalTcpServer = 0;
 #endif
 
+    connect(QCoreApplication::instance(), SIGNAL(aboutToQuit()), this, SLOT(shutdown()));
 }
 
 TasServer::~TasServer()
 { 
+}
+
+void TasServer::shutdown()
+{
     closeServer();
     TasClientManager::deleteInstance();
-    mServiceManager->deleteLater();
-    mServiceManager = 0;
+    if(mServiceManager){
+        mServiceManager->deleteLater();
+        mServiceManager = 0;
+    }
 }
 
 const QString& TasServer::getServerVersion()
