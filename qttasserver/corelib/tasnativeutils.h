@@ -25,6 +25,9 @@
 
 #include "tasclientmanager.h"
 
+const char* const ROTATE_TOP_UP   = "rotate_top_up";
+const char* const ROTATE_RIGHT_UP = "rotate_right_up";
+
 class TasNativeUtils {
 public:
     /*! Pid of the active window, only ids registered to qttas are taken
@@ -32,7 +35,8 @@ public:
      */
     static int pidOfActiveWindow(const QHash<QString, TasClient*> clients);
     static int bringAppToForeground(TasClient& client);
-	static void changeOrientation();
+    static void changeOrientation(QString);
+
 };
 
 #endif

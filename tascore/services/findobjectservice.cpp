@@ -47,7 +47,7 @@ FindObjectService::~FindObjectService()
 bool FindObjectService::executeService(TasCommandModel& model, TasResponse& response)
 {
     if(model.service() == serviceName()){
-        TasLogger::logger()->debug("FindObjectService::executeService");
+        //        TasLogger::logger()->debug("FindObjectService::executeService");
         bool traverseAll = false;
         TasDataModel* uiModel = new TasDataModel();
         TasObject& application = mTraverser->addModelRoot(*uiModel);
@@ -66,26 +66,25 @@ bool FindObjectService::executeService(TasCommandModel& model, TasResponse& resp
             mTraverser->initializeTraverse(command);
             if(!addObjectDetails(application, targetObj, command)){
                 //not found so the we need to traverse the old way
-                //TasLogger::logger()->debug("FindObjectService::executeService not found so the we need to traverse the old way");
                 traverseAll = true;   
                 break;
             }
             mTraverser->finalizeTraverse();
         }
         if(traverseAll){
-            //TasLogger::logger()->debug("FindObjectService::executeService nothing found traverse all");
+            TasLogger::logger()->debug("FindObjectService::executeService nothing found traverse all");
             delete uiModel;
-            //TasLogger::logger()->debug("FindObjectService::executeService old model cleaned");
+            //            TasLogger::logger()->debug("FindObjectService::executeService old model cleaned");
             TasCommand* command = 0;
             if (model.targetList().size() > 0) {
                 if(!model.targetList().at(0)->commandList().isEmpty()){
                     command = model.targetList().at(0)->commandList().at(0);
                 }
             }
-            //TasLogger::logger()->debug("FindObjectService::executeService normal traverse");
+            //            TasLogger::logger()->debug("FindObjectService::executeService normal traverse");
             uiModel = mTraverser->getUiState(command);
         }
-        //TasLogger::logger()->debug("FindObjectService::executeService make return message.");
+        //        TasLogger::logger()->debug("FindObjectService::executeService make return message.");
         QByteArray* xml = new QByteArray();         
         uiModel->serializeModel(*xml);
         delete uiModel;
@@ -103,20 +102,15 @@ bool FindObjectService::addObjectDetails(TasObject& parent, TasTargetObject *tar
     if(targetObj->className().isEmpty()){
         return false;
     }
-
     QList<QObject*> objects;
-    // No parent given -> look from first level (app)
+    //first level look from app 
     if(!parentObject){
-        //TasLogger::logger()->debug("FindObjectService::addObjectDetails searchForObject");
         objects = searchForObject(targetObj);
     }
-    // Parent given -> look from parent
+    //look children of parent
     else{
-        //TasLogger::logger()->debug("FindObjectService::addObjectDetails findMatchingObject");
         objects = findMatchingObject(parentObject->children(), targetObj);
     }
-
-    // Traverse found objects ( we should traverse all of this level's objects if we are to use recursion!)
     if(!objects.isEmpty()){
         foreach(QObject* object, objects){
             TasObject& objectData = parent.addObject();
@@ -139,57 +133,25 @@ bool FindObjectService::addObjectDetails(TasObject& parent, TasTargetObject *tar
 QList<QObject*> FindObjectService::searchForObject(TasTargetObject *targetObj)
 {
     QList<QObject*> targetObjects;
-
     foreach(QWidget* widget, qApp->allWidgets()){
-        //TasLogger::logger()->debug(QString("FindObjectService::searchForObject ObjectName: ") + widget->objectName() + QString(" ClassName: ") + widget->metaObject()->className());
-
         if(targetObjects.contains(widget) || !widget->isVisible()){
-            //TasLogger::logger()->debug(QString("Not Visible or already in list"));
             continue;
         }
         //1. check if widget matches
         if(isMatch(widget, targetObj)){
-            //TasLogger::logger()->debug(QString(">> MATCH on searchForObject"));
             targetObjects.append(widget);
         }  
       
-        //2.look from children and actions
-        if(!targetObj->className().isEmpty()){
-            //TasLogger::logger()->debug(QString(">> Looking for children and actions"));
-            QList<QObject*> matches;
-
-            // Children
-            QList<QObject*> childrenList;
-            foreach(QObject* child, widget->children()){
-                if (QString(child->metaObject()->className()) != "QAction"){
-                    childrenList.append(child);
-                }
-            }
-            matches.append(findMatchingObject(childrenList, targetObj));
-
-            // Actions
-            QList<QObject*> actionsList;
-            foreach(QAction* action, widget->actions()){
-                actionsList.append((QObject*) action);
-            }
-            matches.append(findMatchingObject(actionsList, targetObj));
-
-            // Avoid duplicate matches
-            foreach (QObject* action, matches){
-                if (!targetObjects.contains(action)) {
-                    targetObjects.append(action);
-                }
-            }
+        //2.look from children
+        if(targetObjects.isEmpty() && !targetObj->className().isEmpty()){
+            targetObjects.append(findMatchingObject(widget->children(), targetObj));
         }
-
 
         //3. Maybe a graphicsView
         QGraphicsView* view = qobject_cast<QGraphicsView*>(widget);
-        if(view){
-            //TasLogger::logger()->debug(QString(">> Its a VIEW"));
+        if(view){             
             foreach(QGraphicsItem* item, view->items()){
                 QGraphicsObject* object = item->toGraphicsObject();
-                //TasLogger::logger()->debug(QString(">> VIEW ITEM Object Name: ") + object->objectName());
                 if (object && object->isVisible() && TestabilityUtils::isItemInView(view, item)){
                     if(isMatch(object, targetObj)){
                         targetObjects.append(object);
@@ -205,14 +167,12 @@ QList<QObject*> FindObjectService::findMatchingObject(QList<QObject*> objectList
 {
     QList<QObject*> targets ;    
     foreach(QObject* candidate, objectList){
-        //TasLogger::logger()->debug(QString("FindObjectService::findMatchingObject ObjectName:") + candidate->objectName() + QString(" ClassName: ") + candidate->metaObject()->className());
         QVariant visibility = candidate->property("visible");
         //skip if property visible false
         if(visibility.isValid() && visibility.type() == QVariant::Bool && visibility.toBool() == false){
             continue;
         }
         if(isMatch(candidate, targetObj)){
-            //TasLogger::logger()->debug(QString(">> MATCH on FindMatchinObject (seach children) Name ") + candidate->objectName() + QString(" ClassName: ") + candidate->metaObject()->className());
             targets.append(candidate);
         }
     }   
@@ -221,7 +181,7 @@ QList<QObject*> FindObjectService::findMatchingObject(QList<QObject*> objectList
 
 bool FindObjectService::isMatch(QObject* candidate, TasTargetObject *targetObj)
 {
-    //TasLogger::logger()->debug("FindObjectService::isMatch className:" + className + " <> " + QString(candidate->metaObject()->className()));
+    //    TasLogger::logger()->debug("FindObjectService::isMatch className:" + className + " <> " + QString(candidate->metaObject()->className()));
     //check id first if given, if not same then not match
     if(!targetObj->objectId().isEmpty()){
          return targetObj->objectId() == TasCoreUtils::objectId(candidate);
