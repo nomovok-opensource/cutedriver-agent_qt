@@ -34,8 +34,8 @@ EXPORTS
 	_ZN12TasCoreUtils9pointerIdEPv @ 33 NONAME
 	_ZN12TasDataModel10clearModelEv @ 34 NONAME
 	_ZN12TasDataModel14serializeModelER10QByteArrayP15SerializeFilterb @ 35 NONAME
-	_ZN12TasDataModel19findObjectContainerERK7QString @ 36 NONAME
-	_ZN12TasDataModel19serializeContainersER12TasXmlWriterR15SerializeFilter @ 37 NONAME
+	_ZN12TasDataModel16serializeObjectsER12TasXmlWriterR15SerializeFilterb @ 36 NONAME
+	_ZN12TasDataModel19findObjectContainerERK7QString @ 37 NONAME
 	_ZN12TasDataModel19serializeIntoStringER12TasXmlWriterR15SerializeFilter @ 38 NONAME
 	_ZN12TasDataModel21addNewObjectContainerERK7QStringS2_ @ 39 NONAME
 	_ZN12TasDataModel21addNewObjectContainerEiRK7QStringS2_ @ 40 NONAME
@@ -156,7 +156,7 @@ EXPORTS
 	_ZN16TestabilityUtils23verifyGraphicsItemMatchERK7QStringP13QGraphicsItem @ 155 NONAME
 	_ZN18TasObjectContainer12addNewObjectERK7QStringS2_S2_ @ 156 NONAME
 	_ZN18TasObjectContainer12addNewObjectEv @ 157 NONAME
-	_ZN18TasObjectContainer19serializeIntoStringER12TasXmlWriterR15SerializeFilter @ 158 NONAME
+	_ZN18TasObjectContainer19serializeIntoStringER12TasXmlWriterR15SerializeFilterb @ 158 NONAME
 	_ZN18TasObjectContainer5setIdE7QString @ 159 NONAME
 	_ZN18TasObjectContainer5setIdEi @ 160 NONAME
 	_ZN18TasObjectContainer7setNameERK7QString @ 161 NONAME
