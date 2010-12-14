@@ -252,9 +252,14 @@ void TasServerServiceManager::removeWaiter(qint32 responseId)
 
 QByteArray TasServerServiceManager::responseHeader()
 {
+    QString name = "qt";
+#ifdef Q_OS_SYMBIAN   
+    name = "symbian";
+#endif
+       
     QString header = "<tasMessage dateTime=\"" +
         QDateTime::currentDateTime().toString("yyyy.MM.dd hh:mm:ss.zzz") + 
-        "\" version=\""+TAS_VERSION+"\">";
+        "\" version=\""+TAS_VERSION+"\"><tasInfo id=\""+qVersion()+"\" name=\""+name+"\" type=\"sut\">";
     return header.toUtf8();
     
 }
@@ -312,7 +317,7 @@ void ResponseWaiter::sendResponse(TasMessage& response)
         TasLogger::logger()->debug("ResponseWaiter::sendResponse add plat stuf");
         response.uncompressData();
         mPlatformData->append(response.data()->data());
-        mPlatformData->append(QString("</tasMessage>").toUtf8());
+        mPlatformData->append(QString("</tasInfo></tasMessage>").toUtf8());
         response.setData(mPlatformData);
         //ownership transferred to response
         mPlatformData = 0;

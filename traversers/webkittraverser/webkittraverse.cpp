@@ -373,6 +373,8 @@ void WebKitTraverse::traverseFrame(QWebFrame* webFrame, TasObject& parent, QStri
         frameInfo.setParentId(parentId);        
         frameInfo.setName(webFrame->frameName());
         frameInfo.addAttribute("title", webFrame->title());
+        QString frameName = webFrame->frameName();
+        frameInfo.setName(frameName);
         frameInfo.addAttribute("url", webFrame->url().toString());
         frameInfo.addAttribute("requestedUrl", webFrame->requestedUrl().toString());
         frameInfo.addAttribute("baseUrl", webFrame->baseUrl().toString());
@@ -386,6 +388,33 @@ void WebKitTraverse::traverseFrame(QWebFrame* webFrame, TasObject& parent, QStri
 
         frameInfo.addAttribute("horizontalScrollBarHeight",webFrame->scrollBarGeometry(Qt::Horizontal).height());
         frameInfo.addAttribute("verticalScrollBarWidth",webFrame->scrollBarGeometry(Qt::Vertical).width());
+
+        if (frameName.trimmed().startsWith("<!--framePath",Qt::CaseInsensitive)){
+            QWebFrame* parentFrame = webFrame->parentFrame();
+            QWebElement frameSet = parentFrame->findFirstElement("frameset");
+            if(!frameSet.isNull()) {
+                QWebElementCollection frames = frameSet.findAll("frame");
+                // Find frame index for this frame
+                int i = frameName.trimmed().lastIndexOf("frame") + 5;
+
+                if (i<=frameName.trimmed().length()){
+                    QString frameNo = frameName.trimmed().at(i);
+                    if(frameNo.toInt()<frames.count()){
+                        QWebElement selFrame = frames[frameNo.toInt()];
+                        //TasLogger::logger()->debug("visibility:" + selFrame.styleProperty("visibility", QWebElement::ComputedStyle).toLower());
+                        //TasLogger::logger()->debug("display:" + selFrame.styleProperty("display", QWebElement::ComputedStyle).toLower());
+                        frameInfo.addBooleanAttribute("visibility",
+                                (selFrame.styleProperty("visibility", QWebElement::ComputedStyle).toLower() == "visible") &&
+                                   (selFrame.styleProperty("display", QWebElement::ComputedStyle).toLower() != "none"));
+                        frameInfo.addAttribute("style",selFrame.attribute("style"));
+                    }
+                }
+            }
+        }
+        else{
+             frameInfo.addBooleanAttribute("visibility", true);
+        }
+
 
         QWebElement docElement = webFrame->documentElement();
         traverseWebElement(&frameInfo, parentPos+webFrame->pos()-webFrame->scrollPosition(), screenPos+webFrame->pos()-webFrame->scrollPosition(), &docElement, tasId);
