@@ -67,7 +67,8 @@ bool ForegroundService::executeService(TasCommandModel& model, TasResponse& resp
         }
     }
     else if (model.service() == "changeOrientation" ){
-        TasCommand* command = getCommandParameters(model, "changeOrientation");
+        status = true;
+        TasCommand* command = getCommandParameters(model, "ChangeOrientation");
         if(command){
             TasNativeUtils::changeOrientation(command->parameter("direction"));
         }

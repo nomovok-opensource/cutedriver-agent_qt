@@ -32,7 +32,9 @@ int main(int argc, char *argv[])
     
     TasServer* server = new TasServer();
     if (server->startServer()){ 
-        return app.exec();
+        int code = app.exec();
+        server->deleteLater();
+        return code;
     }
     else{
         app.exit(0);

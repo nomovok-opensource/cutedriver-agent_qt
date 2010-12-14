@@ -155,29 +155,16 @@ void TasServerServiceManager::handleServiceRequest(TasCommandModel& commandModel
 
     }
     else{
-
-        QByteArray* states = 0;
-        if(commandModel.service() == APPLICATION_STATE || commandModel.service() == FIND_OBJECT_SERVICE){
-            foreach(TasExtensionInterface* traverser, mExtensions){
-                QByteArray data = traverser->traverseApplication("", "", "");
-                if(!data.isNull()){
-                    if(!states){
-                        states = new QByteArray(responseHeader());
-                    }
-                    states->append(data);
-                }         
+        //check if platform specific handlers want to handle the request
+        foreach(TasExtensionInterface* extension, mExtensions){            
+            QByteArray data;
+            if(extension->performCommand(commandModel, data)){
+                TasResponse response(responseId, new QByteArray(data));
+                requester->sendMessage(response);
+                return;
             }
-            if(states){
-                states->append(QString("</tasMessage>").toUtf8());
-            }
-        }       
-        TasResponse response(responseId);
-
-        if(states && !states->isEmpty()){
-            response.setData(states);
-            requester->sendMessage(response);
         }
-        else if(commandModel.service() == SCREEN_SHOT){
+        if(commandModel.service() == SCREEN_SHOT){
             ResponseWaiter* waiter = new ResponseWaiter(responseId, requester);
             connect(waiter, SIGNAL(responded(qint32)), this, SLOT(removeWaiter(qint32)));
             reponseQueue.insert(responseId, waiter);
@@ -186,6 +173,7 @@ void TasServerServiceManager::handleServiceRequest(TasCommandModel& commandModel
             QProcess::startDetached("qttasutilapp", args);
         }
         else{            
+            TasResponse response(responseId);
             response.setRequester(requester);
             performService(commandModel, response);
             //start app waits for register message and performs the response
@@ -252,9 +240,14 @@ void TasServerServiceManager::removeWaiter(qint32 responseId)
 
 QByteArray TasServerServiceManager::responseHeader()
 {
+    QString name = "qt";
+#ifdef Q_OS_SYMBIAN   
+    name = "symbian";
+#endif
+       
     QString header = "<tasMessage dateTime=\"" +
         QDateTime::currentDateTime().toString("yyyy.MM.dd hh:mm:ss.zzz") + 
-        "\" version=\""+TAS_VERSION+"\">";
+        "\" version=\""+TAS_VERSION+"\"><tasInfo id=\""+qVersion()+"\" name=\""+name+"\" type=\"sut\">";
     return header.toUtf8();
     
 }
@@ -312,7 +305,7 @@ void ResponseWaiter::sendResponse(TasMessage& response)
         TasLogger::logger()->debug("ResponseWaiter::sendResponse add plat stuf");
         response.uncompressData();
         mPlatformData->append(response.data()->data());
-        mPlatformData->append(QString("</tasMessage>").toUtf8());
+        mPlatformData->append(QString("</tasInfo></tasMessage>").toUtf8());
         response.setData(mPlatformData);
         //ownership transferred to response
         mPlatformData = 0;

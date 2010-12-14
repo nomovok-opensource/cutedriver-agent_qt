@@ -75,8 +75,10 @@ TasClientManager* TasClientManager::instance()
 
 void TasClientManager::deleteInstance()
 {
-    mInstance->deleteLater();
-    mInstance = 0;
+    if(mInstance){
+        mInstance->deleteLater();
+        mInstance = 0;
+    }
 }
 
 

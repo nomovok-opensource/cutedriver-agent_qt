@@ -59,6 +59,7 @@ public:
 	const QString& getServerVersion();
     
 public slots:
+	void shutdown();
     void closeServer();
     void killAllStartedProcesses();
 

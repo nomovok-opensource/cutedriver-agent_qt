@@ -31,6 +31,8 @@
 #include "tasqtdatamodel.h"
 #include "tasqtcommandmodel.h"
 
+const char* const QT_PREFIX ="Qt_";
+
 TasTraverseUtils::TasTraverseUtils()
 {
     mTraverseFilter = new TasDataFilter();
@@ -160,7 +162,7 @@ void TasTraverseUtils::printProperties(TasObject* objectInfo, QObject* object)
                 attr.setName(name);
             }
             else{
-                attr.setName(QString("Qt_")+name);
+                attr.setName(QString(QT_PREFIX)+name);
             }
             QVariant value = object->property(name);                  
             if(metaproperty.isEnumType() && !metaproperty.isFlagType()){
@@ -253,9 +255,12 @@ void TasTraverseUtils::addFont(TasObject* objectInfo, QFont font)
 }
 
 bool TasTraverseUtils::includeAttribute(const QString& attributeName)
-{
+{    
     if(mTraverseFilter){
-        return mTraverseFilter->includeAttribute(attributeName);
+        if(mTraverseFilter->includeAttribute(attributeName) || mTraverseFilter->includeAttribute(QT_PREFIX+attributeName)){
+            return true;
+        }
+        return false;
     }
     return true;
 }
