@@ -155,29 +155,16 @@ void TasServerServiceManager::handleServiceRequest(TasCommandModel& commandModel
 
     }
     else{
-
-        QByteArray* states = 0;
-        if(commandModel.service() == APPLICATION_STATE || commandModel.service() == FIND_OBJECT_SERVICE){
-            foreach(TasExtensionInterface* traverser, mExtensions){
-                QByteArray data = traverser->traverseApplication("", "", "");
-                if(!data.isNull()){
-                    if(!states){
-                        states = new QByteArray(responseHeader());
-                    }
-                    states->append(data);
-                }         
+        //check if platform specific handlers want to handle the request
+        foreach(TasExtensionInterface* extension, mExtensions){            
+            QByteArray data;
+            if(extension->performCommand(commandModel, data)){
+                TasResponse response(responseId, new QByteArray(data));
+                requester->sendMessage(response);
+                return;
             }
-            if(states){
-                states->append(QString("</tasMessage>").toUtf8());
-            }
-        }       
-        TasResponse response(responseId);
-
-        if(states && !states->isEmpty()){
-            response.setData(states);
-            requester->sendMessage(response);
         }
-        else if(commandModel.service() == SCREEN_SHOT){
+        if(commandModel.service() == SCREEN_SHOT){
             ResponseWaiter* waiter = new ResponseWaiter(responseId, requester);
             connect(waiter, SIGNAL(responded(qint32)), this, SLOT(removeWaiter(qint32)));
             reponseQueue.insert(responseId, waiter);
@@ -186,6 +173,7 @@ void TasServerServiceManager::handleServiceRequest(TasCommandModel& commandModel
             QProcess::startDetached("qttasutilapp", args);
         }
         else{            
+            TasResponse response(responseId);
             response.setRequester(requester);
             performService(commandModel, response);
             //start app waits for register message and performs the response
