@@ -67,6 +67,7 @@ public:
   RegisterWaiter(TasSocket* requester, TasClient *target, qint32 messageId, bool noWait=false);
 	
 private slots:
+    void selfRegister();
 	void clientRegistered(const QString& processId);
     void timeout();
 	void socketClosed();

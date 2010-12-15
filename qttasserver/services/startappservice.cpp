@@ -202,14 +202,20 @@ RegisterWaiter::RegisterWaiter(TasSocket* socket, TasClient *target, qint32 mess
     connect(mSocket, SIGNAL(socketClosed()), this, SLOT(socketClosed()));
 
     //maybe the app already is registered (e.g symbian only allows one instance of each app)
-    //or wait not wanted (starting a native app)
+    //or registering not expected (starting a native app)
+    //wait a bit before sending response to allow app to start
     if(target->socket() || noWait ){
-        clientRegistered(mProcessId);
+        QTimer::singleShot(500, this, SLOT(selfRegister()));
     }
 }
 
+void RegisterWaiter::selfRegister()
+{
+    clientRegistered(mProcessId);
+}
+
 void RegisterWaiter::clientRegistered(const QString& processId)
- {
+{
     TasLogger::logger()->debug("RegisterWaiter::clientRegistered " + processId);    
     //    TasLogger::logger()->debug("RegisterWaiter::clientRegistered respond with id " + QString::number(mMessageId));    
     mSocket->sendResponse(mMessageId, processId);

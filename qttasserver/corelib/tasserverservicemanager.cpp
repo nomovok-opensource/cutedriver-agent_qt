@@ -78,7 +78,7 @@ TasServerServiceManager::~TasServerServiceManager()
 */
 void TasServerServiceManager::handleServiceRequest(TasCommandModel& commandModel, TasSocket* requester, qint32 responseId)
 {
-    TasLogger::logger()->debug("TasServerServiceManager::handleServiceRequest: " + commandModel.service());
+    TasLogger::logger()->debug("TasServerServiceManager::handleServiceRequest: " + commandModel.service() + ": " + commandModel.id());
     TasClient* targetClient = 0;
     if (!commandModel.id().isEmpty() && commandModel.id() != "1"){
         TasClient* crashedApp = mClientManager->findCrashedApplicationById(commandModel.id());
@@ -97,8 +97,14 @@ void TasServerServiceManager::handleServiceRequest(TasCommandModel& commandModel
             foreach(TasExtensionInterface* extension, mExtensions){            
                 QByteArray data;
                 if(extension->performCommand(commandModel, data)){
+                    //remove possible client 
+                    if(commandModel.service() == CLOSE_APPLICATION){
+                        TasLogger::logger()->debug("TasServerServiceManager::handleServiceRequest remove client");
+                        mClientManager->removeClient(commandModel.id());
+                    }
                     TasResponse response(responseId, new QByteArray(data));
                     requester->sendMessage(response);
+                    TasLogger::logger()->debug("TasServerServiceManager::handleServiceRequest: plat service done, returning");
                     return;
                 }
             }
@@ -130,8 +136,7 @@ void TasServerServiceManager::handleServiceRequest(TasCommandModel& commandModel
         bool needFragment = false;
         if(commandModel.service() == APPLICATION_STATE || commandModel.service() == FIND_OBJECT_SERVICE){
             foreach(TasExtensionInterface* traverser, mExtensions){
-                QByteArray data = traverser->traverseApplication(targetClient->processId(), targetClient->applicationName(), 
-                                                                 targetClient->applicationUid());
+                QByteArray data = traverser->traverseApplication(targetClient->processId(), targetClient->applicationName());
                 if(!data.isNull()){
                     waiter->appendPlatformData(data);
                     needFragment = true;
@@ -139,13 +144,12 @@ void TasServerServiceManager::handleServiceRequest(TasCommandModel& commandModel
             }
         }
 
-        if(commandModel.service() == CLOSE_APPLICATION){
+        if(commandModel.service() == CLOSE_APPLICATION && targetClient->process()){
             waiter->setResponseFilter(new ClientRemoveFilter(commandModel));
         }
         connect(waiter, SIGNAL(responded(qint32)), this, SLOT(removeWaiter(qint32)));
         reponseQueue.insert(responseId, waiter);
         if(needFragment){
-            TasLogger::logger()->debug("TasServerServiceManager::handleServiceRequest fragment only");
             commandModel.addAttribute("needFragment", "true");
             targetClient->socket()->sendRequest(responseId, commandModel.sourceString(false));            
         }
@@ -159,6 +163,7 @@ void TasServerServiceManager::handleServiceRequest(TasCommandModel& commandModel
         foreach(TasExtensionInterface* extension, mExtensions){            
             QByteArray data;
             if(extension->performCommand(commandModel, data)){
+                TasLogger::logger()->debug("TasServerServiceManager::handleServiceRequest platform handler completed request.");
                 TasResponse response(responseId, new QByteArray(data));
                 requester->sendMessage(response);
                 return;

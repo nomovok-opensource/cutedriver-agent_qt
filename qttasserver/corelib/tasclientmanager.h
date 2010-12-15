@@ -86,6 +86,8 @@ public:
   void emptyCrashedApplicationList();
   TasClient* logMemClient();
 
+  void removeMe(const TasClient& client);
+
 signals:
   void allClientsRemoved();
 

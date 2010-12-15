@@ -204,3 +204,19 @@ TBool NativeUtils_p::bringAppToForeground(TApaTask app)
     }
     return value;
 }
+
+
+bool TasNativeUtils::killProcess(quint64 pid)
+{
+    bool killed = false;
+    RProcess process;
+    if( process.Open( TProcessId( pid ) ) == KErrNone ){
+        if( process.ExitType() == EExitPending ){
+            process.Kill(0);
+            process.Close();
+            killed = true;
+        }
+    }    
+    return killed;
+}
+ 

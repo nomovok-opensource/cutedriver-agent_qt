@@ -225,6 +225,12 @@ TasClientManager::CloseStatus TasClientManager::removeClient(const QString& proc
     return status;
 }
 
+void TasClientManager::removeMe(const TasClient &client)
+{
+    QMutexLocker locker(&mMutex);   
+    mClients.remove(client.processId());
+}
+
 
 /*!
   Find the best match for the given model.
@@ -372,6 +378,14 @@ void TasClientManager::removeAllClients()
         if(process && process->state() == QProcess::Running){
             process->kill();
         }
+        else{
+            bool ok;
+            quint64 pid = app->processId().toULongLong(&ok, 10);       
+            if(ok && pid != 0){
+                TasNativeUtils::killProcess(pid);
+            }
+
+        }
         delete app;
         app = 0;
     }
@@ -497,8 +511,7 @@ TasClient* TasClientManager::latestClient(bool includeSocketless)
     }        
 #ifdef Q_OS_SYMBIAN 
     return 0;
-#endif
-
+#else
     //find latest
     TasClient* match = 0;
     int smallest = -1;
@@ -517,6 +530,7 @@ TasClient* TasClientManager::latestClient(bool includeSocketless)
         }
     }
     return match;  
+#endif
 }
 
 TasClient* TasClientManager::logMemClient()
@@ -667,11 +681,18 @@ void TasClient::disconnected()
         "TasClient::disconnected socket");
         
     mSocket = 0;
+    //no process remove the client from the list
+    //will register again if so wants
+    if(!mProcess){
+        TasClientManager::instance()->removeMe(*this);
+        deleteLater();
+    }
 }
 
 void TasClient::closeConnection()
 {
     if(mSocket){
+        disconnect(mSocket, SIGNAL(socketClosed()), this, SLOT(disconnected()));    
         mSocket->closeConnection();
     }
 }

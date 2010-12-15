@@ -48,3 +48,8 @@ int TasNativeUtils::bringAppToForeground(TasClient& app)
 
 void TasNativeUtils::changeOrientation(QString direction)
 {}
+
+bool TasNativeUtils::killProcess(quint64 pid)
+{
+    return false;
+}
