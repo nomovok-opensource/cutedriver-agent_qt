@@ -122,7 +122,6 @@ const char* const PLUGIN_ATTR = "testability_plugin";
  */
 
 const char* const SERVER_EXECUTABLE = "qttasserver";
-
 const char* const QT_SERVER_NAME = "127.0.0.1";
 static const int QT_SERVER_PORT = 55534;
 static const int QT_SERVER_PORT_OUT = 55535;

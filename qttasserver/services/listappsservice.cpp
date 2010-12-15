@@ -21,6 +21,7 @@
 #include <QProcess>
 #include <tasqtdatamodel.h>
 #include <taslogger.h>
+#include <tasserver.h>
 
 #include "listappsservice.h"
 
@@ -72,6 +73,13 @@ void ListAppsService::listApplications(TasCommand& command, TasResponse& respons
 
     TasClientManager::instance()->applicationList(*apps);
 
+    // Add HostAddress and HostPort on the Apps List message too.
+    TasServer* tasServer = (TasServer*) response.requester()->parent()->parent();
+    QString address = tasServer->getServerAddress();
+    QString port = QString::number(tasServer->getServerPort());
+    TasObject* hostAddress = &container.addNewObject(0, "QHostAddress", "hostAddresses");
+    hostAddress->addNewObject(0, address, "HostAddress");
+    hostAddress->addNewObject(0, port, "HostPort");
 
     QByteArray* xml = new QByteArray();
     model->serializeModel(*xml);    

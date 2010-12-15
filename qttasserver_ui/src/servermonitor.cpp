@@ -163,6 +163,18 @@ void ServerMonitor::serverResponse(const QString& message)
                     emit serverDebug(target.attribute("name"));        
                 }
             }
+            // TODO Set local variable
+            for (int i = 0; i < count; i++){
+                QDomElement target = targets.item(i).toElement();
+                if(target.attribute("type") == "HostAddress"){
+                    emit serverDebug("Current HostAddress:");
+                    emit serverDebug(target.attribute("name"));
+                }
+                if(target.attribute("type") == "HostPort"){
+                    emit serverDebug("Current HostAddress:");
+                    emit serverDebug(target.attribute("name"));
+                }
+            }
         }
         else{
             emit serverDebug(message);    

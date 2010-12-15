@@ -26,7 +26,8 @@
 #include <QDialogButtonBox>
 #include <QGridLayout>
 #include <QTextEdit>
-
+#include <QComboBox>
+#include <QNetworkInterface>
 
 #include <version.h>
 #include "serverwindow.h"
@@ -58,6 +59,27 @@ ServerWindow::ServerWindow(QWidget* parent)
     QLabel* versionLabel = new QLabel("Server version:");   
     QLabel* stateValue = new QLabel("Unknown");
     QLabel* versionValue = new QLabel(TAS_VERSION);
+
+    QLabel* interfaceListLabel =  new QLabel("Server IP");
+    QComboBox* interfaceList = new QComboBox();
+    QStringList interfaces;
+    // Add available interfaces
+    foreach(QHostAddress interface, QNetworkInterface::allAddresses()){
+        interfaces.append(interface.toString());
+    }
+    interfaceList->insertItems(1,interfaces );
+
+    // Selecte the one used by qttas
+    for(int i = 1; i <= interfaceList->count(); i++ ){
+        if (interfaceList->itemText(i) == QT_SERVER_NAME){
+            interfaceList->setCurrentIndex(i);
+        }
+    }
+
+    // TODO If logic is to be added
+    // 1 Deal with port numbers as well?
+    // 2(select listening internface etc... ) add logic here
+    // listen to signals of current index change , etc...
 
     connect(monitor, SIGNAL(serverState(const QString&)), stateValue, SLOT(setText(const QString&)));
 
@@ -94,21 +116,23 @@ ServerWindow::ServerWindow(QWidget* parent)
     mainLayout->addWidget(stateValue, 0, 1, 1, 1);
     mainLayout->addWidget(versionLabel, 1, 0);
     mainLayout->addWidget(versionValue, 1, 1);
-    mainLayout->addWidget(editField, 2,0, 1, 2);
+    mainLayout->addWidget(interfaceListLabel, 2, 0);
+    mainLayout->addWidget(interfaceList, 2, 1);
+    mainLayout->addWidget(editField, 3,0, 1, 2);
 #ifdef Q_OS_SYMBIAN
-    mainLayout->addWidget(statusButton, 3, 0);
-    mainLayout->addWidget(pluginButton, 3, 1);
+    mainLayout->addWidget(statusButton, 4, 0);
+    mainLayout->addWidget(pluginButton, 4, 1);
 #else
-    mainLayout->addWidget(statusButton, 3, 0);
-    mainLayout->addWidget(loadPluginsButton, 3, 1);
+    mainLayout->addWidget(statusButton, 4, 0);
+    mainLayout->addWidget(loadPluginsButton, 4, 1);
 #endif
-    mainLayout->addWidget(stopButton, 4, 0);
-    mainLayout->addWidget(startButton, 4, 1);
-    mainLayout->addWidget(resetButton, 5, 0);
-    mainLayout->addWidget(quitButton, 5, 1);
+    mainLayout->addWidget(stopButton, 5, 0);
+    mainLayout->addWidget(startButton, 5, 1);
+    mainLayout->addWidget(resetButton, 6, 0);
+    mainLayout->addWidget(quitButton, 6, 1);
 #ifdef Q_OS_SYMBIAN
-    mainLayout->addWidget(autoStart, 6, 0);
-    mainLayout->addWidget(loadPluginsButton, 6, 1);
+    mainLayout->addWidget(autoStart, 7, 0);
+    mainLayout->addWidget(loadPluginsButton, 7, 1);
 #endif
     setLayout(mainLayout);     
 
