@@ -766,12 +766,16 @@ void TasClient::processFinished(int exitCode, QProcess::ExitStatus exitStatus)
         mApplicationName.clear();
         mProcessId.clear();
     }
-    
+
+    if(mSocket){
+        disconnect(mSocket, SIGNAL(socketClosed()), this, SLOT(disconnected()));           
+        mSocket = 0;
+    }
+
     if (mProcess) {
         delete mProcess;
         mProcess = 0;
     }
-    mSocket = 0;
 }
 
 bool TasClient::operator ==(const TasClient &client) const
