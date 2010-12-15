@@ -144,7 +144,7 @@ void TasServerServiceManager::handleServiceRequest(TasCommandModel& commandModel
             }
         }
 
-        if(commandModel.service() == CLOSE_APPLICATION && targetClient->process()){
+        if(commandModel.service() == CLOSE_APPLICATION){
             waiter->setResponseFilter(new ClientRemoveFilter(commandModel));
         }
         connect(waiter, SIGNAL(responded(qint32)), this, SLOT(removeWaiter(qint32)));
