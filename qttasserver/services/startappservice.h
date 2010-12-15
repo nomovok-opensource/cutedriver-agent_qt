@@ -40,45 +40,14 @@ public:
 	bool executeService(TasCommandModel& model, TasResponse& response);
 	QString serviceName() const { return START_APPLICATION; }
 
-#ifdef Q_OS_SYMBIAN
-	static void failedRegister();
-	static void successfullRegister();
-#endif
-
 private:
 	void startApplication(TasCommand& command, TasResponse& response);
-    void launchAttached(const QString& applicationPath,const QStringList& arguments, TasResponse& response, QHash<QString, QString> environmentVariables);
 	void launchDetached(const QString& applicationPath,const QStringList& arguments, TasResponse& response, bool noWait);
 	void setRuntimeParams(TasCommand& command);
 
 private:
     QHash<QString, QString> parseEnvironmentVariables(const QString& env);
-
-#ifdef Q_OS_SYMBIAN
-	static int mFailedRegisterCount;
-#endif
-
 };
-  
-class RegisterWaiter : public QObject
-{
-  Q_OBJECT
-public:
-  RegisterWaiter(TasSocket* requester, TasClient *target, qint32 messageId, bool noWait=false);
-	
-private slots:
-    void selfRegister();
-	void clientRegistered(const QString& processId);
-    void timeout();
-	void socketClosed();
-	void crashed();
-
-private:
-	QTimer mWaiter;
-	QString mProcessId;
-	QString mProcessName;
-	qint32 mMessageId;
-	TasSocket* mSocket;
-};
+ 
 
 #endif

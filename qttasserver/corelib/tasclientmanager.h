@@ -23,7 +23,6 @@
 #define TASCLIENTMANAGER_H
 
 #include <QObject>
-#include <QProcess>
 #include <QHash>
 #include <QList>
 #include <QListIterator>
@@ -62,11 +61,11 @@ public:
   static TasClientManager* instance();
   static void deleteInstance();
 
-  TasClient* addClient(const QString& processId, const QString& processName=QString(), QProcess *process=0);  
+  TasClient* addClient(const QString& processId, const QString& processName=QString());
   TasClient* addRegisteredClient(const QString& processId, const QString& processName, TasSocket* socket, 
 								 const QString& type=TAS_PLUGIN, QString applicationUid=QString());  
 
-  TasClientManager::CloseStatus removeClient(const QString& processId, bool kill=false, int time=0);
+  void removeClient(const QString& processId, bool kill=false);
   void removeAllClients();
 
   void applicationList(TasObject& parent);
@@ -81,11 +80,7 @@ public:
 #endif  
   TasClient* findCrashedApplicationById(const QString& processId);
 
-  TasClientManager::ClientError moveClientToCrashedList(const QString& processId);
-  void crashedApplicationList(TasObject& parent);
-  void emptyCrashedApplicationList();
   TasClient* logMemClient();
-
   void removeMe(const TasClient& client);
 
 signals:
@@ -97,13 +92,10 @@ private:
   TasClient* latestClient(bool includeSocketLess=false);
 
   void removeGhostClients();
-  void checkJammedProcesses();
   TasClient* removeByProcessId(const QString& processId);  
 
 private:
   QHash<QString, TasClient*> mClients;
-  QHash<QString, QProcess*> mJammedProcesses;
-  QHash<QString, TasClient*> mCrashedProcesses;
   static TasClientManager* mInstance;
   TasDataShare* mDataShare;
   QMutex mMutex;
@@ -120,19 +112,14 @@ protected:
 public:
   const QString& processId() const;
 
-  void setProcess(QProcess* process);
-  QProcess* process();  
   void setSocket(TasSocket* socket);
   TasSocket* socket();
   void setApplicationName(const QString& applicationName);
-  void killProcess();
   const QString& applicationName();
   int upTime();
   bool operator ==(const TasClient &client) const;
   void setRegistered();
   void closeConnection();
-  QDateTime crashTime();
-  void stopProcessMonitor();
 
   void setApplicationUid(const QString& uid);
   QString applicationUid();
@@ -140,41 +127,19 @@ public:
   void setPluginType(const QString& pluginType);
   QString pluginType();
 
-
-
 signals:
-  void registered(const QString&);
-  void crashed();
+  void registered(const QString& ProcessId);;
 
 private slots:    
   void disconnected();
-  void processFinished(int exitCode, QProcess::ExitStatus exitStatus);
 
 private:
-  QProcess* mProcess;
   TasSocket* mSocket;
   QString mApplicationName;
   QString mProcessId;
   friend class TasClientManager;
   QTime mCreationTime;
-  QDateTime mCrashTime;
   QString mApplicationUid;
   QString mPluginType;
 };
-
-
-class ClientRemoveFilter : public ResponseFilter
-{
-public:
-    ClientRemoveFilter(TasCommandModel& model);
-   ~ClientRemoveFilter();
-
-	void filterResponse(TasMessage& response);
-
-private:  
-	QString mProcessId;
-	bool mKill;
-	int mWaitTime;
-};
-
 #endif

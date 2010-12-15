@@ -18,27 +18,37 @@
 ****************************************************************************/ 
  
 
-#ifndef LISTAPPSSERVICE_H
-#define LISTAPPSSERVICE_H
+#include "tasnativeutils.h"
 
-#include <tasconstants.h>
-#include "tasservercommand.h"
+#include <taslogger.h>
+#include <windows.h>
+#include <stdio.h>
+#include <psapi.h>
 
-class ListAppsService : public TasServerCommand
+
+int TasNativeUtils::pidOfActiveWindow(const QHash<QString, TasClient*> clients)
 {
+    Q_UNUSED(clients);
+    return -1;
+}
 
-public:
-    ListAppsService();
-    ~ListAppsService();
+int TasNativeUtils::bringAppToForeground(TasClient& app)
+{
+    Q_UNUSED(app);
+    return -1;
+}
 
-	/*!
-	  From ServiceInterface
-	*/
-	bool executeService(TasCommandModel& model, TasResponse& response);
-	QString serviceName() const { return LIST_APPS; }
-	
-private:
-	void listApplications(TasCommand& command, TasResponse& response);
-};
+void TasNativeUtils::changeOrientation(QString)
+{}
 
-#endif
+bool TasNativeUtils::killProcess(quint64 pid)
+{
+    HANDLE hProcess;
+    hProcess = OpenProcess( PROCESS_ALL_ACCESS, FALSE, pid );
+    if( hProcess  ){
+        TerminateProcess( hProcess, 0);
+        CloseHandle(hProcess);
+        return true;
+    }
+    return false;
+}

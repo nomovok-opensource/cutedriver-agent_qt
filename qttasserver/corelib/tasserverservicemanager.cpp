@@ -25,6 +25,7 @@
 #include <QLibraryInfo>
 #include <QDir>
 #include <QPluginLoader>
+#include <QProcess>
 
 #include "tasserverservicemanager.h"
 
@@ -80,18 +81,8 @@ void TasServerServiceManager::handleServiceRequest(TasCommandModel& commandModel
 {
     TasLogger::logger()->debug("TasServerServiceManager::handleServiceRequest: " + commandModel.service() + ": " + commandModel.id());
     TasClient* targetClient = 0;
-    if (!commandModel.id().isEmpty() && commandModel.id() != "1"){
-        TasClient* crashedApp = mClientManager->findCrashedApplicationById(commandModel.id());
-        if (crashedApp){
-            TasResponse response(responseId);
-            response.setIsError(true);
-            response.setErrorMessage("The application " + crashedApp->applicationName() + " with Id " + crashedApp->processId() + " has crashed.");
-            requester->sendMessage(response);
-            return;
-        }
-         
+    if (!commandModel.id().isEmpty() && commandModel.id() != "1"){        
         targetClient = mClientManager->findByProcessId(commandModel.id());
-
         //no registered client check for platform specific handles for the process id
         if(!targetClient){
             foreach(TasExtensionInterface* extension, mExtensions){            
@@ -142,10 +133,6 @@ void TasServerServiceManager::handleServiceRequest(TasCommandModel& commandModel
                     needFragment = true;
                 }
             }
-        }
-
-        if(commandModel.service() == CLOSE_APPLICATION){
-            waiter->setResponseFilter(new ClientRemoveFilter(commandModel));
         }
         connect(waiter, SIGNAL(responded(qint32)), this, SLOT(removeWaiter(qint32)));
         reponseQueue.insert(responseId, waiter);
