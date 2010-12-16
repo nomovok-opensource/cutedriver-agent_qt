@@ -363,8 +363,9 @@ bool TasClientManager::verifyClient(TasClient* client)
             client->deleteLater();
             valid = false;
             TasLogger::logger()->warning("TasClientManager::verifyClient process vanished had to remove client :" + QString::number(pid));
-        }    
-        valid = true;
+        } else {
+            valid = true;
+        }
     }
     return valid;
 }

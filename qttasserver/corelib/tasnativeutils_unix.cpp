@@ -25,6 +25,7 @@
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
 #include <X11/Xatom.h>
+#include <signal.h>
 
 int pidOfXWindow(Display* display, Window win) 
 {
@@ -262,11 +263,19 @@ void TasNativeUtils::changeOrientation(QString)
 {}
 
 bool TasNativeUtils::killProcess(quint64 pid)
-{
-    return false;
+{ 
+    printf("killing %d \n", int(pid));
+    kill(pid, 9);
+    return true;
 }
+
 
 bool TasNativeUtils::verifyProcess(quint64 pid)
 {
-    return true;
+    // kill(pid,0) ?
+    char path[256];
+    sprintf(path, "/proc/%d", int(pid));
+    return access(path, F_OK) != -1;
 }
+
+
