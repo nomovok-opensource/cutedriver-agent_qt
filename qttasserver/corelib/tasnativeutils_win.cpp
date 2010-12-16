@@ -67,15 +67,23 @@ bool TasNativeUtils::verifyProcess(quint64 pid)
 
 bool TasNativeUtils::processExitStatus(quint64 pid, int &status)
 {
-    int code = 0;
     HANDLE hProcess;
     hProcess = OpenProcess( PROCESS_ALL_ACCESS, FALSE, pid );
     if( hProcess  ){
         DWORD dwExitCode = 0;
         if(GetExitCodeProcess(hProcess, &dwExitCode)){
-            TasLogger::logger()->debug("TasNativeUtils::processExitStatus " + QString::number(dwExitCode));
+            if(dwExitCode == STILL_ACTIVE){
+                return false;            
+            }
+            else{
+                status = dwExitCode;
+            }
         }
-        status = dwExitCode;
+        else{
+            TasLogger::logger()->debug("TasNativeUtils::processExitStatus could not get status");
+            //maybe no process since could not open
+            status = 0;
+        }
         CloseHandle(hProcess);
     }
     return true;
