@@ -213,9 +213,9 @@ bool TasNativeUtils::killProcess(quint64 pid)
     if( process.Open( TProcessId( pid ) ) == KErrNone ){
         if( process.ExitType() == EExitPending ){
             process.Kill(0);
-            process.Close();
             killed = true;
         }
+        process.Close();
     }    
     return killed;
 }
@@ -227,9 +227,31 @@ bool TasNativeUtils::verifyProcess(quint64 pid)
     RProcess process;
     if( process.Open( TProcessId( pid ) ) == KErrNone ){
         if( process.ExitType() == EExitPending ){
-            process.Close();
             running = true;
         }
+        process.Close();
     }
     return running;
+}
+
+bool TasNativeUtils::processExitStatus(quint64 pid, int &status)
+{
+    status = 0;
+    RProcess process;
+    TInt code;
+    if( process.Open( TProcessId( pid ) ) == KErrNone ){
+        code = process.ExitType();
+        if( code == EExitPending ){
+            return false;
+        }
+        else if( code == EExitPanic ){
+            status = process.ExitReason();
+        }
+        else {
+            status = 0;
+        }
+        process.Close();
+        
+    }
+    return true;
 }

@@ -33,6 +33,7 @@
 #include "tasconstants.h"
 #include "taslogger.h"
 #include "version.h"
+#include "tasnativeutils.h"
 
 /*!
   \class TasServerServiceManager
@@ -134,6 +135,11 @@ void TasServerServiceManager::handleServiceRequest(TasCommandModel& commandModel
                 }
             }
         }
+
+        if(commandModel.service() == CLOSE_APPLICATION){
+            waiter->setResponseFilter(new CloseFilter(commandModel));
+        }
+
         connect(waiter, SIGNAL(responded(qint32)), this, SLOT(removeWaiter(qint32)));
         reponseQueue.insert(responseId, waiter);
         if(needFragment){
@@ -332,6 +338,73 @@ void ResponseWaiter::socketClosed()
     emit responded(mResponseId);
     deleteLater();
 }
+
+CloseFilter::CloseFilter(TasCommandModel& model)
+{
+    mPassThrough = true;
+    mWaitTime = 3000;
+    mKill = false;
+    TasTarget* target = model.findTarget(APPLICATION_TARGET);    
+    if(target){
+        TasCommand* command = target->findCommand("Close");
+        if(command){
+            bool ok;
+            mPid = command->parameter("uid").toULongLong(&ok, 10);     
+            if(ok){
+                mPassThrough = false;
+            }
+            QString timeString = command->parameter("wait_time");
+            if(!timeString.isEmpty()){
+                mWaitTime = timeString.toInt() * 1000;
+            }        
+            if( command->parameter("kill") == "true"){
+                mKill = true;
+            }
+        }
+    }
+}
+CloseFilter::~CloseFilter()
+{}
+
+void CloseFilter::filterResponse(TasMessage& response)
+{
+    if(mPassThrough) return;
+    
+    TasLogger::logger()->debug("CloseFilter::filterResponse");
+
+    //we need to check that the app really closed
+    int errorCode = 0;
+    int totalSleep = 0;
+    int wait = 200;
+    QString errorMessage;
+    bool didNotCloseInTime = false;
+
+    while(!TasNativeUtils::processExitStatus(mPid, errorCode)){
+        TasCoreUtils::wait(wait);        
+        totalSleep+=wait;
+        if(totalSleep >= mWaitTime){
+            TasLogger::logger()->debug("CloseFilter::filterResponse application did not close in time!");
+            errorMessage = "Application did not close in time.";
+            didNotCloseInTime = true;
+            if(mKill){
+                TasNativeUtils::killProcess(mPid);                     
+            }
+            break;
+        }
+    }
+    TasLogger::logger()->debug("CloseFilter::filterResponse exit code: " + QString::number(errorCode));
+
+
+    if(!didNotCloseInTime && errorCode != 0){
+        errorMessage = "Application exited with code " + QString::number(errorCode);
+    }
+    if(!errorMessage.isEmpty()){
+        response.setErrorMessage(errorMessage);
+    }
+}
+
+
+
 
 
 

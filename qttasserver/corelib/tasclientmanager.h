@@ -128,7 +128,7 @@ public:
   QString pluginType();
 
 signals:
-  void registered(const QString& ProcessId);;
+  void registered(const QString& ProcessId);
 
 private slots:    
   void disconnected();
