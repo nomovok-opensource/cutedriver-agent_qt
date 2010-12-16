@@ -74,10 +74,9 @@ void ShellCommandService::killTask(qint64 pid, TasResponse& response)
 {
     ShellTask* task = mTasks.value(pid);
     if (task) {
-        task->exit();
+        TasLogger::logger()->debug("ShellCommandService::terminating task");
+        task->endTask(); // Deleteafter in terminate
         mTasks.remove(pid);
-        task->deleteLater();
-        task = 0;
         TasLogger::logger()->debug("ShellCommandService::killTask Pid " + QString::number(pid) + " was killed.");
         response.setData("Pid " + QString::number(pid) + " was killed.");
     } else {
@@ -128,10 +127,16 @@ void ShellCommandService::shellStatus(qint64 pid, TasResponse& response)
         // Clean up if process is done.
         if (status != ShellTask::RUNNING) {            
             mTasks.remove(pid);
-            task->exit();
+            if (task->isRunning()) {
+                task->endTask();
+            } else {
+                task->deleteLater();
+                task = 0;
+            }
+
+
             TasLogger::logger()->debug("ShellCommandService::service: deleting");
-            task->deleteLater();
-            task = 0;
+	
             TasLogger::logger()->debug("ShellCommandService::service: donne");
         }
         
@@ -184,11 +189,18 @@ void ShellCommandService::detachedShellCommand(QString message, TasResponse& res
 }
 
 
+void ShellCommandService::finished()
+{
+    TasLogger::logger()->debug("ShellCommandService::shellTask: ending threaded task");
+    sender()->deleteLater();
+}
+
 void ShellCommandService::shellTask(const QString&  command, TasResponse &response)
 {
     TasLogger::logger()->debug("ShellCommandService::shellTask: " + command);
 
     ShellTask* task = new ShellTask(command);
+    connect(task, SIGNAL(finished()), this, SLOT(finished()));
     task->start();
     // Wait for the thread to start.
     TasCoreUtils::wait(1000);

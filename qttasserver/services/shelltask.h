@@ -42,6 +42,8 @@ public:
     ShellTask(const QString& command);
     ~ShellTask();
 
+    void endTask();
+
     void run();
 
     ShellTask::Status status();
