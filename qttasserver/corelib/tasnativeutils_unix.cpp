@@ -280,7 +280,7 @@ bool TasNativeUtils::verifyProcess(quint64 pid)
 
 bool TasNativeUtils::processExitStatus(quint64 pid, int &status)
 {
-    if (verifyProcess) return false;
+    if (verifyProcess(pid)) return false;
     status = 0;
     return true;
 }
