@@ -220,3 +220,16 @@ bool TasNativeUtils::killProcess(quint64 pid)
     return killed;
 }
  
+
+bool TasNativeUtils::verifyProcess(quint64 pid)
+{
+    bool running = false;
+    RProcess process;
+    if( process.Open( TProcessId( pid ) ) == KErrNone ){
+        if( process.ExitType() == EExitPending ){
+            process.Close();
+            running = true;
+        }
+    }
+    return running;
+}

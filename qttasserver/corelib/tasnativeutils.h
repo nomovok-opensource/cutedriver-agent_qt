@@ -37,6 +37,7 @@ public:
     static int bringAppToForeground(TasClient& client);
     static void changeOrientation(QString);
 	static bool killProcess(quint64 pid);
+	static bool verifyProcess(quint64 pid);
 
 };
 

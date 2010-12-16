@@ -52,3 +52,15 @@ bool TasNativeUtils::killProcess(quint64 pid)
     }
     return false;
 }
+
+bool TasNativeUtils::verifyProcess(quint64 pid)
+{
+    bool running = false;
+    HANDLE hProcess;
+    hProcess = OpenProcess( PROCESS_ALL_ACCESS, FALSE, pid );
+    if( hProcess  ){
+        CloseHandle(hProcess);
+        running = true;
+    }
+    return running;
+}

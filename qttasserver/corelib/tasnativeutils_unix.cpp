@@ -265,3 +265,8 @@ bool TasNativeUtils::killProcess(quint64 pid)
 {
     return false;
 }
+
+bool TasNativeUtils::verifyProcess(quint64 pid)
+{
+    return true;
+}

@@ -78,8 +78,6 @@ public:
 #ifdef Q_OS_SYMBIAN
   TasClient* findByApplicationUid(const QString applicationUid);
 #endif  
-  TasClient* findCrashedApplicationById(const QString& processId);
-
   TasClient* logMemClient();
   void removeMe(const TasClient& client);
 
@@ -93,6 +91,8 @@ private:
 
   void removeGhostClients();
   TasClient* removeByProcessId(const QString& processId);  
+
+  bool verifyClient(TasClient* client);
 
 private:
   QHash<QString, TasClient*> mClients;

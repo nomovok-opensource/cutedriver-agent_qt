@@ -53,3 +53,9 @@ bool TasNativeUtils::killProcess(quint64 pid)
 {
     return false;
 }
+
+bool TasNativeUtils::verifyProcess(quint64 pid)
+{
+    //true as default since false will cause testing to stop
+    return true;
+}

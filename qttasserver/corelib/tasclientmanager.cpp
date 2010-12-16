@@ -224,9 +224,149 @@ TasClient* TasClientManager::findClient(TasCommandModel& request)
     }
     if(client == 0){
         client = latestClient();
+        if(!verifyClient(client)){
+            client = 0;
+        }        
     }   
-
     return client;
+}
+
+/*!
+  Searches for a client with the given process id. Returns null if no match
+  found.
+ */
+TasClient* TasClientManager::findByProcessId(const QString& processId, bool includeSocketLess)
+{
+    if(processId.isNull() || processId.isEmpty()){
+        return 0;
+    }
+    TasClient* match = 0;
+    if(mClients.contains(processId)){
+        if(mClients.value(processId)->socket() || includeSocketLess){
+            match = mClients.value(processId);
+        }
+    }
+    if(!verifyClient(match)){
+        match = 0;
+    }
+    return match;
+}
+
+#ifdef Q_OS_SYMBIAN
+TasClient* TasClientManager::findByApplicationUid(const QString applicationUid)
+{
+    if(applicationUid.isNull() || applicationUid.isEmpty()){
+        return 0;
+    }
+    TasClient* match = 0;
+    foreach (TasClient* app, mClients){
+        if(app->applicationUid() == applicationUid){ 
+            //do not return socketless clients 
+            if(app->socket()){
+                match = app;
+                break;
+            }
+        }
+    }
+    if(!verifyClient(match)){
+        match = 0;
+    }
+    return match;
+}
+#endif  
+
+/*!
+  Searches for a client with the given application name. Returns null if no match
+  found.
+ */
+TasClient* TasClientManager::findByApplicationName(const QString& applicationName, bool includeSocketLess)
+{
+    if(applicationName.isNull() || applicationName.isEmpty()){
+        return 0;
+    }
+    TasClient* match = 0;
+    int smallest = -1;
+    foreach (TasClient* app, mClients){
+        if(app->applicationName() == applicationName){ 
+            //do not return socketless clients unless specifically requested
+            if(includeSocketLess || app->socket()){
+                if(smallest == -1){
+                    smallest = app->upTime();
+                    match = app;
+                }
+                else if(app->upTime() < smallest){
+                    smallest = app->upTime();
+                    match = app;
+                }
+            }
+        }
+    }
+    if(!verifyClient(match)){
+        match = 0;
+    }
+    return match;
+}
+
+/*!
+  Returns the client which was added last (most recent).
+  Returns null if the list is empty.
+*/
+TasClient* TasClientManager::latestClient(bool includeSocketless)
+{
+    //    int pid = TasNativeUtils::pidOfActiveWindow(mClients.keys());
+    int pid = TasNativeUtils::pidOfActiveWindow(mClients);
+    if (pid != -1) {
+        QString processId = QString::number(pid);
+        if(mClients.contains(processId)){
+            TasClient* app = mClients.value(processId);
+            if(app->socket() || includeSocketless){
+                return app;
+            }
+        }        
+    }        
+#ifdef Q_OS_SYMBIAN 
+    return 0;
+#else
+    //find latest
+    TasClient* match = 0;
+    int smallest = -1;
+    if(!mClients.empty()){
+        foreach (TasClient* app, mClients){
+            if(( includeSocketless || app->socket() ) && app->pluginType() == TAS_PLUGIN){
+                if(smallest == -1){
+                    smallest = app->upTime();
+                    match = app;
+                }
+                else if(app->upTime() < smallest){
+                    smallest = app->upTime();
+                    match = app;
+                }
+            }
+        }
+    }
+    return match;  
+#endif
+}
+
+
+bool TasClientManager::verifyClient(TasClient* client)
+{
+    //ignore null checks
+    if(!client) return true;
+
+    bool valid = false;
+    bool ok;
+    quint64 pid = client->processId().toULongLong(&ok, 10);       
+    if(ok && pid != 0){
+        if(!TasNativeUtils::verifyProcess(pid)){
+            removeMe(*client);
+            client->deleteLater();
+            valid = false;
+            TasLogger::logger()->warning("TasClientManager::verifyClient process vanished had to remove client :" + QString::number(pid));
+        }    
+        valid = true;
+    }
+    return valid;
 }
 
 void TasClientManager::removeGhostClients()
@@ -284,44 +424,6 @@ void TasClientManager::removeAllClients()
 
 
 /*!
-  Searches for a client with the given process id. Returns null if no match
-  found.
- */
-TasClient* TasClientManager::findByProcessId(const QString& processId, bool includeSocketLess)
-{
-    if(processId.isNull() || processId.isEmpty()){
-        return 0;
-    }
-    TasClient* match = 0;
-    if(mClients.contains(processId)){
-        if(mClients.value(processId)->socket() || includeSocketLess){
-            match = mClients.value(processId);
-        }
-    }
-    return match;
-}
-
-#ifdef Q_OS_SYMBIAN
-TasClient* TasClientManager::findByApplicationUid(const QString applicationUid)
-{
-    if(applicationUid.isNull() || applicationUid.isEmpty()){
-        return 0;
-    }
-    TasClient* match = 0;
-    foreach (TasClient* app, mClients){
-        if(app->applicationUid() == applicationUid){ 
-            //do not return socketless clients 
-            if(app->socket()){
-                match = app;
-                break;
-            }
-        }
-    }
-    return match;
-}
-#endif  
-
-/*!
   Searches for a client with the given process id and removes it from the list. 
   Returns null if no match found.
  */
@@ -335,77 +437,6 @@ TasClient* TasClientManager::removeByProcessId(const QString& processId)
         app = mClients.take(processId);
     }
     return app;
-}
-
-
-/*!
-  Searches for a client with the given application name. Returns null if no match
-  found.
- */
-TasClient* TasClientManager::findByApplicationName(const QString& applicationName, bool includeSocketLess)
-{
-    if(applicationName.isNull() || applicationName.isEmpty()){
-        return 0;
-    }
-    TasClient* match = 0;
-    int smallest = -1;
-    foreach (TasClient* app, mClients){
-        if(app->applicationName() == applicationName){ 
-            //do not return socketless clients unless specifically requested
-            if(includeSocketLess || app->socket()){
-                if(smallest == -1){
-                    smallest = app->upTime();
-                    match = app;
-                }
-                else if(app->upTime() < smallest){
-                    smallest = app->upTime();
-                    match = app;
-                }
-            }
-        }
-    }
-    return match;
-}
-
-/*!
-  Returns the client which was added last (most recent).
-  Returns null if the list is empty.
-*/
-TasClient* TasClientManager::latestClient(bool includeSocketless)
-{
-    //    int pid = TasNativeUtils::pidOfActiveWindow(mClients.keys());
-    int pid = TasNativeUtils::pidOfActiveWindow(mClients);
-    if (pid != -1) {
-        QString processId = QString::number(pid);
-        if(mClients.contains(processId)){
-            TasClient* app = mClients.value(processId);
-            if(app->socket() || includeSocketless){
-                return app;
-            }
-        }        
-    }        
-#ifdef Q_OS_SYMBIAN 
-    return 0;
-#else
-    //find latest
-    TasClient* match = 0;
-    int smallest = -1;
-    if(!mClients.empty()){
-        foreach (TasClient* app, mClients){
-            if(( includeSocketless || app->socket() ) && app->pluginType() == TAS_PLUGIN){
-                if(smallest == -1){
-                    smallest = app->upTime();
-                    match = app;
-                }
-                else if(app->upTime() < smallest){
-                    smallest = app->upTime();
-                    match = app;
-                }
-            }
-        }
-    }
-    return match;  
-#endif
 }
 
 TasClient* TasClientManager::logMemClient()
