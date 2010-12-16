@@ -26,7 +26,7 @@
 #include <QDialogButtonBox>
 #include <QGridLayout>
 #include <QTextEdit>
-#include <QComboBox>
+#include <QRadioButton>
 #include <QNetworkInterface>
 
 #include <version.h>
@@ -60,21 +60,24 @@ ServerWindow::ServerWindow(QWidget* parent)
     QLabel* stateValue = new QLabel("Unknown");
     QLabel* versionValue = new QLabel(TAS_VERSION);
 
-    QLabel* interfaceListLabel =  new QLabel("Server IP");
-    QComboBox* interfaceList = new QComboBox();
-    QStringList interfaces;
-    // Add available interfaces
-    foreach(QHostAddress interface, QNetworkInterface::allAddresses()){
-        interfaces.append(interface.toString());
-    }
-    interfaceList->insertItems(1,interfaces );
 
-    // Selecte the one used by qttas
-    for(int i = 1; i <= interfaceList->count(); i++ ){
-        if (interfaceList->itemText(i) == QT_SERVER_NAME){
-            interfaceList->setCurrentIndex(i);
-        }
-    }
+    QLabel* hostBindingLabel =  new QLabel("Server Address Binding:");
+    anyBindRadioButton = new QRadioButton("Any");
+    localBindRadioButton = new QRadioButton("Localhost");
+    connect(anyBindRadioButton, SIGNAL(clicked()), monitor, SLOT(setAnyBinding()));
+    connect(localBindRadioButton, SIGNAL(clicked()), monitor, SLOT(setLocalBinding()));
+    anyBindRadioButton->setDisabled(true);
+    localBindRadioButton->setDisabled(true);
+
+    // Set defalt binding Disable when not yet checked (read from server)
+    // Monitor will restart the server if binding change needed
+    // Whenever a button is switched on or off it emits the toggled() signal.
+    // Connect to this signal if you want to trigger an action each time the button changes state.
+    // Use isChecked() to see if a particular button is selected.
+
+
+
+
 
     // TODO If logic is to be added
     // 1 Deal with port numbers as well?
@@ -85,7 +88,8 @@ ServerWindow::ServerWindow(QWidget* parent)
 
     connect(monitor, SIGNAL(beginMonitor()), this, SLOT(disableButtons()));
     connect(monitor, SIGNAL(stopMonitor()), this, SLOT(enableButtons()));
-
+    connect(monitor, SIGNAL(disableReBinding()), this, SLOT(disableRadioButtons()));
+    connect(monitor, SIGNAL(enableReBinding(const QString&)), this, SLOT(enableRadioButtons(const QString&)));
 
     QTextEdit* editField = new QTextEdit();
     editField->setReadOnly(true);
@@ -96,6 +100,8 @@ ServerWindow::ServerWindow(QWidget* parent)
     connect(resetButton, SIGNAL(clicked()), editField, SLOT(clear()));
     connect(statusButton, SIGNAL(clicked()), editField, SLOT(clear()));
     connect(loadPluginsButton, SIGNAL(clicked()), editField, SLOT(clear()));
+    connect(anyBindRadioButton, SIGNAL(clicked()), editField, SLOT(clear()));
+    connect(localBindRadioButton, SIGNAL(clicked()), editField, SLOT(clear()));
 
 #ifdef Q_OS_SYMBIAN
     connect(pluginButton, SIGNAL(clicked()), editField, SLOT(clear()));
@@ -116,22 +122,26 @@ ServerWindow::ServerWindow(QWidget* parent)
     mainLayout->addWidget(stateValue, 0, 1, 1, 1);
     mainLayout->addWidget(versionLabel, 1, 0);
     mainLayout->addWidget(versionValue, 1, 1);
-    mainLayout->addWidget(interfaceListLabel, 2, 0);
-    mainLayout->addWidget(interfaceList, 2, 1);
-    mainLayout->addWidget(editField, 3,0, 1, 2);
+
+    // Server binding Radio
+    mainLayout->addWidget(hostBindingLabel, 2, 0);
+    mainLayout->addWidget(anyBindRadioButton, 2, 1);
+    mainLayout->addWidget(localBindRadioButton, 3, 1);
+
+    mainLayout->addWidget(editField, 4,0, 1, 2);
 #ifdef Q_OS_SYMBIAN
-    mainLayout->addWidget(statusButton, 4, 0);
-    mainLayout->addWidget(pluginButton, 4, 1);
+    mainLayout->addWidget(statusButton, 5, 0);
+    mainLayout->addWidget(pluginButton, 5, 1);
 #else
-    mainLayout->addWidget(statusButton, 4, 0);
-    mainLayout->addWidget(loadPluginsButton, 4, 1);
+    mainLayout->addWidget(statusButton, 5, 0);
+    mainLayout->addWidget(loadPluginsButton, 5, 1);
 #endif
-    mainLayout->addWidget(stopButton, 5, 0);
-    mainLayout->addWidget(startButton, 5, 1);
-    mainLayout->addWidget(resetButton, 6, 0);
-    mainLayout->addWidget(quitButton, 6, 1);
+    mainLayout->addWidget(stopButton, 6, 0);
+    mainLayout->addWidget(startButton, 6, 1);
+    mainLayout->addWidget(resetButton, 7, 0);
+    mainLayout->addWidget(quitButton, 7, 1);
 #ifdef Q_OS_SYMBIAN
-    mainLayout->addWidget(autoStart, 7, 0);
+    mainLayout->addWidget(autoStart, 8, 0);
     mainLayout->addWidget(loadPluginsButton, 7, 1);
 #endif
     setLayout(mainLayout);     
@@ -160,6 +170,24 @@ void ServerWindow::enableButtons()
     startButton->setDisabled(false);
     resetButton->setDisabled(false);
     loadPluginsButton->setDisabled(false);
+}
+
+void ServerWindow::disableRadioButtons()
+{
+    anyBindRadioButton->setDisabled(true);
+    localBindRadioButton->setDisabled(true);
+}
+
+void ServerWindow::enableRadioButtons(const QString& currentBinding)
+{
+    anyBindRadioButton->setDisabled(false);
+    localBindRadioButton->setDisabled(false);
+    if(currentBinding == "0.0.0.0" && !anyBindRadioButton->isChecked()){
+        anyBindRadioButton->setChecked(true);
+    }
+    else if(currentBinding == "127.0.0.1" && !localBindRadioButton->isChecked()){
+        localBindRadioButton->setChecked(true);;
+    }
 }
 
 ServerWindow::~ServerWindow()

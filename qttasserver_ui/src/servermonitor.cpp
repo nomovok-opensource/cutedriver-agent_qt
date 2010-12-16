@@ -62,6 +62,10 @@ const static QString RUNNING = "Running";
 const static QString FIXTURE_DIR = "tasfixtures";
 const static QString TRAVERSER_DIR = "traversers";
 
+static QString BINDING = "";
+static QString BINDING_ADDRESS = "";
+static QString PORT = "";
+
 
 #ifdef Q_OS_SYMBIAN
 const static QString SERVERINI =  "c:\\system\\data\\qttasserver.ini";
@@ -96,6 +100,7 @@ void ServerMonitor::serverState()
 void ServerMonitor::restartServer()
 {
     emit beginMonitor();
+    emit disableReBinding();
     mState = RESTART;
     emit serverDebug("Restarting server...");
     emit serverDebug("Stopping server...");
@@ -105,9 +110,10 @@ void ServerMonitor::restartServer()
 void ServerMonitor::startServer()
 {
     emit beginMonitor();
+    emit disableReBinding();
     mState = START;
     emit serverDebug("Starting server....");
-    QProcess::startDetached(SERVER_PATH);   
+    QProcess::startDetached(SERVER_PATH, QStringList(BINDING));
     emit serverDebug("Process started wait a bit...");
     QTimer::singleShot(3000, this, SLOT(serverState()));
 }
@@ -115,12 +121,22 @@ void ServerMonitor::startServer()
 void ServerMonitor::stopServer()
 {        
     emit beginMonitor();
-    mState = STOP;                               
+    emit disableReBinding();
+    mState = STOP;
     emit serverDebug("Stopping server...");
     mClient->sendMessage(CLOSE_APP);
     TasLogger::logger()->debug("ServerMonitor::stopServer");
 }
 
+void ServerMonitor::setAnyBinding(){
+        BINDING = "any";
+        restartServer();
+}
+
+void ServerMonitor::setLocalBinding(){
+        BINDING = "localhost";
+        restartServer();
+}
 
 void ServerMonitor::info(const QString& message)
 {
@@ -137,6 +153,7 @@ void ServerMonitor::error(const QString& message)
     }
     if(mState == STOP || mState == RESTART){
         emit serverDebug("Connection was closed. Server appears to have stopped.");
+
         killServer();
         if(mState == RESTART){
             TasCoreUtils::wait(1000);
@@ -163,17 +180,20 @@ void ServerMonitor::serverResponse(const QString& message)
                     emit serverDebug(target.attribute("name"));        
                 }
             }
-            // TODO Set local variable
+            // Get server host address and port binds
             for (int i = 0; i < count; i++){
                 QDomElement target = targets.item(i).toElement();
                 if(target.attribute("type") == "HostAddress"){
-                    emit serverDebug("Current HostAddress:");
-                    emit serverDebug(target.attribute("name"));
+                    BINDING_ADDRESS = target.attribute("name");
+                    emit enableReBinding(BINDING_ADDRESS);
                 }
                 if(target.attribute("type") == "HostPort"){
-                    emit serverDebug("Current HostAddress:");
-                    emit serverDebug(target.attribute("name"));
+                    PORT = target.attribute("name");
                 }
+            }
+            if (!BINDING_ADDRESS.isEmpty() && !PORT.isEmpty()){
+                 emit serverDebug("Current Server address binding:");
+                 emit serverDebug(BINDING_ADDRESS + ":" + PORT);
             }
         }
         else{
@@ -181,6 +201,9 @@ void ServerMonitor::serverResponse(const QString& message)
         }
         emit serverState(RUNNING);                
         emit stopMonitor();
+        if (!BINDING.isEmpty()){
+            emit enableReBinding(BINDING_ADDRESS);
+        }
     }
 }
 

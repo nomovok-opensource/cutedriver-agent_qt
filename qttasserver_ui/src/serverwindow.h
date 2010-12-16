@@ -25,6 +25,7 @@
 #include <QWidget>
 #include <QPushButton>
 #include <QCheckBox>
+#include <QRadioButton>
 
 #include "servermonitor.h"
 
@@ -39,6 +40,8 @@ public:
 private slots:
    void disableButtons();
    void enableButtons();
+   void disableRadioButtons();
+   void enableRadioButtons(const QString& currentBinding);
 
 private:
    QPushButton* statusButton;
@@ -48,6 +51,8 @@ private:
    QPushButton* pluginButton;
    QCheckBox* autoStart;
    QPushButton* loadPluginsButton;
+   QRadioButton* anyBindRadioButton;
+   QRadioButton* localBindRadioButton;
    ServerMonitor* monitor;
 };
 
