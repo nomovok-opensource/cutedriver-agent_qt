@@ -264,7 +264,6 @@ void TasNativeUtils::changeOrientation(QString)
 
 bool TasNativeUtils::killProcess(quint64 pid)
 { 
-    printf("killing %d \n", int(pid));
     kill(pid, 9);
     return true;
 }
@@ -281,6 +280,8 @@ bool TasNativeUtils::verifyProcess(quint64 pid)
 
 bool TasNativeUtils::processExitStatus(quint64 pid, int &status)
 {
+    if (verifyProcess) return false;
+    status = 0;
     return true;
 }
 
