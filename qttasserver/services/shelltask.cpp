@@ -52,10 +52,10 @@ ShellTask::~ShellTask()
         if (mProcess->state() == QProcess::Running ||
             mProcess->state() == QProcess::Starting) {
             mProcess->terminate();
-          //  mProcess->kill();
+            //mProcess->kill();
         }
-        //delete mProcess;
-        //mProcess=0;
+        mProcess->deleteLater();
+        mProcess=0;
     }            
 }
 

@@ -76,10 +76,12 @@ void ShellCommandService::killTask(qint64 pid, TasResponse& response)
     if (task) {
         task->exit();
         mTasks.remove(pid);
-//        delete task;
-//        task = 0;
+        task->deleteLater();
+        task = 0;
+        TasLogger::logger()->debug("ShellCommandService::killTask Pid " + QString::number(pid) + " was killed.");
         response.setData("Pid " + QString::number(pid) + " was killed.");
     } else {
+        TasLogger::logger()->debug("ShellCommandService::killTask Pid " + QString::number(pid) + " was not found.");
         response.setData("Pid " + QString::number(pid) + " was not found.");
     }
     
@@ -124,17 +126,18 @@ void ShellCommandService::shellStatus(qint64 pid, TasResponse& response)
         output.addAttribute("output", QString(task->responseData()));    
     
         // Clean up if process is done.
-        if (status == ShellTask::FINISHED) {            
+        if (status != ShellTask::RUNNING) {            
             mTasks.remove(pid);
             task->exit();
             TasLogger::logger()->debug("ShellCommandService::service: deleting");
-//            delete task;
-//            task = 0;
+            task->deleteLater();
+            task = 0;
             TasLogger::logger()->debug("ShellCommandService::service: donne");
         }
         
         QByteArray* xml = new QByteArray();
         model->serializeModel(*xml);
+        delete model;
         response.setData(xml);
     }
 
@@ -181,19 +184,11 @@ void ShellCommandService::detachedShellCommand(QString message, TasResponse& res
 }
 
 
-void ShellCommandService::finished()
-{
-    TasLogger::logger()->debug("ShellCommandService::task has finished");
-    delete sender();
-}
-
 void ShellCommandService::shellTask(const QString&  command, TasResponse &response)
 {
     TasLogger::logger()->debug("ShellCommandService::shellTask: " + command);
 
     ShellTask* task = new ShellTask(command);
-    connect(task, SIGNAL(finished()), 
-            this, SLOT(finished()));
     task->start();
     // Wait for the thread to start.
     TasCoreUtils::wait(1000);

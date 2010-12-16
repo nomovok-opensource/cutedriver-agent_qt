@@ -40,10 +40,7 @@ public:
     */
     bool executeService(TasCommandModel& model, TasResponse& response);
     QString serviceName() const { return SHELL_COMMAND; }
-    
-private slots:
-    void finished();
-
+  
 private:
     void killTask(qint64 pid, TasResponse& response);
     void shellStatus(qint64 pid, TasResponse& response);
