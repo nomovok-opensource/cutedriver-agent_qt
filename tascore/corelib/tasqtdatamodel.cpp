@@ -549,21 +549,24 @@ TasObject& TasObjectContainer::addNewObject(const QString& id, const QString& na
     Returns the created element as is and not appended to any element inside the doc.
 
 */
-void TasObjectContainer::serializeIntoString(TasXmlWriter& xmlWriter, SerializeFilter& filter)
+void TasObjectContainer::serializeIntoString(TasXmlWriter& xmlWriter, SerializeFilter& filter, bool elementsOnly)
 {
-    QMap<QString, QString> attributes;
-    attributes[ID] = id; 
-    attributes[NAME] = name; 
-    attributes[TYPE] = type;     
-    xmlWriter.openElement(CONTAINER_NAME, attributes);
-
+    if(!elementsOnly){
+        QMap<QString, QString> attributes;
+        attributes[ID] = id; 
+        attributes[NAME] = name; 
+        attributes[TYPE] = type;     
+        xmlWriter.openElement(CONTAINER_NAME, attributes);
+    }
     for (int i = 0; i < objects.size(); ++i) {
         TasObject* object = objects.at(i);
         if(filter.serializeObject(*object)){
             object->serializeIntoString(xmlWriter, filter);
         }
     }
-    xmlWriter.closeElement(CONTAINER_NAME);
+    if(!elementsOnly){
+        xmlWriter.closeElement(CONTAINER_NAME);
+    }
 }
 
 
@@ -678,7 +681,7 @@ void TasDataModel::serializeModel(QByteArray& xmlData, SerializeFilter* filter, 
     stream.setCodec(QTextCodec::codecForName("UTF-8"));
     TasXmlWriter tasXmlWriter(stream);
     if(containers){
-        serializeContainers(tasXmlWriter, *filter);
+        serializeObjects(tasXmlWriter, *filter, true);
     }
     else{
         serializeIntoString(tasXmlWriter, *filter);
@@ -692,17 +695,17 @@ void TasDataModel::serializeIntoString(TasXmlWriter& xmlWriter, SerializeFilter&
     attributes[VERSION] = TAS_VERSION; 
     attributes[DATE_TIME] = QDateTime::currentDateTime().toString("yyyy.MM.dd hh:mm:ss.zzz"); 
     xmlWriter.openElement(ROOT_NAME, attributes);
-    serializeContainers(xmlWriter, filter);
+    serializeObjects(xmlWriter, filter);
     xmlWriter.closeElement(ROOT_NAME);
 }
 
 
-void TasDataModel::serializeContainers(TasXmlWriter& xmlWriter, SerializeFilter& filter)
+void TasDataModel::serializeObjects(TasXmlWriter& xmlWriter, SerializeFilter& filter, bool elementsOnly)
 {
     for (int i = 0; i < containers.size(); ++i) {
         TasObjectContainer* container = containers.at(i);
         if ( filter.serializeContainer(*container)){
-            container->serializeIntoString(xmlWriter, filter);
+            container->serializeIntoString(xmlWriter, filter, elementsOnly);
         }
     }       
 }

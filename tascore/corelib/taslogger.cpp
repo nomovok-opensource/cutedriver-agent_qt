@@ -86,7 +86,7 @@ TasLogger::TasLogger()
 void TasLogger::configureLogger(TasCommand& command)
 {
     bool wasLogging = mEnabled;
-    debug(command.parameter(CLEAR_LOG));
+
     if(mEnabled) disableLogger();
 
     if(command.parameter(CLEAR_LOG) == "true"){
@@ -121,18 +121,13 @@ void TasLogger::configureLogger(TasCommand& command)
         QDir().mkpath(mLogPath);
     }
 
-//     if(!command.parameter(LOG_FILE).isEmpty()){
-//         mLogFileName = command.parameter(LOG_FILE);
-//     }
-
     if(command.parameter(LOG_QDEBUG) == "true"){
         setOutputter(true);
     }
     else if(command.parameter(LOG_QDEBUG) == "false"){
         setOutputter(false);
     }
-    
-
+   
     if(!command.parameter(LOG_FILE_SIZE).isEmpty()){
         mLogSize = command.parameter(LOG_FILE_SIZE).toInt();
     }
@@ -335,9 +330,11 @@ void TasLogger::outPut(const QString& line)
     }
     else{
         QMutexLocker locker(&mMutex);
-        mOut->write(line.toAscii());
-        mOut->write("\n");
-        mOut->flush();
+        if(mOut){
+            mOut->write(line.toAscii());
+            mOut->write("\n");
+            mOut->flush();
+        }
     }
 }
 

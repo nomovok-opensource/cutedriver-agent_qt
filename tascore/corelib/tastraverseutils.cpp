@@ -332,35 +332,47 @@ void TasTraverseUtils::addTextInfo(TasObject* objectInfo, const QString& text,
 */
 void TasTraverseUtils::printGraphicsItemProperties(TasObject* objectInfo, QGraphicsItem* graphicsItem)
 {       
+    QGraphicsObject* gObject = graphicsItem->toGraphicsObject();
+
     if(mTraverseFilter->includeAttribute("visible")){
-        objectInfo->addBooleanAttribute("visible", graphicsItem->isVisible());
+        if(gObject && !gObject->property("visible").isValid())
+            objectInfo->addBooleanAttribute("visible", graphicsItem->isVisible());
     }
     if(mTraverseFilter->includeAttribute("enabled")){
-        objectInfo->addBooleanAttribute("enabled", graphicsItem->isEnabled());
+        if(gObject && !gObject->property("enabled").isValid())
+            objectInfo->addBooleanAttribute("enabled", graphicsItem->isEnabled());
     }
     if(mTraverseFilter->includeAttribute("selected")){
-        objectInfo->addBooleanAttribute("selected", graphicsItem->isSelected());
+        if(gObject && !gObject->property("selected").isValid())
+            objectInfo->addBooleanAttribute("selected", graphicsItem->isSelected());
     }
     if(mTraverseFilter->includeAttribute("obscured")){
-        objectInfo->addBooleanAttribute("obscured", graphicsItem->isObscured());
+        if(gObject && !gObject->property("obscured").isValid())
+            objectInfo->addBooleanAttribute("obscured", graphicsItem->isObscured());
     }
     if(mTraverseFilter->includeAttribute("focus")){
-        objectInfo->addBooleanAttribute("focus", graphicsItem->hasFocus());
+        if(gObject && !gObject->property("focus").isValid())
+            objectInfo->addBooleanAttribute("focus", graphicsItem->hasFocus());
     }
     if(mTraverseFilter->includeAttribute("under-mouse")){
-        objectInfo->addBooleanAttribute("under-mouse", graphicsItem->isUnderMouse());
+        if(gObject && !gObject->property("under-mouse").isValid())
+            objectInfo->addBooleanAttribute("under-mouse", graphicsItem->isUnderMouse());
     }
     if(mTraverseFilter->includeAttribute("droppable")){
-        objectInfo->addBooleanAttribute("droppable", graphicsItem->acceptDrops());
+        if(gObject && !gObject->property("droppable").isValid())
+            objectInfo->addBooleanAttribute("droppable", graphicsItem->acceptDrops());
     }
     if(mTraverseFilter->includeAttribute("hoverable")){
-        objectInfo->addBooleanAttribute("hoverable", graphicsItem->acceptHoverEvents());    
+        if(gObject && !gObject->property("hoverable").isValid())
+            objectInfo->addBooleanAttribute("hoverable", graphicsItem->acceptHoverEvents());    
     }
     if(mTraverseFilter->includeAttribute("tooltip")){
-        objectInfo->addAttribute("tooltip", graphicsItem->toolTip());   
+        if(gObject && !gObject->property("tooltip").isValid())
+            objectInfo->addAttribute("tooltip", graphicsItem->toolTip());   
     }
     if(mTraverseFilter->includeAttribute("z-value")){
-        objectInfo->addAttribute("z-value", QString::number(graphicsItem->zValue()));   
+        if(gObject && !gObject->property("z-value").isValid())
+            objectInfo->addAttribute("z-value", QString::number(graphicsItem->zValue()));   
     }
 }
 

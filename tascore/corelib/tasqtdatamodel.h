@@ -148,7 +148,7 @@ public:
     TasObject& addNewObject(const QString& id, const QString& name, const QString& type);
 
 private:
-    void serializeIntoString(TasXmlWriter& xmlWriter, SerializeFilter& filter);    
+    void serializeIntoString(TasXmlWriter& xmlWriter, SerializeFilter& filter, bool elementsOnly=false);    
 
 private:
     QString id;
@@ -177,7 +177,7 @@ public:
 	TasObjectContainer* findObjectContainer(const QString& id);
 
 private:
-	void serializeContainers(TasXmlWriter& xmlWriter, SerializeFilter& filter);
+	void serializeObjects(TasXmlWriter& xmlWriter, SerializeFilter& filter, bool elementsOnly=false);
     void serializeIntoString(TasXmlWriter& xmlWriter, SerializeFilter& filter);
 
 private:

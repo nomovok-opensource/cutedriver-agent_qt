@@ -204,3 +204,54 @@ TBool NativeUtils_p::bringAppToForeground(TApaTask app)
     }
     return value;
 }
+
+
+bool TasNativeUtils::killProcess(quint64 pid)
+{
+    bool killed = false;
+    RProcess process;
+    if( process.Open( TProcessId( pid ) ) == KErrNone ){
+        if( process.ExitType() == EExitPending ){
+            process.Kill(0);
+            killed = true;
+        }
+        process.Close();
+    }    
+    return killed;
+}
+ 
+
+bool TasNativeUtils::verifyProcess(quint64 pid)
+{
+    bool running = false;
+    RProcess process;
+    if( process.Open( TProcessId( pid ) ) == KErrNone ){
+        if( process.ExitType() == EExitPending ){
+            running = true;
+        }
+        process.Close();
+    }
+    return running;
+}
+
+bool TasNativeUtils::processExitStatus(quint64 pid, int &status)
+{
+    status = 0;
+    RProcess process;
+    TInt code;
+    if( process.Open( TProcessId( pid ) ) == KErrNone ){
+        code = process.ExitType();
+        if( code == EExitPending ){
+            return false;
+        }
+        else if( code == EExitPanic ){
+            status = process.ExitReason();
+        }
+        else {
+            status = 0;
+        }
+        process.Close();
+        
+    }
+    return true;
+}

@@ -26,8 +26,6 @@
 
  
 
-
-#include <taslogger.h>
 #include <QProcess>
 #include <QMutexLocker>
 #include <QMetaType>
@@ -48,20 +46,20 @@ ShellTask::ShellTask(const QString &command) :
 
 ShellTask::~ShellTask()
 {
-    if (mProcess) {
+    if (mProcess) {      
         if (mProcess->state() == QProcess::Running ||
             mProcess->state() == QProcess::Starting) {
             mProcess->terminate();
-          //  mProcess->kill();
+            //mProcess->kill();
         }
-        //delete mProcess;
-        //mProcess=0;
+        mProcess->deleteLater();
+        mProcess=0;
     }            
 }
 
 void ShellTask::run()
 {
-    TasLogger::logger()->debug("ShellTask::run task");
+//    TasLogger::logger()->debug("ShellTask::run task");
     qRegisterMetaType<QProcess::ExitStatus>("QProcess::ExitStatus");
     qRegisterMetaType<QProcess::ProcessError>("QProcess::ProcessError");
     mProcess = new QProcess(this);
@@ -87,6 +85,15 @@ void ShellTask::run()
     mProcess->closeWriteChannel();
 
     exec();
+}
+
+
+void ShellTask::endTask()
+{
+    if (mProcess) {
+        mProcess->kill();	
+    }
+    quit();
 }
 
 ShellTask::Status ShellTask::status() 
@@ -124,13 +131,13 @@ void ShellTask::readStdOut()
 
 void ShellTask::started()
 {
-    TasLogger::logger()->debug("ShellTask::started");
+//    TasLogger::logger()->debug("ShellTask::started");
     mStatus = ShellTask::RUNNING;
 }
 void ShellTask::finished(int exitCode, QProcess::ExitStatus )
 {
     QMutexLocker locker(&mutex);
-    TasLogger::logger()->debug("ShellTask::finished");
+  //  TasLogger::logger()->debug("ShellTask::finished");
     mResponse.append(mProcess->readAll());
     mStatus = ShellTask::FINISHED;
     mReturnCode = exitCode;
@@ -139,7 +146,7 @@ void ShellTask::finished(int exitCode, QProcess::ExitStatus )
 
 void ShellTask::processError(QProcess::ProcessError processError) 
 {
-    TasLogger::logger()->debug("ShellTask::error in task");
+//    TasLogger::logger()->debug("ShellTask::error in task");
 	
     mStatus = ShellTask::ERR;
     switch (processError) {

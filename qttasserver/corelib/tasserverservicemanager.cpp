@@ -25,6 +25,7 @@
 #include <QLibraryInfo>
 #include <QDir>
 #include <QPluginLoader>
+#include <QProcess>
 
 #include "tasserverservicemanager.h"
 
@@ -32,6 +33,7 @@
 #include "tasconstants.h"
 #include "taslogger.h"
 #include "version.h"
+#include "tasnativeutils.h"
 
 /*!
   \class TasServerServiceManager
@@ -78,27 +80,23 @@ TasServerServiceManager::~TasServerServiceManager()
 */
 void TasServerServiceManager::handleServiceRequest(TasCommandModel& commandModel, TasSocket* requester, qint32 responseId)
 {
-    TasLogger::logger()->debug("TasServerServiceManager::handleServiceRequest: " + commandModel.service());
+    TasLogger::logger()->debug("TasServerServiceManager::handleServiceRequest: " + commandModel.service() + ": " + commandModel.id());
     TasClient* targetClient = 0;
-    if (!commandModel.id().isEmpty() && commandModel.id() != "1"){
-        TasClient* crashedApp = mClientManager->findCrashedApplicationById(commandModel.id());
-        if (crashedApp){
-            TasResponse response(responseId);
-            response.setIsError(true);
-            response.setErrorMessage("The application " + crashedApp->applicationName() + " with Id " + crashedApp->processId() + " has crashed.");
-            requester->sendMessage(response);
-            return;
-        }
-         
+    if (!commandModel.id().isEmpty() && commandModel.id() != "1"){        
         targetClient = mClientManager->findByProcessId(commandModel.id());
-
         //no registered client check for platform specific handles for the process id
         if(!targetClient){
             foreach(TasExtensionInterface* extension, mExtensions){            
                 QByteArray data;
                 if(extension->performCommand(commandModel, data)){
+                    //remove possible client 
+                    if(commandModel.service() == CLOSE_APPLICATION){
+                        TasLogger::logger()->debug("TasServerServiceManager::handleServiceRequest remove client");
+                        mClientManager->removeClient(commandModel.id());
+                    }
                     TasResponse response(responseId, new QByteArray(data));
                     requester->sendMessage(response);
+                    TasLogger::logger()->debug("TasServerServiceManager::handleServiceRequest: plat service done, returning");
                     return;
                 }
             }
@@ -130,8 +128,7 @@ void TasServerServiceManager::handleServiceRequest(TasCommandModel& commandModel
         bool needFragment = false;
         if(commandModel.service() == APPLICATION_STATE || commandModel.service() == FIND_OBJECT_SERVICE){
             foreach(TasExtensionInterface* traverser, mExtensions){
-                QByteArray data = traverser->traverseApplication(targetClient->processId(), targetClient->applicationName(), 
-                                                                 targetClient->applicationUid());
+                QByteArray data = traverser->traverseApplication(targetClient->processId(), targetClient->applicationName());
                 if(!data.isNull()){
                     waiter->appendPlatformData(data);
                     needFragment = true;
@@ -140,12 +137,12 @@ void TasServerServiceManager::handleServiceRequest(TasCommandModel& commandModel
         }
 
         if(commandModel.service() == CLOSE_APPLICATION){
-            waiter->setResponseFilter(new ClientRemoveFilter(commandModel));
+            waiter->setResponseFilter(new CloseFilter(commandModel));
         }
+
         connect(waiter, SIGNAL(responded(qint32)), this, SLOT(removeWaiter(qint32)));
         reponseQueue.insert(responseId, waiter);
         if(needFragment){
-            TasLogger::logger()->debug("TasServerServiceManager::handleServiceRequest fragment only");
             commandModel.addAttribute("needFragment", "true");
             targetClient->socket()->sendRequest(responseId, commandModel.sourceString(false));            
         }
@@ -155,29 +152,17 @@ void TasServerServiceManager::handleServiceRequest(TasCommandModel& commandModel
 
     }
     else{
-
-        QByteArray* states = 0;
-        if(commandModel.service() == APPLICATION_STATE || commandModel.service() == FIND_OBJECT_SERVICE){
-            foreach(TasExtensionInterface* traverser, mExtensions){
-                QByteArray data = traverser->traverseApplication("", "", "");
-                if(!data.isNull()){
-                    if(!states){
-                        states = new QByteArray(responseHeader());
-                    }
-                    states->append(data);
-                }         
+        //check if platform specific handlers want to handle the request
+        foreach(TasExtensionInterface* extension, mExtensions){            
+            QByteArray data;
+            if(extension->performCommand(commandModel, data)){
+                TasLogger::logger()->debug("TasServerServiceManager::handleServiceRequest platform handler completed request.");
+                TasResponse response(responseId, new QByteArray(data));
+                requester->sendMessage(response);
+                return;
             }
-            if(states){
-                states->append(QString("</tasMessage>").toUtf8());
-            }
-        }       
-        TasResponse response(responseId);
-
-        if(states && !states->isEmpty()){
-            response.setData(states);
-            requester->sendMessage(response);
         }
-        else if(commandModel.service() == SCREEN_SHOT){
+        if(commandModel.service() == SCREEN_SHOT){
             ResponseWaiter* waiter = new ResponseWaiter(responseId, requester);
             connect(waiter, SIGNAL(responded(qint32)), this, SLOT(removeWaiter(qint32)));
             reponseQueue.insert(responseId, waiter);
@@ -186,6 +171,7 @@ void TasServerServiceManager::handleServiceRequest(TasCommandModel& commandModel
             QProcess::startDetached("qttasutilapp", args);
         }
         else{            
+            TasResponse response(responseId);
             response.setRequester(requester);
             performService(commandModel, response);
             //start app waits for register message and performs the response
@@ -252,9 +238,14 @@ void TasServerServiceManager::removeWaiter(qint32 responseId)
 
 QByteArray TasServerServiceManager::responseHeader()
 {
+    QString name = "qt";
+#ifdef Q_OS_SYMBIAN   
+    name = "symbian";
+#endif
+       
     QString header = "<tasMessage dateTime=\"" +
         QDateTime::currentDateTime().toString("yyyy.MM.dd hh:mm:ss.zzz") + 
-        "\" version=\""+TAS_VERSION+"\">";
+        "\" version=\""+TAS_VERSION+"\"><tasInfo id=\""+qVersion()+"\" name=\""+name+"\" type=\"sut\">";
     return header.toUtf8();
     
 }
@@ -312,7 +303,7 @@ void ResponseWaiter::sendResponse(TasMessage& response)
         TasLogger::logger()->debug("ResponseWaiter::sendResponse add plat stuf");
         response.uncompressData();
         mPlatformData->append(response.data()->data());
-        mPlatformData->append(QString("</tasMessage>").toUtf8());
+        mPlatformData->append(QString("</tasInfo></tasMessage>").toUtf8());
         response.setData(mPlatformData);
         //ownership transferred to response
         mPlatformData = 0;
@@ -347,6 +338,73 @@ void ResponseWaiter::socketClosed()
     emit responded(mResponseId);
     deleteLater();
 }
+
+CloseFilter::CloseFilter(TasCommandModel& model)
+{
+    mPassThrough = true;
+    mWaitTime = 3000;
+    mKill = false;
+    TasTarget* target = model.findTarget(APPLICATION_TARGET);    
+    if(target){
+        TasCommand* command = target->findCommand("Close");
+        if(command){
+            bool ok;
+            mPid = command->parameter("uid").toULongLong(&ok, 10);     
+            if(ok){
+                mPassThrough = false;
+            }
+            QString timeString = command->parameter("wait_time");
+            if(!timeString.isEmpty()){
+                mWaitTime = timeString.toInt() * 1000;
+            }        
+            if( command->parameter("kill") == "true"){
+                mKill = true;
+            }
+        }
+    }
+}
+CloseFilter::~CloseFilter()
+{}
+
+void CloseFilter::filterResponse(TasMessage& response)
+{
+    if(mPassThrough) return;
+    
+    TasLogger::logger()->debug("CloseFilter::filterResponse");
+
+    //we need to check that the app really closed
+    int errorCode = 0;
+    int totalSleep = 0;
+    int wait = 200;
+    QString errorMessage;
+    bool didNotCloseInTime = false;
+
+    while(!TasNativeUtils::processExitStatus(mPid, errorCode)){
+        TasCoreUtils::wait(wait);        
+        totalSleep+=wait;
+        if(totalSleep >= mWaitTime){
+            TasLogger::logger()->debug("CloseFilter::filterResponse application did not close in time!");
+            errorMessage = "Application did not close in time.";
+            didNotCloseInTime = true;
+            if(mKill){
+                TasNativeUtils::killProcess(mPid);                     
+            }
+            break;
+        }
+    }
+    TasLogger::logger()->debug("CloseFilter::filterResponse exit code: " + QString::number(errorCode));
+
+
+    if(!didNotCloseInTime && errorCode != 0){
+        errorMessage = "Application exited with code " + QString::number(errorCode);
+    }
+    if(!errorMessage.isEmpty()){
+        response.setErrorMessage(errorMessage);
+    }
+}
+
+
+
 
 
 

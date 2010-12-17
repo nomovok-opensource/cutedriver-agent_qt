@@ -95,4 +95,20 @@ private:
 	QByteArray *mPlatformData;
 };
 
+class CloseFilter : public ResponseFilter
+{
+public:
+    CloseFilter(TasCommandModel& model);
+    ~CloseFilter();
+	void filterResponse(TasMessage& response);
+
+private:
+	quint64 mPid;
+    int mWaitTime;
+    bool mKill;
+	bool mPassThrough;
+};
+
+
+
 #endif

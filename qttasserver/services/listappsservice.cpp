@@ -43,16 +43,8 @@ bool ListAppsService::executeService(TasCommandModel& model, TasResponse& respon
             response.setErrorMessage(QString("Could not parse the listApps command from the request."));
         }
         return true;
-    } else if (model.service() == LIST_CRASHED_APPS) {
-    	TasCommand* command = getCommandParameters(model, LIST_CRASHED_APPS);
-		if(command){
-			listCrashedApplications(*command, response);
-		}
-		else {
-			response.setErrorMessage(QString("Could not parse listCrashedApps command from the request."));
-		}
-		return true;
-    } else {
+    }
+    else {
         return false;
     }
 
@@ -80,25 +72,6 @@ void ListAppsService::listApplications(TasCommand& command, TasResponse& respons
     TasObject* hostAddress = &container.addNewObject(0, "QHostAddress", "hostAddresses");
     hostAddress->addNewObject(0, address, "HostAddress");
     hostAddress->addNewObject(0, port, "HostPort");
-
-    QByteArray* xml = new QByteArray();
-    model->serializeModel(*xml);    
-    delete model;
-    response.setData(xml);
-}
-
-void ListAppsService::listCrashedApplications(TasCommand& command, TasResponse& response)
-{
-    Q_UNUSED(command)
-    TasLogger::logger()->debug("ListAppsService::listCrashedApplications ");
-
-    TasDataModel* model = new TasDataModel();
-    QString qtVersion = "Qt" + QString(qVersion());
-    TasObjectContainer& container = model->addNewObjectContainer(1, qtVersion, "qt");
-    TasObject* apps = &container.addNewObject(0, "QApplications", "applications");
-
-    TasClientManager::instance()->crashedApplicationList(*apps);
-    TasClientManager::instance()->emptyCrashedApplicationList();
 
     QByteArray* xml = new QByteArray();
     model->serializeModel(*xml);    

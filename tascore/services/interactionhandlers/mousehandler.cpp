@@ -312,8 +312,10 @@ void MouseHandler::checkMoveMouse(TapDetails details)
 void MouseHandler::setPoint(TasCommand& command, TapDetails& details)
 {
     if(command.parameter("useCoordinates") == "true"){
-        int x = command.parameter("x").toInt();
-        int y = command.parameter("y").toInt();
+        int x = command.parameter("x").toInt() + command.parameter("x_off").toInt();
+        int y = command.parameter("y").toInt() + command.parameter("y_off").toInt();
+
+
         details.point.setX(x);
         details.point.setY(y);           
         details.identifier.append(QString::number(details.point.x()) +"_"+ QString::number(details.point.y()));

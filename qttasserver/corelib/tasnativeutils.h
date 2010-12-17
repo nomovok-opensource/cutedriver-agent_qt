@@ -36,6 +36,9 @@ public:
     static int pidOfActiveWindow(const QHash<QString, TasClient*> clients);
     static int bringAppToForeground(TasClient& client);
     static void changeOrientation(QString);
+	static bool killProcess(quint64 pid);
+	static bool verifyProcess(quint64 pid);
+	static bool processExitStatus(quint64 pid, int& status);
 
 };
 

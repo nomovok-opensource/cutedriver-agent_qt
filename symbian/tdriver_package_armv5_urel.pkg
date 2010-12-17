@@ -61,6 +61,9 @@
 "\epoc32\release\armv5\urel\viewitemtraverse.dll"                               - "$:\sys\bin\viewitemtraverse.dll"
 "\epoc32\data\z\resource\qt\plugins\traversers\viewitemtraverse.qtplugin"    - "$:\resource\qt\plugins\traversers\viewitemtraverse.qtplugin"
 
+"\epoc32\release\armv5\urel\webkittraverse.dll"                               - "$:\sys\bin\webkittraverse.dll"
+"\epoc32\data\z\resource\qt\plugins\traversers\webkittraverse.qtplugin"    - "$:\resource\qt\plugins\traversers\webkittraverse.qtplugin"
+
 "\epoc32\release\armv5\urel\layouttraverse.dll"                             - "$:\sys\bin\layouttraverse.dll"
 "\epoc32\data\z\resource\qt\plugins\traversers\layouttraverse.qtplugin"    - "$:\resource\qt\plugins\traversers\layouttraverse.qtplugin"
 
