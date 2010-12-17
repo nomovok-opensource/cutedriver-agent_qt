@@ -39,8 +39,6 @@ public:
 	
 private:
 	void listApplications(TasCommand& command, TasResponse& response);
-	void listCrashedApplications(TasCommand& command, TasResponse& response);
-	
 };
 
 #endif

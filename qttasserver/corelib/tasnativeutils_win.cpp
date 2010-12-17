@@ -18,49 +18,73 @@
 ****************************************************************************/ 
  
 
-
 #include "tasnativeutils.h"
 
+#include <taslogger.h>
+#include <windows.h>
+#include <stdio.h>
+#include <psapi.h>
 
-/*!
-    \class TasNativeUtils
-    \brief Provides platform dependent operations.    
-    
-    TasNativeUtils contains generic operations for platform specific calls, such as
-    retrieving the pid of the top most (or active window).
-*/
-
-
-/*!
-  Returns the pid of the active (top most) window on the screen. returns -1 if the operation
-  is not available, or the window can not be found.
-*/
 
 int TasNativeUtils::pidOfActiveWindow(const QHash<QString, TasClient*> clients)
 {
+    Q_UNUSED(clients);
     return -1;
 }
 
 int TasNativeUtils::bringAppToForeground(TasClient& app)
 {
+    Q_UNUSED(app);
     return -1;
 }
 
-void TasNativeUtils::changeOrientation(QString direction)
+void TasNativeUtils::changeOrientation(QString)
 {}
 
 bool TasNativeUtils::killProcess(quint64 pid)
 {
+    HANDLE hProcess;
+    hProcess = OpenProcess( PROCESS_ALL_ACCESS, FALSE, pid );
+    if( hProcess  ){
+        TerminateProcess( hProcess, 0);
+        CloseHandle(hProcess);
+        return true;
+    }
     return false;
 }
 
 bool TasNativeUtils::verifyProcess(quint64 pid)
 {
-    //true as default since false will cause testing to stop
-    return true;
+    bool running = false;
+    HANDLE hProcess;
+    hProcess = OpenProcess( PROCESS_ALL_ACCESS, FALSE, pid );
+    if( hProcess  ){
+        CloseHandle(hProcess);
+        running = true;
+    }
+    return running;
 }
 
 bool TasNativeUtils::processExitStatus(quint64 pid, int &status)
 {
+    HANDLE hProcess;
+    hProcess = OpenProcess( PROCESS_ALL_ACCESS, FALSE, pid );
+    if( hProcess  ){
+        DWORD dwExitCode = 0;
+        if(GetExitCodeProcess(hProcess, &dwExitCode)){
+            if(dwExitCode == STILL_ACTIVE){
+                return false;            
+            }
+            else{
+                status = dwExitCode;
+            }
+        }
+        else{
+            TasLogger::logger()->debug("TasNativeUtils::processExitStatus could not get status");
+            //maybe no process since could not open
+            status = 0;
+        }
+        CloseHandle(hProcess);
+    }
     return true;
 }
