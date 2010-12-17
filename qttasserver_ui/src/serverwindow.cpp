@@ -64,28 +64,10 @@ ServerWindow::ServerWindow(QWidget* parent)
     QLabel* hostBindingLabel =  new QLabel("Server Address Binding:");
     anyBindRadioButton = new QRadioButton("Any");
     localBindRadioButton = new QRadioButton("Localhost");
-    connect(anyBindRadioButton, SIGNAL(clicked()), monitor, SLOT(setAnyBinding()));
-    connect(localBindRadioButton, SIGNAL(clicked()), monitor, SLOT(setLocalBinding()));
     anyBindRadioButton->setDisabled(true);
     localBindRadioButton->setDisabled(true);
 
-    // Set defalt binding Disable when not yet checked (read from server)
-    // Monitor will restart the server if binding change needed
-    // Whenever a button is switched on or off it emits the toggled() signal.
-    // Connect to this signal if you want to trigger an action each time the button changes state.
-    // Use isChecked() to see if a particular button is selected.
-
-
-
-
-
-    // TODO If logic is to be added
-    // 1 Deal with port numbers as well?
-    // 2(select listening internface etc... ) add logic here
-    // listen to signals of current index change , etc...
-
     connect(monitor, SIGNAL(serverState(const QString&)), stateValue, SLOT(setText(const QString&)));
-
     connect(monitor, SIGNAL(beginMonitor()), this, SLOT(disableButtons()));
     connect(monitor, SIGNAL(stopMonitor()), this, SLOT(enableButtons()));
     connect(monitor, SIGNAL(disableReBinding()), this, SLOT(disableRadioButtons()));
@@ -100,8 +82,13 @@ ServerWindow::ServerWindow(QWidget* parent)
     connect(resetButton, SIGNAL(clicked()), editField, SLOT(clear()));
     connect(statusButton, SIGNAL(clicked()), editField, SLOT(clear()));
     connect(loadPluginsButton, SIGNAL(clicked()), editField, SLOT(clear()));
+
+
     connect(anyBindRadioButton, SIGNAL(clicked()), editField, SLOT(clear()));
     connect(localBindRadioButton, SIGNAL(clicked()), editField, SLOT(clear()));
+    connect(anyBindRadioButton, SIGNAL(clicked()), monitor, SLOT(setAnyBinding()));
+    connect(localBindRadioButton, SIGNAL(clicked()), monitor, SLOT(setLocalBinding()));
+
 
 #ifdef Q_OS_SYMBIAN
     connect(pluginButton, SIGNAL(clicked()), editField, SLOT(clear()));

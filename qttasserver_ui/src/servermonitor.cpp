@@ -64,7 +64,7 @@ const static QString TRAVERSER_DIR = "traversers";
 
 static QString BINDING = "";
 static QString BINDING_ADDRESS = "";
-static QString PORT = "";
+static QString BINDING_PORT = "";
 
 
 #ifdef Q_OS_SYMBIAN
@@ -188,12 +188,12 @@ void ServerMonitor::serverResponse(const QString& message)
                     emit enableReBinding(BINDING_ADDRESS);
                 }
                 if(target.attribute("type") == "HostPort"){
-                    PORT = target.attribute("name");
+                    BINDING_PORT = target.attribute("name");
                 }
             }
-            if (!BINDING_ADDRESS.isEmpty() && !PORT.isEmpty()){
+            if (!BINDING_ADDRESS.isEmpty() && !BINDING_PORT.isEmpty()){
                  emit serverDebug("Current Server address binding:");
-                 emit serverDebug(BINDING_ADDRESS + ":" + PORT);
+                 emit serverDebug(BINDING_ADDRESS + ":" + BINDING_PORT);
             }
         }
         else{
