@@ -175,14 +175,27 @@ TargetData UiCommandService::makeInteractionData(TasTarget* commandTarget)
         QListIterator<TasCommand*> j(commandTarget->commandList());
         if (j.hasNext()){
             TasCommand* command = j.next();
-            target = qApp->widgetAt(command->parameter("obj_x").toInt(), command->parameter("obj_y").toInt());
-            if(target) {
-                point.setX(command->parameter("obj_x").toInt());
-                point.setY(command->parameter("obj_y").toInt());
-            }
-            else {
-                TasLogger::logger()->warning("UiCommandService::performUiCommands target not found x:" +
-                                             command->parameter("obj_x") + " y:" + command->parameter("obj_y"));
+            if(command->parameter("obj_x") != "" && command->parameter("obj_y") != ""){
+                target = qApp->widgetAt(command->parameter("obj_x").toInt(), command->parameter("obj_y").toInt());
+                if(target) {
+                    point.setX(command->parameter("obj_x").toInt());
+                    point.setY(command->parameter("obj_y").toInt());
+                    TasLogger::logger()->warning("UiCommandService::performUiCommands target found obj_x:" +
+                                                 command->parameter("obj_x") + " obj_y:" + command->parameter("obj_y"));
+                }
+                else {
+                    TasLogger::logger()->warning("UiCommandService::performUiCommands target not found obj_x:" +
+                                                 command->parameter("obj_x") + " obj_y:" + command->parameter("obj_y"));
+                }
+            }else {
+                target = qApp->widgetAt(command->parameter("x").toInt(), command->parameter("y").toInt());
+                if(target) {
+                    TasLogger::logger()->warning("UiCommandService::performUiCommands target found x:" +
+                                                 command->parameter("x") + " y:" + command->parameter("y"));
+                }else{
+                    TasLogger::logger()->warning("UiCommandService::performUiCommands target not found x:" +
+                                                 command->parameter("x") + " y:" + command->parameter("y"));
+                }
             }
         }
     }
