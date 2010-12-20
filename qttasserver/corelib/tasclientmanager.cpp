@@ -195,6 +195,7 @@ void TasClientManager::removeClient(const QString& processId, bool kill)
         app->deleteLater();
         app = 0;
     }
+    TasLogger::logger()->info("TasClientManager::removeClient client count" + QString::number(mClients.size()));
 }
 
 void TasClientManager::removeMe(const TasClient &client)

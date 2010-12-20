@@ -48,8 +48,7 @@
   The difference to TasServiceManager is that a waiter is started for the responses
   which originate from the connected plugins.
 
-  Commands which are reqistered to the manager will be invoked on all 
-  service requests untill on command consumed the request. This is done
+  Commands which are reqistered to the manager will be invoked on all   service requests untill on command consumed the request. This is done
   by returning "true" from the execute method.
 
 */
@@ -72,6 +71,7 @@ TasServerServiceManager::~TasServerServiceManager()
     qDeleteAll(mCommands);
     mCommands.clear();
     mExtensions.clear();
+    mResponseQueue.clear();
 }
 
 /*!
@@ -136,7 +136,7 @@ void TasServerServiceManager::handleServiceRequest(TasCommandModel& commandModel
         }
 
         connect(waiter, SIGNAL(responded(qint32)), this, SLOT(removeWaiter(qint32)));
-        reponseQueue.insert(responseId, waiter);
+        mResponseQueue.insert(responseId, waiter);
         if(needFragment){
             commandModel.addAttribute("needFragment", "true");
             targetClient->socket()->sendRequest(responseId, commandModel.sourceString(false));            
@@ -160,7 +160,7 @@ void TasServerServiceManager::handleServiceRequest(TasCommandModel& commandModel
         if(commandModel.service() == SCREEN_SHOT){
             ResponseWaiter* waiter = new ResponseWaiter(responseId, requester);
             connect(waiter, SIGNAL(responded(qint32)), this, SLOT(removeWaiter(qint32)));
-            reponseQueue.insert(responseId, waiter);
+            mResponseQueue.insert(responseId, waiter);
             QStringList args;
             args << "-i" << QString::number(responseId) << "-a" << "screenshot";
             QProcess::startDetached("qttasutilapp", args);
@@ -217,8 +217,8 @@ void TasServerServiceManager::loadExtension(const QString& filePath)
 
 void TasServerServiceManager::serviceResponse(TasMessage& response)
 {
-    if(reponseQueue.contains(response.messageId())){
-        reponseQueue.value(response.messageId())->sendResponse(response);
+    if(mResponseQueue.contains(response.messageId())){
+        mResponseQueue.value(response.messageId())->sendResponse(response);
     }
     else{
         TasLogger::logger()->warning("TasServerServiceManager::serviceResponse unexpected response. Nobody interested!");
@@ -227,8 +227,9 @@ void TasServerServiceManager::serviceResponse(TasMessage& response)
 
 void TasServerServiceManager::removeWaiter(qint32 responseId)
 {
-    //TasLogger::logger()->debug("TasServerServiceManager::removeWaiter remove " + QString::number(responseId));
-    reponseQueue.remove(responseId);
+    TasLogger::logger()->debug("TasServerServiceManager::removeWaiter remove " + QString::number(responseId));
+    mResponseQueue.remove(responseId);
+    TasLogger::logger()->debug("TasServerServiceManager::removeWaiter response count " + QString::number(mResponseQueue.count()));
 }
 
 QByteArray TasServerServiceManager::responseHeader()
@@ -391,8 +392,7 @@ void CloseFilter::filterResponse(TasMessage& response)
     }
     TasLogger::logger()->debug("CloseFilter::filterResponse exit code: " + QString::number(errorCode));
     //make sure the client is removed
-    TasClientManager::instance()->removeClient(QString::number(mPid));
-
+    TasClientManager::instance()->removeClient(QString::number(mPid), false);
 
     if(!didNotCloseInTime && errorCode != 0){
         errorMessage = "Application exited with code " + QString::number(errorCode);

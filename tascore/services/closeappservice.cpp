@@ -20,6 +20,7 @@
 
 
 #include <QApplication>
+#include <QTimer>
 
 #include "closeappservice.h"
 #include "tassocket.h"
@@ -42,10 +43,7 @@ bool CloseAppService::executeService(TasCommandModel& model, TasResponse& respon
 {    
     if(model.service() == serviceName() ){
         //close once the response has been sent
-        // TestabilityService::instance()->connect(response.requester(), SIGNAL(messageSent()), 
-        //                                                 TestabilityService::instance(), SLOT(closeApplication()));
-        qApp->setProperty(CLOSE_REQUESTED, QVariant(true));
-        response.requester()->connect(response.requester(), SIGNAL(messageSent()), qApp, SLOT(quit()));   
+        connect(response.requester(), SIGNAL(messageSent()), this, SLOT(requestQuit()));           
         return true;
     }
     else{
@@ -53,3 +51,9 @@ bool CloseAppService::executeService(TasCommandModel& model, TasResponse& respon
     }
 }
 
+void CloseAppService::requestQuit()
+{
+    qApp->setProperty(CLOSE_REQUESTED, QVariant(true));    
+    //small delay to allow the server to read the response 
+    QTimer::singleShot(100, qApp, SLOT(quit()));
+}

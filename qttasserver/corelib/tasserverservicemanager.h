@@ -61,7 +61,7 @@ private:
 	void loadExtension(const QString& filePath);
 
 private:	
-	QHash<qint32, ResponseWaiter*> reponseQueue;
+	QHash<qint32, ResponseWaiter*> mResponseQueue;
 	TasClientManager* mClientManager;
 	QList<TasExtensionInterface*> mExtensions;
     TasPluginLoader mPluginLoader;    
