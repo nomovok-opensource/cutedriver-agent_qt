@@ -26,7 +26,6 @@
 
  
 
-
 #include <QProcess>
 #include <QMutexLocker>
 #include <QMetaType>
@@ -47,7 +46,7 @@ ShellTask::ShellTask(const QString &command) :
 
 ShellTask::~ShellTask()
 {
-    if (mProcess) {
+    if (mProcess) {      
         if (mProcess->state() == QProcess::Running ||
             mProcess->state() == QProcess::Starting) {
             mProcess->terminate();
@@ -86,6 +85,15 @@ void ShellTask::run()
     mProcess->closeWriteChannel();
 
     exec();
+}
+
+
+void ShellTask::endTask()
+{
+    if (mProcess) {
+        mProcess->kill();	
+    }
+    quit();
 }
 
 ShellTask::Status ShellTask::status() 
