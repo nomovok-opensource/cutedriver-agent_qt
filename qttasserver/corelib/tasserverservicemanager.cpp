@@ -89,11 +89,6 @@ void TasServerServiceManager::handleServiceRequest(TasCommandModel& commandModel
             foreach(TasExtensionInterface* extension, mExtensions){            
                 QByteArray data;
                 if(extension->performCommand(commandModel, data)){
-                    //remove possible client 
-                    if(commandModel.service() == CLOSE_APPLICATION){
-                        TasLogger::logger()->debug("TasServerServiceManager::handleServiceRequest remove client");
-                        mClientManager->removeClient(commandModel.id());
-                    }
                     TasResponse response(responseId, new QByteArray(data));
                     requester->sendMessage(response);
                     TasLogger::logger()->debug("TasServerServiceManager::handleServiceRequest: plat service done, returning");
@@ -175,7 +170,7 @@ void TasServerServiceManager::handleServiceRequest(TasCommandModel& commandModel
             response.setRequester(requester);
             performService(commandModel, response);
             //start app waits for register message and performs the response
-            if( (commandModel.service() != START_APPLICATION && commandModel.service() != RESOURCE_LOGGING_SERVICE) || response.isError()){
+            if( commandModel.service() != RESOURCE_LOGGING_SERVICE || response.isError()){
                 requester->sendMessage(response);
             }
         }
@@ -361,6 +356,8 @@ CloseFilter::CloseFilter(TasCommandModel& model)
                 mKill = true;
             }
         }
+        command = 0;
+        target = 0;
     }
 }
 CloseFilter::~CloseFilter()
@@ -393,6 +390,8 @@ void CloseFilter::filterResponse(TasMessage& response)
         }
     }
     TasLogger::logger()->debug("CloseFilter::filterResponse exit code: " + QString::number(errorCode));
+    //make sure the client is removed
+    TasClientManager::instance()->removeClient(QString::number(mPid));
 
 
     if(!didNotCloseInTime && errorCode != 0){

@@ -55,7 +55,7 @@ TasClientManager::TasClientManager()
 */
 TasClientManager::~TasClientManager()
 {    
-    removeAllClients();
+    removeAllClients(false);
     delete mDataShare;
     mDataShare = 0;
 }
@@ -126,8 +126,6 @@ TasClient* TasClientManager::addRegisteredClient(const QString& processId, const
 {
     QMutexLocker locker(&mMutex);   
     TasLogger::logger()->info("TasClientManager::addRegisteredClient " + processName);
-    //check clients that were never reqistered
-    removeGhostClients();
 
     TasClient* app = 0;
     if(mClients.contains(processId)){
@@ -370,49 +368,22 @@ bool TasClientManager::verifyClient(TasClient* client)
     return valid;
 }
 
-void TasClientManager::removeGhostClients()
-{
-    QMutableHashIterator<QString, TasClient*> iter(mClients);
-    while (iter.hasNext()) {
-        iter.next();
-        TasClient* app = iter.value();
-        if(app == 0){
-            mClients.remove(iter.key());
-        }
-        else if(!app->socket()){
-            if(app->upTime() > 600000){
-                TasLogger::logger()->debug("TasClientManager::removeGhostClients removing client " + app->processId() +  " " 
-                                           + app->applicationName());
-
-                detachFromStartupData(app->applicationName());
-                mClients.remove(iter.key());
-                app->deleteLater();
-                app = 0;
-            }
-            else if(app->processId().isEmpty()){
-                mClients.remove(iter.key());
-                app->deleteLater();
-                app = 0;
-            }
-        }
-    }
-}
-
-
 /*!
   Removes all clients from the list and kills all
   processes.
   After this call there will be no connected clients.
 */
-void TasClientManager::removeAllClients()
+void TasClientManager::removeAllClients(bool kill)
 {
     QMutexLocker locker(&mMutex);   
     foreach (TasClient* app, mClients){
         app->closeConnection();
-        bool ok;
-        quint64 pid = app->processId().toULongLong(&ok, 10);       
-        if(ok && pid != 0){
-            TasNativeUtils::killProcess(pid);
+        if(kill){
+            bool ok;
+            quint64 pid = app->processId().toULongLong(&ok, 10);       
+            if(ok && pid != 0){
+                TasNativeUtils::killProcess(pid);
+            }
         }
         app->deleteLater();
         app = 0;

@@ -236,13 +236,14 @@ bool TasNativeUtils::verifyProcess(quint64 pid)
 
 bool TasNativeUtils::processExitStatus(quint64 pid, int &status)
 {
+    bool stopped = true;
     status = 0;
     RProcess process;
     TInt code;
     if( process.Open( TProcessId( pid ) ) == KErrNone ){
         code = process.ExitType();
         if( code == EExitPending ){
-            return false;
+            stopped = false;
         }
         else if( code == EExitPanic ){
             status = process.ExitReason();
@@ -251,7 +252,6 @@ bool TasNativeUtils::processExitStatus(quint64 pid, int &status)
             status = 0;
         }
         process.Close();
-        
     }
-    return true;
+    return stopped;
 }

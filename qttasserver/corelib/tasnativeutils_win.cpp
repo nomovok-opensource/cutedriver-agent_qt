@@ -67,13 +67,14 @@ bool TasNativeUtils::verifyProcess(quint64 pid)
 
 bool TasNativeUtils::processExitStatus(quint64 pid, int &status)
 {
+    bool stopped = true;
     HANDLE hProcess;
     hProcess = OpenProcess( PROCESS_ALL_ACCESS, FALSE, pid );
     if( hProcess  ){
         DWORD dwExitCode = 0;
         if(GetExitCodeProcess(hProcess, &dwExitCode)){
             if(dwExitCode == STILL_ACTIVE){
-                return false;            
+                stopped =  false;            
             }
             else{
                 status = dwExitCode;
@@ -86,5 +87,5 @@ bool TasNativeUtils::processExitStatus(quint64 pid, int &status)
         }
         CloseHandle(hProcess);
     }
-    return true;
+    return stopped;
 }

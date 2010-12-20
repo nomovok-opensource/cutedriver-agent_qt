@@ -42,7 +42,7 @@ public:
 
 private:
 	void startApplication(TasCommand& command, TasResponse& response);
-	void launchDetached(const QString& applicationPath,const QStringList& arguments, TasResponse& response, bool noWait);
+	void launchDetached(const QString& applicationPath,const QStringList& arguments, TasResponse& response);
 	void setRuntimeParams(TasCommand& command);
 
 private:

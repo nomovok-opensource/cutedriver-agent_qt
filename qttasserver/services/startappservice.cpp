@@ -85,9 +85,8 @@ void StartAppService::startApplication(TasCommand& command, TasResponse& respons
     }
     else{
         arguments.removeAll(DETACH_MODE);
-        bool noWait = arguments.contains(NO_WAIT);
         arguments.removeAll(NO_WAIT);
-        launchDetached(applicationPath, arguments, response, noWait);
+        launchDetached(applicationPath, arguments, response);
     }
 }
 
@@ -123,11 +122,11 @@ QHash<QString, QString> StartAppService::parseEnvironmentVariables(const QString
     return vars;
 }
 
-void StartAppService::launchDetached(const QString& applicationPath, const QStringList& arguments, TasResponse& response, bool noWait)
+void StartAppService::launchDetached(const QString& applicationPath, const QStringList& arguments, TasResponse& response)
 {
     qint64 pid;
     if(QProcess::startDetached(applicationPath, arguments, ".", &pid)){
-        response.requester()->sendResponse(response.messageId(), QString::number(pid));   
+        response.setData(QString::number(pid));   
     }
     else{
         TasLogger::logger()->error("TasServer::launchDetached: count not start the application " + applicationPath);
