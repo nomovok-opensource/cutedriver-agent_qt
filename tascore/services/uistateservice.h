@@ -42,7 +42,7 @@ public:
 	QString serviceName()const { return APPLICATION_STATE; }
 
 private:
-	QByteArray* makeUiState(TasCommandModel& model);
+	QByteArray makeUiState(TasCommandModel& model);
 	
 private:
 	TasUiTraverser* mTraverser;

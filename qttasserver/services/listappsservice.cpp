@@ -65,8 +65,8 @@ void ListAppsService::listApplications(TasCommand& command, TasResponse& respons
     TasClientManager::instance()->applicationList(*apps);
 
 
-    QByteArray* xml = new QByteArray();
-    model->serializeModel(*xml);    
+    QByteArray xml;
+    model->serializeModel(xml);    
     delete model;
     response.setData(xml);
 }

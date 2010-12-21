@@ -72,10 +72,11 @@ public:
 	virtual void closeConnection() = 0;
 
     bool sendRequest(const qint32& messageId, const QString& message);
-    bool sendRequest(const qint32& messageId, QByteArray* message);
-    bool sendResponse(const qint32& messageId, QString message, bool compressed = false);
-    bool sendResponse(const qint32& messageId, QByteArray* message, bool compressed = false);
-    bool sendError(const qint32& messageId, QByteArray* message, bool compressed = false);
+    bool sendRequest(const qint32& messageId, const QByteArray& message);
+    bool sendResponse(const qint32& messageId, const QString& message, bool compressed = false);
+    bool sendResponse(const qint32& messageId, const QByteArray& message, bool compressed = false);
+    bool sendError(const qint32& messageId, const QString& message);
+    bool sendError(const qint32& messageId, const QByteArray& message, bool compressed = false);
 	
 	bool sendMessage(TasMessage& message);
 
@@ -111,11 +112,11 @@ public:
 	~TasSocketWriter();
 	bool isWritable();
 	bool writeMessage(TasMessage& message);
-	bool writeData(const qint32& messageId, QByteArray message, QString& errorMessage, int timeout);
+	bool writeData(const qint32& messageId, const QByteArray& message, QString& errorMessage, int timeout);
 
 private:
-	void writeBytes(QByteArray* msgBytes);
-	QByteArray* makeHeader(TasMessage& message);
+	void writeBytes(const QByteArray& msgBytes);
+	QByteArray makeHeader(TasMessage& message);
 	void flush();
 
 private:

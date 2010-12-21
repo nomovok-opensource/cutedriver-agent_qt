@@ -36,15 +36,15 @@ TasUtilityApp::~TasUtilityApp()
 void TasUtilityApp::sendScreenShot(uint id)
 {
     QPixmap screenshot = QPixmap::grabWindow(QApplication::desktop()->winId());
-    QByteArray* bytes = new QByteArray();
-    QBuffer buffer(bytes);
+    QByteArray bytes;
+    QBuffer buffer(&bytes);
     buffer.open(QIODevice::WriteOnly);
     screenshot.save(&buffer, "PNG");
     sendData(bytes, id);
 }
 
 
-void TasUtilityApp::sendData(QByteArray* data, uint id)
+void TasUtilityApp::sendData(const QByteArray& data, uint id)
 {
 #if defined(TAS_NOLOCALSOCKET)
     QTcpSocket serverConnection;

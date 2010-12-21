@@ -88,11 +88,14 @@ private slots:
 	void socketClosed();
 
 private:
+	void cleanup();
+
+private:
 	qint32 mResponseId;
 	QTimer mWaiter;
 	TasSocket *mSocket;
 	ResponseFilter* mFilter;
-	QByteArray *mPlatformData;
+	QByteArray mPlatformData;
 };
 
 class CloseFilter : public ResponseFilter

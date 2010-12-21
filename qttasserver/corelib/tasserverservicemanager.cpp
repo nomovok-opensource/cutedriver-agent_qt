@@ -89,7 +89,7 @@ void TasServerServiceManager::handleServiceRequest(TasCommandModel& commandModel
             foreach(TasExtensionInterface* extension, mExtensions){            
                 QByteArray data;
                 if(extension->performCommand(commandModel, data)){
-                    TasResponse response(responseId, new QByteArray(data));
+                    TasResponse response(responseId, data);
                     requester->sendMessage(response);
                     TasLogger::logger()->debug("TasServerServiceManager::handleServiceRequest: plat service done, returning");
                     return;
@@ -152,7 +152,7 @@ void TasServerServiceManager::handleServiceRequest(TasCommandModel& commandModel
             QByteArray data;
             if(extension->performCommand(commandModel, data)){
                 TasLogger::logger()->debug("TasServerServiceManager::handleServiceRequest platform handler completed request.");
-                TasResponse response(responseId, new QByteArray(data));
+                TasResponse response(responseId, data);
                 requester->sendMessage(response);
                 return;
             }
@@ -264,19 +264,23 @@ ResponseWaiter::~ResponseWaiter()
     if(mFilter){
         delete mFilter;
     }
-    if(mPlatformData){
-        delete mPlatformData;
-    }
+    mPlatformData.clear();
+}
+
+void ResponseWaiter::cleanup()
+{
+    disconnect(&mWaiter, 0, this, 0);
+    disconnect(mSocket, 0, this, 0);
 }
 
 void ResponseWaiter::appendPlatformData(QByteArray data)
 {
-    if(!mPlatformData){
+    if(mPlatformData.isEmpty()){
         TasLogger::logger()->debug("ResponseWaiter::appendPlatformData make data container and add root");
         //make header for the document made from fragments
-        mPlatformData = new QByteArray(TasServerServiceManager::responseHeader());
+        mPlatformData = QByteArray(TasServerServiceManager::responseHeader());
     }
-    mPlatformData->append(data);
+    mPlatformData.append(data);
 }
 
 /*!
@@ -295,11 +299,11 @@ void ResponseWaiter::sendResponse(TasMessage& response)
     if(mFilter){
         mFilter->filterResponse(response);
     }
-    if(mPlatformData && !mPlatformData->isEmpty()){
+    if(!mPlatformData.isEmpty()){
         TasLogger::logger()->debug("ResponseWaiter::sendResponse add plat stuf");
         response.uncompressData();
-        mPlatformData->append(response.data()->data());
-        mPlatformData->append(QString("</tasInfo></tasMessage>").toUtf8());
+        mPlatformData.append(response.data().data());
+        mPlatformData.append(QString("</tasInfo></tasMessage>").toUtf8());
         response.setData(mPlatformData);
         //ownership transferred to response
         mPlatformData = 0;
@@ -309,6 +313,7 @@ void ResponseWaiter::sendResponse(TasMessage& response)
         TasLogger::logger()->error("ResponseWaiter::sendResponse socket not writable!");
     }
     emit responded(mResponseId);
+    cleanup();
     deleteLater();
 }
 
@@ -324,6 +329,7 @@ void ResponseWaiter::timeout()
         TasLogger::logger()->error("ResponseWaiter::timeout socket not writable!");
     }
     emit responded(mResponseId);
+    cleanup();
     deleteLater();
 }
 
@@ -332,6 +338,7 @@ void ResponseWaiter::socketClosed()
     mWaiter.stop();
     TasLogger::logger()->error("ResponseWaiter::socketClosed. Connection to this waiter closed. Cannot respond. " );
     emit responded(mResponseId);
+    cleanup();
     deleteLater();
 }
 

@@ -51,7 +51,7 @@ bool UiStateService::executeService(TasCommandModel& model, TasResponse& respons
 /*!
   Send the server ui state.
 */
-QByteArray* UiStateService::serverUiState()
+QByteArray UiStateService::serverUiState()
 {
     TasLogger::logger()->debug("TasServer::serverUiState");
     TasDataModel* model = new TasDataModel();
@@ -73,8 +73,8 @@ QByteArray* UiStateService::serverUiState()
         application.addAttribute("memUsage", mem);
     }
 
-    QByteArray* xml = new QByteArray(); 
-    model->serializeModel(*xml);
+    QByteArray xml;
+    model->serializeModel(xml);
     delete model;
     return xml;
 }

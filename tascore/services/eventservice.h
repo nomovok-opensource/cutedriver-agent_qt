@@ -64,7 +64,7 @@ public:
 	void startFiltering(QStringList eventsToListen);
 
     bool eventFilter(QObject *target, QEvent *event);        
-	QByteArray* getEvents();
+	QByteArray getEvents();
 
 	void addStartTime(QDateTime startTime);
 

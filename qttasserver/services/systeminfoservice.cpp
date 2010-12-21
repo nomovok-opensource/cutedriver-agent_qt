@@ -54,7 +54,7 @@ bool SystemInfoService::executeService(TasCommandModel& model, TasResponse& resp
     }
 }
 
-QByteArray* SystemInfoService::systemInfo()
+QByteArray SystemInfoService::systemInfo()
 {
     TasDataModel* model = new TasDataModel();
     QString qtVersion = "Qt" + QString(qVersion());
@@ -68,8 +68,8 @@ QByteArray* SystemInfoService::systemInfo()
     TasDeviceUtils::addSystemMemoryStatus(memInfo);
     memInfo.addAttribute("qttasMemUsage", TasDeviceUtils::currentProcessHeapSize());
     
-    QByteArray* xml = new QByteArray();
-    model->serializeModel(*xml);
+    QByteArray xml;
+    model->serializeModel(xml);
     delete model;
     return xml;
 }

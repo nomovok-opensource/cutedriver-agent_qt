@@ -192,7 +192,7 @@ void TasClientManager::removeClient(const QString& processId, bool kill)
             }
         }
 
-        app->deleteLater();
+        delete app;
         app = 0;
     }
     TasLogger::logger()->info("TasClientManager::removeClient client count" + QString::number(mClients.size()));
@@ -359,7 +359,8 @@ bool TasClientManager::verifyClient(TasClient* client)
     if(ok && pid != 0){
         if(!TasNativeUtils::verifyProcess(pid)){
             removeMe(*client);
-            client->deleteLater();
+            delete client;
+            client = 0;
             valid = false;
             TasLogger::logger()->warning("TasClientManager::verifyClient process vanished had to remove client :" + QString::number(pid));
         } else {
@@ -386,7 +387,7 @@ void TasClientManager::removeAllClients(bool kill)
                 TasNativeUtils::killProcess(pid);
             }
         }
-        app->deleteLater();
+        delete app;
         app = 0;
     }
     mClients.clear();
@@ -520,8 +521,12 @@ void TasClient::disconnected()
 {
     TasLogger::logger()->debug(
         "TasClient::disconnected socket");
-        
-    mSocket = 0;
+
+    if(mSocket){
+        disconnect(mSocket, SIGNAL(socketClosed()), this, SLOT(disconnected()));    
+        mSocket = 0;
+    }
+
     //no process remove the client from the list
     //will register again if so wants
     TasClientManager::instance()->removeMe(*this);

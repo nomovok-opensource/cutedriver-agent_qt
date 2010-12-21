@@ -40,7 +40,7 @@ public:
 	QString serviceName() const { return SYSTEM_INFO_SERVICE; }
 
 private:
-	QByteArray* systemInfo();
+	QByteArray systemInfo();
 	InfoLogger* mLogger;
 };
 

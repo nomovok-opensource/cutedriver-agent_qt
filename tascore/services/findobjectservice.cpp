@@ -85,8 +85,8 @@ bool FindObjectService::executeService(TasCommandModel& model, TasResponse& resp
             uiModel = mTraverser->getUiState(command);
         }
         //        TasLogger::logger()->debug("FindObjectService::executeService make return message.");
-        QByteArray* xml = new QByteArray();         
-        uiModel->serializeModel(*xml, 0, model.onlyFragment());
+        QByteArray xml;
+        uiModel->serializeModel(xml, 0, model.onlyFragment());
         delete uiModel;
         response.setData(xml);
         return true;

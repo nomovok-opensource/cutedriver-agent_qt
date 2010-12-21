@@ -24,13 +24,11 @@
 
 TasMessage::TasMessage()
 {
-    mData = 0;
     mCompressed = false;
 }
 
-TasMessage::TasMessage(quint8 flag, bool compressed, QByteArray* data, qint32 messageId)
+TasMessage::TasMessage(quint8 flag, bool compressed, const QByteArray& data, qint32 messageId)
 {
-    mData = 0;
     mCompressed = false;
     mMessageId = messageId;
     setFlag(flag);
@@ -39,10 +37,7 @@ TasMessage::TasMessage(quint8 flag, bool compressed, QByteArray* data, qint32 me
 
 TasMessage::~TasMessage()
 {
-    if(mData){
-        delete mData;
-        mData = 0;
-    }
+    mData.clear();
 }
 
 
@@ -56,17 +51,15 @@ void TasMessage::setIsCompressed(bool compressed)
     mCompressed = compressed;
 }
 
-QByteArray* TasMessage::data()
+QByteArray& TasMessage::data()
 {
     return mData;
 }
 
-QByteArray* TasMessage::dataCompressed()
+QByteArray& TasMessage::dataCompressed()
 {
     if(!mCompressed){
-        QByteArray temp = qCompress(*mData, 9);
-        mData->clear();
-        mData->append(temp);
+        mData = qCompress(mData, 9);
         mCompressed = true;
     }
     return mData;
@@ -75,9 +68,7 @@ QByteArray* TasMessage::dataCompressed()
 void TasMessage::uncompressData() 
 {
     if(mCompressed){
-        QByteArray temp = qUncompress(*mData);
-        mData->clear();
-        mData->append(temp);
+        mData = qUncompress(mData);
         mCompressed = false;
     }
 }
@@ -85,7 +76,7 @@ void TasMessage::uncompressData()
 QString TasMessage::dataAsString()
 {
     uncompressData();
-    return QString::fromUtf8(mData->data(), mData->size()).trimmed();
+    return QString::fromUtf8(mData.data(), mData.size()).trimmed();
 }
 
 quint8 TasMessage::flag() const
@@ -111,16 +102,14 @@ void TasMessage::setMessageId(qint32 messageId)
 /*!
   Set data for message. Takes ownership of data.
  */
-void TasMessage::setData(QByteArray* data, bool isCompressed)
+void TasMessage::setData(const QByteArray& data, bool isCompressed)
 {
-    if(mData){
-        delete mData;
-    }
+    mData.clear();
     mData = data;
     setIsCompressed(isCompressed);
 }
 
-void TasMessage::setErrorMessage(QString message)
+void TasMessage::setErrorMessage(const QString& message)
 {
     setIsError(true);
     setIsCompressed(false);
@@ -143,20 +132,22 @@ void TasMessage::setIsError(bool isError)
     }
 }
 
-void TasMessage::setData(QString message)
+void TasMessage::setData(const QString& message)
 {
-    setData(new QByteArray(message.toUtf8()), false);
+    setData(QByteArray(message.toUtf8()), false);
 }
 
 
-TasResponse::TasResponse(qint32 messageId, QByteArray* data, bool isError, bool isCompressed)
+TasResponse::TasResponse(qint32 messageId, const QByteArray& data, bool isError, bool isCompressed)
 {
     //defaults to OK_MESSAGE
-    if(!data){
-        data = new QByteArray(OK_MESSAGE);
+    if(data.isEmpty()){
+        TasMessage::setData(QString(OK_MESSAGE));
+    }
+    else{
+        TasMessage::setData(data, isCompressed);
     }
     TasMessage::setMessageId(messageId);
-    TasMessage::setData(data, isCompressed);
     TasMessage::setIsError(isError);
     mSocket = 0;
 }

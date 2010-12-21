@@ -171,8 +171,8 @@ void ScreenshotService::getScreenshot(TasCommandModel& model, TasResponse& respo
     }
 
     if (!screenshot.isNull()){
-        QByteArray* bytes = new QByteArray();
-        QBuffer buffer(bytes);
+        QByteArray bytes;
+        QBuffer buffer(&bytes);
         buffer.open(QIODevice::WriteOnly);
         screenshot.save(&buffer, pictureFormat.toAscii());
         response.setData(bytes);
