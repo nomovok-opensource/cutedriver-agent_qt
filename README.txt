@@ -1,4 +1,4 @@
-Build instructions for Qt agent (qttas):
+Build instructions for Qt agent (qttas): 
 
 Important note:
 Mobility fixture is now default in the Agent_Qt, so now in Windows and Linux one needs to install mobility API.

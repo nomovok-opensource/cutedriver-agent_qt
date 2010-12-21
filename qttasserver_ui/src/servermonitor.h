@@ -59,6 +59,8 @@ signals:
   void serverState(const QString& state);
   void beginMonitor();
   void stopMonitor();
+  void enableReBinding(const QString& currentBinding);
+  void disableReBinding();
 
 public slots:
   void serverState();
@@ -66,6 +68,8 @@ public slots:
   void stopServer();
   void startServer();
   void loadPlugins();
+  void setAnyBinding();
+  void setLocalBinding();
 #ifdef Q_OS_SYMBIAN
   void enablePluginLoad();
   void setAutoStart(bool autostart);

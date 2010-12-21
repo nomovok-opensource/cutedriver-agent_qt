@@ -48,7 +48,7 @@ class TasServer : public QObject
     Q_OBJECT
 
 public:           
-    TasServer(QObject *parent = 0 );
+    TasServer(QString hostBinding, QObject *parent = 0 );
     ~TasServer();
      
     bool startServer();        
@@ -66,18 +66,20 @@ public slots:
 private:
 	void createServers();
 
-private:                 
+public:
+    QHostAddress mHostBinding;
 
+private:                 
 	TasTcpServer* mTcpServer;
 #if defined(TAS_USELOCALSOCKET)
 	TasLocalServer* mLocalServer;
 #else
 	TasTcpServer* mInternalTcpServer;
 #endif
-
 	TasClientManager* mClientManager;
 	TasServerServiceManager* mServiceManager;
 	QString errorMessage;
+
 };
 
 
