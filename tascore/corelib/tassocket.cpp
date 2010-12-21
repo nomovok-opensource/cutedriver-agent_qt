@@ -54,10 +54,6 @@
     
  */
 
-static const QString CANNOT_SEND = "Socket not connected cannot send message!";
-static const QString TIME_OUT = "Reading response to request took too long!";
-static const QString READ_MESSAGE_FAIL = "Failed to read response message!";
-
 static const int CHUNK_SIZE = 1024;
 static const int SLEEP_TIME = 5;
 
@@ -418,6 +414,7 @@ void TasSocketReader::readMessageData()
     connect(&mDevice, SIGNAL(readyRead()), this, SLOT(readMessageData()));    
 
     if(!ok){
+        rawBytes.clear();
         return;
     }
     //check crc
@@ -430,6 +427,7 @@ void TasSocketReader::readMessageData()
         TasMessage message(flag, compression, rawBytes, messageId);
         emit messageRead(message);
     }
+    rawBytes.clear();
     //maybe there was a new message coming when the old one was still being processed.
     if(mDevice.bytesAvailable() > 0){
         readMessageData();   

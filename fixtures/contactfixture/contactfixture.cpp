@@ -231,23 +231,23 @@ bool ContactFixture::execute(void * objectInstance, QString actionName, QHash<QS
     } else if (actionName == ACTION_REMOVE_CONTACT) {
         stdOut.append(QString("Remove contact: Not supported yet"));
         return false;
-        QContactManager * manager = connectContactManager(parameters, stdOut);
-        if ( manager == NULL) {
+//         QContactManager * manager = connectContactManager(parameters, stdOut);
+//         if ( manager == NULL) {
 
-        }
-        else {
+//         }
+//         else {
 
-        }
+//         }
     } else if (actionName == ACTION_LIST_CONTACT) {
         stdOut.append(QString("List contacts: Not supported yet"));
         return false;
-        QContactManager * manager = connectContactManager(parameters, stdOut);
-        if ( manager == NULL) {
-            return false;
-        }
-        else {
+//         QContactManager * manager = connectContactManager(parameters, stdOut);
+//         if ( manager == NULL) {
+//             return false;
+//         }
+//         else {
 
-        }
+//         }
     } else {
         stdOut.append("Invalid contact fixture command: "+ actionName);
         return false;

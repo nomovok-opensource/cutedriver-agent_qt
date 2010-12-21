@@ -169,7 +169,9 @@ void StartAppService::launchDetached(const QString& applicationPath, const QStri
     RProcess process;
     if( process.Create(program_ptr, cmdline_ptr) == KErrNone){
         process.Resume();
+        pid = process.Id().Id();
         process.Close();
+        response.setData(QString::number(pid));   
     }
 #else
     if(QProcess::startDetached(applicationPath, arguments, ".", &pid)){

@@ -191,6 +191,9 @@ void TasNativeUtils::changeOrientation(QString direction)
             CleanupStack::PopAndDestroy(2);
         }
     );
+    if( err != KErrNone ){
+        TasLogger::logger()->error("<- TasNativeUtils::changeOrientation orientation changed failed, code: " + QString::number(err));
+    }
     // T R A P D ends
 }
 
