@@ -278,10 +278,10 @@ int TasNativeUtils::pidOfActiveWindow(const QHash<QString, TasClient*> clients)
     if (pid != -1) {
         TasLogger::logger()->debug("TasNativeUtils::pidOfActiveWindow Found MeeGo pid: " + QString::number(pid));
         return pid;
-    }        
-
-    Window win = queryStack(display, window, pids);
-    pid = pidOfXWindow(display, win);
+    } else {
+        Window win = queryStack(display, window, pids);
+        pid = pidOfXWindow(display, win);
+    }
     XCloseDisplay(display);    
 
     TasLogger::logger()->debug("TasNativeUtils::pidOfActiveWindow Resolved " + QString::number(pid));
