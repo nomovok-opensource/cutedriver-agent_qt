@@ -59,7 +59,8 @@ bool KeyHandler::executeInteraction(TargetData data)
         QPointer<QWidget> ptr(target);
         doKeyEvent(target, QEvent::KeyPress, (Qt::Key)command.text().toUInt());
         //make sure that the target is still valid (e.g. close button for dialog..)
-        if(!ptr){
+        //use to be !ptr (wtf)
+        if(ptr){
             doKeyEvent(target, QEvent::KeyRelease, (Qt::Key)command.text().toUInt());
         }
         wasConsumed = true;
