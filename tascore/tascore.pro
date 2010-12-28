@@ -35,6 +35,7 @@ INCLUDEPATH += . corelib services services/interactionhandlers services/interact
 CONFIG(maemo){
 LIBS += -lqmsystem
 DEFINES += TAS_MAEMO
+CONFIG += meegotouch
 }
 
 # Input
