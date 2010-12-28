@@ -39,15 +39,10 @@ bool ForegroundService::executeService(TasCommandModel& model, TasResponse& resp
         status = true;
         TasCommand* command = getCommandParameters(model, "BringToForeground");
         if(command){
-            // Find app from client manager
-            TasClientManager* clientManager = TasClientManager::instance();
-            TasClient* app = 0;
-            app = clientManager->findByProcessId(command->parameter("pid"));
-            
-            if (app) {
-                TasLogger::logger()->debug("   App found from client manager, PID: " + app->processId());
-                // Bring to foreground using native utils
-                int error = TasNativeUtils::bringAppToForeground(*app);
+            bool ok;
+            quint64 processId = command->parameter("pid").toULongLong(&ok, 10);       
+            if(processId != 0 && ok){
+                int error = TasNativeUtils::bringAppToForeground(processId);
                 if (TAS_ERROR_NONE == error) {
                     TasLogger::logger()->debug("   App brought to foreground");
                 }
@@ -56,9 +51,9 @@ bool ForegroundService::executeService(TasCommandModel& model, TasResponse& resp
                     response.setErrorMessage("   Couldn't bring app to foreground, error: " + error);
                 }
             }
-            else {
-                TasLogger::logger()->error("   App not found from client manager, PID: " + model.id());
-                response.setErrorMessage("   App not found from client manager, PID: " + model.id());
+            else{
+                TasLogger::logger()->error("Invalid pid: " + model.id());
+                response.setErrorMessage("Invalid pid: " + model.id());
             }
         }
         else {

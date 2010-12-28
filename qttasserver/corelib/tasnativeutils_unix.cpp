@@ -289,9 +289,9 @@ int TasNativeUtils::pidOfActiveWindow(const QHash<QString, TasClient*> clients)
 
 
 
-int TasNativeUtils::bringAppToForeground(TasClient& app)
+int TasNativeUtils::bringAppToForeground(quint64 pid)
 {
-    Q_UNUSED(app);
+    Q_UNUSED(pid);
     return -1;
 }
 
