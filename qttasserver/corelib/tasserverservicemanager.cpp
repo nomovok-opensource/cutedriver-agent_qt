@@ -238,10 +238,8 @@ QByteArray TasServerServiceManager::responseHeader()
 #ifdef Q_OS_SYMBIAN   
     name = "symbian";
 #endif
-       
-    QString header = "<tasMessage dateTime=\"" +
-        QDateTime::currentDateTime().toString("yyyy.MM.dd hh:mm:ss.zzz") + 
-        "\" version=\""+TAS_VERSION+"\"><tasInfo id=\""+qVersion()+"\" name=\""+name+"\" type=\"sut\">";
+    
+    QString header = "<tasMessage version=\""+TAS_VERSION+"\"><tasInfo id=\""+qVersion()+"\" name=\""+name+"\" type=\"sut\">";
     return header.toUtf8();
     
 }
