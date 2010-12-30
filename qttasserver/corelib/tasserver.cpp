@@ -78,7 +78,7 @@ const TInt KQtTasRunning = 1;
 /*!
   Constructs a new TasServer with \a parent.
 */
-TasServer::TasServer(QObject *parent)
+TasServer::TasServer(QString hostBinding, QObject *parent)
     : QObject(parent) 
 { 
     TasLogger::logger()->setLogFile("qttasserver.log");
@@ -111,6 +111,20 @@ TasServer::TasServer(QObject *parent)
 #else
     mInternalTcpServer = 0;
 #endif
+
+    if(hostBinding == "any"){
+        mHostBinding = QHostAddress::Any;
+    }
+    else if(hostBinding == "localhost"){
+        mHostBinding = QHostAddress::LocalHost;
+    }
+    else{
+#ifdef Q_OS_SYMBIAN
+        mHostBinding = QHostAddress::LocalHost;
+#else
+        mHostBinding = QHostAddress::Any;
+#endif
+    }
 
     connect(QCoreApplication::instance(), SIGNAL(aboutToQuit()), this, SLOT(shutdown()));
 }
@@ -305,11 +319,18 @@ bool TasTcpServer::start()
 {
     bool started = false;
     for(int i = 0; i < 5; i++){
-#ifdef Q_OS_SYMBIAN
-        if(listen(QHostAddress::LocalHost, mPort)){
-#else
-        if(listen(QHostAddress::Any, mPort)){
-#endif
+
+//#ifdef Q_OS_SYMBIAN
+//        if(listen(QHostAddress::LocalHost, mPort)){
+//#else
+//        if(listen(QHostAddress::Any, mPort)){
+
+//#endif
+
+        TasServer* tasServer = (TasServer*) this->parent();
+
+
+        if(listen(tasServer->mHostBinding, mPort)){
             started = true;
             break;
         }

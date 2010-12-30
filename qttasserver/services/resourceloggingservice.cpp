@@ -83,7 +83,7 @@ void MemLogServerWaiter::clientRegistered(const QString& processId)
 {
     Q_UNUSED(processId)
     TasLogger::logger()->debug("MemLogServerWaiter::clientRegistered send message");
-    TasMessage message(REQUEST_MSG, false, new QByteArray(mCommandXml.toUtf8()), mMessageId);
+    TasMessage message(REQUEST_MSG, false, QByteArray(mCommandXml.toUtf8()), mMessageId);
     mSocket->messageAvailable(message);
     deleteLater();
 }
@@ -91,16 +91,14 @@ void MemLogServerWaiter::clientRegistered(const QString& processId)
 void MemLogServerWaiter::timeout()
 {
     TasLogger::logger()->error("MemLogServerWaiter::timeout memlogsrv did not register.");
-    QByteArray* msg = new QByteArray(QString(SERVER_NAME + " started but did not register. Cannot not log memory!").toUtf8());
-    mSocket->sendError(mMessageId, msg);
+    mSocket->sendError(mMessageId, SERVER_NAME + " started but did not register. Cannot not log memory!");
     deleteLater();
 }
 
 void MemLogServerWaiter::crashed()
 {
     TasLogger::logger()->error("MemLogServerWaiter::crashed");
-    QByteArray* msg = new QByteArray(QString(SERVER_NAME + " has crashed.").toUtf8());
-    mSocket->sendError(mMessageId, msg);
+    mSocket->sendError(mMessageId, SERVER_NAME + " has crashed.");
     mWaiter.stop();
     deleteLater();
 }

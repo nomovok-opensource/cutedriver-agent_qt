@@ -19,9 +19,13 @@
  
  
 #include <QCoreApplication>
+#include <QSettings>
 
 #include "tasserver.h"
+
 #include <taslogger.h>
+
+
 
 int main(int argc, char *argv[])
 {
@@ -29,8 +33,25 @@ int main(int argc, char *argv[])
     QCoreApplication::setOrganizationName("Nokia");
     QCoreApplication::setOrganizationDomain("nokia.com");
     QCoreApplication::setApplicationName("QtTasserver");
+
+    // Get arguments for binding style
+    // No argument check done, only "any" or "localhost" will have an effect,
+    // other settings will just be ignored and default host binding for current OS will be used
+    QString argHostBinding = "";
+    if(app.arguments().count() > 1){
+        argHostBinding = app.arguments()[1];
+    }
+
+    // Update Persistent Settings if argument provided
+    // Use persistent settings when no argument provided
+    QSettings settings("qttasserver.ini", QSettings::IniFormat);
+    QString settHostBinding = settings.value("hostBinding").toString();
+    if (!argHostBinding.isEmpty()){
+        settHostBinding = argHostBinding;
+        settings.setValue("hostBinding", settHostBinding);
+    }
     
-    TasServer* server = new TasServer();
+    TasServer* server = new TasServer(settHostBinding);
     if (server->startServer()){ 
         int code = app.exec();
         server->deleteLater();

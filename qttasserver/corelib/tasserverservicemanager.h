@@ -61,7 +61,7 @@ private:
 	void loadExtension(const QString& filePath);
 
 private:	
-	QHash<qint32, ResponseWaiter*> reponseQueue;
+	QHash<qint32, ResponseWaiter*> mResponseQueue;
 	TasClientManager* mClientManager;
 	QList<TasExtensionInterface*> mExtensions;
     TasPluginLoader mPluginLoader;    
@@ -88,11 +88,14 @@ private slots:
 	void socketClosed();
 
 private:
+	void cleanup();
+
+private:
 	qint32 mResponseId;
 	QTimer mWaiter;
 	TasSocket *mSocket;
 	ResponseFilter* mFilter;
-	QByteArray *mPlatformData;
+	QByteArray mPlatformData;
 };
 
 class CloseFilter : public ResponseFilter

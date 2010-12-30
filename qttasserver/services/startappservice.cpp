@@ -81,13 +81,12 @@ void StartAppService::startApplication(TasCommand& command, TasResponse& respons
 
     if(arguments.contains(SET_PARAMS_ONLY)){
         // do not start app, just need to set the parameters
-        response.requester()->sendResponse(response.messageId(), "0");
+        response.requester()->sendResponse(response.messageId(), QString("0"));
     }
     else{
         arguments.removeAll(DETACH_MODE);
-        bool noWait = arguments.contains(NO_WAIT);
         arguments.removeAll(NO_WAIT);
-        launchDetached(applicationPath, arguments, response, noWait);
+        launchDetached(applicationPath, arguments, response);
     }
 }
 
@@ -97,7 +96,7 @@ void StartAppService::setRuntimeParams(TasCommand& command)
     QString applicationPath = command.parameter("application_path");    
     QString eventList = command.parameter("events_to_listen");
     QString signalList = command.parameter("signals_to_listen");    
-    TasLogger::logger()->error("StartAppService::setRuntimeParams signals: " + signalList);
+    TasLogger::logger()->debug("StartAppService::setRuntimeParams signals: " + signalList);
     if(!eventList.isEmpty() || !signalList.isEmpty()){
         TasSharedData startupData(eventList.split(","), signalList.split(","));
         QString identifier = TasCoreUtils::parseExecutable(applicationPath);
@@ -123,15 +122,65 @@ QHash<QString, QString> StartAppService::parseEnvironmentVariables(const QString
     return vars;
 }
 
-void StartAppService::launchDetached(const QString& applicationPath, const QStringList& arguments, TasResponse& response, bool noWait)
+
+#ifdef Q_OS_SYMBIAN 
+//Qt startDetach seems to leak memory so need to do it for now.
+//to be removed when fix in qt
+static void qt_create_symbian_commandline(
+    const QStringList &arguments, const QString &nativeArguments, QString &commandLine)
+{
+    for (int i = 0; i < arguments.size(); ++i) {
+        QString tmp = arguments.at(i);
+        tmp.replace(QLatin1String("\\\""), QLatin1String("\\\\\""));
+        tmp.replace(QLatin1String("\""), QLatin1String("\\\""));
+        if (tmp.isEmpty() || tmp.contains(QLatin1Char(' ')) || tmp.contains(QLatin1Char('\t'))) {
+            QString endQuote(QLatin1String("\""));
+            int i = tmp.length();
+            while (i > 0 && tmp.at(i - 1) == QLatin1Char('\\')) {
+                --i;
+                endQuote += QLatin1String("\\");
+            }
+            commandLine += QLatin1String("\"") + tmp.left(i) + endQuote + QLatin1Char(' ');
+        } else {
+            commandLine += tmp + QLatin1Char(' ');
+        }
+    }
+
+    if (!nativeArguments.isEmpty())
+        commandLine += nativeArguments;
+    else if (!commandLine.isEmpty()) // Chop the extra trailing space if any arguments were appended
+        commandLine.chop(1);
+}
+#endif
+
+
+
+void StartAppService::launchDetached(const QString& applicationPath, const QStringList& arguments, TasResponse& response)
 {
     qint64 pid;
-    if(QProcess::startDetached(applicationPath, arguments, ".", &pid)){
-        response.requester()->sendResponse(response.messageId(), QString::number(pid));   
+#ifdef Q_OS_SYMBIAN 
+//Qt startDetach seems to leak memory so need to do it for now.
+//to be removed when fix in qt
+    QString commandLine;
+    QString nativeArguments;
+    qt_create_symbian_commandline(arguments, nativeArguments, commandLine);
+    TPtrC program_ptr(reinterpret_cast<const TText*>(applicationPath.constData()));
+    TPtrC cmdline_ptr(reinterpret_cast<const TText*>(commandLine.constData()));
+    RProcess process;
+    if( process.Create(program_ptr, cmdline_ptr) == KErrNone){
+        process.Resume();
+        pid = process.Id().Id();
+        process.Close();
+        response.setData(QString::number(pid));   
     }
+#else
+    if(QProcess::startDetached(applicationPath, arguments, ".", &pid)){
+        response.setData(QString::number(pid));   
+    }
+#endif
     else{
         TasLogger::logger()->error("TasServer::launchDetached: count not start the application " + applicationPath);
         response.setErrorMessage("Could not start the application " + applicationPath);
-    }            
+    }
 }
 

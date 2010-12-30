@@ -26,9 +26,9 @@
 
 const char* const CLOSE_REQUESTED = "tas_do_close";
 
-class CloseAppService : public TasServiceBase 
+class CloseAppService : public QObject, public TasServiceBase 
 {
-
+    Q_OBJECT
 public:
     CloseAppService();
 	~CloseAppService();
@@ -38,6 +38,10 @@ public:
 	*/
 	bool executeService(TasCommandModel& model, TasResponse& response);
 	QString serviceName()const { return CLOSE_APPLICATION; }
+
+private slots:
+	void requestQuit();
+	
 };
 
 #endif

@@ -24,6 +24,10 @@
 QTM_USE_NAMESPACE
 #endif
 
+
+#include <e32event.h>
+#include <w32std.h>
+
 #include "tasdeviceutils.h"
 #include "taslogger.h"
 
@@ -129,12 +133,40 @@ void TasDeviceUtils::addSystemInformation(TasObject& object)
     TasLogger::logger()->debug("TasDeviceUtils::addSystemInformation out");
 }
 
-void TasDeviceUtils::sendMouseEvent(int x, int y, Qt::MouseButton button, QEvent::Type type)
+void TasDeviceUtils::sendMouseEvent(int x, int y, Qt::MouseButton /*button*/, QEvent::Type type)
 {
-    Q_UNUSED(x);   
-    Q_UNUSED(y);   
-    Q_UNUSED(button);   
-    Q_UNUSED(type);   
+    TasLogger::logger()->debug(QString(__FUNCTION__) +
+                               " x(" + QString::number(x) +
+                               ") y(" + QString::number(y) +")");
+    TPoint pos(x, y);
+
+    bool down = type == QEvent::MouseButtonPress ||
+                type == QEvent::GraphicsSceneMousePress;
+
+    bool up =   type == QEvent::MouseButtonRelease ||
+                type == QEvent::GraphicsSceneMouseRelease;
+
+    bool move = type == QEvent::MouseMove ||
+                type == QEvent::GraphicsSceneMouseMove;
+
+    if (down) { // TODO how about dblclick?
+        TRawEvent eventDown;
+        eventDown.Set(TRawEvent::EButton1Down, pos.iX, pos.iY);
+        UserSvr::AddEvent(eventDown);
+        TasLogger::logger()->debug(QString(__FUNCTION__) + " down type:" + QString::number(type));
+    } else if(up) {
+        TRawEvent eventUp;
+        eventUp.Set(TRawEvent::EButton1Up, pos.iX, pos.iY);
+        UserSvr::AddEvent(eventUp);
+        TasLogger::logger()->debug(QString(__FUNCTION__) + " up   type:" + QString::number(type));
+    } else if(move){
+        TRawEvent eventMove;
+        eventMove.Set(TRawEvent::EPointerMove, pos.iX, pos.iY);
+        UserSvr::AddEvent(eventMove);
+        TasLogger::logger()->debug(QString(__FUNCTION__) + " move type:" + QString::number(type));
+    } else{
+        TasLogger::logger()->debug(QString(__FUNCTION__) + " other type:" + QString::number(type));
+    }
 }
 
 /*!

@@ -64,7 +64,7 @@ bool RecorderService::executeService(TasCommandModel& model, TasResponse& respon
 
 void RecorderService::performRecorderCommands(TasCommandModel& model, TasResponse& response)
 {
-    QByteArray* message = 0;
+    QByteArray message;
     QListIterator<TasTarget*> i(model.targetList());
     bool commandExecuted = false;
     while (i.hasNext()){
@@ -90,26 +90,19 @@ void RecorderService::performRecorderCommands(TasCommandModel& model, TasRespons
                     mTasEvents->addAttribute("eventCount", eventCounter);
                     SerializeFilter* filter = new SerializeFilter();		    		
                     filter->serializeDuplicates(true);		    		
-                    message = new QByteArray();
-                    mTasModel->serializeModel(*message, filter);
-                    commandExecuted = true;
+                    message.clear();
+                    mTasModel->serializeModel(message, filter);
+                    response.setData(message);
                 }
                 else{
-                    message = new QByteArray(QString("Event listening not enabled!").toUtf8());
+                    response.setErrorMessage("Event listening not enabled!");
                 }
+                commandExecuted = true;
             }
             break;
         }
     }
     if(commandExecuted){
-        if(!message){
-            response.setData(OK_MESSAGE);
-        }
-        else{
-            response.setData(message);
-        }
-    }
-    else{
         response.setErrorMessage(PARSE_ERROR);
     }
 }

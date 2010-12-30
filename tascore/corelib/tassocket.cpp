@@ -54,10 +54,6 @@
     
  */
 
-static const QString CANNOT_SEND = "Socket not connected cannot send message!";
-static const QString TIME_OUT = "Reading response to request took too long!";
-static const QString READ_MESSAGE_FAIL = "Failed to read response message!";
-
 static const int CHUNK_SIZE = 1024;
 static const int SLEEP_TIME = 5;
 
@@ -173,7 +169,7 @@ void TasSocket::clearHandlers()
 */
 bool TasSocket::sendRequest(const qint32& messageId, const QString& message)
 {
-    return sendRequest(messageId, new QByteArray(message.toUtf8()));
+    return sendRequest(messageId, QByteArray(message.toUtf8()));
 }
 
 
@@ -181,7 +177,7 @@ bool TasSocket::sendRequest(const qint32& messageId, const QString& message)
   Send a message over the connection represented by this socket. Returns false if the connection 
   is not writable. Message will be deleted once message is sent.
 */
-bool TasSocket::sendRequest(const qint32& messageId, QByteArray* message)
+bool TasSocket::sendRequest(const qint32& messageId, const QByteArray& message)
 {
     TasMessage msg(REQUEST_MSG, false, message, messageId);
     return sendMessage(msg);
@@ -196,18 +192,24 @@ bool TasSocket::sendRequest(const qint32& messageId, QByteArray* message)
     is compressed already. This means that the protocol will indicate that the 
     message is compressed but this function will not perform the compression.
 */
-bool TasSocket::sendResponse(const qint32& messageId, QByteArray* message, bool compressed)
+bool TasSocket::sendResponse(const qint32& messageId, const QByteArray& message, bool compressed)
 {
     TasMessage msg(RESPONSE_MSG, compressed, message, messageId);
     return sendMessage(msg);
 }
 
-bool TasSocket::sendResponse(const qint32& messageId, QString message, bool compressed)
+bool TasSocket::sendResponse(const qint32& messageId, const QString& message, bool compressed)
 {
-    return sendResponse(messageId, new QByteArray(message.toUtf8()), compressed);   
+    return sendResponse(messageId, QByteArray(message.toUtf8()), compressed);   
 }
 
-bool TasSocket::sendError(const qint32& messageId, QByteArray* message, bool compressed)
+
+bool TasSocket::sendError(const qint32& messageId, const QString& message)
+{
+    return sendError(messageId, QByteArray(message.toUtf8()));
+}
+
+bool TasSocket::sendError(const qint32& messageId, const QByteArray& message, bool compressed)
 {
     //wil delete the message
     TasMessage msg(ERROR_MSG, compressed, message, messageId);
@@ -267,22 +269,21 @@ bool TasSocketWriter::writeMessage(TasMessage& message)
         TasLogger::logger()->error("TasSocket::writeMessage socket not writable, cannot send message!");        
         return false;
     }
-    QByteArray* header = makeHeader(message);
-    mDevice.write(header->data(), header->size());
+    QByteArray header = makeHeader(message);
+    mDevice.write(header.data(), header.size());
     writeBytes(message.dataCompressed());
-    delete header;
     return true;
 }
 
-void TasSocketWriter::writeBytes(QByteArray* msgBytes)   
+void TasSocketWriter::writeBytes(const QByteArray& msgBytes)   
 {
 #ifdef Q_OS_SYMBIAN
     //write the data in one kb chunks to avoid problems caused by unstable hw
-    int bytesLeft = msgBytes->size();
+    int bytesLeft = msgBytes.size();
     int chunksWritten = 0;
     forever{
         if(bytesLeft > 0){
-            bytesLeft -= mDevice.write(msgBytes->mid(chunksWritten*CHUNK_SIZE).data(), qMin(CHUNK_SIZE,bytesLeft));
+            bytesLeft -= mDevice.write(msgBytes.mid(chunksWritten*CHUNK_SIZE).data(), qMin(CHUNK_SIZE,bytesLeft));
             flush();
             TasCoreUtils::wait(SLEEP_TIME);
         }
@@ -292,7 +293,7 @@ void TasSocketWriter::writeBytes(QByteArray* msgBytes)
         chunksWritten++;
     }
 #else
-    mDevice.write(msgBytes->data(), msgBytes->size());
+    mDevice.write(msgBytes.data(), msgBytes.size());
 #endif
     mDevice.waitForBytesWritten(READ_TIME_OUT);
 }
@@ -313,15 +314,15 @@ void TasSocketWriter::flush()
 /*!
     Construt a  message from the given flag and message bytes.
  */
-QByteArray* TasSocketWriter::makeHeader(TasMessage& message)
+QByteArray TasSocketWriter::makeHeader(TasMessage& message)
 {
-    QByteArray* block = new QByteArray();
-    QDataStream out(block, QIODevice::WriteOnly);
+    QByteArray block;
+    QDataStream out(&block, QIODevice::WriteOnly);
     out.setByteOrder(QDataStream::LittleEndian);
     out.setVersion(QDataStream::Qt_4_0);
-    QByteArray* payload = message.dataCompressed();
-    quint16 bodyCrc =  qChecksum(payload->data(), payload->size());    
-    out << message.flag() << payload->size() << bodyCrc << COMPRESSION_ON << message.messageId();
+    QByteArray payload = message.dataCompressed();
+    quint16 bodyCrc =  qChecksum(payload.data(), payload.size());    
+    out << message.flag() << payload.size() << bodyCrc << COMPRESSION_ON << message.messageId();
     return block;
 }
 
@@ -375,7 +376,7 @@ void TasSocketReader::readMessageData()
     bool ok = true;
 
     //read body
-    QByteArray *rawBytes = new QByteArray();
+    QByteArray rawBytes;
     
     int totalBytes = 0;
     forever{
@@ -401,7 +402,7 @@ void TasSocketReader::readMessageData()
         }
         char* buffer = (char*)malloc(available);    
         int bytesRead = in.readRawData(buffer, available);
-        rawBytes->append(buffer, bytesRead);
+        rawBytes.append(buffer, bytesRead);
         free(buffer);            
         totalBytes += bytesRead;
         if(totalBytes >= bodySize){
@@ -413,20 +414,20 @@ void TasSocketReader::readMessageData()
     connect(&mDevice, SIGNAL(readyRead()), this, SLOT(readMessageData()));    
 
     if(!ok){
-        delete rawBytes;
+        rawBytes.clear();
         return;
     }
     //check crc
-    quint16 checkSum = qChecksum( rawBytes->data(), bodySize );
+    quint16 checkSum = qChecksum( rawBytes.data(), bodySize );
     if ( checkSum != crc){
         TasLogger::logger()->error("TasSocket::readMessageData CRC error " + QString::number(checkSum) + " read: " 
                                    + QString::number(crc));                
-        delete rawBytes;
     }
     else{
         TasMessage message(flag, compression, rawBytes, messageId);
         emit messageRead(message);
     }
+    rawBytes.clear();
     //maybe there was a new message coming when the old one was still being processed.
     if(mDevice.bytesAvailable() > 0){
         readMessageData();   

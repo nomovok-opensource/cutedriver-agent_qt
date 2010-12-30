@@ -52,16 +52,16 @@ bool UiStateService::executeService(TasCommandModel& model, TasResponse& respons
     }   
 }
 
-QByteArray* UiStateService::makeUiState(TasCommandModel& model)
+QByteArray UiStateService::makeUiState(TasCommandModel& model)
 {
     TasCommand* command = 0;
     if (model.targetList().size() > 0) {
         // Pass first command to traverse, if available.
         command = model.targetList().at(0)->commandList().at(0);
     }
-    QByteArray* xml = new QByteArray(); 
+    QByteArray xml;
     TasDataModel* uiModel = mTraverser->getUiState(command);
-    uiModel->serializeModel(*xml, 0, model.onlyFragment());
+    uiModel->serializeModel(xml, 0, model.onlyFragment());
     delete uiModel;
     return xml;
 }

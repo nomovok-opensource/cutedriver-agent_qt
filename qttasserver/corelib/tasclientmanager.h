@@ -66,7 +66,7 @@ public:
 								 const QString& type=TAS_PLUGIN, QString applicationUid=QString());  
 
   void removeClient(const QString& processId, bool kill=false);
-  void removeAllClients();
+  void removeAllClients(bool kill=true);
 
   void applicationList(TasObject& parent);
 
@@ -89,7 +89,6 @@ private:
   TasClient* findByApplicationName(const QString& applicationName, bool includeSocketLess=false);
   TasClient* latestClient(bool includeSocketLess=false);
 
-  void removeGhostClients();
   TasClient* removeByProcessId(const QString& processId);  
 
   bool verifyClient(TasClient* client);

@@ -39,6 +39,7 @@ class NativeUtils_p
 {
 public:
     static TBool bringAppToForeground(TApaTask app);
+    static TInt getUidForPid(const quint64& pid, TInt& uid);
 };
 
 /*!
@@ -122,7 +123,7 @@ int TasNativeUtils::pidOfActiveWindow(const QHash<QString, TasClient*> clients)
     return pid;
 }
 
-int TasNativeUtils::bringAppToForeground(TasClient& client)
+int TasNativeUtils::bringAppToForeground(quint64 pid)
 {
     TasLogger::logger()->debug("-> TasNativeUtils::bringAppToForeground");
     int error = TAS_ERROR_NONE;
@@ -132,28 +133,17 @@ int TasNativeUtils::bringAppToForeground(TasClient& client)
     if (KErrNone == error) {
         TasLogger::logger()->debug("   Connected to WS");
         TApaTaskList applicationList(wsSession);
-        TBool isOk = EFalse;
-        // Find app by UID
-        QString applicationUid = client.applicationUid();
-        int uidi = applicationUid.toInt();
-        //we must chect the uid since in some situation the uid seems 
-        //to be too big for TInt32 which TUId.iUid is
-        //name used if uid cannot be
-        if(uidi != 0){
+        TInt uid;        
+        if(NativeUtils_p::getUidForPid(pid, uid) == KErrNone){
             TasLogger::logger()->debug("App uid ok look for app");
-            TUid appUid = TUid::Uid(uidi);
-            isOk = NativeUtils_p::bringAppToForeground(applicationList.FindApp(appUid));            
+            TUid appUid = TUid::Uid(uid);
+            if(!NativeUtils_p::bringAppToForeground(applicationList.FindApp(appUid))){
+                TasLogger::logger()->error("Application found but it does not exist!");
+                error = TAS_ERROR_NOT_FOUND;
+            }
         }
         else{
-            TasLogger::logger()->debug("App uid invalid look with name " + client.applicationName());
-            TPtrC16 str(reinterpret_cast<const TUint16*>(client.applicationName().utf16()));            
-            HBufC* buffer = str.Alloc(); 
-            isOk = NativeUtils_p::bringAppToForeground(applicationList.FindApp(*buffer));
-            delete buffer;            
-        }        
-
-        if(!isOk){
-            TasLogger::logger()->error("Application found but it does not exist!");
+            TasLogger::logger()->error("Application could not be found for the pid");
             error = TAS_ERROR_NOT_FOUND;
         }
         
@@ -191,6 +181,9 @@ void TasNativeUtils::changeOrientation(QString direction)
             CleanupStack::PopAndDestroy(2);
         }
     );
+    if( err != KErrNone ){
+        TasLogger::logger()->error("<- TasNativeUtils::changeOrientation orientation changed failed, code: " + QString::number(err));
+    }
     // T R A P D ends
 }
 
@@ -203,6 +196,18 @@ TBool NativeUtils_p::bringAppToForeground(TApaTask app)
         value = ETrue;
     }
     return value;
+}
+
+TInt NativeUtils_p::getUidForPid(const quint64& pid, TInt& uid)
+{
+    TInt err = KErrNone;
+    RProcess process;
+    err = process.Open( TProcessId( pid ) );
+    if( err == KErrNone){
+        uid = process.Type().MostDerived().iUid;
+        process.Close();            
+    }            
+    return err;
 }
 
 
@@ -236,13 +241,14 @@ bool TasNativeUtils::verifyProcess(quint64 pid)
 
 bool TasNativeUtils::processExitStatus(quint64 pid, int &status)
 {
+    bool stopped = true;
     status = 0;
     RProcess process;
     TInt code;
     if( process.Open( TProcessId( pid ) ) == KErrNone ){
         code = process.ExitType();
         if( code == EExitPending ){
-            return false;
+            stopped = false;
         }
         else if( code == EExitPanic ){
             status = process.ExitReason();
@@ -251,7 +257,6 @@ bool TasNativeUtils::processExitStatus(quint64 pid, int &status)
             status = 0;
         }
         process.Close();
-        
     }
-    return true;
+    return stopped;
 }

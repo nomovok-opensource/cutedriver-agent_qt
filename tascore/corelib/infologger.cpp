@@ -235,7 +235,7 @@ void InfoLogger::loadGpuData(TasResponse& response, TasCommand* command)
   data. Serializes the data and returns a QByteArray containing the 
   serialized data.
 */
-QByteArray* InfoLogger::loadData(QFile* file, const QString& name, TasCommand* command)
+QByteArray InfoLogger::loadData(QFile* file, const QString& name, TasCommand* command)
 {
     mTimer.stop();
 
@@ -272,8 +272,8 @@ QByteArray* InfoLogger::loadData(QFile* file, const QString& name, TasCommand* c
     
     SerializeFilter* filter = new SerializeFilter();		    		
     filter->serializeDuplicates(true);		    		
-    QByteArray* xml = new QByteArray();
-    tasModel->serializeModel(*xml, filter);
+    QByteArray xml;
+    tasModel->serializeModel(xml, filter);
     delete tasModel;
     return xml;
 }

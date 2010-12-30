@@ -7,7 +7,7 @@
 #include <memspy_rom.iby>
 #include <memspy.iby>
 
-#define TAS_UPGRADABLE_APP_REG_RSC(NAME) data=DATAZ_\PRIVATE\10003A3F\IMPORT\APPS\ ## NAME ## _reg.rsc        Private\10003a3f\import\apps\ ## NAME ## _reg.rsc
+#define TAS_UPGRADABLE_APP_REG_RSC(NAME) data=DATAZ_\private\10003A3F\import\APPS\ ## NAME ## _reg.rsc        Private\10003a3f\import\apps\ ## NAME ## _reg.rsc
 #define TAS_PLUGIN_STUB(NAME, SUBDIR) data=\epoc32\data\z\resource\qt\plugins\##SUBDIR##\##NAME##.qtplugin RESOURCE_FILES_DIR\qt\plugins\##SUBDIR##\##NAME##.qtplugin
 
 //qttasserver
@@ -64,7 +64,7 @@ TAS_PLUGIN_STUB(testability, testability)
 TAS_PLUGIN_STUB(testabilitystyle, styles)
 
 // Stub SIS
-data=ZSYSTEM\Install\tdriver_package_stub.sis              system\install\tdriver_package_stub.sis
+data=ZSYSTEM\install\tdriver_package_stub.sis              system\install\tdriver_package_stub.sis
 
 #endif
 

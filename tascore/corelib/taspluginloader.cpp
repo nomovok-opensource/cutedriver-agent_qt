@@ -128,8 +128,11 @@ QStringList TasPluginLoader::listPlugins(QString pluginDir)
     else{
         path.replace(romDrive, flashDrive, Qt::CaseInsensitive);
     }
-    plugins.append(QDir(path).entryList(QDir::Files));
-
+    foreach(QString pluginName, QDir(path).entryList(QDir::Files)){
+        if(!plugins.contains(pluginName)){
+            plugins.append(pluginName);            
+        }
+    }
 #else   
     QString path = QLibraryInfo::location(QLibraryInfo::PluginsPath) + "/"+pluginDir;
     QStringList plugins = QDir(path).entryList(QDir::Files);

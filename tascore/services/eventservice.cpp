@@ -59,8 +59,8 @@ bool EventService::executeService(TasCommandModel& model, TasResponse& response)
 
 void EventService::performEventCommands(TasCommandModel& model, TasResponse& response)
 {
-    //QString message = PARSE_ERROR;
-    QByteArray* message = 0;
+    QString errorMessage;
+    QByteArray message;
     QListIterator<TasTarget*> i(model.targetList());
     bool commandExecuted = false;
     while (i.hasNext()){
@@ -71,9 +71,10 @@ void EventService::performEventCommands(TasCommandModel& model, TasResponse& res
             if(filter){
                 QString eventsStr = command->parameter("EventsToListen");   
                 filter->startFiltering(eventsStr.split(",", QString::SkipEmptyParts));
+                response.setData(QString(OK_MESSAGE));
             }
             else{
-                message = new QByteArray(QString("Target could not be found.").toUtf8());
+                response.setErrorMessage("Target could not be found.");
             }
             commandExecuted = true;
         }
@@ -83,9 +84,10 @@ void EventService::performEventCommands(TasCommandModel& model, TasResponse& res
             if(filter){
                 mEventFilters.remove(commandTarget->id());
                 delete filter;
+                response.setData(QString(OK_MESSAGE));
             }
             else{
-                message = new QByteArray(QString("No filter set for object.").toUtf8());
+                response.setErrorMessage("No filter set for object.");
             }
             commandExecuted = true;
         }
@@ -93,24 +95,17 @@ void EventService::performEventCommands(TasCommandModel& model, TasResponse& res
         if(command){
             TasEventFilter* filter = getFilterForTarget(commandTarget, false);
             if(filter){
-                message = filter->getEvents();
-                commandExecuted = true;
+                response.setData(filter->getEvents());
             }
             else{
-                message = new QByteArray(QString("Event listening not enabled!").toUtf8());
+                response.setErrorMessage("Event listening not enabled!");
             }
+            commandExecuted = true;                
         }
         break;        
     }
-    if(commandExecuted){        
-        if(!message){
-            response.setData(OK_MESSAGE);
-        }
-        else{
-            response.setData(message);
-        }
-    }
-    else{
+
+    if(!commandExecuted){        
         response.setErrorMessage(PARSE_ERROR);       
     }
 }
@@ -294,17 +289,16 @@ void TasEventFilter::addMouseEventDetails(QEvent *event, TasObject& eventObj)
 }
 
 
-QByteArray* TasEventFilter::getEvents()
+QByteArray TasEventFilter::getEvents()
 {
-    QByteArray* message = 0;
+    QByteArray message;
     if(mTasEvents != 0){
         SerializeFilter* filter = new SerializeFilter();		    		
         filter->serializeDuplicates(true);		    		
-        message = new QByteArray();
-        mTasModel->serializeModel(*message, filter);
+        mTasModel->serializeModel(message, filter);
     }
     else{
-        message = new QByteArray(QString("Event listening not enabled!").toUtf8());
+        message = QByteArray(QString("Event listening not enabled!").toUtf8());
     }
     return message;
 }

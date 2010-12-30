@@ -40,7 +40,7 @@ public:
 	QString serviceName() const { return APPLICATION_STATE; }
 
 private:
-	QByteArray* serverUiState();
+	QByteArray serverUiState();
 
 };
 

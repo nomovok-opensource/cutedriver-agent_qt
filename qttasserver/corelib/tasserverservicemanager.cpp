@@ -48,8 +48,7 @@
   The difference to TasServiceManager is that a waiter is started for the responses
   which originate from the connected plugins.
 
-  Commands which are reqistered to the manager will be invoked on all 
-  service requests untill on command consumed the request. This is done
+  Commands which are reqistered to the manager will be invoked on all   service requests untill on command consumed the request. This is done
   by returning "true" from the execute method.
 
 */
@@ -72,6 +71,7 @@ TasServerServiceManager::~TasServerServiceManager()
     qDeleteAll(mCommands);
     mCommands.clear();
     mExtensions.clear();
+    mResponseQueue.clear();
 }
 
 /*!
@@ -89,12 +89,7 @@ void TasServerServiceManager::handleServiceRequest(TasCommandModel& commandModel
             foreach(TasExtensionInterface* extension, mExtensions){            
                 QByteArray data;
                 if(extension->performCommand(commandModel, data)){
-                    //remove possible client 
-                    if(commandModel.service() == CLOSE_APPLICATION){
-                        TasLogger::logger()->debug("TasServerServiceManager::handleServiceRequest remove client");
-                        mClientManager->removeClient(commandModel.id());
-                    }
-                    TasResponse response(responseId, new QByteArray(data));
+                    TasResponse response(responseId, data);
                     requester->sendMessage(response);
                     TasLogger::logger()->debug("TasServerServiceManager::handleServiceRequest: plat service done, returning");
                     return;
@@ -141,7 +136,7 @@ void TasServerServiceManager::handleServiceRequest(TasCommandModel& commandModel
         }
 
         connect(waiter, SIGNAL(responded(qint32)), this, SLOT(removeWaiter(qint32)));
-        reponseQueue.insert(responseId, waiter);
+        mResponseQueue.insert(responseId, waiter);
         if(needFragment){
             commandModel.addAttribute("needFragment", "true");
             targetClient->socket()->sendRequest(responseId, commandModel.sourceString(false));            
@@ -157,7 +152,7 @@ void TasServerServiceManager::handleServiceRequest(TasCommandModel& commandModel
             QByteArray data;
             if(extension->performCommand(commandModel, data)){
                 TasLogger::logger()->debug("TasServerServiceManager::handleServiceRequest platform handler completed request.");
-                TasResponse response(responseId, new QByteArray(data));
+                TasResponse response(responseId, data);
                 requester->sendMessage(response);
                 return;
             }
@@ -165,7 +160,7 @@ void TasServerServiceManager::handleServiceRequest(TasCommandModel& commandModel
         if(commandModel.service() == SCREEN_SHOT){
             ResponseWaiter* waiter = new ResponseWaiter(responseId, requester);
             connect(waiter, SIGNAL(responded(qint32)), this, SLOT(removeWaiter(qint32)));
-            reponseQueue.insert(responseId, waiter);
+            mResponseQueue.insert(responseId, waiter);
             QStringList args;
             args << "-i" << QString::number(responseId) << "-a" << "screenshot";
             QProcess::startDetached("qttasutilapp", args);
@@ -175,7 +170,7 @@ void TasServerServiceManager::handleServiceRequest(TasCommandModel& commandModel
             response.setRequester(requester);
             performService(commandModel, response);
             //start app waits for register message and performs the response
-            if( (commandModel.service() != START_APPLICATION && commandModel.service() != RESOURCE_LOGGING_SERVICE) || response.isError()){
+            if( commandModel.service() != RESOURCE_LOGGING_SERVICE || response.isError()){
                 requester->sendMessage(response);
             }
         }
@@ -222,8 +217,8 @@ void TasServerServiceManager::loadExtension(const QString& filePath)
 
 void TasServerServiceManager::serviceResponse(TasMessage& response)
 {
-    if(reponseQueue.contains(response.messageId())){
-        reponseQueue.value(response.messageId())->sendResponse(response);
+    if(mResponseQueue.contains(response.messageId())){
+        mResponseQueue.value(response.messageId())->sendResponse(response);
     }
     else{
         TasLogger::logger()->warning("TasServerServiceManager::serviceResponse unexpected response. Nobody interested!");
@@ -232,8 +227,9 @@ void TasServerServiceManager::serviceResponse(TasMessage& response)
 
 void TasServerServiceManager::removeWaiter(qint32 responseId)
 {
-    //TasLogger::logger()->debug("TasServerServiceManager::removeWaiter remove " + QString::number(responseId));
-    reponseQueue.remove(responseId);
+    TasLogger::logger()->debug("TasServerServiceManager::removeWaiter remove " + QString::number(responseId));
+    mResponseQueue.remove(responseId);
+    TasLogger::logger()->debug("TasServerServiceManager::removeWaiter response count " + QString::number(mResponseQueue.count()));
 }
 
 QByteArray TasServerServiceManager::responseHeader()
@@ -268,19 +264,23 @@ ResponseWaiter::~ResponseWaiter()
     if(mFilter){
         delete mFilter;
     }
-    if(mPlatformData){
-        delete mPlatformData;
-    }
+    mPlatformData.clear();
+}
+
+void ResponseWaiter::cleanup()
+{
+    disconnect(&mWaiter, 0, this, 0);
+    disconnect(mSocket, 0, this, 0);
 }
 
 void ResponseWaiter::appendPlatformData(QByteArray data)
 {
-    if(!mPlatformData){
+    if(mPlatformData.isEmpty()){
         TasLogger::logger()->debug("ResponseWaiter::appendPlatformData make data container and add root");
         //make header for the document made from fragments
-        mPlatformData = new QByteArray(TasServerServiceManager::responseHeader());
+        mPlatformData = QByteArray(TasServerServiceManager::responseHeader());
     }
-    mPlatformData->append(data);
+    mPlatformData.append(data);
 }
 
 /*!
@@ -299,11 +299,11 @@ void ResponseWaiter::sendResponse(TasMessage& response)
     if(mFilter){
         mFilter->filterResponse(response);
     }
-    if(mPlatformData && !mPlatformData->isEmpty()){
+    if(!mPlatformData.isEmpty()){
         TasLogger::logger()->debug("ResponseWaiter::sendResponse add plat stuf");
         response.uncompressData();
-        mPlatformData->append(response.data()->data());
-        mPlatformData->append(QString("</tasInfo></tasMessage>").toUtf8());
+        mPlatformData.append(response.data().data());
+        mPlatformData.append(QString("</tasInfo></tasMessage>").toUtf8());
         response.setData(mPlatformData);
         //ownership transferred to response
         mPlatformData = 0;
@@ -313,6 +313,7 @@ void ResponseWaiter::sendResponse(TasMessage& response)
         TasLogger::logger()->error("ResponseWaiter::sendResponse socket not writable!");
     }
     emit responded(mResponseId);
+    cleanup();
     deleteLater();
 }
 
@@ -328,6 +329,7 @@ void ResponseWaiter::timeout()
         TasLogger::logger()->error("ResponseWaiter::timeout socket not writable!");
     }
     emit responded(mResponseId);
+    cleanup();
     deleteLater();
 }
 
@@ -336,6 +338,7 @@ void ResponseWaiter::socketClosed()
     mWaiter.stop();
     TasLogger::logger()->error("ResponseWaiter::socketClosed. Connection to this waiter closed. Cannot respond. " );
     emit responded(mResponseId);
+    cleanup();
     deleteLater();
 }
 
@@ -361,6 +364,8 @@ CloseFilter::CloseFilter(TasCommandModel& model)
                 mKill = true;
             }
         }
+        command = 0;
+        target = 0;
     }
 }
 CloseFilter::~CloseFilter()
@@ -393,7 +398,8 @@ void CloseFilter::filterResponse(TasMessage& response)
         }
     }
     TasLogger::logger()->debug("CloseFilter::filterResponse exit code: " + QString::number(errorCode));
-
+    //make sure the client is removed
+    TasClientManager::instance()->removeClient(QString::number(mPid), false);
 
     if(!didNotCloseInTime && errorCode != 0){
         errorMessage = "Application exited with code " + QString::number(errorCode);

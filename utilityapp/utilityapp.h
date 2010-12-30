@@ -29,7 +29,7 @@ public:
 	void sendScreenShot(uint id);
 
 private:
-	void sendData(QByteArray* data, uint id);
+	void sendData(const QByteArray& data, uint id);
 };
 
 

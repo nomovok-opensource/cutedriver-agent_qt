@@ -81,7 +81,7 @@ bool ResourceLoggingService::executeService(
                 TasLogger::logger()->error("  Error in logging stop: " + QString::number(error));
                 response.setErrorMessage("Error in logging stop: " + QString::number(error));
             }
-            else {
+            else { 
                 response.setData(responseData);
             }
         }

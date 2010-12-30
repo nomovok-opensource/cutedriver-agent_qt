@@ -35,6 +35,7 @@ INCLUDEPATH += . corelib services services/interactionhandlers services/interact
 CONFIG(maemo){
 LIBS += -lqmsystem
 DEFINES += TAS_MAEMO
+CONFIG += meegotouch
 }
 
 # Input
@@ -58,7 +59,7 @@ symbian: {
     LIBS += -leikcore 
     LIBS += -lhal
 #if ( NCP_COMMON_S60_VERSION_SUPPORT >= S60_VERSION_50 && NCP_COMMON_FAMILY_ID >= 70 )
-	LIBS += -llibegl
+	LIBS += -llibEGL
 #endif
 
     for(PUBLIC_HEADER, PUBLIC_HEADERS) {

@@ -32,21 +32,21 @@ class TasMessage
 {
  public:
     TasMessage();
-    TasMessage(quint8 flag, bool compressed, QByteArray* data, qint32 messageId);
+    TasMessage(quint8 flag, bool compressed, const QByteArray& data, qint32 messageId);
     ~TasMessage();
 
-	void setData(QString message);
+	void setData(const QString& message);
 	void setFlag(quint8 flag);
 	void setIsCompressed(bool compressed);
 	void setTimedOut(bool timedOut);
 	void setMessageId(qint32 messageId);
 	void setIsError(bool isError);
-	void setErrorMessage(QString message);
-	void setData(QByteArray* data, bool isCompressed = false);
+	void setErrorMessage(const QString& message);
+	void setData(const QByteArray& data, bool isCompressed = false);
 	bool isError();
 
-	QByteArray* data();	
-	QByteArray* dataCompressed();	
+	QByteArray& data();	
+	QByteArray& dataCompressed();	
 	QString dataAsString();
 	quint8 flag() const;
     bool isCompressed() const;
@@ -54,7 +54,7 @@ class TasMessage
 	void uncompressData();
 	
 private:
-	QByteArray* mData;
+	QByteArray mData;
 	quint8 mFlag;
     bool mCompressed;
 	qint32 mMessageId;
@@ -65,7 +65,7 @@ class TasResponse : public TasMessage
 {
 public:
 
-    TasResponse(qint32 messageId, QByteArray* data=0, bool isCompressed = false, bool isError = false);
+    TasResponse(qint32 messageId, const QByteArray& data=QByteArray(), bool isCompressed = false, bool isError = false);
 	~TasResponse();
 
 	void setRequester(TasSocket* socket);

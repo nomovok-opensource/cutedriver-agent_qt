@@ -140,8 +140,8 @@ void ShellCommandService::shellStatus(qint64 pid, TasResponse& response)
             TasLogger::logger()->debug("ShellCommandService::service: donne");
         }
         
-        QByteArray* xml = new QByteArray();
-        model->serializeModel(*xml);
+        QByteArray xml;
+        model->serializeModel(xml);
         delete model;
         response.setData(xml);
     }

@@ -27,6 +27,8 @@
 #include <X11/Xatom.h>
 #include <signal.h>
 
+    
+
 int pidOfXWindow(Display* display, Window win) 
 {
     int pid = -1;
@@ -232,6 +234,31 @@ int errorHandler(Display*, XErrorEvent* e)
 }
 
 
+// Meego specific window attribute
+// Try that before anything else.
+int pidOfMeegoWindow(Display* display, Window root)
+{
+    unsigned long nitems, after;
+    int format;
+    Atom type = None;
+    unsigned char* data = NULL;
+    int pid = -1;
+    Window child;
+
+    Atom atom = XInternAtom(display, "_MEEGOTOUCH_CURRENT_APP_WINDOW", True);
+    if (atom != None) {
+        if (Success == XGetWindowProperty(display, root, atom, 0, 0x7FFFFFFF, False, XA_WINDOW,
+                                          &type, &format, &nitems, &after, &data)) {
+            if (nitems > 0) {
+                child = ((Window*)data)[0];
+                pid = pidOfXWindow(display,child);
+                if (data) XFree(data);
+            }
+        }
+    }
+    return pid;
+}
+
 
 int TasNativeUtils::pidOfActiveWindow(const QHash<QString, TasClient*> clients)
 {
@@ -245,17 +272,26 @@ int TasNativeUtils::pidOfActiveWindow(const QHash<QString, TasClient*> clients)
 
     int screen = XDefaultScreen(display);
     int window = RootWindow(display, screen);
-    Window win = queryStack(display, window, pids);
-    pid = pidOfXWindow(display, win);
+
+    // First try to use whatever MeeGo tells us
+    pid = pidOfMeegoWindow(display, window);
+    if (pid != -1) {
+        TasLogger::logger()->debug("TasNativeUtils::pidOfActiveWindow Found MeeGo pid: " + QString::number(pid));
+    } else {
+        Window win = queryStack(display, window, pids);
+        pid = pidOfXWindow(display, win);
+    }
     XCloseDisplay(display);    
 
     TasLogger::logger()->debug("TasNativeUtils::pidOfActiveWindow Resolved " + QString::number(pid));
     return pid;
 }
 
-int TasNativeUtils::bringAppToForeground(TasClient& app)
+
+
+int TasNativeUtils::bringAppToForeground(quint64 pid)
 {
-    Q_UNUSED(app);
+    Q_UNUSED(pid);
     return -1;
 }
 
