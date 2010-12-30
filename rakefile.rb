@@ -122,7 +122,7 @@ task :start_qttasserver do
 	end
   else
     # directly calling "/usr/bin/qttasserver &" hangs, now disabled the stdin, out and err
-    cmd = "/usr/bin/qttasserver </dev/null >/dev/null 2>&1 &"
+    cmd = "sudo /usr/bin/qttasserver </dev/null >/dev/null 2>&1 &"
     system(cmd)
   end
   
