@@ -152,7 +152,7 @@ QList<QObject*> FindObjectService::searchForObject(TasTargetObject *targetObj)
         if(view){             
             foreach(QGraphicsItem* item, view->items()){
                 QGraphicsObject* object = item->toGraphicsObject();
-                if (object && object->isVisible() && TestabilityUtils::isItemInView(view, item)){
+                if (object && object->isVisible()/* && TestabilityUtils::isItemInView(view, item)*/ ){
                     if(isMatch(object, targetObj)){
                         targetObjects.append(object);
                     }           
