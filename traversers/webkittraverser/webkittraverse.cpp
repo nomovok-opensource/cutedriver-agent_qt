@@ -371,8 +371,9 @@ void WebKitTraverse::traverseFrame(QWebFrame* webFrame, TasObject& parent, QStri
         frameInfo.setId(tasId);
         frameInfo.setType("QWebFrame");
         frameInfo.setParentId(parentId);        
-        frameInfo.setName(webFrame->frameName());
         frameInfo.addAttribute("title", webFrame->title());
+        QString frameName = webFrame->frameName();
+        frameInfo.setName(frameName);
         frameInfo.addAttribute("url", webFrame->url().toString());
         frameInfo.addAttribute("requestedUrl", webFrame->requestedUrl().toString());
         frameInfo.addAttribute("baseUrl", webFrame->baseUrl().toString());
