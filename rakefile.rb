@@ -120,11 +120,8 @@ task :start_qttasserver do
 	  raise "Qttasserver startup failed"		
 	end
   else
-    # directly calling "/usr/bin/qttasserver &" hangs, now disabled the stdin, out and err
-    cmd = "qttasserver </dev/null >/dev/null 2>&1 &"
-    result=`cmd`
-	p result
-	#raise "Qttasserver startup failed" if (failure != true) or ($? != 0) 
+    # directly calling "/usr/bin/qttasserver &" hangs, now disabled the stdin, out and err    
+    result=`qttasserver </dev/null >/dev/null 2>&1 &`		
   end
   
   puts "qttasserver started"
