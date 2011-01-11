@@ -255,7 +255,7 @@ bool TestabilityUtils::isItemInView(QGraphicsView* view, QGraphicsItem* graphics
                     QRectF sceneRect = topItem->sceneBoundingRect();
 
                     // ignore special overlay items
-                    if (topObject && (topObject->objectName() == "glass" || QString(topObject->metaObject()->className()).startsWith("SDeclarativeWindowDecoration"))) {
+                    if (topObject && (topObject->objectName() == "glass" || QString(topObject->metaObject()->className()).startsWith("SDeclarativeWindowDecoration") || topObject->objectName() == "DesktopPageIndicator")) {
                         continue;
                     }
                     // ignore items with no width or height - should not get these when using point??
