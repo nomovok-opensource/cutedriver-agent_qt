@@ -65,7 +65,8 @@ bool TasFixturePlugin::execute(void * objectInstance, QString actionName, QHash<
     if(actionName == "showMessage"){
         QMessageBox msgBox;        
         msgBox.setText(parameters.value("text"));
-        msgBox.exec();
+        int code = msgBox.exec();
+        TasLogger::logger()->debug("TasFixturePlugin::execute showMessage " + QString::number(code));
     }
     // set the stdOut if you wish to pass information back to Testtability Driver
     else if(actionName == "fail"){
