@@ -185,24 +185,24 @@ void WebKitTraverse::traverseObject(TasObject* objectInfo, QObject* object, TasC
                                   Q_RETURN_ARG(QGraphicsWebView*, view));
                 
         if (view) {
-          TasLogger::logger()->debug("Traversing webpage");
-          TasObject& object = objectInfo->addObject();        
-          QPoint p;
-          // Retrieve parent xy coords
-          TasLogger::logger()->debug("Trying to retrieve parent xy");
-          QString xpos = "0"; //command->parameter("x_parent_absolute");
-          QString ypos = "0"; //command->parameter("y_parent_absolute");
-          if (!xpos.isEmpty() && !ypos.isEmpty()) {
-            TasLogger::logger()->debug("XY: " + xpos + " " + ypos);
+            TasLogger::logger()->debug("Traversing webpage");
+            TasObject& webPageObject = objectInfo->addObject();        
+            QPoint p;
+            // Retrieve parent xy coords
+            TasLogger::logger()->debug("Trying to retrieve parent xy");
+            QString xpos = "0"; //command->parameter("x_parent_absolute");
+            QString ypos = "0"; //command->parameter("y_parent_absolute");
+            if (!xpos.isEmpty() && !ypos.isEmpty()) {
+                TasLogger::logger()->debug("XY: " + xpos + " " + ypos);
 
-            p = QPoint(xpos.toInt(), ypos.toInt());
-          }
-          traverseQWebPage(object,view->page(), p, p);
+                p = QPoint(xpos.toInt(), ypos.toInt());
+            }
+            traverseQWebPage(webPageObject,view->page(), p, p);
         } else {
-          TasLogger::logger()->debug("Page instance not found");
+            TasLogger::logger()->debug("Page instance not found");
         }
                 
-     }
+    }
 
     if (object->inherits("GVA::PopupWebChromeItem")) {
 //        TasLogger::logger()->debug(" WebKitTaverse::traverseObject found " + QString(object->metaObject()->className()) );
