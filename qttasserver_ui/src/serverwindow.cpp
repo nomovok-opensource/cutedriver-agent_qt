@@ -27,7 +27,6 @@
 #include <QGridLayout>
 #include <QTextEdit>
 #include <QRadioButton>
-#include <QNetworkInterface>
 
 #include <version.h>
 #include "serverwindow.h"
