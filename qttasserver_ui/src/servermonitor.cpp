@@ -27,6 +27,7 @@
 #include <QDir>
 #include <QLibrary>
 #include <QLibraryInfo>
+#include <QNetworkInterface>
 
 #include "taslogger.h"
 #include "tascoreutils.h"
@@ -193,7 +194,13 @@ void ServerMonitor::serverResponse(const QString& message)
             }
             if (!BINDING_ADDRESS.isEmpty() && !BINDING_PORT.isEmpty()){
                  emit serverDebug("Current Server address binding:");
-                 emit serverDebug(BINDING_ADDRESS + ":" + BINDING_PORT);
+                 if (BINDING_ADDRESS == "0.0.0.0"){
+                     foreach (QHostAddress address, QNetworkInterface::allAddresses()){
+                         emit serverDebug( address.toString() + ":" + BINDING_PORT);
+                     }
+                 } else {
+                     emit serverDebug(BINDING_ADDRESS + ":" + BINDING_PORT);
+                 }
             }
         }
         else{

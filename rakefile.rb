@@ -115,15 +115,13 @@ task :start_qttasserver do
   	require 'win32ole'
 		begin
       shell = WIN32OLE.new( 'Shell.Application' )
-      shell.ShellExecute( 'qttasserver.exe', '', 'f:\qttas\bin', '', 2)
-      true
+      shell.ShellExecute( 'qttasserver.exe', '', 'f:\qttas\bin', '', 2)      
     rescue
-		false 
+	  raise "Qttasserver startup failed"		
 	end
   else
-    # directly calling "/usr/bin/qttasserver &" hangs, now disabled the stdin, out and err
-    cmd = "/usr/bin/qttasserver </dev/null >/dev/null 2>&1 &"
-    system(cmd)
+    # directly calling "/usr/bin/qttasserver &" hangs, now disabled the stdin, out and err    
+    result=`qttasserver </dev/null >/dev/null 2>&1 &`		
   end
   
   puts "qttasserver started"

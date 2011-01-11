@@ -254,8 +254,11 @@ bool TestabilityUtils::isItemInView(QGraphicsView* view, QGraphicsItem* graphics
                     QGraphicsObject* topObject = topItem->toGraphicsObject();
                     QRectF sceneRect = topItem->sceneBoundingRect();
 
-                    // ignore special overlay items
-                    if (topObject && (topObject->objectName() == "glass" || QString(topObject->metaObject()->className()).startsWith("SDeclarativeWindowDecoration"))) {
+                    // ignore special overlay items, mousearea added for now
+                    // may cause the removal of this feature since areas in qml can be created to shift for example to shift focus
+                    // but objects inside the area should still be available
+                    // as it is likely that more such components will follow we may have to rethink this feature
+                    if (topObject && (topObject->objectName() == "glass" || QString(topObject->metaObject()->className()).startsWith("SDeclarativeWindowDecoration") || QString(topObject->metaObject()->className()).startsWith("QDeclarativeMouseArea"))) { 
                         continue;
                     }
                     // ignore items with no width or height - should not get these when using point??
@@ -268,9 +271,9 @@ bool TestabilityUtils::isItemInView(QGraphicsView* view, QGraphicsItem* graphics
                     }
                 }
 
-                //QGraphicsObject* topObject = topItem->toGraphicsObject();
-                //QGraphicsObject* itemObject = graphicsItem->toGraphicsObject();
-                //TasLogger::logger()->debug("TestabilityUtils::isItemInView top item with id " + QString::number((quintptr)topObject) + " name " + topObject->metaObject()->className() + " item " + QString::number((quintptr)itemObject) + " itemname " + itemObject->metaObject()->className());
+                QGraphicsObject* topObject = topItem->toGraphicsObject();
+                QGraphicsObject* itemObject = graphicsItem->toGraphicsObject();
+                TasLogger::logger()->debug("TestabilityUtils::isItemInView top item with id " + QString::number((quintptr)topObject) + " name " + topObject->metaObject()->className() + " item " + QString::number((quintptr)itemObject) + " itemname " + itemObject->metaObject()->className());
 
                 // if the item itself is the top most item or item is father of topmost item
                 if (topItem && (topItem == graphicsItem || graphicsItem->isAncestorOf(topItem))) {

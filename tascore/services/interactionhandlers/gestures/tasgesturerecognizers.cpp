@@ -27,6 +27,11 @@ const char* const TYPE     = "type";
 const char* const RADIUS   = "radius";
 const char* const ROTATE_DIRECTION = "rotate_direction";
 
+#ifdef TAS_MAEMO
+#include <MApplication>
+#include <MWindow>
+#endif
+
 /*!
     \class TasGestureRecognizer
 
@@ -88,12 +93,40 @@ int TasGestureUtils::getDistance(TasCommand& command)
     return command.parameter("distance").toInt();
 }
 
+
+
+
+
 int TasGestureUtils::getDirection(TasCommand& command)
 {
     int direction = command.parameter("direction").toInt();
+#ifdef TAS_MAEMO
+    // In meegotouch applications, modify the direction of the actual
+    // angle of the device.
+    MWindow *w = MApplication::activeWindow();
+    if (w != 0 && w != NULL) {
+        M::OrientationAngle angle = w->orientationAngle();
+        switch(angle) {
+        case M::Angle90:
+            direction += 90;
+            break;
+        case M::Angle180:
+            direction += 180;
+            break;
+        case M::Angle270:
+            direction += 270;
+            break;
+        case M::Angle0:
+        default:
+            break;
+        }
+    }
+#endif
+
     direction -= 90;
     direction = direction * -1;
     return direction;
+
 }
 
 QLineF TasGestureUtils::makeLine(QPoint start, int length, int angle)

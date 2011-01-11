@@ -1,7 +1,9 @@
 qttas (1.0.0-1) unstable; urgency=low
 
   * new release version
+  * Fixes: NB#214318 - TDriver 1.0 into Harmattan
   * Fixes: NB#206292 - ':selected' attribute always returns 'false' for all available themes
+  * Fixes: NB#214498 - Dragging up of MPannableViewport works for landscape mode but does not work for Potrait mode
 
  -- Testability Driver Team <testabilitydriver@nokia.com>  Fri, 17 Dec 2010 12:00:00 +0300
 
