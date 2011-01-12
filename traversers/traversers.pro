@@ -25,7 +25,7 @@ SUBDIRS += viewitemtraverser
 
 SUBDIRS += layouttraverser
 
-SUBDIRS += webkittraverser
+#SUBDIRS += webkittraverser
 
 CONFIG(maemo){
 SUBDIRS += duitraverser

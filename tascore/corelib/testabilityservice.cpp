@@ -27,7 +27,7 @@
 #include "screenshotservice.h"
 #include "uicommandservice.h"
 #include "uistateservice.h"
-#include "webkitcommandservice.h"
+//#include "webkitcommandservice.h"
 #include "recorderservice.h"
 #include "taslogger.h"
 #include "tasdatashare.h"
@@ -358,7 +358,7 @@ void TestabilityService::initializeServiceManager()
     mServiceManager->registerCommand(new ObjectService());
     mServiceManager->registerCommand(new ScreenshotService());
     mServiceManager->registerCommand(new UiCommandService());
-    mServiceManager->registerCommand(new WebkitCommandService());
+    //    mServiceManager->registerCommand(new WebkitCommandService());
     mServiceManager->registerCommand(new UiStateService());
     mServiceManager->registerCommand(new RecorderService());    
     mServiceManager->registerCommand(new FindObjectService());    
