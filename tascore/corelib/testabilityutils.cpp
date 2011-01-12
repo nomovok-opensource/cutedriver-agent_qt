@@ -248,36 +248,44 @@ bool TestabilityUtils::isItemInView(QGraphicsView* view, QGraphicsItem* graphics
 
                 QGraphicsItem* topItem = NULL;
 
-                // check top most item in item coordinates
-                for (int i = 0; i < topItems.size(); ++i) {
-                    topItem = topItems.at(i);
-                    QGraphicsObject* topObject = topItem->toGraphicsObject();
-                    QRectF sceneRect = topItem->sceneBoundingRect();
+                // top most item check disabled by default
+                if(isVisibilityCheckOn()) {
 
-                    // ignore special overlay items
-                    if (topObject && (topObject->objectName() == "glass" || QString(topObject->metaObject()->className()).startsWith("SDeclarativeWindowDecoration") || topObject->objectName() == "DesktopPageIndicator")) {
-                        continue;
+                    // check top most item in item coordinates
+                    for (int i = 0; i < topItems.size(); ++i) {
+                        topItem = topItems.at(i);
+                        QGraphicsObject* topObject = topItem->toGraphicsObject();
+                        QRectF sceneRect = topItem->sceneBoundingRect();
+
+                        // ignore special overlay items
+                        if (topObject && isItemBlackListed(topObject->objectName(), topObject->metaObject()->className())) {
+                            continue;
+                        }
+                        // ignore items with no width or height - should not get these when using point??
+                        else if(sceneRect.width() == 0 || sceneRect.height() == 0) {
+                            continue;
+                        }
+                        // found the top most item
+                        else {
+                            break;
+                        }
                     }
-                    // ignore items with no width or height - should not get these when using point??
-                    else if(sceneRect.width() == 0 || sceneRect.height() == 0) {
-                        continue;
+
+                    //QGraphicsObject* topObject = topItem->toGraphicsObject();
+                    //QGraphicsObject* itemObject = graphicsItem->toGraphicsObject();
+                    //TasLogger::logger()->debug("TestabilityUtils::isItemInView top item with id " + QString::number((quintptr)topObject) + " name " + topObject->metaObject()->className() + " item " + QString::number((quintptr)itemObject) + " itemname " + itemObject->metaObject()->className());
+
+                    // if the item itself is the top most item or item is father of topmost item
+                    if (topItem && (topItem == graphicsItem || graphicsItem->isAncestorOf(topItem))) {
+                        return true;
                     }
-                    // found the top most item
                     else {
-                        break;
+                        return false;
                     }
-                }
-
-                //QGraphicsObject* topObject = topItem->toGraphicsObject();
-                //QGraphicsObject* itemObject = graphicsItem->toGraphicsObject();
-                //TasLogger::logger()->debug("TestabilityUtils::isItemInView top item with id " + QString::number((quintptr)topObject) + " name " + topObject->metaObject()->className() + " item " + QString::number((quintptr)itemObject) + " itemname " + itemObject->metaObject()->className());
-
-                // if the item itself is the top most item or item is father of topmost item
-                if (topItem && (topItem == graphicsItem || graphicsItem->isAncestorOf(topItem))) {
-                    return true;
                 }
                 else {
-                    return false;
+                    // no top most check so return true as within viewport
+                    return true;
                 }
             }
             else {
@@ -349,6 +357,35 @@ bool TestabilityUtils::isBlackListed()
     return false;
 }
 
+bool TestabilityUtils::isVisibilityCheckOn()
+{
+    QVariant value = TestabilitySettings::settings()->getValue(VISIBILITY_CHECK);
+    if(value.isValid() && value.canConvert<QString>()){
+        QString onOff = value.toString();
+        if(onOff.toLower() == "on"){
+                return true;
+        }
+    }
+    return false;
+}
+
+bool TestabilityUtils::isItemBlackListed(QString objectName, QString className)
+{
+    QVariant value = TestabilitySettings::settings()->getValue(VISIBILITY_BLACKLIST);
+    if(value.isValid() && value.canConvert<QString>()){
+        QStringList blackList = value.toString().split(",");
+        for (int i = 0; i < blackList.size(); i++){
+            QString blackListed = blackList.at(i);
+            if(blackListed.contains(objectName)){
+                return true;
+            }
+            if(blackListed.contains(className)){
+                return true;
+            }
+        }
+    }
+    return false;
+}
 /*!
     Returns the Proxy Widget if any parent widget has a proxy
  */

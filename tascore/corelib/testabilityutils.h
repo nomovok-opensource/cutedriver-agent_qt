@@ -56,6 +56,8 @@ public:
 	static bool isCustomTraverse();
 	static QString graphicsItemId(QGraphicsItem* graphicsItem);
 	static QGraphicsWidget* castToGraphicsWidget(QGraphicsItem* graphicsItem);
+    static bool isVisibilityCheckOn();
+    static bool isItemBlackListed(QString objectName, QString className);
 
 protected:
 	QWidget* findWidget(const QString& id);
