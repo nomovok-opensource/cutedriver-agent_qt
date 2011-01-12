@@ -4,7 +4,8 @@ Project.configure do |project|
  
   project.email_notifier.emails = ['ext-mika.1.leiman@nokia.com',
   'ivan.castane-capel@nokia.com',
-  'testabilitydriver@nokia.com'
+  'testabilitydriver@nokia.com',
+  'ext-ville.kankainen@nokia.com'
   ]
   
   project.email_notifier.from = 'ext-mika.1.leiman@nokia.com'

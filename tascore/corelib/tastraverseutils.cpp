@@ -288,7 +288,6 @@ QPair<QPoint,QPoint> TasTraverseUtils::addGraphicsItemCoordinates(TasObject* obj
     }
 
     // if the onDisplay property is calculated by the fw, believe it if is set to false.
-    /*
     QGraphicsObject* qobj = graphicsItem->toGraphicsObject();
     if (qobj) {
         QVariant onDisplay = qobj->property("onDisplay");
@@ -297,9 +296,9 @@ QPair<QPoint,QPoint> TasTraverseUtils::addGraphicsItemCoordinates(TasObject* obj
         } else {
             objectInfo->addBooleanAttribute("visibleOnScreen", locationDetails.visible);  
         }
-    } else { */
+    } else { 
         objectInfo->addBooleanAttribute("visibleOnScreen", locationDetails.visible);  
-    //}
+    }
     return coords;
 }
 
