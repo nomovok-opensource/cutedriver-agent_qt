@@ -128,7 +128,7 @@ ServerWindow::ServerWindow(QWidget* parent)
     mainLayout->addWidget(quitButton, 7, 1);
 #ifdef Q_OS_SYMBIAN
     mainLayout->addWidget(autoStart, 8, 0);
-    mainLayout->addWidget(loadPluginsButton, 7, 1);
+    mainLayout->addWidget(loadPluginsButton, 8, 1);
 #endif
     setLayout(mainLayout);     
 
