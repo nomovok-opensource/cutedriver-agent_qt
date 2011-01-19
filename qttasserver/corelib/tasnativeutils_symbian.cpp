@@ -49,71 +49,28 @@ public:
 
 int TasNativeUtils::pidOfActiveWindow(const QHash<QString, TasClient*> clients)
 {
-    TasLogger::logger()->debug("-> TasNativeUtils::pidOfActiveWindow");
+    Q_UNUSED(clients);
 
-    //do not bother searching if no apps reqistered
-    if(clients.isEmpty()){
-        return TAS_ERROR_NOT_FOUND;
-    }
-    
-    //check for dialogs
-    const TUid PropertyCategoryUid = {0x20022FC5};
-    const TUint StatusKey = 'Stat';
-    TInt shown = 0;
-    RProperty::Get(PropertyCategoryUid, StatusKey, shown);
-    if(shown == 1){
-        foreach (TasClient* app, clients){
-            if( app->applicationUid() == QString::number(PropertyCategoryUid.iUid)){
-                return app->processId().toInt();
-            }
-        }
-    }
-
-    const QList<QString>& pids = clients.keys();
+    TasLogger::logger()->debug("-> TasNativeUtils::pidOfActiveWindow"); 
     int pid = TAS_ERROR_NOT_FOUND;
     RWsSession wsSession;
     int error = wsSession.Connect();
     if (KErrNone == error) {
-        TApaTaskList applicationList(wsSession);
-        
+        TApaTaskList applicationList(wsSession);        
         int i = 0;
         int max = wsSession.NumWindowGroups();
-        bool appExists = false;
-        do {
-            TApaTask foregroundApp = applicationList.FindByPos(i);
-            appExists = foregroundApp.Exists();
-            if (appExists) {
-                RThread foregroundAppThread;
-                if (KErrNone == foregroundAppThread.Open(foregroundApp.ThreadId().Id())) {
-                    RProcess foregroundAppProcess;
-                    if(foregroundAppThread.Process(foregroundAppProcess) == KErrNone){
-                        pid = foregroundAppProcess.Id().Id();
-                        if (!pids.contains(QString::number(pid))) {
-                            pid = TAS_ERROR_NOT_FOUND;
-                        }
-                        else {
-                        }
-                        foregroundAppProcess.Close();
-                    }
-                    foregroundAppThread.Close();
-                } 
-                else {
-                    TasLogger::logger()->error(
-                            "   Could not open topmost app thread, ID: " + 
-                            QString::number(foregroundApp.ThreadId().Id()));
+        TApaTask foregroundApp = applicationList.FindByPos(i);
+        if ( foregroundApp.Exists() ) {
+            RThread foregroundAppThread;
+            if (KErrNone == foregroundAppThread.Open(foregroundApp.ThreadId().Id())) {
+                RProcess foregroundAppProcess;
+                if(foregroundAppThread.Process(foregroundAppProcess) == KErrNone){
+                    pid = foregroundAppProcess.Id().Id();
+                    foregroundAppProcess.Close();
                 }
+                foregroundAppThread.Close();
             } 
-            else {
-                TasLogger::logger()->error("   No pos " + QString::number(i) + " app found!");
-            }
-            i++;
-            //break the loop if max windowgroup reached
-            //mysterious amount of tasks sometimes occurs causing infinite loops
-            if( i > max){
-                appExists = false;
-            }
-        } while (appExists && TAS_ERROR_NOT_FOUND == pid);
-
+        } 
         wsSession.Close();    
     }
     else {
