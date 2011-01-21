@@ -17,7 +17,7 @@
 ** 
 ****************************************************************************/ 
  
-
+#include <QDebug>
 #include <QProcess>
 #include <QCoreApplication>
 
@@ -154,13 +154,13 @@ static void qt_create_symbian_commandline(
 #endif
 
 
-
 void StartAppService::launchDetached(const QString& applicationPath, const QStringList& arguments, TasResponse& response)
 {
-    qint64 pid;
+
 #ifdef Q_OS_SYMBIAN 
 //Qt startDetach seems to leak memory so need to do it for now.
 //to be removed when fix in qt
+    qint64 pid;
     QString commandLine;
     QString nativeArguments;
     qt_create_symbian_commandline(arguments, nativeArguments, commandLine);
@@ -173,7 +173,43 @@ void StartAppService::launchDetached(const QString& applicationPath, const QStri
         process.Close();
         response.setData(QString::number(pid));   
     }
+//#elif (defined(Q_OS_WIN32) || defined(Q_OS_WINCE))
+
+//    STARTUPINFO si;
+//    PROCESS_INFORMATION pi;
+
+//    ZeroMemory( &si, sizeof(si) );
+//    si.cb = sizeof(si);
+//    ZeroMemory( &pi, sizeof(pi) );
+
+//    LPTSTR argv = (WCHAR*) ( applicationPath + " -testability " + arguments.join(" ") ).utf16();
+
+//    // Start the child process.
+//    if( CreateProcess( NULL,   // No module name (use command line)
+//        argv,           // Command line
+//        NULL,           // Process handle not inheritable
+//        NULL,           // Thread handle not inheritable
+//        FALSE,          // Set handle inheritance to FALSE
+//        0,              // No creation flags
+//        NULL,           // Use parent's environment block
+//        NULL,           // Use parent's starting directory
+//        &si,            // Pointer to STARTUPINFO structure
+//        &pi )           // Pointer to PROCESS_INFORMATION structure
+//    )
+//    {
+//        QString pid = QString::number(pi.dwProcessId);
+//        CloseHandle( pi.hProcess );
+//        CloseHandle( pi.hThread );
+
+//        TasLogger::logger()->debug("TasServer::launchDetached: application PID " + pid);
+//        response.setData(pid);
+
+//    }
+
+//#elif (defined(Q_OS_UNIX) || defined(Q_OS_LINUX)|| defined(Q_OS_WS_MAC))
+
 #else
+    qint64 pid;
     if(QProcess::startDetached(applicationPath, arguments, ".", &pid)){
         response.setData(QString::number(pid));   
     }
