@@ -49,6 +49,7 @@
 #include "foregroundservice.h"
 #include "systeminfoservice.h"
 #include "resourceloggingservice.h"
+#include "startedappservice.h"
 
 #ifdef Q_OS_SYMBIAN
 #include <e32property.h>
@@ -104,6 +105,7 @@ TasServer::TasServer(QObject *parent)
     mServiceManager->registerCommand(new ForegroundService());
     mServiceManager->registerCommand(new SystemInfoService());
     mServiceManager->registerCommand(new ResourceLoggingService());    
+    mServiceManager->registerCommand(new StartedAppsService());    
 
     mTcpServer = 0;
 #if defined(TAS_USELOCALSOCKET)
