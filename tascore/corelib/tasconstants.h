@@ -42,6 +42,7 @@ const char* const PLATFORM                   = "platformOperation";
 const char* const COLLECT_EVENTS             = "collectEvents";
 const char* const OBJECT_SERVICE             = "objectManipulation";
 const char* const LIST_APPS                  = "listApps";
+const char* const STARTED_APPS             = "startedApps";
 const char* const RECORD_EVENTS              = "recordEvents";
 const char* const CONF_SERVICE               = "confService";
 const char* const INFO_SERVICE               = "infoService";                                                  
