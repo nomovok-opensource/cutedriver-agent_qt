@@ -32,6 +32,8 @@
 
 #if (defined(Q_OS_WIN32) || defined(Q_OS_WINCE)) 
 #include <windows.h>
+#elif (defined(Q_OS_UNIX) || defined(Q_OS_WS_MAC))
+#include <unistd.h>
 #endif
 
 const char* const SET_PARAMS_ONLY = "set_params_only";
@@ -206,7 +208,22 @@ void StartAppService::launchDetached(const QString& applicationPath, const QStri
 
 //    }
 
-//#elif (defined(Q_OS_UNIX) || defined(Q_OS_LINUX)|| defined(Q_OS_WS_MAC))
+//#elif (defined(Q_OS_UNIX) || defined(Q_OS_WS_MAC))
+
+
+
+//    pid_t pid;
+//    char *const parmList[] =
+//    {"/bin/ls", "-l", "/u/userid/dirname", NULL\};
+//    char *const envParms[2] = {"STEPLIB=SASC.V6.LINKLIB", NULL\};
+
+//    if ((pid = fork()) ==-1)
+//       perror("fork error");
+//    else if (pid == 0) {
+//       execve("/u/userid/bin/newShell", parmList, envParms);
+//       printf("Return not expected. Must be an execve error.\\n");
+//    }
+
 
 #else
     qint64 pid;
