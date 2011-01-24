@@ -16,8 +16,6 @@
 ** of this file. 
 ** 
 ****************************************************************************/ 
- 
-
         
 #include "tasxmlwriter.h"
 
@@ -58,11 +56,18 @@ void TasXmlWriter::closeElement(const QString& name)
 
 QString TasXmlWriter::encodeString(const QString& source)
 {
+
     QString encoded = source;
+
     encoded.replace( "&", "&amp;" );
     encoded.replace( ">", "&gt;" );
     encoded.replace( "<", "&lt;" );
     encoded.replace( "\"", "&quot;" );
     encoded.replace( "\'", "&apos;" );
+
+    // ASCII #27 not valid character in xml
+    encoded.replace( QChar::fromAscii(27), "\\e" );
+
     return encoded;
 }
+
