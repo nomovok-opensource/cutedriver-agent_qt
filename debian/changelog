@@ -1,6 +1,6 @@
 qttas (1.0.3-1) unstable; urgency=low
 
-  * new release version
+  * Fixes: NB#220154 - quick fix for setting environment variables for processes started through qttasserve
 
  -- Testability Driver Team <testabilitydriver@nokia.com>  Tue, 25 Jan 2011 09:00:00 +0200
 
