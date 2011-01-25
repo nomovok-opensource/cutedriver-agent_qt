@@ -26,6 +26,7 @@
 #include <tasdatashare.h>
 
 #include "tasdeviceutils.h"
+#include "tasclientmanager.h"
              
 #include "startappservice.h"
 
@@ -127,6 +128,7 @@ void StartAppService::launchDetached(const QString& applicationPath, const QStri
 {
     qint64 pid;
     if(QProcess::startDetached(applicationPath, arguments, ".", &pid)){
+	TasClientManager::instance()->addStartedApp(applicationPath, QDateTime::currentDateTime().toString("yyyyMMddhhmmsszzz"));
         response.requester()->sendResponse(response.messageId(), QString::number(pid));   
     }
     else{
