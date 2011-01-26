@@ -64,6 +64,7 @@ void StartedAppsService::startedApplications(TasCommand& command, TasResponse& r
 
     QByteArray xml;
     model->serializeModel(xml);    
+
     delete model;
     response.setData(xml);
 }

@@ -176,6 +176,7 @@ void StartAppService::launchDetached(const QString& applicationPath, const QStri
     }
 #else
     if(QProcess::startDetached(applicationPath, arguments, ".", &pid)){
+
 	    TasClientManager::instance()->addStartedApp(applicationPath, QDateTime::currentDateTime().toString("yyyyMMddhhmmsszzz"));
         response.setData(QString::number(pid));   
     }
