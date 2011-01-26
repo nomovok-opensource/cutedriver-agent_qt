@@ -248,20 +248,6 @@ bool TestabilityUtils::isItemInView(QGraphicsView* view, QGraphicsItem* graphics
 
                 QGraphicsItem* topItem = NULL;
 
-<<<<<<< HEAD
-                // check top most item in item coordinates
-                for (int i = 0; i < topItems.size(); ++i) {
-                    topItem = topItems.at(i);
-                    QGraphicsObject* topObject = topItem->toGraphicsObject();
-                    QRectF sceneRect = topItem->sceneBoundingRect();
-
-                    // ignore special overlay items, mousearea added for now
-                    // may cause the removal of this feature since areas in qml can be created to shift for example to shift focus
-                    // but objects inside the area should still be available
-                    // as it is likely that more such components will follow we may have to rethink this feature
-                    if (topObject && (topObject->objectName() == "glass" || QString(topObject->metaObject()->className()).startsWith("SDeclarativeWindowDecoration") || QString(topObject->metaObject()->className()).startsWith("QDeclarativeMouseArea"))) { 
-                        continue;
-=======
                 // top most item check disabled by default
                 if(isVisibilityCheckOn()) {
 
