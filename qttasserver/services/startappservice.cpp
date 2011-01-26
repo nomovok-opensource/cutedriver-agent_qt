@@ -32,7 +32,10 @@
 
 #if (defined(Q_OS_WIN32) || defined(Q_OS_WINCE)) 
 #include <windows.h>
+
 #elif (defined(Q_OS_UNIX) || defined(Q_OS_WS_MAC))
+#include <stdio.h>
+#include <stdlib.h>
 #include <unistd.h>
 #endif
 
@@ -174,55 +177,120 @@ void StartAppService::launchDetached(const QString& applicationPath, const QStri
         pid = process.Id().Id();
         process.Close();
         response.setData(QString::number(pid));   
+    }require 'tdriver'
+@sut = TDriver.sut(:Id => 'sut_qt')
+@app = @sut.run(:name => '/usr/bin/calculator')
+
+#elif (defined(Q_OS_WIN32) || defined(Q_OS_WINCE))
+
+    STARTUPINFO si;
+    PROCESS_INFORMATION pi;
+
+    ZeroMemory( &si, sizeof(si) );
+    si.cb = sizeof(si);
+    ZeroMemory( &pi, sizeof(pi) );
+
+    LPTSTR argv = (WCHAR*) ( applicationPath + " -testability " + arguments.join(" ") ).utf16();
+
+    // Start the child process.
+    if( CreateProcess( NULL,   // No module name (use command line)
+        argv,           // Command line
+        NULL,           // Process handle not inheritable
+        NULL,           // Thread handle not inheritable
+        FALSE,          // Set handle inheritance to FALSE
+        0,              // No creation flags
+        NULL,           // Use parent's environment block
+        NULL,           // Use parent's starting directory
+        &si,            // Pointer to STARTUPINFO structure
+        &pi )           // Pointer to PROCESS_INFORMATION structure
+    )
+    {
+        QString pid = QString::number(pi.dwProcessId);
+        CloseHandle( pi.hProcess );
+        CloseHandle( pi.hThread );
+
+        TasLogger::logger()->debug("TasServer::launchDetached: application PID " + pid);
+        response.setData(pid);
+
     }
-//#elif (defined(Q_OS_WIN32) || defined(Q_OS_WINCE))
 
-//    STARTUPINFO si;
-//    PROCESS_INFORMATION pi;
+#elif (defined(Q_OS_UNIX) || defined(Q_OS_WS_MAC))
 
-//    ZeroMemory( &si, sizeof(si) );
-//    si.cb = sizeof(si);
-//    ZeroMemory( &pi, sizeof(pi) );
+    pid_t pid;
 
-//    LPTSTR argv = (WCHAR*) ( applicationPath + " -testability " + arguments.join(" ") ).utf16();
+    // Get extra environment parameters
+    // ##### TODO
+    QString environment = "TESTAPP_VIEW=EditArea";
 
-//    // Start the child process.
-//    if( CreateProcess( NULL,   // No module name (use command line)
-//        argv,           // Command line
-//        NULL,           // Process handle not inheritable
-//        NULL,           // Thread handle not inheritable
-//        FALSE,          // Set handle inheritance to FALSE
-//        0,              // No creation flags
-//        NULL,           // Use parent's environment block
-//        NULL,           // Use parent's starting directory
-//        &si,            // Pointer to STARTUPINFO structure
-//        &pi )           // Pointer to PROCESS_INFORMATION structure
-//    )
-//    {
-//        QString pid = QString::number(pi.dwProcessId);
-//        CloseHandle( pi.hProcess );
-//        CloseHandle( pi.hThread );
+    // Create Arguments ARRAY (application path to executable on first element)
+    QStringList paramList (applicationPath);
+    paramList << arguments;
+    // ## argument sneed some processing
+    char **paramListArray = new char*[ paramList.length() + 1 ];
+    for( int i = 0; i < paramList.length(); i++)
+    {
+        QByteArray variable = ((QString) paramList[i]).toLocal8Bit();
+        char *const variablePtr = new char[variable.length() + 1];
+        strcpy(variablePtr, variable.data());
+        paramListArray[i] = variablePtr;
+    }
+     paramListArray[paramList.length()] = NULL;
 
-//        TasLogger::logger()->debug("TasServer::launchDetached: application PID " + pid);
-//        response.setData(pid);
+    // Create environment Array with NULL end element
+    QStringList envList = QProcess::systemEnvironment() << environment ;
+    // Add the ones comming as parameter!
+    // ##### TODO for now 'enviroment'
+    char **envListArray = new char*[ envList.length() + 1 ];
+    for( int i = 0; i < envList.length(); i++)
+    {
+        QByteArray variable = ((QString) envList[i]).toLocal8Bit();
+        char *const variablePtr = new char[variable.length() + 1];
+        strcpy(variablePtr, variable.data());
+        envListArray[i] = variablePtr;
+    }
+     envListArray[envList.length()] = NULL;
 
-//    }
 
-//#elif (defined(Q_OS_UNIX) || defined(Q_OS_WS_MAC))
+    //QString parmListString = "-testability"; // arguments[0]; // only one for now works, split otherwhilse and add as array of char* const
+    //QString envParmsString = "TESTAPP_VIEW=EditArea";
+
+//    QByteArray appArr = applicationPath.toLocal8Bit();
+//    char *const app = new char[appArr.size() + 1];
+//    strcpy(app, appArr.data());
+
+//    QByteArray paramArr = parmListString.toLocal8Bit();
+//    char *const param = new char[paramArr.size() + 1];
+//    strcpy(param, paramArr.data());
 
 
+    //char *const parmList[] = { app, param, NULL };
 
-//    pid_t pid;
-//    char *const parmList[] =
-//    {"/bin/ls", "-l", "/u/userid/dirname", NULL\};
-//    char *const envParms[2] = {"STEPLIB=SASC.V6.LINKLIB", NULL\};
 
-//    if ((pid = fork()) ==-1)
-//       perror("fork error");
-//    else if (pid == 0) {
-//       execve("/u/userid/bin/newShell", parmList, envParms);
-//       printf("Return not expected. Must be an execve error.\\n");
-//    }
+    // Child
+    if ( (pid = fork()) == 0) {
+       execve( paramListArray[0], paramListArray, envListArray);
+       TasLogger::logger()->error( QString("TasServer::launchDetached: ###### CHILDREN DIED, AppPath: %1").arg(paramListArray[0]));
+    }
+
+    // Parent
+    else if (pid > 0) {
+
+        // Free memory
+        for (int i = 0; i < paramList.length(); i++ )
+        {
+            delete [] paramListArray[i];
+        }
+        delete [] paramListArray;
+
+        for (int i = 0; i < envList.length(); i++ )
+        {
+            delete [] envListArray[i];
+        }
+        delete [] envListArray;
+
+        TasLogger::logger()->error( QString("TasServer::launchDetached: ###### CHILDS Pid: %1").arg((int)pid) );
+        response.setData(QString::number((int) pid));
+    }
 
 
 #else
