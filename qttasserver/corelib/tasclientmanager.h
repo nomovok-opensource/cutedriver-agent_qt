@@ -64,11 +64,13 @@ public:
   TasClient* addClient(const QString& processId, const QString& processName=QString());
   TasClient* addRegisteredClient(const QString& processId, const QString& processName, TasSocket* socket, 
 								 const QString& type=TAS_PLUGIN, QString applicationUid=QString());  
+  void addStartedApp(const QString& processName, const QString& timestamp);
 
   void removeClient(const QString& processId, bool kill=false);
   void removeAllClients(bool kill=true);
 
   void applicationList(TasObject& parent);
+  void startedApplicationsList(TasObject& parent);
 
   bool writeStartupData(const QString& identifier, const TasSharedData& data);
   bool detachFromStartupData(const QString& identifier);
@@ -95,6 +97,7 @@ private:
 
 private:
   QHash<QString, TasClient*> mClients;
+  QHash<QString, QString> mStartedApps;
   static TasClientManager* mInstance;
   TasDataShare* mDataShare;
   QMutex mMutex;
