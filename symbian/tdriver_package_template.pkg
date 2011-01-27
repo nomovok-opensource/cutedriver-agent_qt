@@ -1,0 +1,64 @@
+; Qt Testability stub pkg file for generating qt_testability stub sis package.
+;
+
+; Language
+&EN
+
+; SIS header: name, uid, version
+#{"QtTestability"},(0xE3b3c562),1,0,0, TYPE=SA
+
+; Localised Vendor name
+%{"Nokia, Qt Software"}
+
+; Unique Vendor name
+:"Nokia, Qt Software"
+
+; Qttasserver
+"/epoc32/release/$(PLATFORM)/$(TARGET)/qttasserver.exe"           - "$:\sys\bin\qttasserver.exe"
+"\epoc32\data\z\resource\apps\qttasserver.rsc"                    - "$:\resource\apps\qttasserver.rsc"
+"\epoc32\data\z\private\10003a3f\import\apps\qttasserver_reg.rsc" - "$:\private\10003a3f\import\apps\qttasserver_reg.rsc"
+
+; Qttas_ui
+"/epoc32/release/$(PLATFORM)/$(TARGET)/qttas_ui.exe"           - "$:\sys\bin\qttas_ui.exe"
+"\epoc32\data\z\resource\apps\qttas_ui.rsc"                    - "$:\resource\apps\qttas_ui.rsc"
+"\epoc32\data\z\private\10003a3f\import\apps\qttas_ui_reg.rsc" - "$:\private\10003a3f\import\apps\qttas_ui_reg.rsc"
+
+; Qttasmemlog
+;"/epoc32/release/$(PLATFORM)/$(TARGET)/qttasmemlog_srv.exe"       - "$:\sys\bin\qttasmemlog_srv.exe"
+;"\epoc32\data\z\resource\apps\qttasmemlog_srv.rsc"                - "$:\resource\apps\qttasmemlog_srv.rsc"
+;"\epoc32\data\z\private\10003a3f\import\apps\qttasmemlog_srv.rsc" - "$:\private\10003a3f\import\apps\qttasmemlog_srv.rsc"
+
+
+; Qt_Testability dll
+"/epoc32/release/$(PLATFORM)/$(TARGET)/qttestability.dll" - "$:\sys\bin\qttestability.dll"
+"..\tascore\conf\qt_testability.ini"                      - "$:\qt_testability\qt_testability.ini"
+
+; Traverser plugins
+"/epoc32/release/$(PLATFORM)/$(TARGET)/qttraverse.dll"                    - "$:\sys\bin\qttraverse.dll"
+"/epoc32/release/$(PLATFORM)/$(TARGET)/viewitemtraverse.dll"              - "$:\sys\bin\viewitemtraverse.dll"
+"/epoc32/release/$(PLATFORM)/$(TARGET)/layouttraverse.dll"                - "$:\sys\bin\layouttraverse.dll"
+"/epoc32/release/$(PLATFORM)/$(TARGET)/webkittraverse.dll"                - "$:\sys\bin\webkittraverse.dll"
+"\epoc32\data\z\resource\qt\plugins\traversers\qttraverse.qtplugin"       - "$:\resource\qt\plugins\traversers\qttraverse.qtplugin"
+"\epoc32\data\z\resource\qt\plugins\traversers\viewitemtraverse.qtplugin" - "$:\resource\qt\plugins\traversers\viewitemtraverse.qtplugin"
+"\epoc32\data\z\resource\qt\plugins\traversers\layouttraverse.qtplugin"   - "$:\resource\qt\plugins\traversers\layouttraverse.qtplugin"
+"\epoc32\data\z\resource\qt\plugins\traversers\webkittraverse.qtplugin"   - "$:\resource\qt\plugins\traversers\webkittraverse.qtplugin"
+
+; Fixtures
+"/epoc32/release/$(PLATFORM)/$(TARGET)/tasfixture.dll"- "$:\sys\bin\tasfixture.dll"
+"/epoc32/release/$(PLATFORM)/$(TARGET)/tassignal.dll"- "$:\sys\bin\tassignal.dll"
+"/epoc32/release/$(PLATFORM)/$(TARGET)/fpsfixture.dll"- "$:\sys\bin\fpsfixture.dll"
+"/epoc32/release/$(PLATFORM)/$(TARGET)/popupfixture.dll"- "$:\sys\bin\popupfixture.dll"
+"/epoc32/release/$(PLATFORM)/$(TARGET)/filefixture.dll"- "$:\sys\bin\filefixture.dll"
+"/epoc32/release/$(PLATFORM)/$(TARGET)/launchfixture.dll"- "$:\sys\bin\launchfixture.dll"
+"\epoc32\data\z\resource\qt\plugins\tasfixtures\tasfixture.qtplugin"- "$:\resource\qt\plugins\tasfixtures\tasfixture.qtplugin"
+"\epoc32\data\z\resource\qt\plugins\tasfixtures\tassignal.qtplugin"- "$:\resource\qt\plugins\tasfixtures\tassignal.qtplugin"
+"\epoc32\data\z\resource\qt\plugins\tasfixtures\fpsfixture.qtplugin"- "$:\resource\qt\plugins\tasfixtures\fpsfixture.qtplugin"
+"\epoc32\data\z\resource\qt\plugins\tasfixtures\popupfixture.qtplugin"- "$:\resource\qt\plugins\tasfixtures\popupfixture.qtplugin"
+"\epoc32\data\z\resource\qt\plugins\tasfixtures\filefixture.qtplugin"- "$:\resource\qt\plugins\tasfixtures\filefixture.qtplugin"
+"\epoc32\data\z\resource\qt\plugins\tasfixtures\launchfixture.qtplugin"- "$:\resource\qt\plugins\tasfixtures\launchfixture.qtplugin"
+
+; loaders
+"/epoc32/release/$(PLATFORM)/$(TARGET)/testability.dll"- "$:\sys\bin\testability.dll"
+"/epoc32/release/$(PLATFORM)/$(TARGET)/testabilitystyle.dll"- "$:\sys\bin\testabilitystyle.dll"
+"\epoc32\data\z\resource\qt\plugins\testability\testability.qtplugin"- "$:\resource\qt\plugins\testability\testability.qtplugin"
+"\epoc32\data\z\resource\qt\plugins\styles\testabilitystyle.qtplugin"- "$:\resource\qt\plugins\styles\testabilitystyle.qtplugin"
