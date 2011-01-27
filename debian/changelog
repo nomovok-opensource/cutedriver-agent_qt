@@ -1,4 +1,10 @@
 
+qttas (1.0.4-1) unstable; urgency=low
+
+  * new release version
+
+ -- Testability Driver Team <testabilitydriver@nokia.com>  Wed, 26 Jan 2011 16:00:00 +0200
+
 qttas (1.0.3-2) unstable; urgency=low
 
   * use stacking order to determine current foreground app
