@@ -116,11 +116,7 @@ void UiCommandService::executeNextCommand()
             }
         }
         performMultitouchCommand(dataList);
-        //make sure the list is empty
-        target = 0;
-        foreach(target, mMultiTouchCommands){
-            delete target;
-        }
+        qDeleteAll(mMultiTouchCommands);
         mMultiTouchCommands.clear();
     }
     else if(!mCommandQueue.isEmpty()){
