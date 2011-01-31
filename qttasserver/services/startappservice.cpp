@@ -196,16 +196,40 @@ void StartAppService::launchDetached(const QString& applicationPath, const QStri
     si.cb = sizeof(si);
     ZeroMemory( &pi, sizeof(pi) );
 
-    LPTSTR argv = (WCHAR*) ( applicationPath + " -testability " + arguments.join(" ") ).utf16();
+    // Arguments
+    QString argv = applicationPath + arguments.join(" ");
+
+    // Environment bloc variable
+    QStringList envList = QProcess::systemEnvironment() << environmentVars;
+
+    WCHAR envp[envList.join(" ").length() + 2]; // just counting memory in cluding the NULL (\0) string ends and binal NULL block end
+    LPTSTR env = (LPTSTR) envp;
+
+    for (int i = 0; i < envList.length(); i++)
+    {
+        env = lstrcpy( env, (LPTSTR) envList[i].utf16() );
+        env += lstrlen( (LPTSTR) envList[i].utf16() ) +1;
+    }
+    *env = (WCHAR) NULL;
+
+    // DEBUG
+//    LPTSTR lpszVariable = envp;
+//    while (*lpszVariable) //while not null
+//    {
+//        TasLogger::logger()->debug( QString("TasServer::launchDetached: ENV: %1").arg(QString::fromUtf16((ushort *) lpszVariable)) );
+//        lpszVariable += lstrlen(lpszVariable) + 1;
+//    }
+
+
 
     // Start the child process.
     if( CreateProcess( NULL,   // No module name (use command line)
-        argv,           // Command line
+        (WCHAR *) argv.utf16(),           // Command line
         NULL,           // Process handle not inheritable
         NULL,           // Thread handle not inheritable
         FALSE,          // Set handle inheritance to FALSE
-        0,              // No creation flags
-        NULL,           // Use parent's environment block
+        CREATE_UNICODE_ENVIRONMENT,              // 0 for no creation flags
+        (LPVOID) envp,           // Use parent's environment block
         NULL,           // Use parent's starting directory
         &si,            // Pointer to STARTUPINFO structure
         &pi )           // Pointer to PROCESS_INFORMATION structure
@@ -214,9 +238,7 @@ void StartAppService::launchDetached(const QString& applicationPath, const QStri
         QString pid = QString::number(pi.dwProcessId);
         CloseHandle( pi.hProcess );
         CloseHandle( pi.hThread );
-
-        TasLogger::logger()->debug("TasServer::launchDetached: application     // Add the ones comming as parameter!
-                                   // ##### TODO for now 'enviroment'PID " + pid);
+        TasLogger::logger()->debug( QString("TasServer::launchDetached: Child PID: %1").arg(pid) );
         response.setData(pid);
 
     }
@@ -332,7 +354,7 @@ void StartAppService::launchDetached(const QString& applicationPath, const QStri
         }
         delete [] envListArray;
 
-        TasLogger::logger()->debug( QString("TasServer::launchDetached:Child PID: %1").arg((int)pid) );
+        TasLogger::logger()->debug( QString("TasServer::launchDetached: Child PID: %1").arg((int)pid) );
         response.setData(QString::number((int) pid));
     }
 
@@ -344,7 +366,12 @@ void StartAppService::launchDetached(const QString& applicationPath, const QStri
     }
 #endif
     else{
-        TasLogger::logger()->error("TasServer::launchDetached: count not start the application " + applicationPath);
+
+        //windows
+        QString errorMess = QString::number( GetLastError() );
+        TasLogger::logger()->error("TasServer::launchDetached: EXIT ERROR " + errorMess);
+
+        TasLogger::logger()->error("TasServer::launchDetached: Could not start the application " + applicationPath);
         response.setErrorMessage("Could not start the application " + applicationPath);
     }
 }
