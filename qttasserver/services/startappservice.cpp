@@ -370,11 +370,6 @@ void StartAppService::launchDetached(const QString& applicationPath, const QStri
     }
 #endif
     else{
-
-        //windows
-        QString errorMess = QString::number( GetLastError() );
-        TasLogger::logger()->error("TasServer::launchDetached: EXIT ERROR " + errorMess);
-
         TasLogger::logger()->error("TasServer::launchDetached: Could not start the application " + applicationPath);
         response.setErrorMessage("Could not start the application " + applicationPath);
     }
