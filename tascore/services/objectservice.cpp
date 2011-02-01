@@ -131,17 +131,11 @@ void ObjectService::doCallMethod(TasCommand* command, QObject* target, QString& 
     QString methodName = command->parameter("method_name");
     int methodId = target->metaObject()->indexOfMethod(
                 QMetaObject::normalizedSignature(methodName.toAscii()).constData());
-    TasLogger::logger()->debug(
-                QString("TasCommander::performObjectService %1('%2')=('%3') methodId %4")
-                .arg(command->name())
-                .arg(methodName)
-                .arg(QMetaObject::normalizedSignature(methodName.toAscii()).constData())
-                .arg(methodId));
+
     if (methodId == -1){
         errorString.append(methodName + " method not found on object. ");
         TasLogger::logger()->debug("...method not found on object");
     }
-
     else{
         QMetaMethod metaMethod = target->metaObject()->method(methodId);
         TasLogger::logger()->debug("...got metaMethod");

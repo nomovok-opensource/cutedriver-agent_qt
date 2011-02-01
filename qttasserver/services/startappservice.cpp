@@ -26,6 +26,7 @@
 #include <tasdatashare.h>
 
 #include "tasdeviceutils.h"
+#include "tasclientmanager.h"
              
 #include "startappservice.h"
 
@@ -182,6 +183,7 @@ void StartAppService::launchDetached(const QString& applicationPath, const QStri
         process.Resume();
         pid = process.Id().Id();
         process.Close();
+        TasClientManager::instance()->addStartedApp(applicationPath, QDateTime::currentDateTime().toString("yyyyMMddhhmmsszzz"));
         response.setData(QString::number(pid));   
     }require 'tdriver'
 @sut = TDriver.sut(:Id => 'sut_qt')
@@ -362,6 +364,8 @@ void StartAppService::launchDetached(const QString& applicationPath, const QStri
 #else
     qint64 pid;
     if(QProcess::startDetached(applicationPath, arguments, ".", &pid)){
+
+	    TasClientManager::instance()->addStartedApp(applicationPath, QDateTime::currentDateTime().toString("yyyyMMddhhmmsszzz"));
         response.setData(QString::number(pid));   
     }
 #endif

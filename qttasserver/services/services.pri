@@ -31,6 +31,7 @@ HEADERS += services/foregroundservice.h
 HEADERS += services/systeminfoservice.h
 HEADERS += services/resourceloggingservice.h
 HEADERS += services/shelltask.h
+HEADERS += services/startedappservice.h 
 
 SOURCES += services/startappservice.cpp
 SOURCES += services/closeappservice.cpp 
@@ -45,6 +46,7 @@ SOURCES += services/foregroundservice.cpp
 SOURCES += services/systeminfoservice.cpp
 SOURCES += services/resourceloggingservice.cpp
 SOURCES += services/shelltask.cpp
+SOURCES += services/startedappservice.cpp
 
 unix:!symbian:!macx:!CONFIG(no_x) {
    SOURCES += services/uicommandservice_unix.cpp
