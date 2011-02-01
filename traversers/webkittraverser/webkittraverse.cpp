@@ -216,11 +216,11 @@ void WebKitTraverse::traverseObject(TasObject* objectInfo, QObject* object, TasC
           TasObject& tas_object = objectInfo->addObject();
 
           QGraphicsWidget* item = qobject_cast<QGraphicsWidget*>(object);
-          QPoint p(item->pos().x()-element->geometry().x(),item->pos().y()-element->geometry().y());
-
-          QString tasId = TasCoreUtils::objectId(object);
-
-          traverseWebElement(&tas_object,p,p,element, tasId);
+          if(item){
+              QPoint p(item->pos().x()-element->geometry().x(),item->pos().y()-element->geometry().y());              
+              QString tasId = TasCoreUtils::objectId(object);              
+              traverseWebElement(&tas_object,p,p,element, tasId);
+          }
         } else {
 //          TasLogger::logger()->debug("QWebElement not found");
         }
