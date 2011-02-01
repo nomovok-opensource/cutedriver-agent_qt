@@ -106,7 +106,7 @@ bool DialogFixture::execute(void * objectInstance, QString actionName, QHash<QSt
             else if (actionName == "tap_control") {
                 int count = tap(namePattern, classPattern, dialogName);
                 if (count != 1) {
-                    TasLogger::logger()->error((msgPrefix + ": Dialog child match count: %1").arg(count));
+                    TasLogger::logger()->error(msgPrefix + ": Dialog child match count:" + QString::number(count));
                     result = false;
                 }
             }
@@ -114,7 +114,7 @@ bool DialogFixture::execute(void * objectInstance, QString actionName, QHash<QSt
             else if (actionName == "send_text") {
                 int count = sendText(parameters.value("text"), namePattern, classPattern, dialogName);
                 if (count != 1) {
-                    TasLogger::logger()->error((msgPrefix + ": Dialog child match count: %1").arg(count));
+                    TasLogger::logger()->error(msgPrefix + ": Dialog child match count:" + QString::number(count));
                     result = false;
                 }
             }

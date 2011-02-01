@@ -18,6 +18,27 @@
 ****************************************************************************/ 
  
 
+#ifndef STARTEDAPPSSERVICE_H
+#define STARTEDAPPSSERVICE_H
 
-static QString TAS_VERSION = "1.0.4";
+#include <tasconstants.h>
+#include "tasservercommand.h"
 
+class StartedAppsService : public TasServerCommand
+{
+
+public:
+    StartedAppsService();
+    ~StartedAppsService();
+
+	/*!
+	  From ServiceInterface
+	*/
+	bool executeService(TasCommandModel& model, TasResponse& response);
+	QString serviceName() const { return STARTED_APPS; }
+	
+private:
+	void startedApplications(TasCommand& command, TasResponse& response);
+};
+
+#endif

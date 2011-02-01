@@ -26,6 +26,7 @@
 #include <tasdatashare.h>
 
 #include "tasdeviceutils.h"
+#include "tasclientmanager.h"
              
 #include "startappservice.h"
 
@@ -173,6 +174,7 @@ void StartAppService::launchDetached(const QString& applicationPath, const QStri
         process.Resume();
         pid = process.Id().Id();
         process.Close();
+        TasClientManager::instance()->addStartedApp(applicationPath, QDateTime::currentDateTime().toString("yyyyMMddhhmmsszzz"));
         response.setData(QString::number(pid));   
     }
 //#elif (defined(Q_OS_WIN32) || defined(Q_OS_WINCE))
@@ -228,6 +230,8 @@ void StartAppService::launchDetached(const QString& applicationPath, const QStri
 #else
     qint64 pid;
     if(QProcess::startDetached(applicationPath, arguments, ".", &pid)){
+
+	    TasClientManager::instance()->addStartedApp(applicationPath, QDateTime::currentDateTime().toString("yyyyMMddhhmmsszzz"));
         response.setData(QString::number(pid));   
     }
 #endif

@@ -16,8 +16,27 @@
 ** of this file. 
 ** 
 ****************************************************************************/ 
+
+
+#ifndef LaunchFixturePLUGIN_H
+#define LaunchFixturePLUGIN_H
+
+
+#include <QObject>
+#include <QHash>
+#include <tasqtfixtureplugininterface.h>
+
+class LaunchFixture : public QObject, public TasFixturePluginInterface
+{
+    Q_OBJECT
+    Q_INTERFACES(TasFixturePluginInterface)
+public:
+     LaunchFixture(QObject* parent=0);
+     ~LaunchFixture();
+     bool execute(void* objectInstance, QString actionName, QHash<QString, QString> parameters, QString & stdOut);
+
+private:
+ };
+
+#endif //LaunchFixturePLUGIN_H
  
-
-
-static QString TAS_VERSION = "1.0.4";
-
