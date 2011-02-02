@@ -38,6 +38,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <QSharedMemory>
 #endif
 
 const char* const SET_PARAMS_ONLY = "set_params_only";
