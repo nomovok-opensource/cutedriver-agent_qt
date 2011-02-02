@@ -34,7 +34,7 @@
 #if (defined(Q_OS_WIN32) || defined(Q_OS_WINCE)) 
 #include <windows.h>
 
-#elif (defined(Q_OS_UNIX) || defined(Q_OS_WS_MAC))
+#elif (defined(Q_OS_UNIX) && defined(Q_OS_WS_MAC) && defined(Q_OS_WIN32))
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -185,9 +185,7 @@ void StartAppService::launchDetached(const QString& applicationPath, const QStri
         process.Close();
         TasClientManager::instance()->addStartedApp(applicationPath, QDateTime::currentDateTime().toString("yyyyMMddhhmmsszzz"));
         response.setData(QString::number(pid));   
-    }require 'tdriver'
-@sut = TDriver.sut(:Id => 'sut_qt')
-@app = @sut.run(:name => '/usr/bin/calculator')
+    }
 
 #elif (defined(Q_OS_WIN32) && defined(Q_OS_WINCE) && defined(Q_OS_UNIX)) //ignore untill fixed
 
