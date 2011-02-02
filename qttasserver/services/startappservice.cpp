@@ -17,7 +17,7 @@
 ** 
 ****************************************************************************/ 
  
-
+#include <QDebug>
 #include <QProcess>
 #include <QCoreApplication>
 
@@ -33,6 +33,12 @@
 
 #if (defined(Q_OS_WIN32) || defined(Q_OS_WINCE)) 
 #include <windows.h>
+
+#elif (defined(Q_OS_UNIX) || defined(Q_OS_WS_MAC))
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include "private/qcore_unix_p.h"
 #endif
 
 const char* const SET_PARAMS_ONLY = "set_params_only";
@@ -75,8 +81,13 @@ void StartAppService::startApplication(TasCommand& command, TasResponse& respons
 {
     QString applicationPath = command.parameter("application_path");    
     QString args = command.parameter("arguments");
-    TasLogger::logger()->debug("TasServer::startApplication: " + applicationPath);
+    QString envs = command.parameter("environment");
+    TasLogger::logger()->debug(QString("TasServer::startApplication: '%1'").arg(applicationPath));
+    TasLogger::logger()->debug(QString("TasServer::startApplication: Arguments: '%1'").arg(args));
+    TasLogger::logger()->debug(QString("TasServer::startApplication: Environment: '%1'").arg(envs));
     QStringList arguments = args.split(",");
+    QStringList environmentVars = envs.split(" ");
+
 
     setRuntimeParams(command);
 
@@ -87,7 +98,7 @@ void StartAppService::startApplication(TasCommand& command, TasResponse& respons
     else{
         arguments.removeAll(DETACH_MODE);
         arguments.removeAll(NO_WAIT);
-        launchDetached(applicationPath, arguments, response);
+        launchDetached(applicationPath, arguments, environmentVars, response);
     }
 }
 
@@ -155,13 +166,13 @@ static void qt_create_symbian_commandline(
 #endif
 
 
-
-void StartAppService::launchDetached(const QString& applicationPath, const QStringList& arguments, TasResponse& response)
+void StartAppService::launchDetached(const QString& applicationPath, const QStringList& arguments, const QStringList& environmentVars, TasResponse& response)
 {
-    qint64 pid;
+
 #ifdef Q_OS_SYMBIAN 
 //Qt startDetach seems to leak memory so need to do it for now.
 //to be removed when fix in qt
+    qint64 pid;
     QString commandLine;
     QString nativeArguments;
     qt_create_symbian_commandline(arguments, nativeArguments, commandLine);
@@ -174,8 +185,184 @@ void StartAppService::launchDetached(const QString& applicationPath, const QStri
         process.Close();
         TasClientManager::instance()->addStartedApp(applicationPath, QDateTime::currentDateTime().toString("yyyyMMddhhmmsszzz"));
         response.setData(QString::number(pid));   
+    }require 'tdriver'
+@sut = TDriver.sut(:Id => 'sut_qt')
+@app = @sut.run(:name => '/usr/bin/calculator')
+
+#elif (defined(Q_OS_WIN32) || defined(Q_OS_WINCE))
+
+    STARTUPINFO si;
+    PROCESS_INFORMATION pi;
+
+    ZeroMemory( &si, sizeof(si) );
+    si.cb = sizeof(si);
+    ZeroMemory( &pi, sizeof(pi) );
+
+    // Arguments
+    QString argv = applicationPath + arguments.join(" ");
+
+    // Environment bloc variable
+    QStringList envList = QProcess::systemEnvironment() << environmentVars;
+
+    WCHAR envp[envList.join(" ").length() + 2]; // just counting memory in cluding the NULL (\0) string ends and binal NULL block end
+    LPTSTR env = (LPTSTR) envp;
+
+    for (int i = 0; i < envList.length(); i++)
+    {
+        env = lstrcpy( env, (LPTSTR) envList[i].utf16() );
+        env += lstrlen( (LPTSTR) envList[i].utf16() ) +1;
     }
+    *env = (WCHAR) NULL;
+
+    // DEBUG
+//    LPTSTR lpszVariable = envp;
+//    while (*lpszVariable) //while not null
+//    {
+//        TasLogger::logger()->debug( QString("TasServer::launchDetached: ENV: %1").arg(QString::fromUtf16((ushort *) lpszVariable)) );
+//        lpszVariable += lstrlen(lpszVariable) + 1;
+//    }
+
+
+
+    // Start the child process.
+    if( CreateProcess( NULL,   // No module name (use command line)
+        (WCHAR *) argv.utf16(),           // Command line
+        NULL,           // Process handle not inheritable
+        NULL,           // Thread handle not inheritable
+        FALSE,          // Set handle inheritance to FALSE
+        CREATE_UNICODE_ENVIRONMENT,              // 0 for no creation flags
+        (LPVOID) envp,           // Use parent's environment block
+        NULL,           // Use parent's starting directory
+        &si,            // Pointer to STARTUPINFO structure
+        &pi )           // Pointer to PROCESS_INFORMATION structure
+    )
+    {
+        QString pid = QString::number(pi.dwProcessId);
+        CloseHandle( pi.hProcess );
+        CloseHandle( pi.hThread );
+        TasLogger::logger()->debug( QString("TasServer::launchDetached: Child PID: %1").arg(pid) );
+        response.setData(pid);
+
+    }
+
+#elif (defined(Q_OS_UNIX) || defined(Q_OS_WS_MAC))
+
+    pid_t pid, sid, grandpid;
+
+    int pidPipeDesc[2];
+    qt_safe_pipe(pidPipeDesc);
+
+    // Create Arguments ARRAY (application path to executable on first element)
+    QStringList paramList;
+    paramList << applicationPath;
+    paramList << arguments;
+    char **paramListArray = new char*[ paramList.length() + 1 ];
+    for( int i = 0; i < paramList.length(); i++)
+    {
+        QByteArray variable = ((QString) paramList[i]).toLocal8Bit();
+        char *const variablePtr = new char[variable.length() + 1];
+        strcpy(variablePtr, variable.data());
+        paramListArray[i] = variablePtr;
+    }
+     paramListArray[paramList.length()] = NULL;
+
+
+    // Create environment Array with NULL end element
+    QStringList envList = QProcess::systemEnvironment() << environmentVars;
+    //TasLogger::logger()->debug(QString("TasServer::startApplication: ALL '%1'").arg(envList.join(",")));
+    //TasLogger::logger()->debug(QString("TasServer::startApplication: USER '%1'").arg(environmentVars.join(",")));
+
+    char **envListArray = new char*[ envList.length() + 1 ];
+    for( int i = 0; i < envList.length(); i++)
+    {
+        QByteArray variable = ((QString) envList[i]).toLocal8Bit();
+        char *const variablePtr = new char[variable.length() + 1];
+        strcpy(variablePtr, variable.data());
+        envListArray[i] = variablePtr;
+    }
+    envListArray[envList.length()] = NULL;
+
+    // START MAKING CHILDREN HERE :D
+    // Child
+    if ( (pid = fork()) == 0) {
+
+        // We are only going to write on the pipe for papa
+        qt_safe_close(pidPipeDesc[0]);
+
+        // Create new session for the process (detatch from parent process group)
+        sid = setsid();
+        if ( sid < 0 )
+        {
+            TasLogger::logger()->error( QString("TasServer::launchDetached:Failed to detach child."));
+            exit(1);
+        }
+
+        // Grandchild
+        if ( ( grandpid = fork() ) == 0 )
+        {
+            // Try see if we don't need path
+            execve( paramListArray[0], paramListArray, envListArray);
+
+            // Try also on all path directories if above fails
+            const QString path = QString::fromLocal8Bit(::getenv("PATH"));
+            const QString file = QString::fromLocal8Bit(paramListArray[0]);
+            if (!path.isEmpty())
+            {
+                QStringList pathEntries = path.split(QLatin1Char(':'));
+                for (int k = 0; k < pathEntries.size(); ++k) {
+                    QByteArray tmp = QFile::encodeName(pathEntries.at(k));
+                    if (!tmp.endsWith('/')) tmp += '/';
+                    tmp += QFile::encodeName(file);
+                    paramListArray[0] = tmp.data();
+                    TasLogger::logger()->error( QString("TasServer::launchDetached: PATH = '%1'").arg((char *) paramListArray[0]));
+                    execve( paramListArray[0], paramListArray, envListArray);
+
+                }
+             }
+
+            TasLogger::logger()->error( QString("TasServer::launchDetached: Granhild process died straight away."));
+        }
+
+        // Child exit in order to end detachment of grandchild
+        else if( grandpid > 0)
+        {
+            qt_safe_write(pidPipeDesc[1], &grandpid, sizeof(pid_t));
+            qt_safe_close(pidPipeDesc[1]);
+            _exit(0);
+        }
+
+    }
+
+    // Parent
+    else if (pid > 0) {
+
+        // We are only going to read from the pipe from child
+        qt_safe_close(pidPipeDesc[1]);
+        pid_t actualpid = 0;
+        qt_safe_read(pidPipeDesc[0], &actualpid, sizeof(pid_t));
+        qt_safe_close(pidPipeDesc[0]);
+        pid = actualpid;
+
+        // Free memory
+        for (int i = 0; i < paramList.length(); i++ )
+        {
+            delete [] paramListArray[i];
+        }
+        delete [] paramListArray;
+
+        for (int i = 0; i < envList.length(); i++ )
+        {
+            delete [] envListArray[i];
+        }
+        delete [] envListArray;
+
+        TasLogger::logger()->debug( QString("TasServer::launchDetached: Child PID: %1").arg((int)pid) );
+        response.setData(QString::number((int) pid));
+    }
+
+
 #else
+    qint64 pid;
     if(QProcess::startDetached(applicationPath, arguments, ".", &pid)){
 
 	    TasClientManager::instance()->addStartedApp(applicationPath, QDateTime::currentDateTime().toString("yyyyMMddhhmmsszzz"));
@@ -183,7 +370,7 @@ void StartAppService::launchDetached(const QString& applicationPath, const QStri
     }
 #endif
     else{
-        TasLogger::logger()->error("TasServer::launchDetached: count not start the application " + applicationPath);
+        TasLogger::logger()->error("TasServer::launchDetached: Could not start the application " + applicationPath);
         response.setErrorMessage("Could not start the application " + applicationPath);
     }
 }
