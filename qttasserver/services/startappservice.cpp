@@ -185,11 +185,9 @@ void StartAppService::launchDetached(const QString& applicationPath, const QStri
         process.Close();
         TasClientManager::instance()->addStartedApp(applicationPath, QDateTime::currentDateTime().toString("yyyyMMddhhmmsszzz"));
         response.setData(QString::number(pid));   
-    }require 'tdriver'
-@sut = TDriver.sut(:Id => 'sut_qt')
-@app = @sut.run(:name => '/usr/bin/calculator')
+    }
 
-#elif (defined(Q_OS_WIN32) && defined(Q_OS_WINCE) && defined(Q_OS_UNIX)) //ignore untill fixed
+#elif (defined(Q_OS_WIN32) || defined(Q_OS_WINCE))
 
     STARTUPINFO si;
     PROCESS_INFORMATION pi;
@@ -245,7 +243,7 @@ void StartAppService::launchDetached(const QString& applicationPath, const QStri
 
     }
 
-#elif (defined(Q_OS_UNIX) && defined(Q_OS_WS_MAC) && defined(Q_OS_WIN32) )
+#elif (defined(Q_OS_UNIX) || defined(Q_OS_WS_MAC))
 
     pid_t pid, sid, grandpid;
 
