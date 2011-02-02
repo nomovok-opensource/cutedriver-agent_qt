@@ -197,7 +197,7 @@ void StartAppService::launchDetached(const QString& applicationPath, const QStri
     ZeroMemory( &pi, sizeof(pi) );
 
     // Arguments
-    QString argv = applicationPath + arguments.join(" ");
+    QString argv = applicationPath + " " + arguments.join(" ");
 
     // Environment bloc variable
     QStringList envList = QProcess::systemEnvironment() << environmentVars;
