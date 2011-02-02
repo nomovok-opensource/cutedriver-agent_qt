@@ -34,7 +34,7 @@
 #if (defined(Q_OS_WIN32) || defined(Q_OS_WINCE)) 
 #include <windows.h>
 
-#elif (defined(Q_OS_UNIX) || defined(Q_OS_WS_MAC))
+#elif (defined(Q_OS_UNIX) && defined(Q_OS_WS_MAC) && defined(Q_OS_WIN32))
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
