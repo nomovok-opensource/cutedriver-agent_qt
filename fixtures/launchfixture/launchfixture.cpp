@@ -90,7 +90,7 @@ bool LaunchFixture::execute(void * objectInstance, QString actionName, QHash<QSt
             cmdLine->SetCommandL(EApaCommandRun);
             User::LeaveIfError(session.StartApp(*cmdLine));
             //TasLogger::logger()->debug("  command line " );
-            stdOut.append(QString::fromUtf16(info.iFullName.Ptr()));
+            stdOut.append(QString((QChar*) info.iFullName.Ptr(), info.iFullName.Length()));
             CleanupStack::PopAndDestroy(2);
         );
         //T R A P D ends
