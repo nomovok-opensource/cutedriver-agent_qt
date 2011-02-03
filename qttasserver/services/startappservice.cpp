@@ -185,10 +185,7 @@ void StartAppService::launchDetached(const QString& applicationPath, const QStri
         process.Close();
         TasClientManager::instance()->addStartedApp(applicationPath, QDateTime::currentDateTime().toString("yyyyMMddhhmmsszzz"));
         response.setData(QString::number(pid));   
-    }require 'tdriver'
-@sut = TDriver.sut(:Id => 'sut_qt')
-@app = @sut.run(:name => '/usr/bin/calculator')
-
+    }
 #elif (defined(Q_OS_WIN32) || defined(Q_OS_WINCE))
 
     STARTUPINFO si;
