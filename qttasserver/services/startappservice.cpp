@@ -307,7 +307,7 @@ void StartAppService::launchDetached(const QString& applicationPath, const QStri
         // Grandchild
         if ( ( grandpid = fork() ) == 0 )
         {
-            // detach ont he child.
+            // detach ont he grandchild.
             mem.detach();
 
             // Try see if we don't need path
@@ -347,6 +347,13 @@ void StartAppService::launchDetached(const QString& applicationPath, const QStri
             mem.detach();
             _exit(0);
         }
+        else
+        {
+            // if child fork fails detach mem and kill child
+            // TODO Return with error?
+            mem.detach();
+            _exit(0);
+        }
 
     }
 
@@ -368,7 +375,6 @@ void StartAppService::launchDetached(const QString& applicationPath, const QStri
             //TODO? add counter to break free if error on fork()
         }
         mem.detach();
-        //mem.~QSharedMemory();
 
         pid = actualpid;
 
@@ -399,6 +405,8 @@ void StartAppService::launchDetached(const QString& applicationPath, const QStri
     }
 #endif
     else{
+        // if parent fork fails, clear mem and send error
+        mem.detach();
         TasLogger::logger()->error("TasServer::launchDetached: Could not start the application " + applicationPath);
         response.setErrorMessage("Could not start the application " + applicationPath);
     }
