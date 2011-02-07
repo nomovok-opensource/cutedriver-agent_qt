@@ -201,7 +201,7 @@ void StartAppService::launchDetached(const QString& applicationPath, const QStri
     // Environment bloc variable
     QStringList envList = QProcess::systemEnvironment() << environmentVars;
 
-    WCHAR envp[envList.join(" ").length() + 2]; // just counting memory in cluding the NULL (\0) string ends and binal NULL block end
+	WCHAR* envp = (WCHAR*)malloc((envList.join(" ").length() + 2) * sizeof(WCHAR)); // just counting memory in cluding the NULL (\0) string ends and binal NULL block end
     LPTSTR env = (LPTSTR) envp;
 
     for (int i = 0; i < envList.length(); i++)
@@ -412,5 +412,8 @@ void StartAppService::launchDetached(const QString& applicationPath, const QStri
         TasLogger::logger()->error("TasServer::launchDetached: Could not start the application " + applicationPath);
         response.setErrorMessage("Could not start the application " + applicationPath);
     }
+#if (defined(Q_OS_WIN32) || defined(Q_OS_WINCE))
+	free(envp);
+#endif
 }
 
