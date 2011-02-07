@@ -1,6 +1,6 @@
 qttas (1.0.5-1) unstable; urgency=low
 
-  * new release version
+  * Fixes: NB#223734 - Expose QWidget::winId() as xWindow attribute
 
  -- Testability Driver Team <testabilitydriver@nokia.com>  Wed, 03 Feb 2011 16:00:00 +0200
 
