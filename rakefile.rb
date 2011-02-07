@@ -49,6 +49,11 @@ task :cruise => ['kill_qttasserver', 'build_qttas',  'start_qttasserver'] do
 	exit(0)
 end
 
+desc "Task for cruise control"
+task :cruise_vs => ['kill_qttasserver', 'build_qttas_vs',  'start_qttasserver'] do
+	exit(0)
+end
+
 desc "Task for building the example QT application(s)"
 task :build_qttas do
 
@@ -85,6 +90,39 @@ task :build_qttas do
   raise "make install failed" if (failure != true) or ($? != 0) 
   puts "qttas built"
 end
+
+desc "Task for building the example QT application(s)"
+task :build_qttas_vs do
+
+  puts "#########################################################"
+  puts "### Building qttas                                   ####"
+  puts "#########################################################"
+
+	# buid version file
+	#File.open('common/inc/version.h', 'w') { |f| f.write "static QString TAS_VERSION = \"#{@__tas_revision}\";" }  
+  make = "nmake"
+  sudo = ""	
+
+  cmd = sudo + " #{make} uninstall"
+  system(cmd)
+
+  cmd = "#{make} distclean"
+  system(cmd)
+  
+  cmd = "qmake CONFIG+=release CONFIG+=no_mobility qt_testability.pro"
+  failure = system(cmd)
+  raise "qmake failed" if (failure != true) or ($? != 0) 
+    
+  cmd = "#{make}"
+  failure = system(cmd)
+  raise "make release failed" if (failure != true) or ($? != 0) 
+    
+  cmd = sudo + "#{make} install"
+  failure = system(cmd)
+  raise "make install failed" if (failure != true) or ($? != 0) 
+  puts "qttas built"
+end
+
 
 desc "Task for shutting down the qttasserver"
 task :kill_qttasserver do
