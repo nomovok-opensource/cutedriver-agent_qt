@@ -405,7 +405,7 @@ void StartAppService::launchDetached(const QString& applicationPath, const QStri
     }
 #endif
     else{
-#if (defined(Q_OS_UNIX) || defined(Q_OS_WS_MAC))
+#if (defined(Q_OS_UNIX) || defined(Q_OS_WS_MAC)) && !defined(Q_OS_SYMBIAN)
         // if parent fork fails, clear mem and send error
         mem.detach();
 #endif
