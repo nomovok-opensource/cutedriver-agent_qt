@@ -103,22 +103,26 @@ int TasGestureUtils::getDirection(TasCommand& command)
 #ifdef TAS_MAEMO
     // In meegotouch applications, modify the direction of the actual
     // angle of the device.
-    MWindow *w = MApplication::activeWindow();
-    if (w != 0 && w != NULL) {
-        M::OrientationAngle angle = w->orientationAngle();
-        switch(angle) {
-        case M::Angle90:
-            direction += 90;
-            break;
-        case M::Angle180:
-            direction += 180;
-            break;
-        case M::Angle270:
-            direction += 270;
-            break;
-        case M::Angle0:
-        default:
-            break;
+    MApplication* app = MApplication::instance();
+    if (app) {
+        // activeWindow() would SIGABORT if called without verifying the mapp instance
+        MWindow *w = MApplication::activeWindow(); 
+        if (w) {
+            M::OrientationAngle angle = w->orientationAngle();
+            switch(angle) {
+            case M::Angle90:
+                direction += 90;
+                break;
+            case M::Angle180:
+                direction += 180;
+                break;
+            case M::Angle270:
+                direction += 270;
+                break;
+            case M::Angle0:
+            default:
+                break;
+            }
         }
     }
 #endif
