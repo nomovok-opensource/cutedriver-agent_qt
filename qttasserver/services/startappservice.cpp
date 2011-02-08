@@ -273,9 +273,6 @@ void StartAppService::launchDetached(const QString& applicationPath, const QStri
     }
     envListArray[envList.length()] = NULL;
 
-
-    /////int pidPipeDesc[2];
-    /////qt_safe_pipe(pidPipeDesc);
     // Using shared memory pro IPC instead of qt pipes to avoid using private qt libraries.
     QSharedMemory mem("pid_mem");
     if ( mem.create(sizeof(pid_t)) )
@@ -290,14 +287,11 @@ void StartAppService::launchDetached(const QString& applicationPath, const QStri
         // Child
         if ( (pid = fork()) == 0) {
 
-            // We are only going to write on the pipe for papa
-            /////qt_safe_close(pidPipeDesc[0]);
-
             // Create new session for the process (detatch from parent process group)
             sid = setsid();
             if ( sid < 0 )
             {
-                TasLogger::logger()->error( QString("TasServer::launchDetached:Failed to detach child."));
+                TasLogger::logger()->error( QString("TasServer::launchDetached: Failed to detach child."));
                 exit(1);
             }
 
@@ -305,7 +299,10 @@ void StartAppService::launchDetached(const QString& applicationPath, const QStri
             if ( ( grandpid = fork() ) == 0 )
             {
                 // detach ont he grandchild.
-                mem.detach();
+                while (mem.isAttached())
+                {
+                    mem.detach(); // can fail if mem is locked
+                }
 
                 // Try see if we don't need path
                 execve( paramListArray[0], paramListArray, envListArray);
@@ -330,13 +327,11 @@ void StartAppService::launchDetached(const QString& applicationPath, const QStri
                 TasLogger::logger()->error( QString("TasServer::launchDetached: Granhild process died straight away."));
             }
 
-            // Child exit in order to end detachment of grandchild
+            // Child send Grandchild pid to shared mem and exit in order to end detachment of grandchild
             else if( grandpid > 0)
             {
                 /////qt_safe_write(pidPipeDesc[1], &grandpid, sizeof(pid_t));
                 /////qt_safe_close(pidPipeDesc[1]);
-                //QSharedMemory mem("pid_mem");
-                //mem.attach();
                 mem.lock();
                 pid_t *mem_ptr = (pid_t *) mem.data();
                 *mem_ptr = grandpid;
@@ -348,8 +343,12 @@ void StartAppService::launchDetached(const QString& applicationPath, const QStri
             {
                 // if child fork fails detach mem and kill child
                 // TODO Return with error?
-                mem.detach();
-                _exit(0);
+                while (mem.isAttached())
+                {
+                    mem.detach(); // can fail if mem is locked
+                }
+                TasLogger::logger()->error( QString("TasServer::launchDetached: Failed second fork().Could not start the application " + applicationPath));
+                _exit(1);
             }
 
         }
@@ -357,23 +356,22 @@ void StartAppService::launchDetached(const QString& applicationPath, const QStri
         // Parent
         else if (pid > 0) {
 
-            // We are only going to read from the pipe from child
-            /////qt_safe_close(pidPipeDesc[1]);
             pid_t actualpid = 0;
-            /////qt_safe_read(pidPipeDesc[0], &actualpid, sizeof(pid_t));
-            /////qt_safe_close(pidPipeDesc[0]);
-            while(!actualpid)
+            int count = 0;
+            while(!actualpid && count < 10)
             {
                 mem.lock();
                 pid_t *mem_ptr = (pid_t *) mem.data();
                 actualpid = *mem_ptr;
                 mem.unlock();
                 TasLogger::logger()->debug( QString("TasServer::launchDetached: ACTUAL Child PID: %1").arg((int)actualpid) );
-                //TODO? add counter to break free if error on fork()
+                sleep(100);
+                count++;
             }
-            mem.detach();
-
-            pid = actualpid;
+            while (mem.isAttached())
+            {
+                mem.detach(); // can fail if mem is locked
+            }
 
             // Free memory
             for (int i = 0; i < paramList.length(); i++ )
@@ -388,14 +386,25 @@ void StartAppService::launchDetached(const QString& applicationPath, const QStri
             }
             delete [] envListArray;
 
-            TasLogger::logger()->debug( QString("TasServer::launchDetached: Child PID: %1").arg((int)pid) );
-            response.setData(QString::number((int) pid));
+            if (actualpid == 0)
+            {
+                TasLogger::logger()->error("TasServer::launchDetached: Error getting the PID for the new application " + applicationPath);
+                response.setErrorMessage("Could not start the application " + applicationPath);
+            }
+            else
+            {
+                TasLogger::logger()->debug( QString("TasServer::launchDetached: Child PID: %1").arg((int)actualpid) );
+                response.setData(QString::number((int) actualpid));
+            }
         }
         else
         {
             //fails, clear mem and send error
-            mem.detach();
-            TasLogger::logger()->error("TasServer::launchDetached: Could not start the application " + applicationPath);
+            while (mem.isAttached())
+            {
+                mem.detach(); // can fail if mem is locked
+            }
+            TasLogger::logger()->error("TasServer::launchDetached: Failed first fork(). Could not start the application " + applicationPath);
             response.setErrorMessage("Could not start the application " + applicationPath);
 
         }
@@ -413,8 +422,11 @@ void StartAppService::launchDetached(const QString& applicationPath, const QStri
     else{
 #if (defined(Q_OS_UNIX) || defined(Q_OS_WS_MAC)) && !defined(Q_OS_SYMBIAN)
         // if parent fork fails, clear mem and send error
-        mem.detach();
-        TasLogger::logger()->debug(QString("TasServer::startApplication: SharedMem ERROR: ").arg(mem.errorString()));
+        while (mem.isAttached())
+        {
+            mem.detach(); // can fail if mem is locked
+        }
+        TasLogger::logger()->debug(QString("TasServer::launchDetached: Error attaching to Shared Memory: ").arg(mem.errorString()));
 #endif
         TasLogger::logger()->error("TasServer::launchDetached: Could not start the application " + applicationPath);
         response.setErrorMessage("Could not start the application " + applicationPath);
