@@ -330,13 +330,14 @@ void StartAppService::launchDetached(const QString& applicationPath, const QStri
             // Child send Grandchild pid to shared mem and exit in order to end detachment of grandchild
             else if( grandpid > 0)
             {
-                /////qt_safe_write(pidPipeDesc[1], &grandpid, sizeof(pid_t));
-                /////qt_safe_close(pidPipeDesc[1]);
                 mem.lock();
                 pid_t *mem_ptr = (pid_t *) mem.data();
                 *mem_ptr = grandpid;
                 mem.unlock();
-                mem.detach();
+                while (mem.isAttached())
+                {
+                    mem.detach(); // can fail if mem is locked
+                }
                 _exit(0);
             }
             else
@@ -358,19 +359,23 @@ void StartAppService::launchDetached(const QString& applicationPath, const QStri
 
             pid_t actualpid = 0;
             int count = 0;
-            while(!actualpid && count < 10)
+            while(actualpid == 0 && count < 10)
             {
                 mem.lock();
                 pid_t *mem_ptr = (pid_t *) mem.data();
                 actualpid = *mem_ptr;
                 mem.unlock();
                 TasLogger::logger()->debug( QString("TasServer::launchDetached: ACTUAL Child PID: %1").arg((int)actualpid) );
-                sleep(100);
-                count++;
+                if (actualpid == 0 )
+                {
+                    sleep(100);
+                    count++;
+                }
             }
             while (mem.isAttached())
             {
-                mem.detach(); // can fail if mem is locked
+                bool res = mem.detach(); // can fail if mem is locked
+                if (!res) TasLogger::logger()->error("TasServer::launchDetached: Parent::Shared Memory Detached failed! Retrying.");
             }
 
             // Free memory
