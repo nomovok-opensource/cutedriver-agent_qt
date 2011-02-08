@@ -335,8 +335,8 @@ void StartAppService::launchDetached(const QString& applicationPath, const QStri
             {
                 /////qt_safe_write(pidPipeDesc[1], &grandpid, sizeof(pid_t));
                 /////qt_safe_close(pidPipeDesc[1]);
-                QSharedMemory mem("pid_mem");
-                mem.attach();
+                //QSharedMemory mem("pid_mem");
+                //mem.attach();
                 mem.lock();
                 pid_t *mem_ptr = (pid_t *) mem.data();
                 *mem_ptr = grandpid;
