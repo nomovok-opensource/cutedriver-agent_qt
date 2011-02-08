@@ -28,6 +28,16 @@ QTM_USE_NAMESPACE
 #include <e32event.h>
 #include <w32std.h>
 
+#include <e32property.h>
+
+//rotation include and defines
+#include <cfclient.h>
+_LIT( KContextSource, "Sensor" );
+_LIT( KSensorSourceEventOrientation, "Event.Orientation" );
+_LIT( KContextValueRightUp, "DisplayRightUp" );
+//_LIT( KContextValueTopUp, "DisplayUp" ); //not utilized atleast for now
+
+
 #include "tasdeviceutils.h"
 #include "taslogger.h"
 
@@ -138,7 +148,40 @@ void TasDeviceUtils::sendMouseEvent(int x, int y, Qt::MouseButton /*button*/, QE
     TasLogger::logger()->debug(QString(__FUNCTION__) +
                                " x(" + QString::number(x) +
                                ") y(" + QString::number(y) +")");
-    TPoint pos(x, y);
+
+    bool rightUp = false;
+
+    TRAPD(err,
+        MCFListener *cfListener= NULL;
+        CCFClient* client = CCFClient::NewLC( *cfListener );
+        CCFContextQuery* query = CCFContextQuery::NewLC();
+        query->SetSourceL( KContextSource() );
+        query->SetTypeL( KSensorSourceEventOrientation() );
+
+        RContextObjectArray result;
+        TInt err = client->RequestContext( *query, result );
+
+        for(TInt n=0;n<result.Count();n++)
+        {
+          if(0 == ((CCFContextObject*)result[n])->Value().Compare(KContextValueRightUp())){
+            //TasLogger::logger()->debug(QString(__FUNCTION__) + " has been rotated");
+            rightUp = true;
+          }
+        }
+
+        result.ResetAndDestroy();
+        CleanupStack::PopAndDestroy(2); //client, query
+
+    );
+
+    TPoint pos;
+    if(rightUp){
+      pos.SetXY(360-y, x);
+    }
+    else
+    {
+      pos.SetXY(x,y);
+    }
 
     bool down = type == QEvent::MouseButtonPress ||
                 type == QEvent::GraphicsSceneMousePress;
