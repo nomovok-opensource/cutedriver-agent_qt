@@ -26,7 +26,15 @@
 //#include <QTouchEvent>
 #include <QString>
 
+#include <QThread>
 #include "tasconstants.h"
+
+class TAS_EXPORT Sleeper: public QThread
+{
+public:
+    static void sleep(int ms);
+
+};
 
 class TAS_EXPORT TasCoreUtils
 {

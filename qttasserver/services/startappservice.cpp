@@ -301,7 +301,9 @@ void StartAppService::launchDetached(const QString& applicationPath, const QStri
                 // detach ont he grandchild.
                 while (mem.isAttached())
                 {
-                    mem.detach(); // can fail if mem is locked
+                    bool res = mem.detach(); // can fail if mem is locked
+                    if (!res) TasLogger::logger()->error("TasServer::launchDetached: GrandChild::Shared Memory Detachment failed! Retrying.");
+                    if (mem.isAttached()) Sleeper::sleep(100);
                 }
 
                 // Try see if we don't need path
@@ -336,7 +338,9 @@ void StartAppService::launchDetached(const QString& applicationPath, const QStri
                 mem.unlock();
                 while (mem.isAttached())
                 {
-                    mem.detach(); // can fail if mem is locked
+                    bool res = mem.detach();
+                    if (!res) TasLogger::logger()->error("TasServer::launchDetached:Child::Shared Memory Detachment failed! Retrying.");
+                    if (mem.isAttached()) Sleeper::sleep(100);
                 }
                 _exit(0);
             }
@@ -346,7 +350,9 @@ void StartAppService::launchDetached(const QString& applicationPath, const QStri
                 // TODO Return with error?
                 while (mem.isAttached())
                 {
-                    mem.detach(); // can fail if mem is locked
+                    bool res = mem.detach(); // can fail if mem is locked
+                    if (!res) TasLogger::logger()->error("TasServer::launchDetached: Child::SecondForkError::Shared Memory Detachment failed! Retrying.");
+                    if (mem.isAttached()) Sleeper::sleep(100);
                 }
                 TasLogger::logger()->error( QString("TasServer::launchDetached: Failed second fork().Could not start the application " + applicationPath));
                 _exit(1);
@@ -368,14 +374,15 @@ void StartAppService::launchDetached(const QString& applicationPath, const QStri
                 TasLogger::logger()->debug( QString("TasServer::launchDetached: ACTUAL Child PID: %1").arg((int)actualpid) );
                 if (actualpid == 0 )
                 {
-                    sleep(100);
+                    Sleeper::sleep(100);
                     count++;
                 }
             }
             while (mem.isAttached())
             {
                 bool res = mem.detach(); // can fail if mem is locked
-                if (!res) TasLogger::logger()->error("TasServer::launchDetached: Parent::Shared Memory Detached failed! Retrying.");
+                if (!res) TasLogger::logger()->error("TasServer::launchDetached: Parent::Shared Memory Detachment failed! Retrying.");
+                if (mem.isAttached()) Sleeper::sleep(100);
             }
 
             // Free memory
@@ -407,7 +414,9 @@ void StartAppService::launchDetached(const QString& applicationPath, const QStri
             //fails, clear mem and send error
             while (mem.isAttached())
             {
-                mem.detach(); // can fail if mem is locked
+                bool res = mem.detach();
+                if (!res) TasLogger::logger()->error("TasServer::launchDetached: Parent::ForkError::Shared Memory Detachment failed! Retrying.");
+                if (mem.isAttached()) Sleeper::sleep(100);
             }
             TasLogger::logger()->error("TasServer::launchDetached: Failed first fork(). Could not start the application " + applicationPath);
             response.setErrorMessage("Could not start the application " + applicationPath);
@@ -429,7 +438,9 @@ void StartAppService::launchDetached(const QString& applicationPath, const QStri
         // if parent fork fails, clear mem and send error
         while (mem.isAttached())
         {
-            mem.detach(); // can fail if mem is locked
+            bool res = mem.detach(); // can fail if mem is locked
+            if (!res) TasLogger::logger()->error("TasServer::launchDetached: Parent::SharedMemErorr:: Shared Memory Dtachement failed! Retrying.");
+            if (mem.isAttached()) Sleeper::sleep(100);
         }
         TasLogger::logger()->debug(QString("TasServer::launchDetached: Error attaching to Shared Memory: ").arg(mem.errorString()));
 #endif

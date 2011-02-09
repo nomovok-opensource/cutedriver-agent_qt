@@ -40,13 +40,10 @@
 #include "tasdeviceutils.h"
 #include "testabilitysettings.h"
 
-class Sleeper: public QThread {
-public:
-    static void sleep(int ms)
-    {
+void Sleeper::sleep(int ms)
+{
         QThread::msleep(ms);
-    }
-};
+}
 
 
 QString TasCoreUtils::getApplicationName()
@@ -141,7 +138,7 @@ QString TasCoreUtils::eventType(QEvent* event)
             return QString("DeferredDelete");
         case QEvent::DragEnter: // 60 The cursor enters a widget during a drag and drop operation (QDragEnterEvent). 
             return QString("DragEnter");
-        case QEvent::DragLeave: // 62 The cursor leaves a widget during a drag and drop operation (QDragLeaveEvent). 
+        case QEvent::DragLeave: // 62 The cursor leaves a widget during a drag and drop operation (QDragLeaveEvent)sleep.
             return QString("DragLeave");
         case QEvent::DragMove: // 61 A drag and drop operation is in progress (QDragMoveEvent). 
             return QString("DragMove");
