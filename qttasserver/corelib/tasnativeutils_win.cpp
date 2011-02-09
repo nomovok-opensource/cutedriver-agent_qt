@@ -44,7 +44,7 @@ void TasNativeUtils::changeOrientation(QString)
 bool TasNativeUtils::killProcess(quint64 pid)
 {
     HANDLE hProcess;
-    hProcess = OpenProcess( PROCESS_ALL_ACCESS, FALSE, pid );
+    hProcess = OpenProcess( PROCESS_TERMINATE, FALSE, pid );
     if( hProcess  ){
         TerminateProcess( hProcess, 0);
         CloseHandle(hProcess);
@@ -57,7 +57,7 @@ bool TasNativeUtils::verifyProcess(quint64 pid)
 {
     bool running = false;
     HANDLE hProcess;
-    hProcess = OpenProcess( PROCESS_ALL_ACCESS, FALSE, pid );
+    hProcess = OpenProcess( READ_CONTROL, FALSE, pid );
     if( hProcess  ){
         CloseHandle(hProcess);
         running = true;
@@ -69,7 +69,7 @@ bool TasNativeUtils::processExitStatus(quint64 pid, int &status)
 {
     bool stopped = true;
     HANDLE hProcess;
-    hProcess = OpenProcess( PROCESS_ALL_ACCESS, FALSE, pid );
+    hProcess = OpenProcess( READ_CONTROL, FALSE, pid );
     if( hProcess  ){
         DWORD dwExitCode = 0;
         if(GetExitCodeProcess(hProcess, &dwExitCode)){
