@@ -158,7 +158,14 @@ void TasQtTraverse::traverseObject(TasObject* objectInfo, QObject* object, TasCo
                     objectInfo->addAttribute("transformM33",tr.m33());
                 }
             }
-            objectInfo->addBooleanAttribute("isViewPort", isViewPort);                    
+            objectInfo->addBooleanAttribute("isViewPort", isViewPort);       
+// Add special window id attribute into qwidget atttributes
+#if defined(Q_WS_X11) 
+            unsigned long wid = static_cast<unsigned long>(widget->winId());
+            objectInfo->addAttribute("xWindow", (int)wid); // can this fail due to precision?
+#endif 
+
+             
         } else {
             if(object != qApp){
                 objectInfo->addAttribute("objectType", embeddedApp? TYPE_WEB : TYPE_STANDARD_VIEW );        

@@ -81,3 +81,7 @@ LIBS += -lqmsystem
 unix:!symbian:!macx:!CONFIG(no_x) {
   LIBS += -lX11 -lXtst 
 }
+
+symbian: {
+    LIBS += -lcfclient -lcfservices
+}
