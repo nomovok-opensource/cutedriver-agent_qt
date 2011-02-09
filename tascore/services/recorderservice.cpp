@@ -102,7 +102,7 @@ void RecorderService::performRecorderCommands(TasCommandModel& model, TasRespons
             break;
         }
     }
-    if(commandExecuted){
+    if(!commandExecuted){
         response.setErrorMessage(PARSE_ERROR);
     }
 }
