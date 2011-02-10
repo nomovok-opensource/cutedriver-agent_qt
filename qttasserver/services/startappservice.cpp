@@ -38,6 +38,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <sys/wait.h>
 #include <QSharedMemory>
 #endif
 
@@ -285,14 +286,14 @@ void StartAppService::launchDetached(const QString& applicationPath, const QStri
 
         // START MAKING CHILDREN HERE :D
         // Child
-        if ( (pid = fork()) == 0) {
-
+        if ( (pid = fork()) == 0)
+        {
             // Create new session for the process (detatch from parent process group)
             sid = setsid();
             if ( sid < 0 )
             {
                 TasLogger::logger()->error( QString("TasServer::launchDetached: Failed to detach child."));
-                exit(1);
+                _exit(1);
             }
 
             // Grandchild
@@ -385,6 +386,10 @@ void StartAppService::launchDetached(const QString& applicationPath, const QStri
                 if (mem.isAttached()) Sleeper::sleep(100);
             }
 
+            // Reaping zomby child
+            int childreturn;
+            waitpid(pid, &childreturn, 0);
+
             // Free memory
             for (int i = 0; i < paramList.length(); i++ )
             {
@@ -401,6 +406,11 @@ void StartAppService::launchDetached(const QString& applicationPath, const QStri
             if (actualpid == 0)
             {
                 TasLogger::logger()->error("TasServer::launchDetached: Error getting the PID for the new application " + applicationPath);
+                response.setErrorMessage("Could not start the application " + applicationPath);
+            }
+            else if (childreturn != 0)
+            {
+                TasLogger::logger()->error("TasServer::launchDetached: Error waiting for zombie child " + applicationPath);
                 response.setErrorMessage("Could not start the application " + applicationPath);
             }
             else
