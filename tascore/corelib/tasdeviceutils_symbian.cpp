@@ -27,14 +27,14 @@ QTM_USE_NAMESPACE
 
 #include <e32event.h>
 #include <w32std.h>
-
 #include <e32property.h>
+#include <eikenv.h>
 
 //rotation include and defines
 #include <cfclient.h>
-_LIT( KContextSource, "Sensor" );
-_LIT( KSensorSourceEventOrientation, "Event.Orientation" );
-_LIT( KContextValueRightUp, "DisplayRightUp" );
+//_LIT( KContextSource, "Sensor" );
+//_LIT( KSensorSourceEventOrientation, "Event.Orientation" );
+//_LIT( KContextValueRightUp, "DisplayRightUp" );
 //_LIT( KContextValueTopUp, "DisplayUp" ); //not utilized atleast for now
 
 
@@ -149,39 +149,23 @@ void TasDeviceUtils::sendMouseEvent(int x, int y, Qt::MouseButton /*button*/, QE
                                " x(" + QString::number(x) +
                                ") y(" + QString::number(y) +")");
 
-    bool rightUp = false;
 
-    TRAPD(err,
-        MCFListener *cfListener= NULL;
-        CCFClient* client = CCFClient::NewLC( *cfListener );
-        CCFContextQuery* query = CCFContextQuery::NewLC();
-        query->SetSourceL( KContextSource() );
-        query->SetTypeL( KSensorSourceEventOrientation() );
+    TPoint pos(x,y);
 
-        RContextObjectArray result;
-        TInt err = client->RequestContext( *query, result );
-
-        for(TInt n=0;n<result.Count();n++)
+    CWsScreenDevice* sws = new ( ELeave ) CWsScreenDevice( CEikonEnv::Static()->WsSession() );
+    if( sws->Construct() == KErrNone) 
         {
-          if(0 == ((CCFContextObject*)result[n])->Value().Compare(KContextValueRightUp())){
-            //TasLogger::logger()->debug(QString(__FUNCTION__) + " has been rotated");
-            rightUp = true;
-          }
+        TPixelsAndRotation sizeAndRotation;    
+        sws->GetDefaultScreenSizeAndRotation( sizeAndRotation );
+        //origo is actually the bottom left corner so adjust y
+        if ( sizeAndRotation.iRotation == 1 || sizeAndRotation.iRotation == 2)
+            {
+            pos.SetXY((sizeAndRotation.iPixelSize.iHeight - y), x);
+            }
         }
-
-        result.ResetAndDestroy();
-        CleanupStack::PopAndDestroy(2); //client, query
-
-    );
-
-    TPoint pos;
-    if(rightUp){
-      pos.SetXY(360-y, x);
-    }
-    else
-    {
-      pos.SetXY(x,y);
-    }
+    delete sws;  
+   
+    TasLogger::logger()->debug(QString(__FUNCTION__) + " Pos: " + QString::number(pos.iX) + "," + QString::number(pos.iY));
 
     bool down = type == QEvent::MouseButtonPress ||
                 type == QEvent::GraphicsSceneMousePress;

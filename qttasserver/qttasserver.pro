@@ -39,11 +39,13 @@ symbian: {
     TARGET.EPOCALLOWDLLDATA = 1 
     TARGET.EPOCHEAPSIZE = 0x20000 0x3400000
 
+    LIBS += -leikcore 
     LIBS += -leuser
     LIBS += -lws32
     LIBS += -lapgrfx
     LIBS += -lMemSpyDriverClient
     LIBS += -lhal
+    LIBS += -lcone
     LIBS += -lcfclient -lcfservices
     INCLUDEPATH += /epoc32/include/platform/memspy/driver /epoc32/include/platform/mw
 #if ( NCP_COMMON_S60_VERSION_SUPPORT >= S60_VERSION_50 && NCP_COMMON_FAMILY_ID >= 70 )
