@@ -344,12 +344,14 @@ TasCommandModel* TasCommandModel::makeModel(const QString& sourceXml)
     QString errorMsg;
     if (doc->setContent(sourceXml, &errorMsg)){
         model = new TasCommandModel(doc);
+        model->mSource = sourceXml;
     }
     else{
+        TasLogger::logger()->error("TasCommandModel::makeModel input failed: " + sourceXml);
         TasLogger::logger()->error("TasCommandModel::makeModel Could not parse the xml. Reason: " + errorMsg);
         delete doc;
     }
-    model->mSource = sourceXml;
+
     return model;
 }
 
