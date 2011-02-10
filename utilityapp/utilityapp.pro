@@ -40,6 +40,8 @@ symbian: {
   	TARGET.EPOCALLOWDLLDATA = 1 
 	TARGET.EPOCHEAPSIZE = 0x20000 0x1400000
     LIBS += -lhal
+    LIBS += -lws32
+    LIBS += -lcone
 #if ( NCP_COMMON_S60_VERSION_SUPPORT >= S60_VERSION_50 && NCP_COMMON_FAMILY_ID >= 70 )
 	LIBS += -llibegl
 #endif

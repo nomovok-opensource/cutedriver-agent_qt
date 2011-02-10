@@ -58,6 +58,8 @@ symbian: {
 	LIBS += -lcone 
     LIBS += -leikcore 
     LIBS += -lhal
+    LIBS += -lws32
+
 #if ( NCP_COMMON_S60_VERSION_SUPPORT >= S60_VERSION_50 && NCP_COMMON_FAMILY_ID >= 70 )
 	LIBS += -llibEGL
 #endif
