@@ -68,6 +68,18 @@ bool TasFixturePlugin::execute(void * objectInstance, QString actionName, QHash<
         int code = msgBox.exec();
         TasLogger::logger()->debug("TasFixturePlugin::execute showMessage " + QString::number(code));
     }
+    else if(actionName.toLower() == "change_orientation"){
+        QWidget* appWindow = TestabilityUtils::getApplicationWindow();
+        if(appWindow){
+            QSize newSize(appWindow->height(), appWindow->width());
+            appWindow->resize(newSize);    
+            result =  true;
+        }
+        else{
+            stdOut = "Could not find application window.";
+            result =  false;
+        }
+    }
     // set the stdOut if you wish to pass information back to Testtability Driver
     else if(actionName == "fail"){
         stdOut = "The execution failed. Parameters were {";

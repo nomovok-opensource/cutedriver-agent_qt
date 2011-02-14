@@ -58,6 +58,7 @@ public:
 	static QGraphicsWidget* castToGraphicsWidget(QGraphicsItem* graphicsItem);
     static bool isVisibilityCheckOn();
     static bool isItemBlackListed(QString objectName, QString className);
+	static QWidget* getApplicationWindow();
 
 protected:
 	QWidget* findWidget(const QString& id);
@@ -65,7 +66,7 @@ protected:
 	QGraphicsItem* findGraphicsItem(const QString& id);
 	QGraphicsItem* lookForMatch(QList<QGraphicsItem*> itemList, const QString& targetId);
 	bool verifyGraphicsItemMatch(const QString& targetId, QGraphicsItem* source);
-	QWidget* getApplicationWindow();
+
 private:
 
 };
