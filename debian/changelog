@@ -1,8 +1,21 @@
 qttas (1.0.5-1) unstable; urgency=low
 
-  * Fixes: NB#223734 - Expose QWidget::winId() as xWindow attribute
+  * new release version
 
- -- Testability Driver Team <testabilitydriver@nokia.com>  Wed, 03 Feb 2011 16:00:00 +0200
+ -- Testability Driver Team <testabilitydriver@nokia.com>  Thu, 15 Feb 2011 12:01:00 +0200
+
+qttas (1.0.4-3) unstable; urgency=low
+
+  * Fixes: NB#227508 - meego-im-uiserver crashes when running TDriver scripts
+  * Fixes: NB#223734 - Change QWidget::winId() to effectiveWinId
+
+ -- Testability Driver Team <testabilitydriver@nokia.com>  Thu, 15 Feb 2011 12:00:00 +0200
+
+qttas (1.0.4-2) unstable; urgency=low
+
+  * new release version
+
+ -- Testability Driver Team <testabilitydriver@nokia.com>  Thu, 10 Feb 2011 16:00:00 +0200
 
 qttas (1.0.4-1) unstable; urgency=low
 
