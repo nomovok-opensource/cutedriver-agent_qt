@@ -422,7 +422,7 @@ ItemLocationDetails TestabilityUtils::getItemLocationDetails(QGraphicsItem* grap
 {
     bool isVisible = false;
     QGraphicsView* view = getViewForItem(graphicsItem);
-    ItemLocationDetails locationDetails;
+    ItemLocationDetails locationDetails = {QPoint(), QPoint(), QPoint(), 0, 0, false};
     if(view){
         // for webkit
         // If the window is embedded into a another app, wee need to figure out if the widget is visible

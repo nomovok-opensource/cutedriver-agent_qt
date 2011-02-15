@@ -399,10 +399,8 @@ void TasClientManager::removeAllClients(bool kill)
             }
         }
         delete app;
-        app = 0;
     }
     mClients.clear();
-   
     emit allClientsRemoved();
 }
 
