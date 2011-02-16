@@ -20,6 +20,8 @@
 #include <QDebug>
 #include <QProcess>
 #include <QCoreApplication>
+#include <QDir>
+#include <QDirIterator>
 
 #include <taslogger.h>
 #include <tascoreutils.h>
@@ -97,11 +99,64 @@ void StartAppService::startApplication(TasCommand& command, TasResponse& respons
         response.requester()->sendResponse(response.messageId(), QString("0"));
     }
     else{
+#if !defined(Q_OS_SYMBIAN)
+        //check for search path
+        if(!command.parameter("app_path").isEmpty()){
+            //look for the app binary
+            QString fullName = searchForApp(applicationPath, command.parameter("app_path")); 
+            if(!fullName.isEmpty()){
+                applicationPath = fullName;
+            }
+        }
+#endif
         arguments.removeAll(DETACH_MODE);
         arguments.removeAll(NO_WAIT);
         launchDetached(applicationPath, arguments, environmentVars, response);
     }
 }
+
+QString StartAppService::searchForApp(const QString& appName, const QString& rootPath)
+{
+    TasLogger::logger()->debug("StartAppService::searchForApp " + appName + " from " + rootPath);
+    QFileInfo filename(appName);
+    //check that if the file exists   
+    if( filename.exists()){
+        TasLogger::logger()->debug("StartAppService::searchForApp given name exists return it " + filename.absoluteFilePath());
+        return filename.absoluteFilePath();
+    }
+    QDir root(rootPath);
+    if(!root.exists()){
+        TasLogger::logger()->debug("StartAppService::searchForApp given root path does not exist.");
+        return QString();
+    }
+
+    QStringList apps;
+    apps << filename.baseName();
+    apps << filename.baseName() + ".exe";
+   
+    QDirIterator iter(rootPath, apps, QDir::Files | QDir::Executable,
+                      QDirIterator::Subdirectories | QDirIterator::FollowSymlinks);
+
+    //if more than one found return the first one
+    QString applicationPath;
+    while(iter.hasNext()){        
+        QString name = iter.next();
+        if(name.isEmpty()){
+            break;
+        }
+        QFileInfo match(name);
+        if(match.isExecutable()){
+            applicationPath = match.filePath();
+            TasLogger::logger()->debug("StartAppService::searchForApp match found: " + applicationPath);
+            break;
+        }
+        else{
+            TasLogger::logger()->debug("StartAppService::searchForApp match not executable");
+        }
+    }
+    return applicationPath;
+}
+
 
 
 void StartAppService::setRuntimeParams(TasCommand& command)
