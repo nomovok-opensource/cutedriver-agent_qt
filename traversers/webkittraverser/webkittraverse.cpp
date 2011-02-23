@@ -204,7 +204,7 @@ void WebKitTraverse::traverseObject(TasObject* objectInfo, QObject* object, TasC
                 
     }
 
-    if (object->inherits("GVA::PopupWebChromeItem")) {
+    if (object->inherits("GVA::WebChromeItem")) {
 //        TasLogger::logger()->debug(" WebKitTaverse::traverseObject found " + QString(object->metaObject()->className()) );
 
         QWebElement* element = 0;
