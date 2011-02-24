@@ -30,9 +30,7 @@
 
 static const QString ACTION_STORE_LIST = "list_contact_stores";
 static const QString ACTION_ADD_CONTACT = "add_contact";
-static const QString ACTION_REMOVE_CONTACT = "remove_contact";
-
-static const QString ACTION_LIST_CONTACT = "list_contact";
+static const QString ACTION_REMOVE_ALL_CONTACT = "remove_all_contact";
 
 static const QString STORE_NAME = "store_name";
 static const QString CONTACT_FIRSTNAME = "first_name";
@@ -78,7 +76,7 @@ bool ContactFixture::execute(void * objectInstance, QString actionName, QHash<QS
     QStringList availableManagers = QContactManager::availableManagers();
     availableManagers.removeAll("invalid");
 
-    if (actionName == ACTION_STORE_LIST) {
+    if (actionName.toLower() == ACTION_STORE_LIST) {
 
         QStringListIterator it(availableManagers);
 
@@ -87,7 +85,7 @@ bool ContactFixture::execute(void * objectInstance, QString actionName, QHash<QS
             if(it.hasNext())
                 stdOut.append(";");
         }
-    } else if (actionName == ACTION_ADD_CONTACT) {
+    } else if (actionName.toLower() == ACTION_ADD_CONTACT) {
 
         QContactManager * manager = connectContactManager(parameters, stdOut);
         if ( manager == NULL) {
@@ -228,26 +226,18 @@ bool ContactFixture::execute(void * objectInstance, QString actionName, QHash<QS
                 stdOut.append(QString("Failed to save contact!\n(error code %1)").arg(manager->error()));
             }
         }
-    } else if (actionName == ACTION_REMOVE_CONTACT) {
-        stdOut.append(QString("Remove contact: Not supported yet"));
-        return false;
-//         QContactManager * manager = connectContactManager(parameters, stdOut);
-//         if ( manager == NULL) {
-
-//         }
-//         else {
-
-//         }
-    } else if (actionName == ACTION_LIST_CONTACT) {
-        stdOut.append(QString("List contacts: Not supported yet"));
-        return false;
-//         QContactManager * manager = connectContactManager(parameters, stdOut);
-//         if ( manager == NULL) {
-//             return false;
-//         }
-//         else {
-
-//         }
+    } else if (actionName.toLower() == ACTION_REMOVE_ALL_CONTACT) {
+        QContactManager * manager = connectContactManager(parameters, stdOut);
+        if ( manager == NULL) {
+         return false;
+        }
+        else {
+            QList<QContact> contactList = manager->contacts();
+            QList<QContact>::iterator i;
+            for (i = contactList.begin(); i != contactList.end(); ++i) {
+                manager->removeContact((*i).localId());
+            }
+        }
     } else {
         stdOut.append("Invalid contact fixture command: "+ actionName);
         return false;
