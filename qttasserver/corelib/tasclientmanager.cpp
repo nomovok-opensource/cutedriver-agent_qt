@@ -391,19 +391,25 @@ void TasClientManager::removeAllClients(bool kill)
     QMutexLocker locker(&mMutex);   
     foreach (TasClient* app, mClients){
         app->closeConnection();
-        if(kill){
+        if(kill && mStartedPids.contains(app->processId())){
             bool ok;
             quint64 pid = app->processId().toULongLong(&ok, 10);       
             if(ok && pid != 0){
                 TasNativeUtils::killProcess(pid);
             }
         }
+        mStartedPids.removeAll(app->processId());
         delete app;
     }
     mClients.clear();
     emit allClientsRemoved();
 }
 
+
+void TasClientManager::addStartedPid(const QString& pid)
+{
+    mStartedPids << pid;
+}
 
 
 /*!

@@ -111,7 +111,11 @@ void StartAppService::startApplication(TasCommand& command, TasResponse& respons
 #endif
         arguments.removeAll(DETACH_MODE);
         arguments.removeAll(NO_WAIT);
-        launchDetached(applicationPath, arguments, environmentVars, response);
+        launchDetached(applicationPath, arguments, environmentVars, response);        
+        //add pids to startedapp pid list
+        if(!response.isError() && !response.dataAsString().isEmpty() ){
+            TasClientManager::instance()->addStartedPid(response.dataAsString());
+        }
     }
 }
 
