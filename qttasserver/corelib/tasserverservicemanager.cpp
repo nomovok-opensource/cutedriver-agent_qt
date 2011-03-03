@@ -119,7 +119,12 @@ void TasServerServiceManager::handleServiceRequest(TasCommandModel& commandModel
     }
 
     if(targetClient){
-        ResponseWaiter* waiter = new ResponseWaiter(responseId, requester);
+        int timeout = 10000;
+        if(!commandModel.parameter("plugin_timeout").isEmpty()){
+            TasLogger::logger()->debug("TasServerServiceManager::handleServiceRequest set timeout " + commandModel.parameter("plugin_timeout"));
+            timeout = commandModel.parameter("plugin_timeout").toInt();
+        }
+        ResponseWaiter* waiter = new ResponseWaiter(responseId, requester, timeout);
         bool needFragment = false;
         if(commandModel.service() == APPLICATION_STATE || commandModel.service() == FIND_OBJECT_SERVICE){
             foreach(TasExtensionInterface* traverser, mExtensions){
