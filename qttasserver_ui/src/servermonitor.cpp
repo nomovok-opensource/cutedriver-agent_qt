@@ -68,10 +68,6 @@ static QString BINDING_ADDRESS = "";
 static QString BINDING_PORT = "";
 
 
-#ifdef Q_OS_SYMBIAN
-const static QString SERVERINI =  "c:\\system\\data\\qttasserver.ini";
-#endif
-
 ServerMonitor::ServerMonitor(QObject* parent)
     :QObject(parent)
 {

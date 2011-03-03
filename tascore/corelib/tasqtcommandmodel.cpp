@@ -50,6 +50,16 @@ QDomElement TasDomObject::addChild(const QString& name)
 }
 
 /*!
+    Return a parameter for the value. The QString can be empty and
+    should always be verified using QString::isEmpty
+*/
+QString TasDomObject::parameter(const QString& name)
+{
+    return mElement.attribute(name);
+}
+
+
+/*!
     \class TasCommand
     \brief TasCommand represents a single command to be sent to the application under testing.     
     
@@ -94,7 +104,6 @@ QString TasCommand::text() const
     return mElement.text();
 }
 
-
 /*!
     Return a parameter for the value. The QString can be empty and
     should always be verified using QString::isEmpty
@@ -103,6 +112,8 @@ QString TasCommand::parameter(const QString& name)
 {
     return mElement.attribute(name);
 }
+
+
 
 void TasCommand::addApiParameter(const QString& name, const QString& value, const QString& type)
 {

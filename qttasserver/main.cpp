@@ -24,6 +24,7 @@
 #include "tasserver.h"
 
 #include <taslogger.h>
+#include <testabilitysettings.h>
 
 
 
@@ -44,11 +45,13 @@ int main(int argc, char *argv[])
 
     // Update Persistent Settings if argument provided
     // Use persistent settings when no argument provided
-    QSettings settings("qttasserver.ini", QSettings::IniFormat);
-    QString settHostBinding = settings.value("hostBinding").toString();
+    //QSettings settings("qttasserver.ini", QSettings::IniFormat);
+    TestabilitySettings *settings = TestabilitySettings::settings();
+    //QString settHostBinding = settings->value("hostBinding").toString();
+    QString settHostBinding = settings->getValue("hostBinding").toString();
     if (!argHostBinding.isEmpty()){
         settHostBinding = argHostBinding;
-        settings.setValue("hostBinding", settHostBinding);
+        settings->setValue("hostBinding", settHostBinding);
     }
     
     TasServer* server = new TasServer(settHostBinding);
