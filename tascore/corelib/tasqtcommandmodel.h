@@ -61,6 +61,7 @@ public:
     QString text() const;	
     QString apiParameter(const QString& name);
 	QHash<QString, QString> getApiParameters() const;
+    QString parameter(const QString& name);
 
 	void addApiParameter(const QString& name, const QString& value, const QString& type);
 };
