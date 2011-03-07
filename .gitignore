@@ -10,6 +10,11 @@ Makefile
 *.sis
 *stubs*
 *.pkg
-
+*.o
+lib/
+\#*
+\.#*
+bin/
+TAGS
 #don't ignore files in symbian folder
 !/symbian/*
