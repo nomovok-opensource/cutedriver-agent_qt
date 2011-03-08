@@ -35,11 +35,13 @@ public:
     TestabilityPlugin(QObject *parent = 0);    
 
     void Initialize();
-
-#ifdef Q_OS_SYMBIAN
 private:
+#ifdef Q_OS_SYMBIAN
 	bool loadPlugin();
 #endif
+    static QString getApplicationName();
+    static QString parseExecutable(QString completePath);
+
 
 };
 
