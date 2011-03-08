@@ -99,3 +99,6 @@
 
 "\epoc32\release\armv5\urel\launchfixture.dll"               - "$:\sys\bin\launchfixture.dll"
 "\epoc32\data\z\resource\qt\plugins\tasfixtures\launchfixture.qtplugin"   - "$:\resource\qt\plugins\tasfixtures\launchfixture.qtplugin"
+
+"\epoc32\release\armv5\urel\settingfixture.dll"               - "$:\sys\bin\settingfixture.dll"
+"\epoc32\data\z\resource\qt\plugins\tasfixtures\settingfixture.qtplugin"   - "$:\resource\qt\plugins\tasfixtures\settingfixture.qtplugin"

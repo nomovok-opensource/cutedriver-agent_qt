@@ -54,6 +54,7 @@ file=ABI_DIR\BUILD_DIR\filefixture.dll                    SHARED_LIB_DIR\filefix
 file=ABI_DIR\BUILD_DIR\launchfixture.dll                  SHARED_LIB_DIR\launchfixture.dll
 file=ABI_DIR\BUILD_DIR\contactfixture.dll                 SHARED_LIB_DIR\contactfixture.dll
 file=ABI_DIR\BUILD_DIR\mobilitysysinfofixture.dll         SHARED_LIB_DIR\mobilitysysinfofixture.dll
+file=ABI_DIR\BUILD_DIR\settingfixture.dll                 SHARED_LIB_DIR\settingfixture.dll
 TAS_PLUGIN_STUB(tasfixture, tasfixtures)
 TAS_PLUGIN_STUB(tassignal, tasfixtures)
 TAS_PLUGIN_STUB(fpsfixture, tasfixtures)
@@ -62,6 +63,7 @@ TAS_PLUGIN_STUB(filefixture, tasfixtures)
 TAS_PLUGIN_STUB(launchfixture, tasfixtures)
 TAS_PLUGIN_STUB(contactfixture, tasfixtures)
 TAS_PLUGIN_STUB(mobilitysysinfofixture, tasfixtures)
+TAS_PLUGIN_STUB(settingfixture, tasfixtures)
 
 //testability loader plugin
 file=ABI_DIR\BUILD_DIR\testability.dll                    SHARED_LIB_DIR\testability.dll
