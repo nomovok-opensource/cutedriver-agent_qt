@@ -204,6 +204,12 @@ TestabilityService::~TestabilityService()
  */
 void TestabilityService::registerPlugin()
 {
+    //close requested so do not register again
+    QVariant prop = qApp->property(CLOSE_REQUESTED);
+    if(prop.isValid() && prop.toBool()){
+        return;
+    }
+
     //remove paint tracking, paint tracking only on startup after this rely on the watchdog
     qApp->removeEventFilter(this);
 
