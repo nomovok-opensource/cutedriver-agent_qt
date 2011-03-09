@@ -28,12 +28,12 @@ include(../../tasbase.pri)
 target.path = $$TAS_TARGET_PLUGIN/tasfixtures
 
 symbian: {
-	TARGET.EPOCALLOWDLLDATA = 1
+    TARGET.EPOCALLOWDLLDATA = 1
     TARGET.CAPABILITY=CAP_GENERAL_DLL
     setting_fixture_plugin.sources = settingfixture.dll
-	setting_fixture_plugin.path = /resource/qt/plugins/settingfixtures
+    setting_fixture_plugin.path = /resource/qt/plugins/tasfixtures
  
-	DEPLOYMENT += setting_fixture_plugin
+    DEPLOYMENT += setting_fixture_plugin
 }
 
 CONFIG += mobility
