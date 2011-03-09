@@ -1,6 +1,7 @@
 qttas (1.1.0-1) unstable; urgency=low
 
   * new release version
+  * Fixes: NB#204237 - Signals fixture is off-by-one regarding the signal parameters 
 
  -- Testability Driver Team <testabilitydriver@nokia.com>  Thu, 15 Feb 2011 12:01:00 +0200
 
