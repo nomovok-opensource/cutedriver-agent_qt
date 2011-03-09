@@ -402,7 +402,6 @@ void TasClientManager::removeAllClients(bool kill)
         delete app;
     }
     mClients.clear();
-    emit allClientsRemoved();
 }
 
 
@@ -557,11 +556,18 @@ void TasClient::disconnected()
 
     if(mSocket){
         disconnect(mSocket, SIGNAL(socketClosed()), this, SLOT(disconnected()));    
-        mSocket = 0;
     }
+    socketDied();
+}
 
+void TasClient::socketDied()
+{    
+    if(mSocket){
+        disconnect(mSocket, SIGNAL(destroyed()), this, SLOT(socketDied()));    
+    }
     //no process remove the client from the list
     //will register again if so wants
+    mSocket = 0;
     TasClientManager::instance()->removeMe(*this);
     deleteLater();
 }
@@ -581,6 +587,7 @@ void TasClient::setSocket(TasSocket* socket)
 {
     mSocket = socket;
     connect(mSocket, SIGNAL(socketClosed()), this, SLOT(disconnected()));    
+    connect(mSocket, SIGNAL(destroyed()), this, SLOT(socketDied()));    
 }
 
 int TasClient::upTime()

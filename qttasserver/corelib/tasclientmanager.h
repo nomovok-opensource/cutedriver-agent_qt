@@ -85,9 +85,6 @@ public:
 
   void addStartedPid(const QString& pid);
 
-signals:
-  void allClientsRemoved();
-
 private:
 
   TasClient* findByApplicationName(const QString& applicationName, bool includeSocketLess=false);
@@ -137,6 +134,7 @@ signals:
 
 private slots:    
   void disconnected();
+  void socketDied();
 
 private:
   TasSocket* mSocket;
