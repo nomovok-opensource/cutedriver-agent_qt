@@ -31,8 +31,9 @@
 TasSignalSpy::TasSignalSpy(QObject * object, const char * signal, TasObjectContainer& objectContainer, bool traverseSender)
     :mObjectContainer(objectContainer)
 {    
-    QObject::connect(object, signal, this, SLOT(signalHasOccured()));
     mSignalSpy = new QSignalSpy(object, signal);
+    QObject::connect(object, signal, this, SLOT(signalHasOccured()));
+
 	mSignalName = QString(signal).replace(QString::number(QSIGNAL_CODE), QString(""));
     setTarget(object);
     mTraverseSender = traverseSender;

@@ -58,7 +58,8 @@ const int PAINT_EVENT_LIMIT = 10;
 */
 extern "C" TAS_EXPORT void qt_testability_init()
 {
-    if(qApp->type() == QApplication::Tty){
+    // Ignore command line applications and the special launcher daemon in meego booster apps
+    if(qApp->type() == QApplication::Tty || TestabilityUtils::getApplicationName() == "applauncherd.bin"){
         return;
     }
 
