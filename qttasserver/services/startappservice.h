@@ -42,7 +42,9 @@ public:
 
 private:
 	void startApplication(TasCommand& command, TasResponse& response);
-        void launchDetached(const QString& applicationPath,const QStringList& arguments, const QStringList& environmentVars, TasResponse& response);
+        void launchDetached(const QString& applicationPath, const QStringList& arguments,
+                            const QStringList& environmentVars, const QString &workingDirectory,
+                            TasResponse& response);
 	void setRuntimeParams(TasCommand& command);
 	QString searchForApp(const QString& appName, const QString& rootPath);
 
