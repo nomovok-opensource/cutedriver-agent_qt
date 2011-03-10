@@ -74,7 +74,7 @@ win32: {
 }
 
 CONFIG(maemo){
-LIBS += -lqmsystem 
+LIBS += -lqmsystem2
 }
 
 

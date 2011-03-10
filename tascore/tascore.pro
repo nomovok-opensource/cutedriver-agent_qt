@@ -33,7 +33,7 @@ DEPENDPATH += . corelib services services/interactionhandlers services/interacti
 INCLUDEPATH += . corelib services services/interactionhandlers services/interactionhandlers/gestures services/interactionhandlers/eventgenerator
 
 CONFIG(maemo){
-LIBS += -lqmsystem
+LIBS += -lqmsystem2
 DEFINES += TAS_MAEMO
 CONFIG += meegotouch
 }
