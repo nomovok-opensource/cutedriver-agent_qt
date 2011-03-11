@@ -50,7 +50,7 @@ Q_EXPORT_PLUGIN2(webkittraverse, WebKitTraverse)
     Constructor
 */
 WebKitTraverse::WebKitTraverse(QObject* parent)
-    :QObject(parent), counter(0)
+    :QObject(parent), counter(0), zoom_correction(1.0)
 {
     mTraverseUtils = new TasTraverseUtils();
 }
@@ -109,7 +109,6 @@ void WebKitTraverse::traverseObject(TasObject* objectInfo, QObject* object, TasC
             traverseQGraphicsWebView(objectInfo, webView, command);
         }        
     }
-
 
 
 
@@ -227,6 +226,17 @@ void WebKitTraverse::traverseObject(TasObject* objectInfo, QObject* object, TasC
 
      }
 
+    if (object->inherits("GVA::ScrollableWebContentView")) {
+      TasLogger::logger()->debug(" WebKitTaverse::traverseObject found " + QString(object->metaObject()->className()) );
+      qreal factor;
+      if(QMetaObject::invokeMethod(object, "zoomScale",
+                                Qt::AutoConnection,
+                                Q_RETURN_ARG(qreal, factor))) {
+        objectInfo->addAttribute("zoomScale",factor);
+        zoom_correction = factor;
+      }
+
+    }
 
 #endif
 }
@@ -321,7 +331,7 @@ void WebKitTraverse::traverseQWebPage(TasObject& pageInfo, QWebPage* webPage,
     pageInfo.addBooleanAttribute("isContentEditable", webPage->isContentEditable());
     pageInfo.addAttribute("x_absolute", screenPos.x());                        
     pageInfo.addAttribute("y_absolute", screenPos.y());
-    pageInfo.addAttribute("x", webViewPos.x());                        
+    pageInfo.addAttribute("x", webViewPos.x());
     pageInfo.addAttribute("y", webViewPos.y());
     pageInfo.addAttribute("objectType", TYPE_QWEB);
 
@@ -452,12 +462,20 @@ void WebKitTraverse::traverseWebElement(TasObject* parent, QPoint parentPos, QPo
     // position need to be relative to parent
     // NOTE all of these needs to be handled in webkitcommandservice.cpp
     QPoint childPos = QPoint(webElement->geometry().x(), webElement->geometry().y());
-    childInfo.addAttribute("x", childPos.x()+parentPos.x());
-    childInfo.addAttribute("y", childPos.y()+parentPos.y());   
-    childInfo.addAttribute("x_absolute", childPos.x()+screenPos.x());
-    childInfo.addAttribute("y_absolute", childPos.y()+screenPos.y());   
-    childInfo.addAttribute("width", webElement->geometry().width());
-    childInfo.addAttribute("height", webElement->geometry().height());
+//    childInfo.addAttribute("o_x", childPos.x()+parentPos.x());
+//    childInfo.addAttribute("o_y", childPos.y()+parentPos.y());
+//    childInfo.addAttribute("o_x_absolute", childPos.x()+screenPos.x());
+//    childInfo.addAttribute("o_y_absolute", childPos.y()+screenPos.y());
+//    childInfo.addAttribute("o_width", webElement->geometry().width());
+//    childInfo.addAttribute("o_height", webElement->geometry().height());
+
+    childInfo.addAttribute("x",          (int)(((qreal)childPos.x())*zoom_correction)+parentPos.x());
+    childInfo.addAttribute("y",          (int)(((qreal)childPos.y())*zoom_correction)+parentPos.y());
+    childInfo.addAttribute("x_absolute", (int)(((qreal)childPos.x())*zoom_correction)+screenPos.x());
+    childInfo.addAttribute("y_absolute", (int)(((qreal)childPos.y())*zoom_correction)+screenPos.y());
+    childInfo.addAttribute("width",      (int)(((qreal)webElement->geometry().width() )*zoom_correction));
+    childInfo.addAttribute("height",     (int)(((qreal)webElement->geometry().height())*zoom_correction));
+
     childInfo.addAttribute("objectType", TYPE_WEB);
     childInfo.addBooleanAttribute("visible",
         (webElement->styleProperty("visibility", QWebElement::ComputedStyle).toLower() == "visible") &&
@@ -507,10 +525,12 @@ void WebKitTraverse::parseAttributes(QWebElement* webElement, TasObject* objInfo
 
     if(webElement->hasAttributes()) {
         foreach(QString attrib, webElement->attributeNames()) {
-            //TasLogger::logger()->debug("  : " + attrib + "->" + webElement->attribute(attrib));
+//            TasLogger::logger()->debug("  : " + attrib + "->" + webElement->attribute(attrib));
 
-            if(attrib!="id") {
-                if((attrib != "value" && attrib != "checked")
+            attrib = attrib.trimmed();
+
+            if(attrib!="id" && attrib != "width" && attrib != "height") {
+                if((attrib != "value" && attrib != "checked" )
                                       ||
                    (webElement->localName().toLower()!="input"))
                 {
