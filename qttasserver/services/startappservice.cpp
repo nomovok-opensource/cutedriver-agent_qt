@@ -1,22 +1,22 @@
-/*************************************************************************** 
-** 
-** Copyright (C) 2010 Nokia Corporation and/or its subsidiary(-ies). 
-** All rights reserved. 
-** Contact: Nokia Corporation (testabilitydriver@nokia.com) 
-** 
+/***************************************************************************
+**
+** Copyright (C) 2010 Nokia Corporation and/or its subsidiary(-ies).
+** All rights reserved.
+** Contact: Nokia Corporation (testabilitydriver@nokia.com)
+**
 ** This file is part of Testability Driver Qt Agent
-** 
-** If you have questions regarding the use of this file, please contact 
-** Nokia at testabilitydriver@nokia.com . 
-** 
-** This library is free software; you can redistribute it and/or 
-** modify it under the terms of the GNU Lesser General Public 
-** License version 2.1 as published by the Free Software Foundation 
-** and appearing in the file LICENSE.LGPL included in the packaging 
-** of this file. 
-** 
-****************************************************************************/ 
- 
+**
+** If you have questions regarding the use of this file, please contact
+** Nokia at testabilitydriver@nokia.com .
+**
+** This library is free software; you can redistribute it and/or
+** modify it under the terms of the GNU Lesser General Public
+** License version 2.1 as published by the Free Software Foundation
+** and appearing in the file LICENSE.LGPL included in the packaging
+** of this file.
+**
+****************************************************************************/
+
 #include <QDebug>
 #include <QProcess>
 #include <QCoreApplication>
@@ -29,17 +29,18 @@
 
 #include "tasdeviceutils.h"
 #include "tasclientmanager.h"
-             
+
 #include "startappservice.h"
 
 
-#if (defined(Q_OS_WIN32) || defined(Q_OS_WINCE)) 
+#if (defined(Q_OS_WIN32) || defined(Q_OS_WINCE))
 #include <windows.h>
 
 #elif (defined(Q_OS_UNIX) || defined(Q_OS_WS_MAC))
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <errno.h>
 #include <sys/wait.h>
 #include <QSharedMemory>
 #endif
@@ -82,15 +83,16 @@ bool StartAppService::executeService(TasCommandModel& model, TasResponse& respon
  */
 void StartAppService::startApplication(TasCommand& command, TasResponse& response)
 {
-    QString applicationPath = command.parameter("application_path");    
+    QString applicationPath = command.parameter("application_path");
     QString args = command.parameter("arguments");
     QString envs = command.parameter("environment");
+    QString dir = command.parameter("directory");
     TasLogger::logger()->debug(QString("TasServer::startApplication: '%1'").arg(applicationPath));
     TasLogger::logger()->debug(QString("TasServer::startApplication: Arguments: '%1'").arg(args));
     TasLogger::logger()->debug(QString("TasServer::startApplication: Environment: '%1'").arg(envs));
+    TasLogger::logger()->debug(QString("TasServer::startApplication: Directory: '%1'").arg(dir));
     QStringList arguments = args.split(",");
     QStringList environmentVars = envs.split(" ");
-
 
     setRuntimeParams(command);
 
@@ -103,7 +105,7 @@ void StartAppService::startApplication(TasCommand& command, TasResponse& respons
         //check for search path
         if(!command.parameter("app_path").isEmpty()){
             //look for the app binary
-            QString fullName = searchForApp(applicationPath, command.parameter("app_path")); 
+            QString fullName = searchForApp(applicationPath, command.parameter("app_path"));
             if(!fullName.isEmpty()){
                 applicationPath = fullName;
             }
@@ -111,7 +113,7 @@ void StartAppService::startApplication(TasCommand& command, TasResponse& respons
 #endif
         arguments.removeAll(DETACH_MODE);
         arguments.removeAll(NO_WAIT);
-        launchDetached(applicationPath, arguments, environmentVars, response);        
+        launchDetached(applicationPath, arguments, environmentVars, dir, response);
         //add pids to startedapp pid list
         if(!response.isError() && !response.dataAsString().isEmpty() ){
             TasClientManager::instance()->addStartedPid(response.dataAsString());
@@ -123,7 +125,7 @@ QString StartAppService::searchForApp(const QString& appName, const QString& roo
 {
     TasLogger::logger()->debug("StartAppService::searchForApp " + appName + " from " + rootPath);
     QFileInfo filename(appName);
-    //check that if the file exists   
+    //check that if the file exists
     if( filename.exists()){
         TasLogger::logger()->debug("StartAppService::searchForApp given name exists return it " + filename.absoluteFilePath());
         return filename.absoluteFilePath();
@@ -137,13 +139,13 @@ QString StartAppService::searchForApp(const QString& appName, const QString& roo
     QStringList apps;
     apps << filename.baseName();
     apps << filename.baseName() + ".exe";
-   
+
     QDirIterator iter(rootPath, apps, QDir::Files | QDir::Executable,
                       QDirIterator::Subdirectories | QDirIterator::FollowSymlinks);
 
     //if more than one found return the first one
     QString applicationPath;
-    while(iter.hasNext()){        
+    while(iter.hasNext()){
         QString name = iter.next();
         if(name.isEmpty()){
             break;
@@ -165,9 +167,9 @@ QString StartAppService::searchForApp(const QString& appName, const QString& roo
 
 void StartAppService::setRuntimeParams(TasCommand& command)
 {
-    QString applicationPath = command.parameter("application_path");    
+    QString applicationPath = command.parameter("application_path");
     QString eventList = command.parameter("events_to_listen");
-    QString signalList = command.parameter("signals_to_listen");    
+    QString signalList = command.parameter("signals_to_listen");
     TasLogger::logger()->debug("StartAppService::setRuntimeParams signals: " + signalList);
     if(!eventList.isEmpty() || !signalList.isEmpty()){
         TasSharedData startupData(eventList.split(","), signalList.split(","));
@@ -195,7 +197,7 @@ QHash<QString, QString> StartAppService::parseEnvironmentVariables(const QString
 }
 
 
-#ifdef Q_OS_SYMBIAN 
+#ifdef Q_OS_SYMBIAN
 //Qt startDetach seems to leak memory so need to do it for now.
 //to be removed when fix in qt
 static void qt_create_symbian_commandline(
@@ -226,12 +228,19 @@ static void qt_create_symbian_commandline(
 #endif
 
 
-void StartAppService::launchDetached(const QString& applicationPath, const QStringList& arguments, const QStringList& environmentVars, TasResponse& response)
+void StartAppService::launchDetached(const QString& applicationPath, const QStringList& arguments,
+                                     const QStringList& environmentVars, const QString &workingDirectory,
+                                     TasResponse& response)
 {
 
-#ifdef Q_OS_SYMBIAN 
-//Qt startDetach seems to leak memory so need to do it for now.
-//to be removed when fix in qt
+#ifdef Q_OS_SYMBIAN
+    //Qt startDetach seems to leak memory so need to do it for now.
+    //to be removed when fix in qt
+
+    if (!workingDirectory.isEmpty()) {
+        TasLogger::logger()->warning(QString("TasServer::launchDetached: Working directory not supported on Symbian");
+    }
+
     qint64 pid;
     QString commandLine;
     QString nativeArguments;
@@ -244,7 +253,7 @@ void StartAppService::launchDetached(const QString& applicationPath, const QStri
         pid = process.Id().Id();
         process.Close();
         TasClientManager::instance()->addStartedApp(applicationPath, QDateTime::currentDateTime().toString("yyyyMMddhhmmsszzz"));
-        response.setData(QString::number(pid));   
+        response.setData(QString::number(pid));
     }
 #elif (defined(Q_OS_WIN32) || defined(Q_OS_WINCE))
 
@@ -260,9 +269,14 @@ void StartAppService::launchDetached(const QString& applicationPath, const QStri
 
     // Environment bloc variable
     QStringList envList = QProcess::systemEnvironment() << environmentVars;
-
     WCHAR* envp = (WCHAR*)malloc((envList.join(" ").length() + 2) * sizeof(WCHAR)); // just counting memory in cluding the NULL (\0) string ends and binal NULL block end
     LPTSTR env = (LPTSTR) envp;
+    LPCTSTR lpCurrentDirectory  = NULL;
+
+    if (!workingDirectory.isEmpty()) {
+        lpCurrentDirectory  = (LPCTSTR)workingDirectory.utf16();
+    }
+    // else use current working directory
 
     for (int i = 0; i < envList.length(); i++)
     {
@@ -289,7 +303,7 @@ void StartAppService::launchDetached(const QString& applicationPath, const QStri
         FALSE,          // Set handle inheritance to FALSE
         CREATE_UNICODE_ENVIRONMENT,              // 0 for no creation flags
         (LPVOID) envp,           // Use parent's environment block
-        NULL,           // Use parent's starting directory
+        lpCurrentDirectory ,        // Working directory
         &si,            // Pointer to STARTUPINFO structure
         &pi )           // Pointer to PROCESS_INFORMATION structure
     )
@@ -318,7 +332,7 @@ void StartAppService::launchDetached(const QString& applicationPath, const QStri
         strcpy(variablePtr, variable.data());
         paramListArray[i] = variablePtr;
     }
-     paramListArray[paramList.length()] = NULL;
+    paramListArray[paramList.length()] = NULL;
 
 
     // Create environment Array with NULL end element
@@ -366,6 +380,14 @@ void StartAppService::launchDetached(const QString& applicationPath, const QStri
                     if (mem.isAttached()) Sleeper::sleep(100);
                 }
 
+                // Change working directory
+                if (!workingDirectory.isEmpty()) {
+                    if (chdir(workingDirectory.toLocal8Bit().constData()) == -1) {
+                        TasLogger::logger()->error( QString("TasServer::launchDetached: chdir(\"%1\") error: %2")
+                                                   .arg(workingDirectory).arg(strerror(errno)) );
+                    }
+                }
+
                 // Try see if we don't need path
                 execve( paramListArray[0], paramListArray, envListArray);
 
@@ -380,7 +402,7 @@ void StartAppService::launchDetached(const QString& applicationPath, const QStri
                         if (!tmp.endsWith('/')) tmp += '/';
                         tmp += QFile::encodeName(file);
                         paramListArray[0] = tmp.data();
-                        TasLogger::logger()->error( QString("TasServer::launchDetached: PATH = '%1'").arg((char *) paramListArray[0]));
+                        TasLogger::logger()->debug( QString("TasServer::launchDetached: PATH = '%1'").arg((char *) paramListArray[0]));
                         execve( paramListArray[0], paramListArray, envListArray);
 
                     }
@@ -498,8 +520,8 @@ void StartAppService::launchDetached(const QString& applicationPath, const QStri
     qint64 pid;
     if(QProcess::startDetached(applicationPath, arguments, ".", &pid)){
 
-	    TasClientManager::instance()->addStartedApp(applicationPath, QDateTime::currentDateTime().toString("yyyyMMddhhmmsszzz"));
-        response.setData(QString::number(pid));   
+            TasClientManager::instance()->addStartedApp(applicationPath, QDateTime::currentDateTime().toString("yyyyMMddhhmmsszzz"));
+        response.setData(QString::number(pid));
     }
 #endif
     else{
@@ -517,7 +539,7 @@ void StartAppService::launchDetached(const QString& applicationPath, const QStri
         response.setErrorMessage("Could not start the application " + applicationPath);
     }
 #if (defined(Q_OS_WIN32) || defined(Q_OS_WINCE))
-	free(envp);
+        free(envp);
 #endif
 }
 
