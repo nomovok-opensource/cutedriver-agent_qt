@@ -32,7 +32,7 @@
 #include <QEvent>
 
 #ifdef TAS_MAEMO
-#include <qmsystem/qmdisplaystate.h>
+#include <qmsystem2/qmdisplaystate.h>
 #endif
 
 
@@ -45,9 +45,9 @@ void TasDeviceUtils::resetInactivity()
 {
 #ifdef TAS_MAEMO
     TasLogger::logger()->debug("TasDeviceUtils:: resetting inactivity");
-    Maemo::QmDisplayState state; 
+    MeeGo::QmDisplayState state; 
   
-    if (!state.set(Maemo::QmDisplayState::On)) {
+    if (!state.set(MeeGo::QmDisplayState::On)) {
         TasLogger::logger()->warning("TasDeviceUtils:: setting displaystate failed!");
     }    
 

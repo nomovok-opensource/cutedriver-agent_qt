@@ -2,12 +2,12 @@ Source: qttas
 Section: devel
 Priority: extra
 Maintainer: Petri Kiiskinen <ext-petri.ak.kiiskinen@nokia.com>
-Build-Depends: debhelper (>= 5), libqt4-dev (>=4.6.1~), libqtwebkit-dev (>=2.1~), libqmsystem-dev (>= 0.1.33~), x11proto-xext-dev, libxtst-dev, libqtcontacts-dev, libqtm-serviceframework-dev,libqtm-systeminfo-dev,libmeegotouch-dev
+Build-Depends: debhelper (>= 5), libqt4-dev (>=4.6.1~), libqtwebkit-dev (>=2.1~), libqmsystem2-dev (>= 0.1.33~), x11proto-xext-dev, libxtst-dev, libqtcontacts-dev, libqtm-serviceframework-dev,libqtm-systeminfo-dev,libmeegotouch-dev
 Standards-Version: 3.7.2
 
 Package: qttas-server
 Architecture: any
-Depends: libqt4-network (>= 4.6.1~), libqt4-xml (>= 4.6.1~), libqtcore4 (>= 4.6.1~), libqtgui4 (>= 4.6.1~), libc6 (>= 2.5.0), libqmsystem0 (>= 0.1.33~), libxtst6
+Depends: libqt4-network (>= 4.6.1~), libqt4-xml (>= 4.6.1~), libqtcore4 (>= 4.6.1~), libqtgui4 (>= 4.6.1~), libc6 (>= 2.5.0), libqmsystem2, libxtst6
 Description: QT Tas Server implementation
  QT TAS is a test automation server which provides testability 
  interface. Interface is used to access UI components to 
