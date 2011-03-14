@@ -238,7 +238,7 @@ void StartAppService::launchDetached(const QString& applicationPath, const QStri
     //to be removed when fix in qt
 
     if (!workingDirectory.isEmpty()) {
-        TasLogger::logger()->warning(QString("TasServer::launchDetached: Working directory not supported on Symbian");
+        TasLogger::logger()->warning(QString("TasServer::launchDetached: Working directory not supported on Symbian"));
     }
 
     qint64 pid;
