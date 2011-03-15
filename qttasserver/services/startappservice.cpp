@@ -394,7 +394,7 @@ void StartAppService::launchDetached(const QString& applicationPath, const QStri
                 // Try also on all path directories if above fails
                 const QString path = QString::fromLocal8Bit(::getenv("PATH"));
                 const QString file = QString::fromLocal8Bit(paramListArray[0]);
-                if (!path.isEmpty())
+                if (!file.contains('/') && !path.isEmpty())
                 {
                     QStringList pathEntries = path.split(QLatin1Char(':'));
                     for (int k = 0; k < pathEntries.size(); ++k) {
