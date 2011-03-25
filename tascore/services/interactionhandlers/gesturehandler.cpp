@@ -61,6 +61,7 @@ bool GestureHandler::executeInteraction(TargetData data)
         wasConsumed = true;
         //will delete it self when done
         TasLogger::logger()->debug("GestureHandler::executeInteraction make gesturerunner");
+        gesture->setUseTapScreen(data.command->parameter("useTapScreen") == "true");
         new TasGestureRunner(gesture);
     }
     return wasConsumed;

@@ -167,7 +167,7 @@ void TasDeviceUtils::addSystemMemoryStatus(TasObject& object)
 // }
 
 
-void TasDeviceUtils::sendMouseEvent(int x, int y, Qt::MouseButton button, QEvent::Type type)
+void TasDeviceUtils::sendMouseEvent(int x, int y, Qt::MouseButton button, QEvent::Type type, uint /*pointerNumber*/)
 {
     Display* dpy = 0;
     Window root = None;

@@ -56,7 +56,7 @@ public:
 	static int currentProcessHeapSize();
 	static void addSystemMemoryStatus(TasObject& object);
 	static void addSystemInformation(TasObject& object);
-	static void sendMouseEvent(int x, int y, Qt::MouseButton button, QEvent::Type);
+	static void sendMouseEvent(int x, int y, Qt::MouseButton button, QEvent::Type, uint pointerNumber);
 	/*!
 	  Return cpu time in millis
 	*/

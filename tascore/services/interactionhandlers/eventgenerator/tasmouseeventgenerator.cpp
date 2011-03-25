@@ -34,24 +34,25 @@ TasMouseEventGenerator::~TasMouseEventGenerator()
 
 void TasMouseEventGenerator::setUseTapScreen(bool use)
 {
+    //TasLogger::logger()->debug(QString(__FUNCTION__) + QString::number(use));
     mUseTapScreen = use;
 }
 
-void TasMouseEventGenerator::doMousePress(QWidget* target, Qt::MouseButton button, QPoint point)
+void TasMouseEventGenerator::doMousePress(QWidget* target, Qt::MouseButton button, QPoint point, uint pointerNumber)
 {
     QMouseEvent* eventPress = new QMouseEvent(QEvent::MouseButtonPress, target->mapFromGlobal(point), point, button, button, 0);    
-    sendMouseEvent(target, eventPress);
+    sendMouseEvent(target, eventPress, pointerNumber);
 }
-void TasMouseEventGenerator::doMouseRelease(QWidget* target, Qt::MouseButton button, QPoint point)
+void TasMouseEventGenerator::doMouseRelease(QWidget* target, Qt::MouseButton button, QPoint point, uint pointerNumber)
 {
-    QMouseEvent* eventRelease = new QMouseEvent(QEvent::MouseButtonRelease, target->mapFromGlobal(point), point, button, Qt::NoButton, 0);    
-    sendMouseEvent(target, eventRelease);
+    QMouseEvent* eventRelease = new QMouseEvent(QEvent::MouseButtonRelease, target->mapFromGlobal(point), point, button, Qt::NoButton, 0);
+    sendMouseEvent(target, eventRelease, pointerNumber);
 }
-void TasMouseEventGenerator::doMouseMove(QWidget* target, QPoint point, Qt::MouseButton button)
+void TasMouseEventGenerator::doMouseMove(QWidget* target, QPoint point, Qt::MouseButton button, uint pointerNumber )
 {
     moveCursor(point);
     QMouseEvent* eventMove = new QMouseEvent(QEvent::MouseMove, target->mapFromGlobal(point), point, button, button, 0);
-    sendMouseEvent(target, eventMove);
+    sendMouseEvent(target, eventMove, pointerNumber);
 }
 void TasMouseEventGenerator::doScroll(QWidget* target, QPoint& point, int delta, Qt::MouseButton button,  Qt::Orientation orient)
 {
@@ -64,10 +65,10 @@ void TasMouseEventGenerator::doMouseDblClick(QWidget* target, Qt::MouseButton bu
     QMouseEvent* eventDblClick = new QMouseEvent(QEvent::MouseButtonDblClick, target->mapFromGlobal(point), point, button, Qt::NoButton, 0);    
     sendMouseEvent(target, eventDblClick);
 }
-void TasMouseEventGenerator::sendMouseEvent(QWidget* target, QMouseEvent* event)
+void TasMouseEventGenerator::sendMouseEvent(QWidget* target, QMouseEvent* event, uint pointerNumber)
 {
     if(mUseTapScreen){
-        TasDeviceUtils::sendMouseEvent(event->globalX(), event->globalY(), event->button(), event->type());
+        TasDeviceUtils::sendMouseEvent(event->globalX(), event->globalY(), event->button(), event->type(), pointerNumber);
     } else {
         QSpontaneKeyEvent::setSpontaneous(event);
         qApp->postEvent(target, event);
@@ -75,10 +76,10 @@ void TasMouseEventGenerator::sendMouseEvent(QWidget* target, QMouseEvent* event)
     }
 }
 
-void TasMouseEventGenerator::moveCursor(QPoint point)
+void TasMouseEventGenerator::moveCursor(QPoint point, uint pointerNumber)
 {
     if (mUseTapScreen) {
-        TasDeviceUtils::sendMouseEvent(point.x(), point.y(), Qt::NoButton, QEvent::MouseMove);                
+        //TasDeviceUtils::sendMouseEvent(point.x(), point.y(), Qt::NoButton, QEvent::MouseMove, pointerNumber);
     } else {
         QCursor::setPos(point);
     }
