@@ -143,12 +143,19 @@ void TasDeviceUtils::addSystemInformation(TasObject& object)
     TasLogger::logger()->debug("TasDeviceUtils::addSystemInformation out");
 }
 
-void TasDeviceUtils::sendMouseEvent(int x, int y, Qt::MouseButton /*button*/, QEvent::Type type)
+void TasDeviceUtils::sendMouseEvent(int x, int y, Qt::MouseButton /*button*/, QEvent::Type type, uint aPointerNumber)
 {
     TasLogger::logger()->debug(QString(__FUNCTION__) +
                                " x(" + QString::number(x) +
-                               ") y(" + QString::number(y) +")");
+                               ") y(" + QString::number(y) +
+                               ") type(" + QString::number(type) +
+                               ") p.nr(" + QString::number(aPointerNumber) + ")");
 
+
+//    TInt maxPointers;
+//    if( HAL::Get(HALData::EPointerMaxPointers, maxPointers) == KErrNone){
+//      TasLogger::logger()->debug("max pointers " + QString::number(maxPointers));
+//    }
 
     TPoint pos(x,y);
 
@@ -179,18 +186,21 @@ void TasDeviceUtils::sendMouseEvent(int x, int y, Qt::MouseButton /*button*/, QE
     if (down) { // TODO how about dblclick?
         TRawEvent eventDown;
         eventDown.Set(TRawEvent::EButton1Down, pos.iX, pos.iY);
+        eventDown.SetPointerNumber(aPointerNumber);
         UserSvr::AddEvent(eventDown);
-        TasLogger::logger()->debug(QString(__FUNCTION__) + " down type:" + QString::number(type));
+        //TasLogger::logger()->debug(QString(__FUNCTION__) + " down type:" + QString::number(type));
     } else if(up) {
         TRawEvent eventUp;
         eventUp.Set(TRawEvent::EButton1Up, pos.iX, pos.iY);
+        eventUp.SetPointerNumber(aPointerNumber);
         UserSvr::AddEvent(eventUp);
-        TasLogger::logger()->debug(QString(__FUNCTION__) + " up   type:" + QString::number(type));
+        //TasLogger::logger()->debug(QString(__FUNCTION__) + " up   type:" + QString::number(type));
     } else if(move){
         TRawEvent eventMove;
         eventMove.Set(TRawEvent::EPointerMove, pos.iX, pos.iY);
+        eventMove.SetPointerNumber(aPointerNumber);
         UserSvr::AddEvent(eventMove);
-        TasLogger::logger()->debug(QString(__FUNCTION__) + " move type:" + QString::number(type));
+        //TasLogger::logger()->debug(QString(__FUNCTION__) + " move type:" + QString::number(type));
     } else{
         TasLogger::logger()->debug(QString(__FUNCTION__) + " other type:" + QString::number(type));
     }

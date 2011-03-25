@@ -29,6 +29,7 @@ TasGestureRunner::TasGestureRunner(TasGesture* gesture, QObject* parent)
     connect(&mTimeLine, SIGNAL(valueChanged(qreal)), this, SLOT(timerEvent(qreal)));
     connect(&mTimeLine, SIGNAL(finished()), this, SLOT(finished()));
     qApp->installEventFilter(this);
+    mMouseGen.setUseTapScreen(gesture->getUseTapScreen());
     startGesture();
 }
 
@@ -46,11 +47,11 @@ void TasGestureRunner::startGesture()
 
     if(mGesture->isPress()){
         if(mGesture->isMultiTouch()){
-            mTouchGen.doTouchBegin(mGesture->getTarget(), mGesture->startPoints(), mGesture->touchPointIdKey());       
+            mTouchGen.doTouchBegin(mGesture->getTarget(), mGesture->startPoints(), mGesture->touchPointIdKey());
         }
         else{
             if(mGesture->pointerType() == MouseHandler::TypeTouch || mGesture->pointerType() == MouseHandler::TypeBoth){
-                mTouchGen.doTouchBegin(mGesture->getTarget(), mGesture->startPoints(), mGesture->touchPointIdKey());       
+                mTouchGen.doTouchBegin(mGesture->getTarget(), mGesture->startPoints(), mGesture->touchPointIdKey());
             }            
             if(mGesture->pointerType() == MouseHandler::TypeMouse || mGesture->pointerType() == MouseHandler::TypeBoth){
                 mMouseGen.doMousePress(mGesture->getTarget(), mGesture->getMouseButton(), mGesture->startPoints().first().screenPoint);

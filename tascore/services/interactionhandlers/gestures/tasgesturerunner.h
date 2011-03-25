@@ -31,7 +31,7 @@ public:
     TasGestureRunner(TasGesture* gesture, QObject* parent=0);
     ~TasGestureRunner();
 
-	bool eventFilter(QObject *target, QEvent *event);        
+    bool eventFilter(QObject *target, QEvent *event);
 
 protected slots:
     void timerEvent(qreal);
