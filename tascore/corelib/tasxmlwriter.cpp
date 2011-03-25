@@ -65,8 +65,11 @@ QString TasXmlWriter::encodeString(const QString& source)
     encoded.replace( "\"", "&quot;" );
     encoded.replace( "\'", "&apos;" );
 
-    // ASCII #27 not valid character in xml
+    // ASCII #27 is not valid character in XML 1.0 specification
     encoded.replace( QChar::fromAscii(27), "\\e" );
+
+    // ASCII #1 is not valid character in XML 1.0 specification
+    encoded.replace( QChar::fromAscii(1), "" );
 
     return encoded;
 }
