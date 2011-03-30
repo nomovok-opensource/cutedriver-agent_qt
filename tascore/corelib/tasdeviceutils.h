@@ -66,6 +66,9 @@ public:
 
 	static bool isServerRunning();
 
+  static int getOrientation();
+
+
 private:
 	GpuMemDetailsInterface* gpuDetailsHandler;
 

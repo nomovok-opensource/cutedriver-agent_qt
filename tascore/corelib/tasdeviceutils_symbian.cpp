@@ -234,3 +234,7 @@ bool TasDeviceUtils::isServerRunning()
     return running;
 }
 
+int TasDeviceUtils::getOrientation()
+{
+    return -1;
+}

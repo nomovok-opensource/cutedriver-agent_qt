@@ -97,3 +97,9 @@ bool TasDeviceUtils::isServerRunning()
 void TasDeviceUtils::sendMouseEvent(int x, int y, Qt::MouseButton button, QEvent::Type type, uint pointerNumber)
 {
 }
+
+
+int TasDeviceUtils::getOrientation()
+{
+    return -1;
+}

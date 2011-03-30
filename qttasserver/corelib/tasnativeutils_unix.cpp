@@ -55,9 +55,6 @@ int pidOfXWindow(Display* display, Window win)
                 pid += prop[0];  
             }
         }
-        
-       
-
     }  
     if (prop) XFree(prop);
     return pid;
