@@ -33,6 +33,8 @@ target.path = $$TAS_TARGET_PLUGIN/tasfixtures
 symbian: {
 	TARGET.EPOCALLOWDLLDATA = 1
         TARGET.CAPABILITY = CAP_GENERAL_DLL LocalServices NetworkServices ReadUserData UserEnvironment Location  ReadDeviceData
+        TARGET.UID3 = 0x2003A9F7
+
 
         mobilitysysinfo_fixture_plugin.sources = mobilitysysinfofixture.dll
         mobilitysysinfo_fixture_plugin.path = /resource/qt/plugins/tasfixtures
