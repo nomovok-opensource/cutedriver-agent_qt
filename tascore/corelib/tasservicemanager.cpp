@@ -104,6 +104,12 @@ void TasServiceManager::performService(TasCommandModel& commandModel, TasRespons
     TasLogger::logger()->debug("TasServiceManager::performService: " + commandModel.service());
     QMutableListIterator<TasServiceCommand*> i(mCommands);
     bool wasConsumed = false;
+
+#ifdef Q_OS_SYMBIAN
+    int err = 0;
+    //run under symbian TRAP harness
+    TRAP(err,
+#endif
     while (i.hasNext()){
         TasServiceCommand* command = i.next();
         if(command->executeService(commandModel, response)){
@@ -111,6 +117,14 @@ void TasServiceManager::performService(TasCommandModel& commandModel, TasRespons
             break;
         }
     }
+#ifdef Q_OS_SYMBIAN
+    ); //closing TRAPD
+    if(err) {
+        response.setData(serviceErrorMessage()+commandModel.service() + "\n## Symbian error code(" + QString::number(err) + ")\n");
+        response.setIsError(true);
+        wasConsumed = true;
+    }
+#endif
     if(!wasConsumed){
         TasLogger::logger()->warning("TasServiceManager::executeCommand unknown service");
         response.setData(serviceErrorMessage()+commandModel.service());
