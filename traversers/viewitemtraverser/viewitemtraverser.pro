@@ -30,6 +30,8 @@ target.path = $$TAS_TARGET_PLUGIN/traversers
 symbian: {
     TARGET.CAPABILITY=CAP_GENERAL_DLL
 	TARGET.EPOCALLOWDLLDATA = 1
+	TARGET.UID3 = 0x2003A9EB
+
 	viewitem_plugin.sources = viewitemtraverse.dll
 	viewitem_plugin.path = /resource/qt/plugins/traversers
  

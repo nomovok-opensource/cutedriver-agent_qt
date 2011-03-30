@@ -29,6 +29,8 @@ CONFIG += plugin
 symbian: {
     TARGET.CAPABILITY=CAP_GENERAL_DLL
 	TARGET.EPOCALLOWDLLDATA = 1
+	TARGET.UID3 = 0x2003A9E6
+
 	
 	testability_plugin.sources = testability.dll
 	testability_plugin.path = /resource/qt/plugins/testability

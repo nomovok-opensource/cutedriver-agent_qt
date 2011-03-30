@@ -37,6 +37,8 @@ symbian: {
 	TARGET.VID = VID_DEFAULT
   	TARGET.EPOCALLOWDLLDATA = 1 
 	TARGET.EPOCHEAPSIZE = 0x20000 0x1400000
+	TARGET.UID3 = 0x2003A9E7
+
 #    LIBS += -lmemspydriverclient
 #    INCLUDEPATH += /epoc32/include/platform/memspy/driver
 
