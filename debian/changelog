@@ -1,3 +1,10 @@
+qttas (1.1.1-1) unstable; urgency=low
+
+  * new release version
+  * Fixes: NB#237003 - gesture directions are mixed up in vkb when in portrait mode
+
+ -- Testability Driver Team <testabilitydriver@nokia.com>  Thu, 32 Mar 2011 13:01:00 +0200
+
 qttas (1.1.0-1) unstable; urgency=low
 
   * new release version
