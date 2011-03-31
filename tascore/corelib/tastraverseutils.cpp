@@ -23,6 +23,7 @@
 
 #if QT_VERSION >= 0x040700
 #include <QDeclarativeItem>
+#include <QDeclarativeContext>
 #endif
 
 #include "testabilityutils.h"
@@ -71,12 +72,16 @@ void TasTraverseUtils::addObjectDetails(TasObject* objectInfo, QObject* object)
         QString objectType = object->metaObject()->className();
         objectType.replace(QString(":"), QString("_"));
 #if QT_VERSION >= 0x040700
-        //strip dynamic qml strings from the class name
+        //strip dynamic qml strings from the class name and add id string if existing
         if(qobject_cast<QDeclarativeItem*>(object)){
             QStringList stringList = objectType.split("_QML");
             QString strippedType = stringList.takeFirst();
             objectInfo->addAttribute("QML_TYPE_EXTENSION",  objectType.remove(strippedType));    
             objectType = strippedType;
+            QDeclarativeContext *context = qmlContext(object);
+            if (context) {
+                objectInfo->addAttribute("idString", context->getIdString(object));
+            }
         }
 #endif
         objectInfo->setType(objectType);    
