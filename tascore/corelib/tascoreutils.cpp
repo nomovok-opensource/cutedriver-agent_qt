@@ -401,3 +401,23 @@ bool TasCoreUtils::autostart()
     }
     return false;
 }
+
+QString TasCoreUtils::encodeString(const QString& source)
+{
+
+    QString encoded = source;
+
+    encoded.replace( "&", "&amp;" );
+    encoded.replace( ">", "&gt;" );
+    encoded.replace( "<", "&lt;" );
+    encoded.replace( "\"", "&quot;" );
+    encoded.replace( "\'", "&apos;" );
+
+    // ASCII #27 is not valid character in XML 1.0 specification
+    encoded.replace( QChar::fromAscii(27), "\\e" );
+
+    // ASCII #1 is not valid character in XML 1.0 specification
+    encoded.replace( QChar::fromAscii(1), "" );
+
+    return encoded;
+}
