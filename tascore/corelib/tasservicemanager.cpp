@@ -16,7 +16,6 @@
 ** of this file. 
 ** 
 ****************************************************************************/ 
- 
             
 #include <QMutableListIterator>
 
@@ -102,34 +101,37 @@ void TasServiceManager::handleServiceRequest(TasCommandModel& commandModel, TasS
 void TasServiceManager::performService(TasCommandModel& commandModel, TasResponse& response)
 {
     TasLogger::logger()->debug("TasServiceManager::performService: " + commandModel.service());
-    QMutableListIterator<TasServiceCommand*> i(mCommands);
     bool wasConsumed = false;
-
 #ifdef Q_OS_SYMBIAN
     int err = 0;
     //run under symbian TRAP harness
-    TRAP(err,
-#endif
-    while (i.hasNext()){
-        TasServiceCommand* command = i.next();
-        if(command->executeService(commandModel, response)){
-            wasConsumed = true;
-            break;
-        }
-    }
-#ifdef Q_OS_SYMBIAN
-    ); //closing TRAPD
+    TRAP(err, wasConsumed = doServiceExecution(commandModel, response));
     if(err) {
         response.setData(serviceErrorMessage()+commandModel.service() + "\n## Symbian error code(" + QString::number(err) + ")\n");
         response.setIsError(true);
         wasConsumed = true;
     }
+#else
+    wasConsumed = doServiceExecution(commandModel, response);
 #endif
     if(!wasConsumed){
         TasLogger::logger()->warning("TasServiceManager::executeCommand unknown service");
         response.setData(serviceErrorMessage()+commandModel.service());
         response.setIsError(true);
     }
+}
+
+
+bool TasServiceManager::doServiceExecution(TasCommandModel& commandModel, TasResponse& response)
+{
+    QMutableListIterator<TasServiceCommand*> i(mCommands);
+    while (i.hasNext()){
+        TasServiceCommand* command = i.next();
+        if(command->executeService(commandModel, response)){
+            return true;
+        }
+    }
+    return false;
 }
 
 
