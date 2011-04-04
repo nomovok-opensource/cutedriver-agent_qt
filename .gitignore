@@ -11,6 +11,9 @@ Makefile
 *stubs*
 *.pkg
 *.o
+*.Release
+*.Debug
+*.*~
 lib/
 \#*
 \.#*

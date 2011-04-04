@@ -38,6 +38,7 @@ HEADERS += $$PWD/tasservicemanager.h
 HEADERS += $$PWD/tasxmlwriter.h 
 HEADERS += $$PWD/tassocket.h 
 HEADERS += $$PWD/tasdeviceutils.h 
+HEADERS += $$PWD/taspointercache.h 
 #HEADERS += $$PWD/tascommandparser.h 
 
 SOURCES += $$PWD/tasmessages.cpp
@@ -53,6 +54,7 @@ SOURCES += $$PWD/tasdatashare.cpp
 SOURCES += $$PWD/testabilitysettings.cpp
 SOURCES += $$PWD/tascoreutils.cpp
 SOURCES += $$PWD/infologger.cpp
+SOURCES += $$PWD/taspointercache.cpp
 
 unix: {
     symbian: {
