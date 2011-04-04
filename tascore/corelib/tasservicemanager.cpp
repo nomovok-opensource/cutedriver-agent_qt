@@ -101,22 +101,24 @@ void TasServiceManager::handleServiceRequest(TasCommandModel& commandModel, TasS
 void TasServiceManager::performService(TasCommandModel& commandModel, TasResponse& response)
 {
     TasLogger::logger()->debug("TasServiceManager::performService: " + commandModel.service());
+    bool wasConsumed = false;
 #ifdef Q_OS_SYMBIAN
     int err = 0;
-    bool wasConsumed = false;
     //run under symbian TRAP harness
     TRAP(err, wasConsumed = doServiceExecution(commandModel, response));
     if(err) {
         response.setData(serviceErrorMessage()+commandModel.service() + "\n## Symbian error code(" + QString::number(err) + ")\n");
         response.setIsError(true);
+        wasConsumed = true;
     }
 #else
-    if(!doServiceExecution(commandModel, response)){
+    wasConsumed = doServiceExecution(commandModel, response);
+#endif
+    if(!wasConsumed){
         TasLogger::logger()->warning("TasServiceManager::executeCommand unknown service");
         response.setData(serviceErrorMessage()+commandModel.service());
         response.setIsError(true);
     }
-#endif
 }
 
 
