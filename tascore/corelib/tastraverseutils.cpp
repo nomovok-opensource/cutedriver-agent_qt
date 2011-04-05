@@ -133,10 +133,10 @@ void TasTraverseUtils::addVariantValue(TasAttribute& attr, const QVariant& value
         attr.addValue(value.toRectF());
         break;
     case QVariant::DateTime:
-        attr.addValue(QString::number(value.toDateTime().toTime_t()));
+        attr.addValuePlainString(QString::number(value.toDateTime().toTime_t()));
         break;
     case QVariant::Date:
-        attr.addValue(value.toDate().toString("dd.MM.yyyy"));
+        attr.addValuePlainString(value.toDate().toString("dd.MM.yyyy"));
         break;
     default:
         attr.addValue(value.toString());        

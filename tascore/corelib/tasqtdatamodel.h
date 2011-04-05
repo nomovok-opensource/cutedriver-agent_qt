@@ -59,14 +59,16 @@ class TAS_EXPORT TasAttribute
 {
 private:
     TasAttribute();
+    TasAttribute(const QString& name);
     
 public:    
     ~TasAttribute();
 
     void setName(const QString& name);    
-	void setType(const QString& type);    
-	void setDataType(const QString& type);    
-    void addValue(const QString& value);    
+	  void setType(const QString& type);    
+	  void setDataType(const QString& type);    
+    void addValue(const QString& value);
+    void addValuePlainString(const QString& value); // doesn't call TasCoreUtils::encodeString
     void addValue(const QSize& value);    
     void addValue(const QSizeF& value);    
     void addValue(const QPoint& value);    
@@ -98,6 +100,7 @@ public:
     ~TasObject();
 
     TasAttribute& addAttribute();
+    TasAttribute& addAttribute(const QString& name);
     TasAttribute& addAttribute(const QString& name, const QString& value);
     TasAttribute& addAttribute(const QString& name, int value);    
     TasAttribute& addAttribute(const QString& name, qreal value);    
