@@ -46,6 +46,10 @@ protected:
 	TasCommandModel* parseMessageString(const QString& messageBody, QString& errorMessage);
 	virtual QString serviceErrorMessage(){return "QtTestabilityPlugin does not support the given service: ";}
 
+private:
+	bool doServiceExecution(TasCommandModel& commandModel, TasResponse& response);
+
+
 protected:
 	QList<TasServiceCommand*> mCommands;
 };
