@@ -104,7 +104,6 @@ bool FindObjectService::addObjectDetails(TasObject& parent, TasTargetObject *tar
     if(!targetObj->objectId().isEmpty()){
         QObject* o = TasPointerCache::instance()->getObject(targetObj->objectId());
         if(o != 0){
-            TasLogger::logger()->debug("FindObjectService::addObjectDetails found from cache.");
             objects.append(o);
             cached = true;
         }
@@ -118,7 +117,6 @@ bool FindObjectService::addObjectDetails(TasObject& parent, TasTargetObject *tar
         //look children of parent
         else{
             if(!targetObj->objectName().isEmpty()){
-                TasLogger::logger()->debug("FindObjectService::addObjectDetails look by name from parent " + targetObj->objectName());
                 objects = parentObject->findChildren<QObject*>(targetObj->objectName());
             }
             else{
@@ -160,7 +158,6 @@ QList<QObject*> FindObjectService::searchForObject(TasTargetObject *targetObj)
         //2.look from children
         if(targetObjects.isEmpty()){
             if(!targetObj->objectName().isEmpty()){
-                TasLogger::logger()->debug("FindObjectService::searchForObject look by name " + targetObj->objectName());
                 targetObjects.append(widget->findChildren<QObject*>(targetObj->objectName()));
             }
             else{
