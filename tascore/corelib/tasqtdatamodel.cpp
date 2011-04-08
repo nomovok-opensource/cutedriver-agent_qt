@@ -30,7 +30,7 @@
 
 //xml strings
 const char* const VERSION = "version";
-const char* const DATE_TIME = "dateTime";
+//const char* const DATE_TIME = "dateTime";
 const char* const NAME = "name";
 const char* const TYPE = "type";
 const char* const ENV = "env";
