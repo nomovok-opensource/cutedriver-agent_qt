@@ -17,13 +17,16 @@
 ** 
 ****************************************************************************/ 
  
+#include "taslogger.h"
+#include "tasdeviceutils.h"
 
+#define _WIN32_WINNT 0x0501
 
 #include <windows.h>
 #include <stdio.h>
 #include <psapi.h>
 
-#include "tasdeviceutils.h"
+
 
 TasDeviceUtils::TasDeviceUtils()
 {
@@ -111,7 +114,55 @@ void TasDeviceUtils::addSystemInformation(TasObject& object)
 
 void TasDeviceUtils::sendMouseEvent(int x, int y, Qt::MouseButton button, QEvent::Type type, uint pointerNumber)
 {
+    TasLogger::logger()->debug("TasDeviceUtils::sendMouseEvent");
+
+    MOUSEINPUT mi = {0};
+    mi.dx = x;
+    mi.dy = y;
+    mi.mouseData = 0;
+    mi.time = 0; //system should provide this
+    mi.dwExtraInfo = 0;
+
+    if(type == QEvent::MouseButtonPress || type == QEvent::GraphicsSceneMousePress){
+        TasLogger::logger()->debug("TasDeviceUtils::sendMouseEvent send event type press");
+        if(button == Qt::LeftButton){
+            mi.dwFlags = MOUSEEVENTF_LEFTDOWN; //0x0002;
+        }
+        else if(button == Qt::RightButton){
+            mi.dwFlags = MOUSEEVENTF_RIGHTDOWN; //0x0008;    
+        }
+        else if(button == Qt::MidButton){
+            mi.dwFlags = MOUSEEVENTF_MIDDLEDOWN; //0x0020; 
+        }
+    }
+    else if(type == QEvent::MouseButtonRelease || type == QEvent::GraphicsSceneMouseRelease){
+        TasLogger::logger()->debug("TasDeviceUtils::sendMouseEvent send event type release");
+        if(button == Qt::LeftButton){
+            mi.dwFlags = MOUSEEVENTF_LEFTUP; //0x0004;
+        }
+        else if(button == Qt::RightButton){
+            mi.dwFlags = MOUSEEVENTF_RIGHTUP; //0x0010;    
+        }
+        else if(button == Qt::MidButton){
+            mi.dwFlags = MOUSEEVENTF_MIDDLEUP;//0x0040; 
+        }
+    }
+    else if(type == QEvent::MouseMove || type == QEvent::GraphicsSceneMouseMove){        
+        TasLogger::logger()->debug("TasDeviceUtils::sendMouseEvent send event type move");
+        double width = GetSystemMetrics(0);
+        double height = GetSystemMetrics(1);
+        mi.dx = (int)(x * (65535.0 / width));
+        mi.dy = (int)(y * (65535.0 / height));
+        mi.dwFlags = MOUSEEVENTF_MOVE | MOUSEEVENTF_ABSOLUTE;
+    }    
+    INPUT input = {0};
+    input.type = INPUT_MOUSE;
+    input.mi = mi;
+    TasLogger::logger()->debug("TasDeviceUtils::sendMouseEvent send event type " + QString::number(mi.dwFlags));
+
+    SendInput(1, &input, sizeof(INPUT));
 }
+
 
 /*!
   Not implemented, true returned to avoid autostart.

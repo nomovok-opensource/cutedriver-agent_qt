@@ -25,7 +25,7 @@
 
 
 #include "taslogger.h"
-
+#include "taspointercache.h"
 #include "findobjectservice.h"
 #include "tastraverserloader.h"
 
@@ -98,18 +98,31 @@ bool FindObjectService::executeService(TasCommandModel& model, TasResponse& resp
 
 bool FindObjectService::addObjectDetails(TasObject& parent, TasTargetObject *targetObj, TasCommand* command, QObject* parentObject)
 {
-    //must be set
-    if(targetObj->className().isEmpty()){
-        return false;
-    }
+    bool cached = false;
     QList<QObject*> objects;
-    //first level look from app 
-    if(!parentObject){
-        objects = searchForObject(targetObj);
-    }
-    //look children of parent
-    else{
-        objects = findMatchingObject(parentObject->children(), targetObj);
+    //look from cache
+    if(!targetObj->objectId().isEmpty()){
+        QObject* o = TasPointerCache::instance()->getObject(targetObj->objectId());
+        if(o != 0){
+            objects.append(o);
+            cached = true;
+        }
+    }   
+    if(!cached){
+        //first level look from app 
+        if(!parentObject){
+            //look from parents object list if name set
+            objects = searchForObject(targetObj);
+        }
+        //look children of parent
+        else{
+            if(!targetObj->objectName().isEmpty()){
+                objects = parentObject->findChildren<QObject*>(targetObj->objectName());
+            }
+            else{
+                objects = findMatchingObject(parentObject->children(), targetObj);
+            }
+        }
     }
     if(!objects.isEmpty()){
         foreach(QObject* object, objects){
@@ -143,21 +156,27 @@ QList<QObject*> FindObjectService::searchForObject(TasTargetObject *targetObj)
         }  
       
         //2.look from children
-        if(targetObjects.isEmpty() && !targetObj->className().isEmpty()){
-            targetObjects.append(findMatchingObject(widget->children(), targetObj));
+        if(targetObjects.isEmpty()){
+            if(!targetObj->objectName().isEmpty()){
+                targetObjects.append(widget->findChildren<QObject*>(targetObj->objectName()));
+            }
+            else{
+                targetObjects.append(findMatchingObject(widget->children(), targetObj));
+            }
         }
-
         //3. Maybe a graphicsView
-        QGraphicsView* view = qobject_cast<QGraphicsView*>(widget);
-        if(view){             
-            foreach(QGraphicsItem* item, view->items()){
-                QGraphicsObject* object = item->toGraphicsObject();
-                if (object && object->isVisible() && TestabilityUtils::isItemInView(view, item)){
-                    if(isMatch(object, targetObj)){
-                        targetObjects.append(object);
-                    }           
-                }
-            }        
+        if(targetObjects.isEmpty()){
+            QGraphicsView* view = qobject_cast<QGraphicsView*>(widget);
+            if(view){             
+                foreach(QGraphicsItem* item, view->items()){
+                    QGraphicsObject* object = item->toGraphicsObject();
+                    if (object && object->isVisible() && TestabilityUtils::isItemInView(view, item)){
+                        if(isMatch(object, targetObj)){
+                            targetObjects.append(object);
+                        }           
+                    }
+                }        
+            }
         }
     }
     return targetObjects;
@@ -191,8 +210,6 @@ bool FindObjectService::isMatch(QObject* candidate, TasTargetObject *targetObj)
         return targetObj->objectName() == candidate->objectName();
     }
 
-    bool isMatch = false;
-
     //traverser strips _QML so need to strip it here also
     QString className = candidate->metaObject()->className();
 
@@ -202,13 +219,12 @@ bool FindObjectService::isMatch(QObject* candidate, TasTargetObject *targetObj)
     }
 #endif
 
-    if(className == targetObj->className()){
-        //class name ok, check props
-        if(propertiesMatch(targetObj->searchParameters(), candidate)){
-            isMatch = true;
-        }
+    if(!targetObj->className().isEmpty() && (className != targetObj->className())){
+        return false;        
     }
-    return isMatch;
+
+    //all other checks ok, check props
+    return propertiesMatch(targetObj->searchParameters(), candidate);
 }
 
 bool FindObjectService::propertiesMatch(QHash<QString,QString> props, QObject* object)
