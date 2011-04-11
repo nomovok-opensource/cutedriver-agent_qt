@@ -23,7 +23,9 @@
 
 #if QT_VERSION >= 0x040700
 #include <QDeclarativeItem>
+#ifdef QML_ID
 #include <QDeclarativeContext>
+#endif
 #endif
 
 #include "testabilityutils.h"
@@ -78,10 +80,12 @@ void TasTraverseUtils::addObjectDetails(TasObject* objectInfo, QObject* object)
             QString strippedType = stringList.takeFirst();
             objectInfo->addAttribute("QML_TYPE_EXTENSION",  objectType.remove(strippedType));    
             objectType = strippedType;
+#ifdef QML_ID
             QDeclarativeContext *context = qmlContext(object);
             if (context) {
-                objectInfo->addAttribute("idString", context->getIdString(object));
+                objectInfo->addAttribute("QML_ID", context->getIdString(object));
             }
+#endif
         }
 #endif
         objectInfo->setType(objectType);    

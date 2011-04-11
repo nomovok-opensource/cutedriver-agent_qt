@@ -39,6 +39,10 @@ DEFINES += HAVE_QAPP
 CONFIG += meegotouch
 }
 
+CONFIG(qml_id){
+DEFINES += QML_ID
+}
+
 # Input
 include(corelib/uilib.pri)
 include(corelib/corelib.pri)
