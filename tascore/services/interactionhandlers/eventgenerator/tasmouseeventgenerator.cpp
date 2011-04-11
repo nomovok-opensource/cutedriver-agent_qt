@@ -23,6 +23,10 @@
 #include "tasdeviceutils.h"
 #include "taslogger.h"
 
+#if defined(Q_OS_WIN32)
+#include "windows.h"
+#endif
+
 TasMouseEventGenerator::TasMouseEventGenerator(QObject* parent)
     :QObject(parent)
 {
@@ -68,7 +72,17 @@ void TasMouseEventGenerator::doMouseDblClick(QWidget* target, Qt::MouseButton bu
 void TasMouseEventGenerator::sendMouseEvent(QWidget* target, QMouseEvent* event, uint pointerNumber)
 {
     if(mUseTapScreen){
+#if defined(Q_OS_WIN32)
+        if( GetForegroundWindow() != target->window()->winId()){
+            TasLogger::logger()->debug("TasMouseEventGenerator::sendMouseEvent set foreground");
+            SetForegroundWindow(target->window()->winId());
+        }
+        if(event->type() == QEvent::MouseButtonPress || event->type() == QEvent::GraphicsSceneMousePress){
+            TasDeviceUtils::sendMouseEvent(event->globalX(), event->globalY(), event->button(), QEvent::MouseMove, pointerNumber);
+        }
+#endif
         TasDeviceUtils::sendMouseEvent(event->globalX(), event->globalY(), event->button(), event->type(), pointerNumber);
+        TasLogger::logger()->debug("TasMouseEventGenerator::sendMouseEvent done");
     } else {
         QSpontaneKeyEvent::setSpontaneous(event);
         qApp->postEvent(target, event);

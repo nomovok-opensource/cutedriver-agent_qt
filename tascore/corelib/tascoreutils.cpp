@@ -39,6 +39,7 @@
 #include "tascoreutils.h"
 #include "tasdeviceutils.h"
 #include "testabilitysettings.h"
+#include "taspointercache.h"
 
 void Sleeper::sleep(int ms)
 {
@@ -363,7 +364,9 @@ void TasCoreUtils::wait(int millis)
 QString TasCoreUtils::objectId(QObject* object)
 {
     if(object){
-        return QString::number((quintptr)object);
+        QString id = QString::number((quintptr)object);
+        TasPointerCache::instance()->storePointer(id, object);
+        return id;
     }
     return "";
 }

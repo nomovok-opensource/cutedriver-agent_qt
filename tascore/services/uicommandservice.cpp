@@ -35,6 +35,7 @@
 
 #include "tasdeviceutils.h"
 
+
 /*!
   \class UiCommandService
   \brief UiCommandService manages ui commands send to the app

@@ -17,12 +17,13 @@
 **
 ****************************************************************************/
 
-
+#include <QGraphicsObject>
 
 #include "testabilityutils.h"
 #include "taslogger.h"
 #include "testabilitysettings.h"
 #include "tasqtcommandmodel.h"
+#include "taspointercache.h"
 
 /*!
   \class TestabilityUtils
@@ -36,8 +37,15 @@
 */
 QWidget* TestabilityUtils::findWidget(const QString& id)
 {
-    TasLogger::logger()->debug("TestabilityUtils::findWidget id:" + id);
+    TasLogger::logger()->debug("TestabilityUtils::findWidget id:" + id);    
     QWidget* widget = NULL;
+    QObject* o = TasPointerCache::instance()->getObject(id);
+    if(o != 0){
+        widget = qobject_cast<QWidget*>(o);
+        if(widget){
+            return widget;
+        }
+    }
     QWidgetList widgetList = qApp->allWidgets();
     if (!widgetList.empty()){
         QWidgetList::iterator i;
@@ -63,6 +71,16 @@ QWidget* TestabilityUtils::findWidget(const QString& id)
 QGraphicsItem* TestabilityUtils::findGraphicsItem(const QString& id)
 {
     QGraphicsItem* item = NULL;
+    QObject* o = TasPointerCache::instance()->getObject(id);
+    if(o != 0){
+        TasLogger::logger()->debug("TestabilityUtils::findGraphicsItem Object found from cache try casting");    
+        QGraphicsObject* go = qobject_cast<QGraphicsObject*>(o);
+        if(go){
+            TasLogger::logger()->debug("TestabilityUtils::findGraphicsItem object ok returning it.");    
+            return go;
+        }
+    }
+
     QWidgetList widgetList = qApp->topLevelWidgets();
     if (!widgetList.empty()){
         QList<QWidget*>::iterator iter;
