@@ -312,6 +312,7 @@ void StartAppService::launchDetached(const QString& applicationPath, const QStri
         CloseHandle( pi.hProcess );
         CloseHandle( pi.hThread );
         TasLogger::logger()->debug( QString("TasServer::launchDetached: Child PID: %1").arg(pid) );
+        TasClientManager::instance()->addStartedApp(applicationPath, QDateTime::currentDateTime().toString("yyyyMMddhhmmsszzz"));
         response.setData(pid);
 
     }
