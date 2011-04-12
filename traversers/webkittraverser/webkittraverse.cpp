@@ -453,7 +453,7 @@ void WebKitTraverse::traverseWebElement(TasObject* parent, QPoint parentPos, QPo
     //childInfo.setId(QString::number(++counter));    
     uint elementId = qHash(webElement->toOuterXml()+webFrameId);
     childInfo.setId(QString::number(elementId));
-    childInfo.setType(webElement->tagName().toLower());    
+    childInfo.setType(webElement->tagName().toLower().replace(QString(":"), QString("_")));
     //QWebElement parentElement = webElement->parent();
     //int parentId = (int)&parentElement;
     //childInfo.setParentId(parentId);        
