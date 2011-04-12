@@ -232,7 +232,7 @@ void StartAppService::launchDetached(const QString& applicationPath, const QStri
                                      const QStringList& environmentVars, const QString &workingDirectory,
                                      TasResponse& response)
 {
-
+    QString additionalMessage;
 #ifdef Q_OS_SYMBIAN
     //Qt startDetach seems to leak memory so need to do it for now.
     //to be removed when fix in qt
@@ -348,9 +348,37 @@ void StartAppService::launchDetached(const QString& applicationPath, const QStri
     }
     envListArray[envList.length()] = NULL;
 
+
+    // Try to find the binary first
+    QString filePath("");
+    const QString path = QString::fromLocal8Bit(::getenv("PATH"));
+    const QString file = QString::fromLocal8Bit(paramListArray[0]);
+    if (!file.contains('/') && !path.isEmpty()) 
+    {
+        QStringList pathEntries = path.split(QLatin1Char(':'));
+        foreach(QString dir, pathEntries) 
+        {
+            if (!dir.endsWith(QDir::separator())) {
+                dir += QDir::separator();
+            }
+            filePath = dir + file;
+            if (QFile::exists(filePath)) {
+                break;
+            } else {
+                filePath = "";
+            }
+        }
+    } else if (QFile::exists(file)) {
+        filePath= file;
+    }
+
+    if (filePath.isEmpty()) {
+        additionalMessage = ". The file was not found or is not in PATH.";
+    }
+
     // Using shared memory pro IPC instead of qt pipes to avoid using private qt libraries.
     QSharedMemory mem("pid_mem");
-    if ( mem.create(sizeof(pid_t)) )
+    if ( !filePath.isEmpty() && mem.create(sizeof(pid_t)) )
     {
 
         mem.lock();
@@ -390,26 +418,10 @@ void StartAppService::launchDetached(const QString& applicationPath, const QStri
                 }
 
                 // Try see if we don't need path
+                paramListArray[0] = QFile::encodeName(filePath).data();
                 execve( paramListArray[0], paramListArray, envListArray);
-
-                // Try also on all path directories if above fails
-                const QString path = QString::fromLocal8Bit(::getenv("PATH"));
-                const QString file = QString::fromLocal8Bit(paramListArray[0]);
-                if (!file.contains('/') && !path.isEmpty())
-                {
-                    QStringList pathEntries = path.split(QLatin1Char(':'));
-                    for (int k = 0; k < pathEntries.size(); ++k) {
-                        QByteArray tmp = QFile::encodeName(pathEntries.at(k));
-                        if (!tmp.endsWith('/')) tmp += '/';
-                        tmp += QFile::encodeName(file);
-                        paramListArray[0] = tmp.data();
-                        TasLogger::logger()->debug( QString("TasServer::launchDetached: PATH = '%1'").arg((char *) paramListArray[0]));
-                        execve( paramListArray[0], paramListArray, envListArray);
-
-                    }
-                 }
-
                 TasLogger::logger()->error( QString("TasServer::launchDetached: Granhild process died straight away."));
+                _exit(1);
             }
 
             // Child send Grandchild pid to shared mem and exit in order to end detachment of grandchild
@@ -534,10 +546,9 @@ void StartAppService::launchDetached(const QString& applicationPath, const QStri
             if (!res) TasLogger::logger()->error("TasServer::launchDetached: Parent::SharedMemErorr:: Shared Memory Dtachement failed! Retrying.");
             if (mem.isAttached()) Sleeper::sleep(100);
         }
-        TasLogger::logger()->debug(QString("TasServer::launchDetached: Error attaching to Shared Memory: ").arg(mem.errorString()));
 #endif
         TasLogger::logger()->error("TasServer::launchDetached: Could not start the application " + applicationPath);
-        response.setErrorMessage("Could not start the application " + applicationPath);
+        response.setErrorMessage("Could not start the application " + applicationPath + additionalMessage);
     }
 #if (defined(Q_OS_WIN32) || defined(Q_OS_WINCE))
         free(envp);
