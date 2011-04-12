@@ -410,6 +410,7 @@ void StartAppService::launchDetached(const QString& applicationPath, const QStri
                  }
 
                 TasLogger::logger()->error( QString("TasServer::launchDetached: Granhild process died straight away."));
+                _exit(1);
             }
 
             // Child send Grandchild pid to shared mem and exit in order to end detachment of grandchild
