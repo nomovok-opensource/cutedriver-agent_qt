@@ -1,5 +1,6 @@
 qttas (1.1.1-2) unstable; urgency=low
 
+  * Fixes: NB#247007 - Force loading of qttas plugin for all apps
   * Fixes: NB#245944 - Connection to plugin timedout!
 
  -- Testability Driver Team <testabilitydriver@nokia.com>  Thu, 32 Mar 2011 13:01:00 +0200
