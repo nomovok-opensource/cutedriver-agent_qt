@@ -112,7 +112,8 @@ void TestabilityPlugin::Initialize()
     }
 #endif
     // Ignore the launcher (but allow retrying)
-    if (getApplicationName() == "applauncherd.bin"){
+    if (getApplicationName() == "applauncherd.bin" || getApplicationName() == "applifed.x" || 
+        getApplicationName() == "applifed") {
         return;
     }
     QLibrary testLib("qttestability");
