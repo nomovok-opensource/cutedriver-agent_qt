@@ -394,7 +394,7 @@ bool TestabilityUtils::isItemBlackListed(QString objectName, QString className)
         QStringList blackList = value.toString().split(",");
         for (int i = 0; i < blackList.size(); i++){
             QString blackListed = blackList.at(i);
-            if(blackListed.contains(objectName)){
+            if(!objectName.isEmpty() && blackListed.contains(objectName)){
                 return true;
             }
             if(blackListed.contains(className)){
