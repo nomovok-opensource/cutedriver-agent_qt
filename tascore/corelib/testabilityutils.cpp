@@ -389,6 +389,12 @@ bool TestabilityUtils::isVisibilityCheckOn()
 
 bool TestabilityUtils::isItemBlackListed(QString objectName, QString className)
 {
+    //black list will most likely contain names without dynamic qml extension
+    if(className.contains("_QML")){
+        QStringList stringList = className.split("_QML");
+        className = stringList.takeFirst();        
+    }
+
     QVariant value = TestabilitySettings::settings()->getValue(VISIBILITY_BLACKLIST);
     if(value.isValid() && value.canConvert<QString>()){
         QStringList blackList = value.toString().split(",");
