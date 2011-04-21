@@ -25,6 +25,7 @@ target.path = $$TAS_TARGET_PLUGIN/tasfixtures
 symbian: {
 	 TARGET.EPOCALLOWDLLDATA = 1
 	 TARGET.CAPABILITY=CAP_GENERAL_DLL
+	 TARGET.UID3 = 0x2003A9F2
 	 dialog_fixture_plugin.sources = dialogfixture.dll
 	 dialog_fixture_plugin.path = /resource/qt/plugins/tasfixtures
 	 DEPLOYMENT += dialog_fixture_plugin

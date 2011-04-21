@@ -87,17 +87,7 @@ bool UtilFixturePlugin::execute(void * objectInstance, QString actionName, QHash
     // place your own code below
     bool result = true;
 
-    if(actionName.toLower() == "showmessage"){
-        QMessageBox msgBox;        
-        msgBox.setText(parameters.value("text"));
-        msgBox.exec();
-    }
-    // set the stdOut if you wish to pass information back to MATTI
-    else if(actionName.toLower() == "fail"){
-        stdOut = "The execution failed. Parameters were {";
-        result =  false;
-    }
-    else if(actionName.toLower() == "contextmenu"){
+    if(actionName.toLower() == "contextmenu"){
         TasLogger::logger()->debug("UtilFixturePlugin::execute contextMenu");
         QObject* target = 0;
         QPoint globalPoint(-1, -1);

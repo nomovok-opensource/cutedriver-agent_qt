@@ -23,6 +23,9 @@
 
 #if QT_VERSION >= 0x040700
 #include <QDeclarativeItem>
+#ifdef QML_ID
+#include <QDeclarativeContext>
+#endif
 #endif
 
 #include "testabilityutils.h"
@@ -71,12 +74,18 @@ void TasTraverseUtils::addObjectDetails(TasObject* objectInfo, QObject* object)
         QString objectType = object->metaObject()->className();
         objectType.replace(QString(":"), QString("_"));
 #if QT_VERSION >= 0x040700
-        //strip dynamic qml strings from the class name
+        //strip dynamic qml strings from the class name and add id string if existing
         if(qobject_cast<QDeclarativeItem*>(object)){
             QStringList stringList = objectType.split("_QML");
             QString strippedType = stringList.takeFirst();
             objectInfo->addAttribute("QML_TYPE_EXTENSION",  objectType.remove(strippedType));    
             objectType = strippedType;
+#ifdef QML_ID
+            QDeclarativeContext *context = qmlContext(object);
+            if (context) {
+                objectInfo->addAttribute("QML_ID", context->getStringId(object));
+            }
+#endif
         }
 #endif
         objectInfo->setType(objectType);    
@@ -128,10 +137,10 @@ void TasTraverseUtils::addVariantValue(TasAttribute& attr, const QVariant& value
         attr.addValue(value.toRectF());
         break;
     case QVariant::DateTime:
-        attr.addValue(QString::number(value.toDateTime().toTime_t()));
+        attr.addValuePlainString(QString::number(value.toDateTime().toTime_t()));
         break;
     case QVariant::Date:
-        attr.addValue(value.toDate().toString("dd.MM.yyyy"));
+        attr.addValuePlainString(value.toDate().toString("dd.MM.yyyy"));
         break;
     default:
         attr.addValue(value.toString());        
@@ -288,7 +297,6 @@ QPair<QPoint,QPoint> TasTraverseUtils::addGraphicsItemCoordinates(TasObject* obj
     }
 
     // if the onDisplay property is calculated by the fw, believe it if is set to false.
-    /*
     QGraphicsObject* qobj = graphicsItem->toGraphicsObject();
     if (qobj) {
         QVariant onDisplay = qobj->property("onDisplay");
@@ -297,9 +305,9 @@ QPair<QPoint,QPoint> TasTraverseUtils::addGraphicsItemCoordinates(TasObject* obj
         } else {
             objectInfo->addBooleanAttribute("visibleOnScreen", locationDetails.visible);  
         }
-    } else { */
+    } else { 
         objectInfo->addBooleanAttribute("visibleOnScreen", locationDetails.visible);  
-    //}
+    }
     return coords;
 }
 

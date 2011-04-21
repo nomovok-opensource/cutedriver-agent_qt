@@ -1,3 +1,67 @@
+qttas (1.1.1-2) unstable; urgency=low
+
+  * Fixes: NB#247007 - Force loading of qttas plugin for all apps
+  * Fixes: NB#245944 - Connection to plugin timedout!
+
+ -- Testability Driver Team <testabilitydriver@nokia.com>  Thu, 32 Mar 2011 13:01:00 +0200
+
+qttas (1.1.1-1) unstable; urgency=low
+
+  * new release version
+  * Fixes: NB#237003 - gesture directions are mixed up in vkb when in portrait mode
+
+ -- Testability Driver Team <testabilitydriver@nokia.com>  Thu, 32 Mar 2011 13:01:00 +0200
+
+qttas (1.1.0-1) unstable; urgency=low
+
+  * new release version
+  * Fixes: NB#204237 - Signals fixture is off-by-one regarding the signal parameters 
+
+ -- Testability Driver Team <testabilitydriver@nokia.com>  Thu, 15 Feb 2011 12:01:00 +0200
+
+qttas (1.0.4-3) unstable; urgency=low
+
+  * Fixes: NB#227508 - meego-im-uiserver crashes when running TDriver scripts
+  * Fixes: NB#223734 - Change QWidget::winId() to effectiveWinId
+
+ -- Testability Driver Team <testabilitydriver@nokia.com>  Thu, 15 Feb 2011 12:00:00 +0200
+
+qttas (1.0.4-2) unstable; urgency=low
+
+  * new release version
+
+ -- Testability Driver Team <testabilitydriver@nokia.com>  Thu, 10 Feb 2011 16:00:00 +0200
+
+qttas (1.0.4-1) unstable; urgency=low
+
+  * new release version
+
+ -- Testability Driver Team <testabilitydriver@nokia.com>  Wed, 26 Jan 2011 16:00:00 +0200
+
+qttas (1.0.3-2) unstable; urgency=low
+
+  * use stacking order to determine current foreground app
+
+ -- Testability Driver Team <testabilitydriver@nokia.com>  Wed, 26 Jan 2011 09:00:00 +0200
+
+qttas (1.0.3-1) unstable; urgency=low
+
+  * Fixes: NB#220154 - quick fix for setting environment variables for processes started through qttasserve
+
+ -- Testability Driver Team <testabilitydriver@nokia.com>  Tue, 25 Jan 2011 09:00:00 +0200
+
+qttas (1.0.2-1) unstable; urgency=low
+
+  * new release version - no changes - released together with testability-driver
+
+ -- Testability Driver Team <testabilitydriver@nokia.com>  Fri, 21 Jan 2011 12:00:00 +0200
+
+qttas (1.0.0-2) unstable; urgency=low
+
+  * Fixes: NB#220154 - quick fix for setting environment variables for processes started through qttasserve
+
+ -- Testability Driver Team <testabilitydriver@nokia.com>  Wed, 19 Jan 2011 10:00:00 +0300
+
 qttas (1.0.0-1) unstable; urgency=low
 
   * new release version

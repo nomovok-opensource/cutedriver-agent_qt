@@ -51,6 +51,8 @@ public:
 	bool isPress(){return mPress;}
 	bool isRelease(){return mRelease;}
 	QString touchPointIdKey(){return mTouchPointIdKey;}
+	void setUseTapScreen(bool useTapScreen) { mUseTapScreen=useTapScreen; }
+	bool getUseTapScreen() { return mUseTapScreen; }
 
 protected:
 	TasTouchPoints makeTouchPoint(QPoint pos, QPoint lastPos=QPoint(), QPoint startPos=QPoint());
@@ -60,6 +62,7 @@ protected:
 	bool mIsDrag;
 	bool mPress;
 	bool mRelease;
+	bool mUseTapScreen;
 	int mDuration;
 	QWidget* mTarget;
 	QGraphicsItem* mTargetItem;

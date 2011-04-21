@@ -42,6 +42,7 @@ const char* const PLATFORM                   = "platformOperation";
 const char* const COLLECT_EVENTS             = "collectEvents";
 const char* const OBJECT_SERVICE             = "objectManipulation";
 const char* const LIST_APPS                  = "listApps";
+const char* const STARTED_APPS             = "startedApps";
 const char* const RECORD_EVENTS              = "recordEvents";
 const char* const CONF_SERVICE               = "confService";
 const char* const INFO_SERVICE               = "infoService";                                                  
@@ -200,9 +201,12 @@ const char* const LOG_EVENTS = "logEvents";
 const char* const COMMAND_EXEC_JS_ON_OBJ = "ExecuteJavaScriptOnWebElement";
 const char* const COMMAND_EXEC_JS_ON_QWEBFRAME = "ExecuteJavaScriptOnQWebFrame";
 const char* const COMMAND_EXEC_SCROLL_QWEBFRAME = "ScrollQWebFrame";
+
 //settings
 const char* const BLACK_LISTED = "black_list";
 const char* const AUTO_START = "autostart";
+const char* const VISIBILITY_CHECK = "visibility_check";
+const char* const VISIBILITY_BLACKLIST = "visibility_blacklist";
 
 
 #ifdef TDTASSERVER

@@ -17,12 +17,13 @@
 **
 ****************************************************************************/
 
-
+#include <QGraphicsObject>
 
 #include "testabilityutils.h"
 #include "taslogger.h"
 #include "testabilitysettings.h"
 #include "tasqtcommandmodel.h"
+#include "taspointercache.h"
 
 /*!
   \class TestabilityUtils
@@ -36,8 +37,15 @@
 */
 QWidget* TestabilityUtils::findWidget(const QString& id)
 {
-    TasLogger::logger()->debug("TestabilityUtils::findWidget id:" + id);
+    TasLogger::logger()->debug("TestabilityUtils::findWidget id:" + id);    
     QWidget* widget = NULL;
+    QObject* o = TasPointerCache::instance()->getObject(id);
+    if(o != 0){
+        widget = qobject_cast<QWidget*>(o);
+        if(widget){
+            return widget;
+        }
+    }
     QWidgetList widgetList = qApp->allWidgets();
     if (!widgetList.empty()){
         QWidgetList::iterator i;
@@ -63,6 +71,16 @@ QWidget* TestabilityUtils::findWidget(const QString& id)
 QGraphicsItem* TestabilityUtils::findGraphicsItem(const QString& id)
 {
     QGraphicsItem* item = NULL;
+    QObject* o = TasPointerCache::instance()->getObject(id);
+    if(o != 0){
+        TasLogger::logger()->debug("TestabilityUtils::findGraphicsItem Object found from cache try casting");    
+        QGraphicsObject* go = qobject_cast<QGraphicsObject*>(o);
+        if(go){
+            TasLogger::logger()->debug("TestabilityUtils::findGraphicsItem object ok returning it.");    
+            return go;
+        }
+    }
+
     QWidgetList widgetList = qApp->topLevelWidgets();
     if (!widgetList.empty()){
         QList<QWidget*>::iterator iter;
@@ -248,39 +266,44 @@ bool TestabilityUtils::isItemInView(QGraphicsView* view, QGraphicsItem* graphics
 
                 QGraphicsItem* topItem = NULL;
 
-                // check top most item in item coordinates
-                for (int i = 0; i < topItems.size(); ++i) {
-                    topItem = topItems.at(i);
-                    QGraphicsObject* topObject = topItem->toGraphicsObject();
-                    QRectF sceneRect = topItem->sceneBoundingRect();
+                // top most item check disabled by default
+                if(isVisibilityCheckOn()) {
 
-                    // ignore special overlay items, mousearea added for now
-                    // may cause the removal of this feature since areas in qml can be created to shift for example to shift focus
-                    // but objects inside the area should still be available
-                    // as it is likely that more such components will follow we may have to rethink this feature
-                    if (topObject && (topObject->objectName() == "glass" || QString(topObject->metaObject()->className()).startsWith("SDeclarativeWindowDecoration") || QString(topObject->metaObject()->className()).startsWith("QDeclarativeMouseArea"))) { 
-                        continue;
+                    // check top most item in item coordinates
+                    for (int i = 0; i < topItems.size(); ++i) {
+                        topItem = topItems.at(i);
+                        QGraphicsObject* topObject = topItem->toGraphicsObject();
+                        QRectF sceneRect = topItem->sceneBoundingRect();
+
+                        // ignore special overlay items
+                        if (topObject && isItemBlackListed(topObject->objectName(), topObject->metaObject()->className())) {
+                            continue;
+                        }
+                        // ignore items with no width or height - should not get these when using point??
+                        else if(sceneRect.width() == 0 || sceneRect.height() == 0) {
+                            continue;
+                        }
+                        // found the top most item
+                        else {
+                            break;
+                        }
                     }
-                    // ignore items with no width or height - should not get these when using point??
-                    else if(sceneRect.width() == 0 || sceneRect.height() == 0) {
-                        continue;
+
+                    //QGraphicsObject* topObject = topItem->toGraphicsObject();
+                    //QGraphicsObject* itemObject = graphicsItem->toGraphicsObject();
+                    //TasLogger::logger()->debug("TestabilityUtils::isItemInView top item with id " + QString::number((quintptr)topObject) + " name " + topObject->metaObject()->className() + " item " + QString::number((quintptr)itemObject) + " itemname " + itemObject->metaObject()->className());
+
+                    // if the item itself is the top most item or item is father of topmost item
+                    if (topItem && (topItem == graphicsItem || graphicsItem->isAncestorOf(topItem))) {
+                        return true;
                     }
-                    // found the top most item
                     else {
-                        break;
+                        return false;
                     }
-                }
-
-                QGraphicsObject* topObject = topItem->toGraphicsObject();
-                QGraphicsObject* itemObject = graphicsItem->toGraphicsObject();
-                TasLogger::logger()->debug("TestabilityUtils::isItemInView top item with id " + QString::number((quintptr)topObject) + " name " + topObject->metaObject()->className() + " item " + QString::number((quintptr)itemObject) + " itemname " + itemObject->metaObject()->className());
-
-                // if the item itself is the top most item or item is father of topmost item
-                if (topItem && (topItem == graphicsItem || graphicsItem->isAncestorOf(topItem))) {
-                    return true;
                 }
                 else {
-                    return false;
+                    // no top most check so return true as within viewport
+                    return true;
                 }
             }
             else {
@@ -352,6 +375,41 @@ bool TestabilityUtils::isBlackListed()
     return false;
 }
 
+bool TestabilityUtils::isVisibilityCheckOn()
+{
+    QVariant value = TestabilitySettings::settings()->getValue(VISIBILITY_CHECK);
+    if(value.isValid() && value.canConvert<QString>()){
+        QString onOff = value.toString();
+        if(onOff.toLower() == "on"){
+                return true;
+        }
+    }
+    return false;
+}
+
+bool TestabilityUtils::isItemBlackListed(QString objectName, QString className)
+{
+    //black list will most likely contain names without dynamic qml extension
+    if(className.contains("_QML")){
+        QStringList stringList = className.split("_QML");
+        className = stringList.takeFirst();        
+    }
+
+    QVariant value = TestabilitySettings::settings()->getValue(VISIBILITY_BLACKLIST);
+    if(value.isValid() && value.canConvert<QString>()){
+        QStringList blackList = value.toString().split(",");
+        for (int i = 0; i < blackList.size(); i++){
+            QString blackListed = blackList.at(i);
+            if(!objectName.isEmpty() && blackListed.contains(objectName)){
+                return true;
+            }
+            if(blackListed.contains(className)){
+                return true;
+            }
+        }
+    }
+    return false;
+}
 /*!
     Returns the Proxy Widget if any parent widget has a proxy
  */
@@ -388,7 +446,7 @@ ItemLocationDetails TestabilityUtils::getItemLocationDetails(QGraphicsItem* grap
 {
     bool isVisible = false;
     QGraphicsView* view = getViewForItem(graphicsItem);
-    ItemLocationDetails locationDetails;
+    ItemLocationDetails locationDetails = {QPoint(), QPoint(), QPoint(), 0, 0, false};
     if(view){
         // for webkit
         // If the window is embedded into a another app, wee need to figure out if the widget is visible

@@ -55,9 +55,6 @@ int pidOfXWindow(Display* display, Window win)
                 pid += prop[0];  
             }
         }
-        
-       
-
     }  
     if (prop) XFree(prop);
     return pid;
@@ -274,7 +271,7 @@ int TasNativeUtils::pidOfActiveWindow(const QHash<QString, TasClient*> clients)
     int window = RootWindow(display, screen);
 
     // First try to use whatever MeeGo tells us
-    pid = pidOfMeegoWindow(display, window);
+    //pid = pidOfMeegoWindow(display, window);
     if (pid != -1) {
         TasLogger::logger()->debug("TasNativeUtils::pidOfActiveWindow Found MeeGo pid: " + QString::number(pid));
     } else {

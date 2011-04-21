@@ -58,7 +58,9 @@ const int PAINT_EVENT_LIMIT = 10;
 */
 extern "C" TAS_EXPORT void qt_testability_init()
 {
-    if(qApp->type() == QApplication::Tty){
+    // Ignore command line applications and the special launcher daemon in meego booster apps
+    if(qApp->type() == QApplication::Tty || TestabilityUtils::getApplicationName() == "applauncherd.bin" || TestabilityUtils::getApplicationName() == "applifed.x" || 
+       TestabilityUtils::getApplicationName() == "applifed") {
         return;
     }
 
@@ -204,6 +206,12 @@ TestabilityService::~TestabilityService()
  */
 void TestabilityService::registerPlugin()
 {
+    //close requested so do not register again
+    QVariant prop = qApp->property(CLOSE_REQUESTED);
+    if(prop.isValid() && prop.toBool()){
+        return;
+    }
+
     //remove paint tracking, paint tracking only on startup after this rely on the watchdog
     qApp->removeEventFilter(this);
 

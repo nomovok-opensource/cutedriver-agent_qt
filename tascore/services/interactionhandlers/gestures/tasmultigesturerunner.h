@@ -25,6 +25,7 @@
 
 #include "tasgesture.h"
 #include "tastoucheventgenerator.h"
+#include "tasmouseeventgenerator.h"
 
 class TasMultiGestureRunner : public QObject
 {
@@ -44,7 +45,9 @@ private:
 	QTimeLine mTimeLine;
 	QHash<TasGesture*,qreal> mGestures;
 	TasTouchEventGenerator mTouchGen;	
+	TasMouseEventGenerator mMouseGen;
 	QHash<TasGesture*, QList<TasTouchPoints> > mPreviousPoints;
+	bool mUseTapScreen;
 };
 
 #endif

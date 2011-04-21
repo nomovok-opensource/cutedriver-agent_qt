@@ -49,11 +49,15 @@
 ""- "z:\sys\bin\fpsfixture.dll"
 ""- "z:\sys\bin\popupfixture.dll"
 ""- "z:\sys\bin\filefixture.dll"
+""- "z:\sys\bin\settingfixture.dll"
+""- "z:\sys\bin\launchfixture.dll"
 ""- "z:\resource\qt\plugins\tasfixtures\tasfixture.qtplugin"
 ""- "z:\resource\qt\plugins\tasfixtures\tassignal.qtplugin"
 ""- "z:\resource\qt\plugins\tasfixtures\fpsfixture.qtplugin"
 ""- "z:\resource\qt\plugins\tasfixtures\popupfixture.qtplugin"
 ""- "z:\resource\qt\plugins\tasfixtures\filefixture.qtplugin"
+""- "z:\resource\qt\plugins\tasfixtures\settingfixture.qtplugin"
+""- "z:\resource\qt\plugins\tasfixtures\launchfixture.qtplugin"
 
 ; loaders
 ""- "z:\sys\bin\testability.dll"

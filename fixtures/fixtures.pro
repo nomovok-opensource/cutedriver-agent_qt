@@ -39,6 +39,7 @@ SUBDIRS += popupfixture
 
 symbian: {
 #	SUBDIRS += utilfixture
+        SUBDIRS += launchfixture
 }
 CONFIG(maemo){
 #SUBDIRS += duifixture #not supported anymore
@@ -47,5 +48,7 @@ CONFIG(maemo){
 SUBDIRS += tapfixture
 
 SUBDIRS += dialogfixture
+
+SUBDIRS += settingfixture
 
 CONFIG  += ordered

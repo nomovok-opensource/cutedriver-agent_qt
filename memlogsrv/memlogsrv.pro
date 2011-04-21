@@ -37,10 +37,14 @@ symbian: {
 	TARGET.VID = VID_DEFAULT
   	TARGET.EPOCALLOWDLLDATA = 1 
 	TARGET.EPOCHEAPSIZE = 0x20000 0x1400000
+	TARGET.UID3 = 0x2003A9E7
+
     LIBS += -lmemspydriverclient
     INCLUDEPATH += /epoc32/include/platform/memspy/driver
 
     LIBS += -lhal
+    LIBS += -lcone
+    LIBS += -lws32
     INCLUDEPATH += /epoc32/include/platform/memspy/driver
 #if ( NCP_COMMON_S60_VERSION_SUPPORT >= S60_VERSION_50 && NCP_COMMON_FAMILY_ID >= 70 )
 	LIBS += -llibEGL

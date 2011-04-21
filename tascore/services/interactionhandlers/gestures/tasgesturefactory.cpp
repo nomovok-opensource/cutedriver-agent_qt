@@ -79,7 +79,10 @@ TasGesture* TasGestureFactory::makeGesture(TargetData data)
 
     foreach(TasGestureRecognizer* recogizer, mRecognizers){
         if(recogizer->isSupportedType(gestureType)){
-            return recogizer->create(data);
+            TasGesture *gesture = recogizer->create(data);
+            // check here that every gesture recognizer does not have to check it
+            gesture->setUseTapScreen(data.command->parameter("useTapScreen") == "true");
+            return gesture;
         }
     }
     mErrorMessage = "TasGestureFactory::makeGesture: Uknown gesture type " + gestureType + ".";

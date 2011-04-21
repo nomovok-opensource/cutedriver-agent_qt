@@ -38,9 +38,6 @@ public:
   void addTextContent(const QString& content);
   void closeElement(const QString& name);
 
-private:
-  QString encodeString(const QString& source);
-
 private: 
   QTextStream& mXmlStream;
 

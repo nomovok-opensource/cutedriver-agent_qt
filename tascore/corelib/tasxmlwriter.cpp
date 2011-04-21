@@ -16,8 +16,6 @@
 ** of this file. 
 ** 
 ****************************************************************************/ 
- 
-
         
 #include "tasxmlwriter.h"
 
@@ -38,31 +36,21 @@ void TasXmlWriter::openElement(const QString& name)
 void TasXmlWriter::openElement(const QString& name, QMap<QString,QString> attributes)
 {
     mXmlStream << "<" << name << " ";
-    QMap<QString, QString>::const_iterator i = attributes.constBegin();
-    while (i != attributes.constEnd()) {
-        mXmlStream << i.key() << "=\"" << encodeString(i.value())<< "\" ";
-        ++i;
-    }
+
+    QMap<QString, QString>::const_iterator i;
+
+    for (i = attributes.constBegin(); i != attributes.constEnd(); ++i)
+        mXmlStream << i.key() << "=\"" << i.value() << "\" ";
+        
     mXmlStream << ">";
 }
 
 void TasXmlWriter::addTextContent(const QString& content)
 {
-    mXmlStream << encodeString(content);
+    mXmlStream << content;
 }
 
 void TasXmlWriter::closeElement(const QString& name)
 {
     mXmlStream << "</" << name << ">";
-}
-
-QString TasXmlWriter::encodeString(const QString& source)
-{
-    QString encoded = source;
-    encoded.replace( "&", "&amp;" );
-    encoded.replace( ">", "&gt;" );
-    encoded.replace( "<", "&lt;" );
-    encoded.replace( "\"", "&quot;" );
-    encoded.replace( "\'", "&apos;" );
-    return encoded;
 }

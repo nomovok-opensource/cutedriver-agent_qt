@@ -29,6 +29,7 @@ TasGestureRunner::TasGestureRunner(TasGesture* gesture, QObject* parent)
     connect(&mTimeLine, SIGNAL(valueChanged(qreal)), this, SLOT(timerEvent(qreal)));
     connect(&mTimeLine, SIGNAL(finished()), this, SLOT(finished()));
     qApp->installEventFilter(this);
+    mMouseGen.setUseTapScreen(gesture->getUseTapScreen());
     startGesture();
 }
 
@@ -46,11 +47,17 @@ void TasGestureRunner::startGesture()
 
     if(mGesture->isPress()){
         if(mGesture->isMultiTouch()){
-            mTouchGen.doTouchBegin(mGesture->getTarget(), mGesture->startPoints(), mGesture->touchPointIdKey());       
+            if(!mGesture->getUseTapScreen()){
+                mTouchGen.doTouchBegin(mGesture->getTarget(), mGesture->startPoints(), mGesture->touchPointIdKey());
+            } else {
+                for(int n=0;n<mGesture->startPoints().size();n++){
+                    mMouseGen.doMousePress(mGesture->getTarget(),  mGesture->getMouseButton(), mGesture->startPoints().at(n).screenPoint, n);
+                }
+            }
         }
         else{
             if(mGesture->pointerType() == MouseHandler::TypeTouch || mGesture->pointerType() == MouseHandler::TypeBoth){
-                mTouchGen.doTouchBegin(mGesture->getTarget(), mGesture->startPoints(), mGesture->touchPointIdKey());       
+                mTouchGen.doTouchBegin(mGesture->getTarget(), mGesture->startPoints(), mGesture->touchPointIdKey());
             }            
             if(mGesture->pointerType() == MouseHandler::TypeMouse || mGesture->pointerType() == MouseHandler::TypeBoth){
                 mMouseGen.doMousePress(mGesture->getTarget(), mGesture->getMouseButton(), mGesture->startPoints().first().screenPoint);
@@ -88,7 +95,13 @@ void TasGestureRunner::finished()
 void TasGestureRunner::releaseMouse()
 {
     if(mGesture->isMultiTouch() && mGesture->isRelease()){
-        mTouchGen.doTouchEnd(mGesture->getTarget(), mGesture->endPoints(), mGesture->touchPointIdKey());       
+        if(!mGesture->getUseTapScreen()){
+            mTouchGen.doTouchEnd(mGesture->getTarget(), mGesture->endPoints(), mGesture->touchPointIdKey());
+        } else {
+            for(int n=0;n<mGesture->endPoints().size();n++){
+                mMouseGen.doMouseRelease(mGesture->getTarget(),mGesture->getMouseButton(),mGesture->endPoints().at(n).screenPoint, n);
+            }
+        }
     }
     else{
         if(mGesture->pointerType() == MouseHandler::TypeTouch || mGesture->pointerType() == MouseHandler::TypeBoth){
@@ -114,7 +127,14 @@ void TasGestureRunner::move(QList<TasTouchPoints> points, bool force)
     }
     //    TasLogger::logger()->debug("TasGestureRunner::move needed");
     if(mGesture->isMultiTouch()){
-        mTouchGen.doTouchUpdate(mGesture->getTarget(), points, mGesture->touchPointIdKey());       
+        if(!mGesture->getUseTapScreen()){
+            mTouchGen.doTouchUpdate(mGesture->getTarget(), points, mGesture->touchPointIdKey());
+        } else {
+            for(int n=0;n<points.size();n++){
+                TasTouchPoints touchpoint = points.at(n);
+                mMouseGen.doMouseMove(mGesture->getTarget(),touchpoint.screenPoint,mGesture->getMouseButton(), n);
+            }
+        }
     }
     else{
         //        TasLogger::logger()->debug("TasGestureRunner::move touch not multi");

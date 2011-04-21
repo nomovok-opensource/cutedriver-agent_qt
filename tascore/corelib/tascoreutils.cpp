@@ -39,14 +39,12 @@
 #include "tascoreutils.h"
 #include "tasdeviceutils.h"
 #include "testabilitysettings.h"
+#include "taspointercache.h"
 
-class Sleeper: public QThread {
-public:
-    static void sleep(int ms)
-    {
+void Sleeper::sleep(int ms)
+{
         QThread::msleep(ms);
-    }
-};
+}
 
 
 QString TasCoreUtils::getApplicationName()
@@ -141,7 +139,7 @@ QString TasCoreUtils::eventType(QEvent* event)
             return QString("DeferredDelete");
         case QEvent::DragEnter: // 60 The cursor enters a widget during a drag and drop operation (QDragEnterEvent). 
             return QString("DragEnter");
-        case QEvent::DragLeave: // 62 The cursor leaves a widget during a drag and drop operation (QDragLeaveEvent). 
+        case QEvent::DragLeave: // 62 The cursor leaves a widget during a drag and drop operation (QDragLeaveEvent)sleep.
             return QString("DragLeave");
         case QEvent::DragMove: // 61 A drag and drop operation is in progress (QDragMoveEvent). 
             return QString("DragMove");
@@ -366,7 +364,9 @@ void TasCoreUtils::wait(int millis)
 QString TasCoreUtils::objectId(QObject* object)
 {
     if(object){
-        return QString::number((quintptr)object);
+        QString id = QString::number((quintptr)object);
+        TasPointerCache::instance()->storePointer(id, object);
+        return id;
     }
     return "";
 }
@@ -403,4 +403,24 @@ bool TasCoreUtils::autostart()
         }
     }
     return false;
+}
+
+QString TasCoreUtils::encodeString(const QString& source)
+{
+
+    QString encoded = source;
+
+    encoded.replace( "&", "&amp;" );
+    encoded.replace( ">", "&gt;" );
+    encoded.replace( "<", "&lt;" );
+    encoded.replace( "\"", "&quot;" );
+    encoded.replace( "\'", "&apos;" );
+
+    // ASCII #27 is not valid character in XML 1.0 specification
+    encoded.replace( QChar::fromAscii(27), "\\e" );
+
+    // ASCII #1 is not valid character in XML 1.0 specification
+    encoded.replace( QChar::fromAscii(1), "" );
+
+    return encoded;
 }

@@ -62,11 +62,17 @@ bool TasFixturePlugin::execute(void * objectInstance, QString actionName, QHash<
     // place your own code below
     bool result = true;
 
-    if(actionName == "showMessage"){
-        QMessageBox msgBox;        
-        msgBox.setText(parameters.value("text"));
-        int code = msgBox.exec();
-        TasLogger::logger()->debug("TasFixturePlugin::execute showMessage " + QString::number(code));
+    if(actionName.toLower() == "change_orientation"){
+        QWidget* appWindow = TestabilityUtils::getApplicationWindow();
+        if(appWindow){
+            QSize newSize(appWindow->height(), appWindow->width());
+            appWindow->resize(newSize);    
+            result =  true;
+        }
+        else{
+            stdOut = "Could not find application window.";
+            result =  false;
+        }
     }
     // set the stdOut if you wish to pass information back to Testtability Driver
     else if(actionName == "fail"){

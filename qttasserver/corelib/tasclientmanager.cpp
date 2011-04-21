@@ -166,6 +166,17 @@ TasClient* TasClientManager::addRegisteredClient(const QString& processId, const
 }
 
 /*!
+  Adds a new app to the list of started apps. If the app already exists it will be replaced.
+ */
+void TasClientManager::addStartedApp(const QString& processName, const QString& timestamp)
+{
+    QMutexLocker locker(&mMutex);   
+    TasLogger::logger()->info("TasClientManager::addStartedApp " + processName + " " + timestamp);
+
+    mStartedApps[processName] = timestamp; 
+}
+
+/*!
   Attempts to remove a client from the connected clients.
   The application process will be deleted which will cause a possible 
   process to be killed if it is still running and the socket 
@@ -380,21 +391,24 @@ void TasClientManager::removeAllClients(bool kill)
     QMutexLocker locker(&mMutex);   
     foreach (TasClient* app, mClients){
         app->closeConnection();
-        if(kill){
+        if(kill && mStartedPids.contains(app->processId())){
             bool ok;
             quint64 pid = app->processId().toULongLong(&ok, 10);       
             if(ok && pid != 0){
                 TasNativeUtils::killProcess(pid);
             }
         }
+        mStartedPids.removeAll(app->processId());
         delete app;
-        app = 0;
     }
     mClients.clear();
-   
-    emit allClientsRemoved();
 }
 
+
+void TasClientManager::addStartedPid(const QString& pid)
+{
+    mStartedPids << pid;
+}
 
 
 /*!
@@ -464,6 +478,24 @@ void TasClientManager::applicationList(TasObject& parent)
 }
 
 /*!
+  Return a data model with all started applications listed.
+ */
+void TasClientManager::startedApplicationsList(TasObject& parent)
+{
+    QMutexLocker locker(&mMutex);
+    int i = 0;   
+    foreach (const QString& app, mStartedApps.keys()){
+        if(app != NULL){
+            TasObject& appObj = parent.addObject();
+            appObj.setId(QString::number(i++));
+            appObj.setType(QString("application"));
+            appObj.setName(app);
+	    appObj.addAttribute("startTime", mStartedApps[app]);
+        }
+    }
+}
+
+/*!
     \class TasClient
     \brief TasAppliction utility class for application details
 
@@ -524,11 +556,18 @@ void TasClient::disconnected()
 
     if(mSocket){
         disconnect(mSocket, SIGNAL(socketClosed()), this, SLOT(disconnected()));    
-        mSocket = 0;
     }
+    socketDied();
+}
 
+void TasClient::socketDied()
+{    
+    if(mSocket){
+        disconnect(mSocket, SIGNAL(destroyed()), this, SLOT(socketDied()));    
+    }
     //no process remove the client from the list
     //will register again if so wants
+    mSocket = 0;
     TasClientManager::instance()->removeMe(*this);
     deleteLater();
 }
@@ -548,6 +587,7 @@ void TasClient::setSocket(TasSocket* socket)
 {
     mSocket = socket;
     connect(mSocket, SIGNAL(socketClosed()), this, SLOT(disconnected()));    
+    connect(mSocket, SIGNAL(destroyed()), this, SLOT(socketDied()));    
 }
 
 int TasClient::upTime()
