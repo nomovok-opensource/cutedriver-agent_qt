@@ -34,7 +34,8 @@ const char* const VERSION = "version";
 const char* const NAME = "name";
 const char* const TYPE = "type";
 const char* const ENV = "env";
-const char* const DATA_TYPE = "dataType";
+const char* const DATA_TYPE = "type";
+const char* const ACCESS = "access";
 const char* const ID = "id";
 const char* const ROOT_NAME = "tasMessage";
 const char* const CONTAINER_NAME = "tasInfo";
@@ -173,7 +174,7 @@ void TasAttribute::serializeIntoString(TasXmlWriter& xmlWriter ,SerializeFilter&
     QMap<QString, QString> attributes;
     attributes[NAME] = TasCoreUtils::encodeString( name );
     if(!type.isEmpty()){
-        attributes[TYPE] = type;
+        attributes[ACCESS] = type;
     }
     if(!dataType.isEmpty()){
         attributes[DATA_TYPE] = dataType;

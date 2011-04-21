@@ -192,13 +192,10 @@ void TasTraverseUtils::printProperties(TasObject* objectInfo, QObject* object)
             if(mTraverseFilter == 0 || !mTraverseFilter->filterProperties()){
                 QString propertyTypes = "";
                 if(metaproperty.isReadable()){
-                    propertyTypes = "readable";
+                    propertyTypes = "r";
                 }
                 if(metaproperty.isWritable ()){
-                    if(!propertyTypes.isEmpty()){
-                        propertyTypes += QString(", ");
-                    }
-                    propertyTypes += QString("writable");
+                    propertyTypes += QString("w");
                 }
                 attr.setType(propertyTypes);
             }
