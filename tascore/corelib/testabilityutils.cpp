@@ -275,8 +275,12 @@ bool TestabilityUtils::isItemInView(QGraphicsView* view, QGraphicsItem* graphics
                         QGraphicsObject* topObject = topItem->toGraphicsObject();
                         QRectF sceneRect = topItem->sceneBoundingRect();
 
+                        // I am top
+                        if(topItem == graphicsItem){
+                            break;
+                        }
                         // ignore special overlay items
-                        if (topObject && isItemBlackListed(topObject->objectName(), topObject->metaObject()->className())) {
+                        else if (topObject && isItemBlackListed(topObject->objectName(), topObject->metaObject()->className())) {
                             continue;
                         }
                         // ignore items with no width or height - should not get these when using point??
