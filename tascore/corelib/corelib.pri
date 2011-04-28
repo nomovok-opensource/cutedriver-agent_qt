@@ -59,8 +59,10 @@ SOURCES += $$PWD/taspointercache.cpp
 unix: {
     symbian: {
        HEADERS += $$PWD/gpuinfo_symbian.h 
+       HEADERS += $$PWD/pwrinfo_symbian.h
        SOURCES += $$PWD/tasdeviceutils_symbian.cpp
        SOURCES += $$PWD/gpuinfo_symbian.cpp
+       SOURCES += $$PWD/pwrinfo_symbian.cpp
     } else {
        macx|CONFIG(no_x):{
          SOURCES += $$PWD/tasdeviceutils.cpp	
@@ -85,5 +87,5 @@ unix:!symbian:!macx:!CONFIG(no_x) {
 }
 
 symbian: {
-    LIBS += -lcfclient -lcfservices
+    LIBS += -lcfclient -lcfservices -lHWRMPowerClient -lcentralrepository
 }

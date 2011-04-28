@@ -29,6 +29,7 @@
 const static QString CPU = "cpu";
 const static QString GPU = "gpu";
 const static QString MEM = "mem";
+const static QString PWR = "pwr";
 const static QString ACTION = "action";
 const static QString APPEND = "append";
 const static QString CLEARLOG = "clearLog";
@@ -42,6 +43,7 @@ InfoLogger::InfoLogger()
     mCpu = 0;
 	mMem = 0;
 	mGpu = 0;
+	mPwr = 0;
     mState = 0;
     mDeviceUtils = new TasDeviceUtils();
     mTimer.setInterval(1000);
@@ -54,6 +56,7 @@ InfoLogger::~InfoLogger()
     if(mCpu) delete mCpu;
     if(mGpu) delete mGpu;
     if(mMem) delete mMem;
+    if(mPwr) delete mPwr;
     delete mDeviceUtils;
 }
 
@@ -129,6 +132,32 @@ void InfoLogger::performLogService(TasCommandModel& model, TasResponse& response
             }
             else if(command->parameter(ACTION) == "stop" || command->parameter(ACTION) == "load"){
                 loadGpuData(response, command);
+            }
+
+        }
+        command = target->findCommand(PWR);
+        if(command){
+            if(command->parameter(ACTION) == "start"){
+                QString fileName;
+                if(!makeFileName(command, PWR, fileName)){
+                    response.setErrorMessage("File path must be defined for pwr logging!");
+                }
+                else{
+                    mState |= PwrLogging;
+                    if(mPwr){
+                        delete mPwr;
+                        mPwr = 0;
+                    }
+                    mPwr = openFile(fileName, command);
+                }
+                //to launch measuring if not running
+                mDeviceUtils->pwrDetails();
+            }
+            else if(command->parameter(ACTION) == "stop" || command->parameter(ACTION) == "load"){
+                loadPwrData(response, command);
+                if(command->parameter(ACTION) == "stop" ){
+                    mDeviceUtils->stopPwrData();
+                }
             }
 
         }
@@ -231,6 +260,25 @@ void InfoLogger::loadGpuData(TasResponse& response, TasCommand* command)
 }
 
 /*!
+  Loads power data from the file and sets the in xml format as
+  the response data.
+*/
+void InfoLogger::loadPwrData(TasResponse& response, TasCommand* command)
+{
+    if(mPwr){
+        response.setData(loadData(mPwr, "pwrUsage", command));
+        if(command->parameter(ACTION) == "stop"){
+            delete mPwr;
+            mPwr = 0;
+            mState ^= PwrLogging;
+        }
+    }
+    else{
+        response.setErrorMessage("No data collected!");
+    }
+}
+
+/*!
   Loads the data from the file and makes a tasdatamodel out of the 
   data. Serializes the data and returns a QByteArray containing the 
   serialized data.
@@ -305,6 +353,9 @@ void InfoLogger::timerEvent()
     if( (mState & GpuLogging) != 0){
         logGpu();
     }
+    if( (mState & PwrLogging) != 0){
+        logPwr();
+    }
 }
 
 void InfoLogger::logMem()
@@ -377,6 +428,26 @@ void InfoLogger::logGpu()
     line.append(VALUE_DELIM);
     line.append(QString::number(details.processSharedMem));    
     writeLine(line, mGpu);
+}
+
+void InfoLogger::logPwr()
+{
+    PwrDetails details = mDeviceUtils->pwrDetails();
+    QString line = "timeStamp:";
+    line.append(QDateTime::currentDateTime().toString(DATE_FORMAT));
+    line.append(ATTR_DELIM);
+    //not supported
+    if(!details.isValid){
+        details.voltage = -1;
+        details.current = -1;
+    }
+    line.append("voltage:");
+    line.append(QString::number(details.voltage));
+    line.append(ATTR_DELIM);
+    line.append("current");
+    line.append(VALUE_DELIM);
+    line.append(QString::number(details.current));
+    writeLine(line, mPwr);
 }
 
 void InfoLogger::writeLine(const QString& line, QFile* file)
