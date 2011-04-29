@@ -104,11 +104,11 @@ void ScreenshotService::getScreenshot(TasCommandModel& model, TasResponse& respo
                     ItemLocationDetails locationDetails = TestabilityUtils::getItemLocationDetails(item);
 
                     if(draw){
-                        screenshot = QPixmap::grabWidget(view->window(), locationDetails.scenePoint.x(), locationDetails.scenePoint.y(),
+                        screenshot = QPixmap::grabWidget(view->window(), locationDetails.windowPoint.x(), locationDetails.windowPoint.y(),
                                                          locationDetails.width, locationDetails.height).toImage();
                     }
                     else{
-                        screenshot = QPixmap::grabWindow(view->window()->winId(), locationDetails.scenePoint.x(), locationDetails.scenePoint.y(),
+                        screenshot = QPixmap::grabWindow(view->window()->winId(), locationDetails.windowPoint.x(), locationDetails.windowPoint.y(),
                                                          locationDetails.width, locationDetails.height).toImage();
                     }
 
