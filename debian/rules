@@ -13,6 +13,9 @@ endif
 QMAKE_OPTIONS = -r CONFIG+=maemo
 CFLAGS = -Wall -g
 
+PACKAGE_TARGETS := $(foreach pkg,$(DEB_ALL_PACKAGES),binary/$(pkg))
+
+
 ifneq (,$(findstring noopt,$(DEB_BUILD_OPTIONS)))
 	CFLAGS += -O0
 else
@@ -92,6 +95,8 @@ binary-arch: build install
 	dh_gencontrol
 	dh_md5sums
 	dh_builddeb --destdir=$(DEBDIR)
+	aegis-deb-add -control debian/qttas-server/DEBIAN/control .. debian/qttas-server.aegis=_aegis
+
 
 binary: binary-indep binary-arch
 .PHONY: build clean binary-indep binary-arch binary install configure

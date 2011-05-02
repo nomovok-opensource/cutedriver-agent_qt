@@ -1,0 +1,7 @@
+<aegis>
+    <request>
+      <credential name="CAP::setuid" />
+      <credential name="CAP::setgid" />
+      <for path="/etc/init/test/qttasserver.conf" />
+    </request>
+</aegis>
