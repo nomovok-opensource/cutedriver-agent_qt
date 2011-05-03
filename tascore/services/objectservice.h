@@ -37,8 +37,9 @@ public:
         QString serviceName()const { return OBJECT_SERVICE; }
 private:
         void performObjectService(TasCommandModel& model, TasResponse& response);
-        void doCallMethod(TasCommand* command, QObject* target, QString& errorString);
+        QString doCallMethod(TasCommand* command, QObject* target, QString& errorString);
         void doSetAttribute(TasCommand* command, QObject* target, QString& errorString);
+        QVariantList parseArguments(TasCommand* command);
 };
 
 #endif
