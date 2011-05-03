@@ -31,6 +31,7 @@
 TasDeviceUtils::TasDeviceUtils()
 {
     gpuDetailsHandler = 0;
+    pwrDetailsHandler = 0;
 }
 
 GpuMemDetails TasDeviceUtils::gpuMemDetails()
@@ -39,6 +40,16 @@ GpuMemDetails TasDeviceUtils::gpuMemDetails()
     details.isValid = false;
     return details;
 }
+
+PwrDetails TasDeviceUtils::pwrDetails()
+{
+    PwrDetails details;
+    details.isValid = false;
+    return details;
+}
+void TasDeviceUtils::stopPwrData()
+{}
+
 
 void TasDeviceUtils::resetInactivity() 
 {

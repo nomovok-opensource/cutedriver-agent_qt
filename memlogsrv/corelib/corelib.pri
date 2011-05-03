@@ -24,8 +24,7 @@ HEADERS += corelib/cpuloadgenerator.h
 SOURCES += corelib/tasqtmemlogservice.cpp
 
 symbian: {
-#    SOURCES += corelib/resourcedatagatherer_symbian.cpp
-    SOURCES += corelib/resourcedatagatherer.cpp
+    SOURCES += corelib/resourcedatagatherer_symbian.cpp
     SOURCES += corelib/cpuloadgenerator_symbian.cpp
 } else {
     SOURCES += corelib/resourcedatagatherer.cpp

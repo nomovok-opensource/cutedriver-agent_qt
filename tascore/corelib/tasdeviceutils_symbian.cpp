@@ -43,6 +43,7 @@ QTM_USE_NAMESPACE
 
 #if ( NCP_COMMON_S60_VERSION_SUPPORT >= S60_VERSION_50 && NCP_COMMON_FAMILY_ID >= 70 )
 #include "gpuinfo_symbian.h"
+#include "pwrinfo_symbian.h"
 #endif
 
 _LIT( KQTasServerName, "qttasserver" );
@@ -50,6 +51,7 @@ _LIT( KQTasServerName, "qttasserver" );
 TasDeviceUtils::TasDeviceUtils()
 {
     gpuDetailsHandler = 0;
+    pwrDetailsHandler = 0;
 }
 
 GpuMemDetails TasDeviceUtils::gpuMemDetails()
@@ -60,11 +62,36 @@ GpuMemDetails TasDeviceUtils::gpuMemDetails()
     }
     return gpuDetailsHandler->gpuData();
 #else
-    GpuMemDetails details:
+    GpuMemDetails details;
     details.isValid = false;
     return details;
 #endif
 }
+
+PwrDetails TasDeviceUtils::pwrDetails()
+{
+#if ( NCP_COMMON_S60_VERSION_SUPPORT >= S60_VERSION_50 && NCP_COMMON_FAMILY_ID >= 70 )
+    if(!pwrDetailsHandler){
+      pwrDetailsHandler = new PwrDetailsHandler();
+    }
+    return pwrDetailsHandler->pwrData();
+#else
+    PwrDetails details;
+    details.isValid = false;
+    return details;
+#endif
+}
+
+void TasDeviceUtils::stopPwrData()
+{
+#if ( NCP_COMMON_S60_VERSION_SUPPORT >= S60_VERSION_50 && NCP_COMMON_FAMILY_ID >= 70 )
+    if(pwrDetailsHandler){
+       delete pwrDetailsHandler;
+       pwrDetailsHandler = 0;
+     }
+#endif
+}
+
 
 void TasDeviceUtils::resetInactivity() 
 {

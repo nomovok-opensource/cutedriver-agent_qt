@@ -128,7 +128,7 @@ void TasServerServiceManager::handleServiceRequest(TasCommandModel& commandModel
         bool needFragment = false;
         if(commandModel.service() == APPLICATION_STATE || commandModel.service() == FIND_OBJECT_SERVICE){
             foreach(TasExtensionInterface* traverser, mExtensions){
-                QByteArray data = traverser->traverseApplication(targetClient->processId(), targetClient->applicationName());
+                QByteArray data = traverser->traverseApplication(commandModel);
                 if(!data.isNull()){
                     waiter->appendPlatformData(data);
                     needFragment = true;

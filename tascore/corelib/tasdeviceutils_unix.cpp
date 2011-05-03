@@ -87,6 +87,7 @@ int getOrientationForWidget(QWidget* widget)
 TasDeviceUtils::TasDeviceUtils()
 {
     gpuDetailsHandler = 0;
+    pwrDetailsHandler = 0;
 }
 
 void TasDeviceUtils::resetInactivity() 
@@ -111,6 +112,16 @@ GpuMemDetails TasDeviceUtils::gpuMemDetails()
     details.isValid = false;
     return details;
 }
+
+PwrDetails TasDeviceUtils::pwrDetails()
+{
+    PwrDetails details;
+    details.isValid = false;
+    return details;
+}
+
+void TasDeviceUtils::stopPwrData()
+{}
 
 // TODO remove the duplicate code (maemo version)
  

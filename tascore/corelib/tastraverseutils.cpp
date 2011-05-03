@@ -83,7 +83,7 @@ void TasTraverseUtils::addObjectDetails(TasObject* objectInfo, QObject* object)
 #ifdef QML_ID
             QDeclarativeContext *context = qmlContext(object);
             if (context) {
-                objectInfo->addAttribute("QML_ID", context->getIdString(object));
+                objectInfo->addAttribute("QML_ID", context->getStringId(object));
             }
 #endif
         }
