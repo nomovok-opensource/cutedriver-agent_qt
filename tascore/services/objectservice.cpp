@@ -97,7 +97,7 @@ void ObjectService::performObjectService(TasCommandModel& model, TasResponse& re
                     doSetAttribute(command, target, errorString);
                 }
                 else if (command->name() == "CallMethod"){
-                    doCallMethod(command, target, errorString);
+                    response.setData(doCallMethod(command, target, errorString));
                 }
                 else {
                     TasLogger::logger()->debug(
@@ -121,29 +121,102 @@ void ObjectService::performObjectService(TasCommandModel& model, TasResponse& re
 }
 
 
+QVariantList ObjectService::parseArguments(TasCommand* command) 
+{
+    TasLogger::logger()->debug("Parse args");
+    int index = 0;
+    QVariantList args;
+
+    while (true) {
+        QString curr = QString("method_param%1").arg(index);
+        TasLogger::logger()->debug("looking for " + curr);
+        QString param = command->parameter(curr);
+        if (param.isEmpty()) {
+            break;
+        }
+        QString val;
+        QGenericArgument arg;
+        val = param.mid(1);
+
+        TasLogger::logger()->debug("got " + val);
+
+        if (param[0] == 'S') {
+            args << QVariant(QString(val));
+        } else if (param[0] == 'I') {
+            args << QVariant(val.toInt());
+        } else if (param[0] == 'D') {
+            QVariant var = QVariant(val.toDouble());
+            TasLogger::logger()->debug("double! : " + QString::number(var.value<double>()));
+            args << var;
+        } else if (param[0] == 'B') {
+            args << QVariant(val == "true"); // //Q_ARG(bool,val == "true");
+        }
+
+        ++index;
+    }
+    
+    while (index <= 9) {
+        args << QVariant();
+        ++index;
+    }
+
+    return args;
+}
+
+
 /*!
 Function for executing a slot that does not take parameters
 */
-void ObjectService::doCallMethod(TasCommand* command, QObject* target, QString& errorString)
+QString ObjectService::doCallMethod(TasCommand* command, QObject* target, QString& errorString)
 {
     Q_ASSERT(command->name() == "CallMethod");
 
     QString methodName = command->parameter("method_name");
+    TasLogger::logger()->debug("name: " + methodName);
     int methodId = target->metaObject()->indexOfMethod(
                 QMetaObject::normalizedSignature(methodName.toAscii()).constData());
-
     if (methodId == -1){
         errorString.append(methodName + " method not found on object. ");
         TasLogger::logger()->debug("...method not found on object");
     }
     else{
         QMetaMethod metaMethod = target->metaObject()->method(methodId);
-        TasLogger::logger()->debug("...got metaMethod");
-        if(!metaMethod.invoke(target, Qt::DirectConnection)){
+        QVariantList args = parseArguments(command);
+        QList<QGenericArgument> arguments;
+        for (int i = 0; i < args.size(); i++) {
+            QVariant& argument = args[i];
+            QGenericArgument genericArgument(
+                QMetaType::typeName(argument.userType()),
+                const_cast<void*>(argument.constData()));
+            arguments << genericArgument;
+        }
+
+        QVariant returnValue(QMetaType::type(metaMethod.typeName()), 
+                             static_cast<void*>(NULL));
+        QGenericReturnArgument returnArgument(
+            metaMethod.typeName(),
+            const_cast<void*>(returnValue.constData()));
+
+        if (!metaMethod.invoke(
+                target,
+                Qt::AutoConnection, // In case the object is in another thread.
+                returnArgument,
+                arguments.value(0),
+                arguments.value(1),
+                arguments.value(2),
+                arguments.value(3),
+                arguments.value(4),
+                arguments.value(5),
+                arguments.value(6),
+                arguments.value(7),
+                arguments.value(8),
+                arguments.value(9))) {
             errorString.append(methodName + " method invocation failed! ");
-            TasLogger::logger()->debug("...invoke failed");
+        } else {
+            return returnValue.toString();
         }
     }
+    return QString(""); 
 }
 
 

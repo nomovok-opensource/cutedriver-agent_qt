@@ -68,12 +68,7 @@ private:
     void parseAttributes(QWebElement* webElement, TasObject* objInfo);
     QString parseElementText(QString innerXml);
 
-    int counter;
-    /*
-      in some cases zoom factor needs to be corrected, and this value is to do that
-      default value 1.0
-    */
-    qreal zoom_correction;
+    QGraphicsWebView* mTemporaryPointerToQGraphicsWebView;
 
 #endif
 
