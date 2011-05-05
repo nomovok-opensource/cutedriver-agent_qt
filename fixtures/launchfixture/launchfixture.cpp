@@ -26,13 +26,13 @@
 #include <testabilityutils.h>
 #include <tasqtdatamodel.h>
 
-#include "LaunchFixture.h"
+#include "launchfixture.h"
 
 #include <taslogger.h>
 
 
 #include <e32base.h>
-#include <APGCLI.H>
+#include <apgcli.h>
 
 Q_EXPORT_PLUGIN2(LaunchFixture, LaunchFixture)
 
