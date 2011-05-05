@@ -33,8 +33,8 @@
 
 FixtureService::FixtureService()
 {
+    mInitialized = false;
     mPluginLoader = new TasPluginLoader();
-    mPluginLoader->initializeFixturePlugins();
     mTimer.setInterval(50);
     connect(&mTimer, SIGNAL(timeout()), this, SLOT(delayedEvent()));
 }
@@ -51,6 +51,12 @@ FixtureService::~FixtureService()
 bool FixtureService::executeService(TasCommandModel& model, TasResponse& response)
 {    
     if(model.service() == serviceName() ){
+
+        if(!mInitialized){
+            mPluginLoader->initializeFixturePlugins();
+            mInitialized = true;
+        }
+        
         if(!model.isAsynchronous()){
             QString message = "";
             if(!performFixture(model, message)){

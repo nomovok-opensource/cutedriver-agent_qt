@@ -45,9 +45,13 @@ INCLUDEPATH += . ../../tascore/corelib
 
 # Input
 HEADERS += tasfixtureplugin.h
+HEADERS += taspropertylogger.h
 SOURCES += tasfixtureplugin.cpp
+SOURCES += taspropertylogger.cpp
 
 DESTDIR = lib
+
+QT += xml
 
 INSTALLS += target
 
