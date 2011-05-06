@@ -92,37 +92,35 @@ QList<QTouchEvent::TouchPoint> TasTouchEventGenerator::convertToTouchPoints(Targ
 QList<QTouchEvent::TouchPoint> TasTouchEventGenerator::convertToTouchPoints(QWidget* target, Qt::TouchPointState state,
                                                                             QList<TasTouchPoints> points, QString identifier)
 {
-    bool store = true;
     QList<QVariant> pointIds;
     if(!identifier.isEmpty()) {
         QVariant pointStore = qApp->property(identifier.toAscii());
         if(pointStore.isValid()){
             pointIds = pointStore.toList();
-        }
-        if(state == Qt::TouchPointReleased){
-            //set invalid to remove the list
-            qApp->setProperty(identifier.toAscii(), QVariant());
-            store = false;
-        }       
+        }      
     }
-    else{
-        store = false;                        
-    }
+
     QList<QTouchEvent::TouchPoint> touchPoints;    
     if(!points.isEmpty()){
         for(int i = 0 ; i < points.size() ; i++){
             if(pointIds.size() <= i ){
                 mTouchPointCounter++;
-                pointIds.append(QVariant(mTouchPointCounter));                
+                pointIds.append(QVariant(mTouchPointCounter));
             }
             touchPoints.append(makeTouchPoint(target, points.at(i), state, pointIds.at(i).toInt()));
         }
     }
-    if(store && !identifier.isEmpty()){
+
+
+    if(state == Qt::TouchPointReleased){
+        qApp->setProperty(identifier.toAscii(), QVariant());
+        mTouchPointCounter = 0;
+    }       
+    else if(!identifier.isEmpty()){
         //we store the point id to the app as property
         //this allows new gestures to use the ids when needed
         qApp->setProperty(identifier.toAscii(), QVariant(pointIds));
-    }
+    } 
     return touchPoints;
 }
 
