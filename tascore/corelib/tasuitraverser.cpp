@@ -32,6 +32,9 @@
 #include "tastraverserloader.h"
 #include "tasdeviceutils.h"
 
+#if defined(TAS_MAEMO) && defined(HAVE_QAPP)
+#include <MLocale>
+#endif
 
 TasUiTraverser::TasUiTraverser(QHash<QString, TasTraverseInterface*> traversers)
 {
@@ -263,6 +266,11 @@ void TasUiTraverser::addApplicationDetails(TasObject& application, TasCommand* c
     if(mem != -1){
         application.addAttribute("memUsage", mem);
     }
+#if defined(TAS_MAEMO) && defined(HAVE_QAPP)
+    MLocale defaultMLocale;
+    application.addAttribute("localeMeegoName", defaultMLocale.name());
+    application.addAttribute("localeMeegoLanguage", defaultMLocale.language());
+#endif
     QLocale defaultLocale;
     application.addAttribute("localeName", defaultLocale.name());
     application.addAttribute("localeCountry", defaultLocale.countryToString(defaultLocale.country()));

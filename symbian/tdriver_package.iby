@@ -7,8 +7,8 @@
 #include <memspy_rom.iby>
 #include <memspy.iby>
 
-#define TAS_UPGRADABLE_APP_REG_RSC(NAME) data=DATAZ_\private\10003A3F\import\APPS\ ## NAME ## _reg.rsc        Private\10003a3f\import\apps\ ## NAME ## _reg.rsc
-#define TAS_PLUGIN_STUB(NAME, SUBDIR) data=\epoc32\data\z\resource\qt\plugins\##SUBDIR##\##NAME##.qtplugin RESOURCE_FILES_DIR\qt\plugins\##SUBDIR##\##NAME##.qtplugin
+#define TAS_UPGRADABLE_APP_REG_RSC(NAME) data=DATAZ_/private/10003a3f/import/apps/NAME ## _reg.rsc        Private/10003a3f/import/apps/NAME ## _reg.rsc
+#define TAS_PLUGIN_STUB(NAME, SUBDIR) data=EPOCROOT##epoc32/data/z/resource/qt/plugins/SUBDIR/NAME.qtplugin RESOURCE_FILES_DIR/qt/plugins/SUBDIR/NAME.qtplugin
 
 //qttasserver
 file=ABI_DIR\BUILD_DIR\qttasserver.exe                    SHARED_LIB_DIR\qttasserver.exe 
@@ -32,7 +32,7 @@ S60_APP_RESOURCE(qttasutilapp)
 
 //qt_testability dll
 file=ABI_DIR\BUILD_DIR\qttestability.dll                  SHARED_LIB_DIR\qttestability.dll 
-data=\epoc32\data\z\system\data\qt_testability.ini        qt_testability\qt_testability.ini   
+data=EPOCROOT##epoc32\data\z\system\data\qt_testability.ini        qt_testability\qt_testability.ini   
 
 
 //traverser plugins
