@@ -144,8 +144,8 @@ bool TasPropertyLogger::getLogData(QObject* object, QHash<QString, QString> para
         else{
             QFile* file = fileMap.value(property);
             QHash<QString,QString> objectAttrs;
-            objectAttrs.insert("type",object->metaObject()->className());
-            objectAttrs.insert("name",object->objectName());
+            objectAttrs.insert("objectType",object->metaObject()->className());
+            objectAttrs.insert("objectName",object->objectName());
             data = QString::fromUtf8(mLoggerUtil.loadLoggedData(file, property, objectAttrs).data());
             if (params.value(CLEARLOG, "") != "false"){
                 file->remove();
