@@ -16,12 +16,11 @@
 ** of this file. 
 ** 
 ****************************************************************************/ 
- 
-
 
 #include <taslogger.h>
 
 #include "confservice.h"
+#include "version.h"
 
 ConfService::ConfService()
 {}
@@ -47,6 +46,14 @@ bool ConfService::executeService(TasCommandModel& model, TasResponse& response)
         }
         return true;
     }    
+    else if ( model.service() == VERSION_SERVICE ){
+
+        // return TAS version as response
+        response.setData( TAS_VERSION );
+
+        return true;
+
+    }
     else{
         return false;
     }
