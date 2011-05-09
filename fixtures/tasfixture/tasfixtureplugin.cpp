@@ -178,7 +178,7 @@ bool TasFixturePlugin::execute(void * objectInstance, QString actionName, QHash<
         }
     }
     else{
-        stdOut = "The execution was ok. Parameters were {";
+        stdOut = "The execution was ok. Parameters were { action: " + actionName ;
         QHash<QString, QString>::const_iterator i = parameters.constBegin();
         while (i != parameters.constEnd()) {
             stdOut.append("(");
