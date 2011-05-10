@@ -1,9 +1,15 @@
+qttas (1.1.1-5) unstable; urgency=low
+
+  * Fixes: NB#253492 - qttas upstart configuration files have to have "x" bit set
+
+ -- Testability Driver Team <testabilitydriver@nokia.com>  Mon, 9 May 2011 09:47:00 +0300
+
 qttas (1.1.1-4) unstable; urgency=low
 
   * Fixes: NB#250975 - Wrong locale information reported for applications
   * Fixes: NB#252522 - Unauthorized init script /etc/init/qttas-testing.conf 
 
- -- Testability Driver Team <testabilitydriver@nokia.com>  Thy, 5 May 2011 09:47:00 +0300
+ -- Testability Driver Team <testabilitydriver@nokia.com>  Thu, 5 May 2011 09:47:00 +0300
 
 qttas (1.1.1-3) unstable; urgency=low
 

@@ -16,37 +16,42 @@
 ** of this file. 
 ** 
 ****************************************************************************/ 
- 
 
+#ifndef TASPROPERTYLOGGER_H
+#define TASPROPERTYLOGGER_H
 
-#ifndef FIXTURESERVICE_H
-#define FIXTURESERVICE_H
+#include <QObject>
+#include <QTimer>
+#include <QPair>
+#include <QList>
+#include <QFile>
+#include <QHash>
+#include <infologger.h>
 
-#include "tasservicebase.h"
-#include "taspluginloader.h"
-
-class FixtureService : public QObject, public TasServiceBase   
+class TasPropertyLogger : QObject
 {
-    Q_OBJECT
+  Q_OBJECT
 public:
-    FixtureService();
-	~FixtureService();
+  TasPropertyLogger();
+  ~TasPropertyLogger();
 
-	/*!
-	  From ServiceInterface
-	*/
-	bool executeService(TasCommandModel& model, TasResponse& response);
-	QString serviceName()const { return FIXTURE; }
-	bool performFixture(TasCommandModel& model, QString& message);
+  bool startPropertyLog(QObject* object, QHash<QString, QString> params, QString &errorMsg);
+  bool getLogData(QObject* object, QHash<QString, QString> params, QString& data);
+  void stopLogger(QObject* object, QHash<QString, QString> params);
 
 private slots:
-    void delayedEvent();
+  void timerEvent();
 
 private:
-	TasPluginLoader* mPluginLoader;
-    QQueue<TasCommandModel*> commandQueue;
-    QTimer mTimer;
-	bool mInitialized;
+  bool validateParams(QHash<QString, QString> params, QString& errorMsg) ;
+
+private:
+  QTimer mTimer;
+  QHash<QObject*, QHash<QString,QFile*> > mTargets;
+  TasInfoLoggerUtil mLoggerUtil;
+  int mInterval;
 };
 
 #endif
+
+

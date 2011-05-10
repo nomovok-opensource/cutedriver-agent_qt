@@ -156,22 +156,58 @@ bool TasFixturePlugin::execute(void * objectInstance, QString actionName, QHash<
 			}
 		}
 	}
-
+    else if(actionName == "logProperty" ){
+        QObject* o = castToObject(objectInstance, parameters.value(OBJECT_TYPE));
+        if(o){
+            result = mLogger.startPropertyLog(o, parameters, stdOut);
+        }
+    }
+    else if(actionName == "logPropertyResults" ){
+        QObject* o = castToObject(objectInstance, parameters.value(OBJECT_TYPE));
+        if(o){
+            stdOut.clear();
+            result = mLogger.getLogData(o, parameters, stdOut);
+        }
+    }
+    else if(actionName == "stopLogProperty" ){
+        QObject* o = castToObject(objectInstance, parameters.value(OBJECT_TYPE));
+        if(o){
+            stdOut.clear();
+            result = mLogger.getLogData(o, parameters, stdOut);
+            mLogger.stopLogger(o, parameters);
+        }
+    }
     else{
         stdOut = "The execution was ok. Parameters were {";
+        QHash<QString, QString>::const_iterator i = parameters.constBegin();
+        while (i != parameters.constEnd()) {
+            stdOut.append("(");
+            stdOut.append(i.key());
+            stdOut.append("=>");
+            stdOut.append(i.value());
+            stdOut.append(")");
+            ++i;
+            
+            stdOut.append("}");
+            // set the return value as boolean
+        }
         result =  true;
     }
-    QHash<QString, QString>::const_iterator i = parameters.constBegin();
-    while (i != parameters.constEnd()) {
-        stdOut.append("(");
-        stdOut.append(i.key());
-        stdOut.append("=>");
-        stdOut.append(i.value());
-        stdOut.append(")");
-        ++i;
-        
-        stdOut.append("}");
-        // set the return value as boolean
-    }
     return result;
+}
+
+QObject* TasFixturePlugin::castToObject(void* objectInstance, const QString& type)
+{
+    if(type == WIDGET_TYPE ){
+        QWidget* widget = reinterpret_cast<QWidget*>(objectInstance);
+        return widget;
+    }
+    else if(type == GRAPHICS_ITEM_TYPE ){
+        QGraphicsItem* item = reinterpret_cast<QGraphicsItem*>(objectInstance);  
+        return item->toGraphicsObject();
+    }
+    else if(type == APPLICATION_TYPE ){
+        return QCoreApplication::instance();
+    }
+    return 0;
 }

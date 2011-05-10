@@ -26,6 +26,8 @@
 #include <QHash>
 #include <tasqtfixtureplugininterface.h>
 
+#include "taspropertylogger.h"
+
 class TasFixturePlugin : public QObject, public TasFixturePluginInterface
 {
   Q_OBJECT
@@ -35,6 +37,13 @@ public:
      TasFixturePlugin(QObject* parent=0);
      ~TasFixturePlugin();
      bool execute(void* objectInstance, QString actionName, QHash<QString, QString> parameters, QString & stdOut);
+
+private:
+	 QObject* castToObject(void* objectInstance, const QString& type);
+
+private:
+	 TasPropertyLogger mLogger;
+
  };
 
 #endif

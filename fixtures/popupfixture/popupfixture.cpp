@@ -71,7 +71,7 @@ bool PopupFixture::execute(void * objectInstance, QString actionName, QHash<QStr
     Q_UNUSED(objectInstance);
     TasLogger::logger()->debug("PopupFixture::execute");
     bool result = true;
-
+  
     if(actionName == "waitPopup"){
         QString className = parameters[CLASS_NAME].trimmed();
         int interval = parameters[INTERVAL].toInt();
@@ -126,13 +126,13 @@ void PopupFixture::startPopupDetection(const QString& className, int interval)
 
 bool PopupFixture::eventFilter(QObject *target, QEvent *event)
 {
-    if( event->type() == QEvent::Show && target ){
-        TasLogger::logger()->debug("PopupFixture::eventFilter");
+    if( (event->type() == QEvent::Show || event->type() == QEvent::WinEventAct) && target ){
+        TasLogger::logger()->debug("PopupFixture::eventFilter " + QString(target->metaObject()->className()));
         QHashIterator<QString, int> i(mClassNames);
         while (i.hasNext()) {
             i.next();
             QString className = i.key();            
-            if(target->inherits(className.toAscii())){
+            if(target->inherits(className.toAscii()) || QString(target->metaObject()->className()).contains(className)){
                 PopupTimer* timer = new PopupTimer(className, mClassNames.value(className));
                 connect(timer, SIGNAL(traverseState(const QString&)), this, SLOT(traverse(const QString&)));
                 mClassNames.remove(className);

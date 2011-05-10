@@ -26,6 +26,7 @@ PUBLIC_HEADERS += $$PWD/tasqtfixtureplugininterface.h
 PUBLIC_HEADERS += $$PWD/tastraverseinterface.h
 PUBLIC_HEADERS += $$PWD/taspluginloader.h 
 PUBLIC_HEADERS += $$PWD/tasextensioninterface.h
+PUBLIC_HEADERS += $$PWD/infologger.h 
 
 HEADERS += $$PWD/tasmessages.h 
 HEADERS += $$PWD/testabilitysettings.h 
@@ -33,7 +34,6 @@ HEADERS += $$PWD/tasdatashare.h
 HEADERS += $$PWD/tascommand.h 
 HEADERS += $$PWD/tasfixtureplugininterface.h 
 HEADERS += $$PWD/tasqtfixtureplugininterface.h 
-HEADERS += $$PWD/infologger.h 
 HEADERS += $$PWD/tasservicemanager.h 
 HEADERS += $$PWD/tasxmlwriter.h 
 HEADERS += $$PWD/tassocket.h 
