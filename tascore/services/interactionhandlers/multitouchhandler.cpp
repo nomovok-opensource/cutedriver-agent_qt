@@ -60,6 +60,16 @@ bool MultitouchHandler::executeInteraction(TargetData /*data*/)
 
 bool MultitouchHandler::executeMultitouchInteraction(QList<TargetData> dataList)
 {
+    //check eventtype, must be the same with all so use first one
+    bool sendPrimary = false;
+    if(!dataList.isEmpty()){
+        if(!dataList.first().command->parameter(POINTER_TYPE).isEmpty()){
+            if(MouseHandler::TypeBoth ==  static_cast<MouseHandler::PointerType>(dataList.first().command->parameter(POINTER_TYPE).toInt())){
+                sendPrimary = true;       
+            }
+        }
+    }
+
     bool consumed = false;
     if(!dataList.isEmpty()){
         consumed = true;
@@ -102,13 +112,13 @@ bool MultitouchHandler::executeMultitouchInteraction(QList<TargetData> dataList)
         QMutableHashIterator<QString, QList<TasTouchPoints>* > presses(itemPressPoints);
         while (presses.hasNext()) {
             presses.next();
-            touchPoints.append(mTouchGen.convertToTouchPoints(target, Qt::TouchPointPressed, *presses.value(), presses.key()));
+            touchPoints.append(mTouchGen.convertToTouchPoints(target, Qt::TouchPointPressed, *presses.value(), sendPrimary, presses.key()));
         }
 
         QMutableHashIterator<QString, QList<TasTouchPoints>* > releases(itemReleasePoints);
         while (releases.hasNext()) {
             releases.next();
-            touchReleasePoints.append(mTouchGen.convertToTouchPoints(target, Qt::TouchPointReleased, *releases.value(), releases.key()));
+            touchReleasePoints.append(mTouchGen.convertToTouchPoints(target, Qt::TouchPointReleased, *releases.value(), sendPrimary, releases.key()));
         }
 
         //send begin event
