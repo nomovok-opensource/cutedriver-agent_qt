@@ -414,6 +414,13 @@ void InfoLogger::logPwr()
     mLoggerUtil.writeLine(line, mPwr);
 }
 
+QByteArray TasInfoLoggerUtil::loadLoggedData(QFile* file, const QString& name )
+{
+    QHash<QString,QString> params;
+    return loadLoggedData(file, name, params);
+}
+
+
 QByteArray TasInfoLoggerUtil::loadLoggedData(QFile* file, const QString& name, QHash<QString,QString> params)
 {
     TasDataModel* tasModel = new TasDataModel();

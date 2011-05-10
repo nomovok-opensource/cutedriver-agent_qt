@@ -37,7 +37,8 @@
 class TAS_EXPORT TasInfoLoggerUtil
 {
 public:
-  QByteArray loadLoggedData(QFile* file, const QString& name, QHash<QString,QString> params = QHash<QString,QString>());
+  QByteArray loadLoggedData(QFile* file, const QString& name, QHash<QString,QString> params);
+  QByteArray loadLoggedData(QFile* file, const QString& name);
   void writeLine(const QString& line, QFile* file);
   QFile* openFile(const QString& fileName, bool append);
 };
