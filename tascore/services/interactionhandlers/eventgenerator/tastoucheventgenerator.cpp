@@ -107,7 +107,7 @@ QList<QTouchEvent::TouchPoint> TasTouchEventGenerator::convertToTouchPoints(QWid
                 mTouchPointCounter++;
                 pointIds.append(QVariant(mTouchPointCounter));
             }
-            touchPoints.append(makeTouchPoint(target, points.at(i), state, pointIds.at(i).toInt()));
+            touchPoints.append(makeTouchPoint(target, points.at(i), state, pointIds.at(i).toInt()-1));
         }
     }
 
@@ -127,9 +127,12 @@ QList<QTouchEvent::TouchPoint> TasTouchEventGenerator::convertToTouchPoints(QWid
 QTouchEvent::TouchPoint TasTouchEventGenerator::makeTouchPoint(QWidget* target, TasTouchPoints points,
                                                                Qt::TouchPointState state, int id)
 {
+    TasLogger::logger()->debug("TasTouchEventGenerator:: generating point with id: " + 
+                               QString::number(id));
     QTouchEvent::TouchPoint touchPoint(id);
     Qt::TouchPointStates states = state;
-    if(points.isPrimary){
+    if(points.isPrimary || id == 0){
+        TasLogger::logger()->debug("TasTouchEventGenerator:: is primary");
         states |= Qt::TouchPointPrimary;
     }
     touchPoint.setPressure(1.0);
