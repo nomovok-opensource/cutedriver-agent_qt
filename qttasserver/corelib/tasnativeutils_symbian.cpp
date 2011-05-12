@@ -226,28 +226,30 @@ void TasNativeUtils::runningProcesses(TasObject& applist)
   	while(find.Next(res) == KErrNone) {
         RProcess process;
         if(process.Open(find) == KErrNone){
-            QString processName;
-            //Parse the executable name as the name
-            TLex lex(process.FileName());
-            TPtrC token = lex.NextToken();
-            TInt start = token.LocateReverseF('\\');
-            if( start != KErrNotFound){
-                start++;//next char from to start from so that \ not included
-                TPtrC exeName = token.Mid(start);
-                TInt prefix = exeName.Find(_L(".exe"));
-                if( prefix != KErrNotFound ){
-                    processName = QString::fromUtf16(exeName.Left(prefix).Ptr(), exeName.Left(prefix).Length());
+            if( process.ExitType() == EExitPending ){
+                QString processName;
+                //Parse the executable name as the name
+                TLex lex(process.FileName());
+                TPtrC token = lex.NextToken();
+                TInt start = token.LocateReverseF('\\');
+                if( start != KErrNotFound){
+                    start++;//next char from to start from so that \ not included
+                    TPtrC exeName = token.Mid(start);
+                    TInt prefix = exeName.Find(_L(".exe"));
+                    if( prefix != KErrNotFound ){
+                        processName = QString::fromUtf16(exeName.Left(prefix).Ptr(), exeName.Left(prefix).Length());
+                    }
+                    else {
+                        processName = QString::fromUtf16(exeName.Ptr(), exeName.Length());
+                    }
+                }            
+                TasObject& processDetails = applist.addNewObject(QString::number(process.Id().Id()), processName, "process");
+                //try getting some kind of ram usage
+                TProcessMemoryInfo memInfo;
+                if(process.GetMemoryInfo(memInfo) == KErrNone){
+                    TUint32 memSize = (memInfo.iCodeSize + memInfo.iConstDataSize + memInfo.iInitialisedDataSize + memInfo.iUninitialisedDataSize);
+                    processDetails.addAttribute("memUsage", QString::number(memSize));
                 }
-                else {
-                    processName = QString::fromUtf16(exeName.Ptr(), exeName.Length());
-                }
-            }            
-            TasObject& processDetails = applist.addNewObject(QString::number(process.Id().Id()), processName, "process");
-            //try getting some kind of ram usage
-            TProcessMemoryInfo memInfo;
-            if(process.GetMemoryInfo(memInfo) == KErrNone){
-                TUint32 memSize = (memInfo.iCodeSize + memInfo.iConstDataSize + memInfo.iInitialisedDataSize + memInfo.iUninitialisedDataSize);
-                processDetails.addAttribute("memUsage", QString::number(memSize));
             }
             process.Close();
         }
