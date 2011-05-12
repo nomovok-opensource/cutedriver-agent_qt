@@ -217,3 +217,9 @@ bool TasNativeUtils::processExitStatus(quint64 pid, int &status)
     }
     return stopped;
 }
+
+
+void TasNativeUtils::runningProcesses(TasObject& applist)
+{
+}
+
