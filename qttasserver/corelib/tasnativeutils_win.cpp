@@ -122,6 +122,7 @@ void TasNativeUtils::runningProcesses(TasObject& applist)
                 processName = QString::fromLocal8Bit(szProcessName);
 #endif                
 
+                processName = processName.split(".exe").first();
                 TasObject& processDetails = applist.addNewObject(QString::number(processID), processName, "process");
                 //add mem
                 PROCESS_MEMORY_COUNTERS pmc;
