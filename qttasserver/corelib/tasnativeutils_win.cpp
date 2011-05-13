@@ -89,3 +89,48 @@ bool TasNativeUtils::processExitStatus(quint64 pid, int &status)
     }
     return stopped;
 }
+
+void TasNativeUtils::runningProcesses(TasObject& applist)
+
+{
+     // Get the list of process identifiers.
+    DWORD aProcesses[1024], cbNeeded, cProcesses;
+    unsigned int i;
+    if ( !EnumProcesses( aProcesses, sizeof(aProcesses), &cbNeeded ) )
+    {
+        //return empty if fails
+        return ;
+    }
+    cProcesses = cbNeeded / sizeof(DWORD);
+
+    //get the details
+    for ( i = 0; i < cProcesses; i++ ){
+        if( aProcesses[i] != 0 ){
+            DWORD processID = aProcesses[i];
+            HANDLE hProcess = OpenProcess( PROCESS_QUERY_INFORMATION|PROCESS_VM_READ, FALSE, processID );
+            if (NULL != hProcess ){
+                HMODULE hMod;
+                DWORD cbNeeded;                
+                TCHAR szProcessName[MAX_PATH] = TEXT("unknown");
+                if ( EnumProcessModules( hProcess, &hMod, sizeof(hMod), &cbNeeded) ){
+                    GetModuleBaseName( hProcess, hMod, szProcessName, sizeof(szProcessName)/sizeof(TCHAR) );
+                }
+                QString processName;
+#ifdef UNICODE
+                processName = QString::fromUtf16((ushort*)szProcessName);
+#else
+                processName = QString::fromLocal8Bit(szProcessName);
+#endif                
+
+                processName = processName.split(".exe").first();
+                TasObject& processDetails = applist.addNewObject(QString::number(processID), processName, "process");
+                //add mem
+                PROCESS_MEMORY_COUNTERS pmc;
+                if(GetProcessMemoryInfo(hProcess,&pmc, sizeof(pmc))){
+                    processDetails.addAttribute("memUsage", (int)pmc.WorkingSetSize);
+                }            
+            }
+            CloseHandle( hProcess );
+        }
+    }
+}
