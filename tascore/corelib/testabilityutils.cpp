@@ -25,6 +25,10 @@
 #include "tasqtcommandmodel.h"
 #include "taspointercache.h"
 
+#if QT_VERSION >= 0x040700
+#include <QDeclarativeItem>
+#endif
+
 /*!
   \class TestabilityUtils
   \brief TasServiveBase is an abstract base class for tasplugin services
@@ -32,12 +36,11 @@
 */
 
 /*!
-  Casting direclty from the id does not work so we need to look
+  Casting directly from the id does not work so we need to look
   for the object with a matching id.
 */
 QWidget* TestabilityUtils::findWidget(const QString& id)
 {
-    TasLogger::logger()->debug("TestabilityUtils::findWidget id:" + id);    
     QWidget* widget = NULL;
     QObject* o = TasPointerCache::instance()->getObject(id);
     if(o != 0){
@@ -531,6 +534,15 @@ ItemLocationDetails TestabilityUtils::getItemLocationDetails(QGraphicsItem* grap
             locationDetails.height = height;
         }
     }
+    
+#if QT_VERSION >= 0x040700
+    // Invisible items in QML are marked not visible
+    // This check could be for all apps?
+    if (qgraphicsitem_cast<QDeclarativeItem*>(graphicsItem) && graphicsItem->effectiveOpacity() == 0.0) {
+        isVisible = false;
+    }
+#endif
+
     locationDetails.visible = isVisible;
     return locationDetails;
 }
