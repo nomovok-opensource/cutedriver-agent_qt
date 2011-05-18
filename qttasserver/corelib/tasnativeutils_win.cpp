@@ -69,7 +69,7 @@ bool TasNativeUtils::processExitStatus(quint64 pid, int &status)
 {
     bool stopped = true;
     HANDLE hProcess;
-    hProcess = OpenProcess( READ_CONTROL, FALSE, pid );
+    hProcess = OpenProcess( PROCESS_QUERY_INFORMATION, FALSE, pid );
     if( hProcess  ){
         DWORD dwExitCode = 0;
         if(GetExitCodeProcess(hProcess, &dwExitCode)){
@@ -81,6 +81,7 @@ bool TasNativeUtils::processExitStatus(quint64 pid, int &status)
             }
         }
         else{
+            
             TasLogger::logger()->debug("TasNativeUtils::processExitStatus could not get status");
             //maybe no process since could not open
             status = 0;
