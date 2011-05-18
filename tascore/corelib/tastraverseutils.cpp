@@ -142,6 +142,9 @@ void TasTraverseUtils::addVariantValue(TasAttribute& attr, const QVariant& value
     case QVariant::Date:
         attr.addValuePlainString(value.toDate().toString("dd.MM.yyyy"));
         break;
+    case QVariant::ByteArray:
+        attr.addValue(value.toByteArray().toBase64());
+        break;
     default:
         attr.addValue(value.toString());        
         break;
