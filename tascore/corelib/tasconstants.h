@@ -42,7 +42,7 @@ const char* const PLATFORM                   = "platformOperation";
 const char* const COLLECT_EVENTS             = "collectEvents";
 const char* const OBJECT_SERVICE             = "objectManipulation";
 const char* const LIST_APPS                  = "listApps";
-const char* const STARTED_APPS             = "startedApps";
+const char* const STARTED_APPS               = "startedApps";
 const char* const RECORD_EVENTS              = "recordEvents";
 const char* const CONF_SERVICE               = "confService";
 const char* const INFO_SERVICE               = "infoService";                                                  
@@ -52,6 +52,7 @@ const char* const SYSTEM_INFO_SERVICE        = "systemInfo";
 const char* const RESOURCE_LOGGING_SERVICE   = "resourceLogging";
 const char* const FIND_OBJECT_SERVICE        = "findObject";
 const char* const CPU_LOAD_SERVICE           = "cpuLoad";
+const char* const VERSION_SERVICE            = "versionService";
 
 /*
  Message flags 

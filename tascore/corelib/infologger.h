@@ -33,6 +33,16 @@
 #include "tasdeviceutils.h"
 #include "tasmessages.h"
 
+
+class TAS_EXPORT TasInfoLoggerUtil
+{
+public:
+  QByteArray loadLoggedData(QFile* file, const QString& name, QHash<QString,QString> params);
+  QByteArray loadLoggedData(QFile* file, const QString& name);
+  void writeLine(const QString& line, QFile* file);
+  QFile* openFile(const QString& fileName, bool append);
+};
+
 class InfoLogger : public QObject
 {
     Q_OBJECT
@@ -84,9 +94,11 @@ private:
 	QFile* mMem;
 	QFile* mGpu;
 	QFile* mPwr;
+	QFile* mProperty;
 	QTime mInterval;
 	qreal mLastCpuTime;
 	TasDeviceUtils* mDeviceUtils;
+	TasInfoLoggerUtil mLoggerUtil;
 };
 
 #endif

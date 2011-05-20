@@ -44,7 +44,7 @@ symbian: {
     LIBS += -leuser
     LIBS += -lws32
     LIBS += -lapgrfx
-    LIBS += -lMemSpyDriverClient
+    LIBS += -lmemspydriverclient
     LIBS += -lhal
     LIBS += -lcone
     LIBS += -lcfclient -lcfservices

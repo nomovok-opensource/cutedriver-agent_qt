@@ -217,3 +217,31 @@ bool TasNativeUtils::processExitStatus(quint64 pid, int &status)
     }
     return stopped;
 }
+
+
+void TasNativeUtils::runningProcesses(TasObject& applist)
+{
+    TFindProcess find;
+  	TFullName res;
+  	while(find.Next(res) == KErrNone) {
+        RProcess process;
+        if(process.Open(find) == KErrNone){
+            if( process.ExitType() == EExitPending ){
+                QString fullName = QString::fromUtf16(process.FileName().Ptr(), process.FileName().Length());
+                QString processName = fullName.split("\\").last();
+                processName = processName.split(".exe").first();
+                TasObject& processDetails = applist.addNewObject(QString::number(process.Id().Id()), processName, "process");
+                //try getting some kind of ram usage
+                TProcessMemoryInfo memInfo;
+                if(process.GetMemoryInfo(memInfo) == KErrNone){
+                    TUint32 memSize = (memInfo.iCodeSize + memInfo.iConstDataSize + memInfo.iInitialisedDataSize + memInfo.iUninitialisedDataSize);
+                    processDetails.addAttribute("memUsage", QString::number(memSize));
+                    processDetails.addAttribute("fullName", fullName);
+                }
+            }
+            process.Close();
+        }
+    }
+}
+
+

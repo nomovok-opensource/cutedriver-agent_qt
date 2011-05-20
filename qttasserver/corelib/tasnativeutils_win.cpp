@@ -69,7 +69,7 @@ bool TasNativeUtils::processExitStatus(quint64 pid, int &status)
 {
     bool stopped = true;
     HANDLE hProcess;
-    hProcess = OpenProcess( READ_CONTROL, FALSE, pid );
+    hProcess = OpenProcess( PROCESS_QUERY_INFORMATION, FALSE, pid );
     if( hProcess  ){
         DWORD dwExitCode = 0;
         if(GetExitCodeProcess(hProcess, &dwExitCode)){
@@ -81,6 +81,7 @@ bool TasNativeUtils::processExitStatus(quint64 pid, int &status)
             }
         }
         else{
+            
             TasLogger::logger()->debug("TasNativeUtils::processExitStatus could not get status");
             //maybe no process since could not open
             status = 0;
@@ -88,4 +89,50 @@ bool TasNativeUtils::processExitStatus(quint64 pid, int &status)
         CloseHandle(hProcess);
     }
     return stopped;
+}
+
+void TasNativeUtils::runningProcesses(TasObject& applist)
+
+{
+     // Get the list of process identifiers.
+    DWORD aProcesses[1024], cbNeeded, cProcesses;
+    unsigned int i;
+    if ( !EnumProcesses( aProcesses, sizeof(aProcesses), &cbNeeded ) )
+    {
+        //return empty if fails
+        return ;
+    }
+    cProcesses = cbNeeded / sizeof(DWORD);
+
+    //get the details
+    for ( i = 0; i < cProcesses; i++ ){
+        if( aProcesses[i] != 0 ){
+            DWORD processID = aProcesses[i];
+            HANDLE hProcess = OpenProcess( PROCESS_QUERY_INFORMATION|PROCESS_VM_READ, FALSE, processID );
+            if (NULL != hProcess ){
+                HMODULE hMod;
+                DWORD cbNeeded;                
+                TCHAR szProcessName[MAX_PATH] = TEXT("unknown");
+                if ( EnumProcessModules( hProcess, &hMod, sizeof(hMod), &cbNeeded) ){
+                    GetModuleBaseName( hProcess, hMod, szProcessName, sizeof(szProcessName)/sizeof(TCHAR) );
+                }
+                QString fullName;
+#ifdef UNICODE
+                fullName = QString::fromUtf16((ushort*)szProcessName);
+#else
+                fullName = QString::fromLocal8Bit(szProcessName);
+#endif                
+
+                QString processName = fullName.split(".exe").first();
+                TasObject& processDetails = applist.addNewObject(QString::number(processID), processName, "process");
+                //add mem
+                PROCESS_MEMORY_COUNTERS pmc;
+                if(GetProcessMemoryInfo(hProcess,&pmc, sizeof(pmc))){
+                    processDetails.addAttribute("memUsage", (int)pmc.WorkingSetSize);
+                    processDetails.addAttribute("fullName", fullName);
+                }            
+            }
+            CloseHandle( hProcess );
+        }
+    }
 }
