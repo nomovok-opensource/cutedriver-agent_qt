@@ -74,7 +74,8 @@ unix: {
 }
 win32: {
     SOURCES += $$PWD/tasdeviceutils_win.cpp
-    LIBS += -lPsapi
+	LIBS += -lPsapi
+	LIBS +=	-lUser32
 }
 
 CONFIG(maemo){

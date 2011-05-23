@@ -5,7 +5,6 @@ Makefile
 *.inf
 *.mmp
 *.rss
-*.def
 *.cache
 *.sis
 *stubs*

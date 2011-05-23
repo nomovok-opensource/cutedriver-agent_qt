@@ -52,7 +52,7 @@ public:
 	QList<QTouchEvent::TouchPoint> convertToTouchPoints(TargetData targetData, Qt::TouchPointState state);
 
     QList<QTouchEvent::TouchPoint> convertToTouchPoints(QWidget* target, Qt::TouchPointState state,
-                                                        QList<TasTouchPoints> points, QString identifier=QString());
+                                                        QList<TasTouchPoints> points, bool sendPrimary, QString identifier=QString());
     QTouchEvent::TouchPoint makeTouchPoint(QWidget* target, TasTouchPoints points, Qt::TouchPointState state, int id);
 
 	QList<TasTouchPoints> toTouchPoints(QPoint point, bool primary);
@@ -61,9 +61,9 @@ public:
 	bool areIdentical(QList<TasTouchPoints> points1, QList<TasTouchPoints> points2);
 
 public slots:
-    void doTouchBegin(QWidget* target, QList<TasTouchPoints> points, QString identifier=QString());
-    void doTouchUpdate(QWidget* target, QList<TasTouchPoints> points, QString identifier=QString());
-    void doTouchEnd(QWidget* target, QList<TasTouchPoints> points, QString identifier=QString());
+    void doTouchBegin(QWidget* target, QList<TasTouchPoints> points, bool sendPrimary, QString identifier=QString());
+    void doTouchUpdate(QWidget* target, QList<TasTouchPoints> points, bool sendPrimary, QString identifier=QString());
+    void doTouchEnd(QWidget* target, QList<TasTouchPoints> points, bool sendPrimary, QString identifier=QString());
 
 private:
     static int mTouchPointCounter;

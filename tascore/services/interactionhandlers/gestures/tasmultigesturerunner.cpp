@@ -64,7 +64,7 @@ void TasMultiGestureRunner::startGesture()
     foreach(TasGesture* gesture, mGestures.keys()){
         if(gesture->isPress()){
             touchPoints.append(mTouchGen.convertToTouchPoints(gesture->getTarget(), Qt::TouchPointPressed, 
-                                                              gesture->startPoints(), gesture->touchPointIdKey()));
+                                                              gesture->startPoints(), false, gesture->touchPointIdKey()));
         }
         mPreviousPoints.insert(gesture, gesture->startPoints());
     }
@@ -102,12 +102,12 @@ void TasMultiGestureRunner::timerEvent(qreal value)
             if(gesture->isRelease()){
                 states |= Qt::TouchPointReleased;
                 touchPoints.append(mTouchGen.convertToTouchPoints(gesture->getTarget(), Qt::TouchPointReleased, 
-                                                                  gesture->endPoints(), gesture->touchPointIdKey()));            
+                                                                  gesture->endPoints(), false, gesture->touchPointIdKey()));            
             }            
         }
         else if(!mTouchGen.areIdentical(gesture->pointsAt(correctedValue), mPreviousPoints.value(gesture))){
             touchPoints.append(mTouchGen.convertToTouchPoints(gesture->getTarget(), Qt::TouchPointMoved,
-                                                              gesture->pointsAt(correctedValue), gesture->touchPointIdKey()));
+                                                              gesture->pointsAt(correctedValue), false, gesture->touchPointIdKey()));
         }
         mPreviousPoints.insert(gesture, gesture->pointsAt(correctedValue));
     }
@@ -145,11 +145,11 @@ void TasMultiGestureRunner::finished()
     foreach(TasGesture* gesture, mGestures.keys()){
         if(!mTouchGen.areIdentical(gesture->endPoints(), mPreviousPoints.value(gesture))){
             touchPoints.append(mTouchGen.convertToTouchPoints(gesture->getTarget(), Qt::TouchPointMoved, 
-                                                              gesture->endPoints(), gesture->touchPointIdKey()));
+                                                              gesture->endPoints(), false, gesture->touchPointIdKey()));
         }
         if(gesture->isRelease()){
             touchReleasePoints.append(mTouchGen.convertToTouchPoints(gesture->getTarget(), Qt::TouchPointReleased, 
-                                                                     gesture->endPoints(), gesture->touchPointIdKey()));
+                                                                     gesture->endPoints(), false, gesture->touchPointIdKey()));
         }
     }
 

@@ -105,6 +105,11 @@ bool TasPropertyLogger::startPropertyLog(QObject* object, QHash<QString, QString
         name.append(".log");
         bool append = (params.value(APPEND, "") == "true");    
         QFile* file = mLoggerUtil.openFile(name, append);
+        if(file->error()!= QFile::NoError){
+            errorMsg = "Opening file failed, reason: " + QString::number(file->error());
+            delete file;
+            return false;
+        }
         fileMap.insert(property, file);
     }
     mTargets.insert(object, fileMap);
