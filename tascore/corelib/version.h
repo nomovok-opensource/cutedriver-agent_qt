@@ -19,4 +19,3 @@
 
 static QString TAS_VERSION = "1.3";
 
-

@@ -24,6 +24,7 @@
 #define TASNATIVEUTILS_H
 
 #include "tasclientmanager.h"
+#include "tasqtdatamodel.h"
 
 const char* const ROTATE_TOP_UP   = "rotate_top_up";
 const char* const ROTATE_RIGHT_UP = "rotate_right_up";
@@ -39,6 +40,7 @@ public:
 	static bool killProcess(quint64 pid);
 	static bool verifyProcess(quint64 pid);
 	static bool processExitStatus(quint64 pid, int& status);
+	static void runningProcesses(TasObject& applist);
 
 };
 

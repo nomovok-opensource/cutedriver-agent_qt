@@ -39,6 +39,8 @@ public:
 	
 private:
 	void listApplications(TasCommand& command, TasResponse& response);
+	void listRunninProcesses(TasResponse& response);
+
 };
 
 #endif

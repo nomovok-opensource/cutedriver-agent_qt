@@ -24,7 +24,7 @@
 #include <tasserver.h>
 
 #include "listappsservice.h"
-
+#include "tasnativeutils.h"
 
 ListAppsService::ListAppsService()
 {}
@@ -34,6 +34,7 @@ ListAppsService::~ListAppsService()
 
 bool ListAppsService::executeService(TasCommandModel& model, TasResponse& response)
 {    
+    bool consumed = false;
     if(model.service() == serviceName()){
         TasCommand* command = getCommandParameters(model, "listApps");
         if(command){
@@ -42,12 +43,13 @@ bool ListAppsService::executeService(TasCommandModel& model, TasResponse& respon
         else {
             response.setErrorMessage(QString("Could not parse the listApps command from the request."));
         }
-        return true;
+        consumed = true;
     }
-    else {
-        return false;
+    if(model.service() == "listRunningProcesses"){
+        listRunninProcesses(response);   
+        consumed = true;
     }
-
+    return consumed;
 }
 
 /*!
@@ -73,6 +75,18 @@ void ListAppsService::listApplications(TasCommand& command, TasResponse& respons
     hostAddress->addNewObject(0, address, "HostAddress");
     hostAddress->addNewObject(0, port, "HostPort");
 
+    QByteArray xml;
+    model->serializeModel(xml);    
+    delete model;
+    response.setData(xml);
+}
+void ListAppsService::listRunninProcesses(TasResponse& response)
+{
+    TasDataModel* model = new TasDataModel();
+    QString qtVersion = "Qt" + QString(qVersion());
+    TasObjectContainer& container = model->addNewObjectContainer(1, qtVersion, "qt");
+    TasObject& apps = container.addNewObject(0, "processList", "processList");
+    TasNativeUtils::runningProcesses(apps);
     QByteArray xml;
     model->serializeModel(xml);    
     delete model;
