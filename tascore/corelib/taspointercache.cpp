@@ -46,3 +46,15 @@ void TasPointerCache::storePointer(const QString& pointerId, QObject* pointer)
 {
     mPointers.insert(pointerId, QPointer<QObject>(pointer));
 }
+
+void TasPointerCache::removeNulls()
+{
+    QMutableHashIterator<QString, QPointer<QObject> > i(mPointers);
+    while (i.hasNext()) {
+        i.next();
+        QPointer<QObject> pointer = i.value();
+        if(pointer.isNull()){
+            i.remove();
+        }
+    }
+}
