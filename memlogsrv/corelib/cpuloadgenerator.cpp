@@ -22,7 +22,9 @@
 #include <QString>
 
 CpuLoadGenerator::CpuLoadGenerator()
-{}
+{
+    mRunning = false;
+}
 
 CpuLoadGenerator::~CpuLoadGenerator() 
 {}

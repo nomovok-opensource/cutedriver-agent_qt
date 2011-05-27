@@ -21,7 +21,9 @@
 #include "resourcedatagatherer.h"
 #include "cpuloadgenerator.h"
 #include <taslogger.h>
+#include <tassocket.h>
 #include <QTimer>
+#include <QCoreApplication>
 
 const int DEFAULT_LOGGING_INTERVAL_MS   = 1000;
 const int INTERVAL_S_TO_MS              = 1000;
@@ -126,10 +128,22 @@ bool ResourceLoggingService::executeService(
             response.setErrorMessage("Unknown command: " + model.name());
         }
     }
+    //check to see if the server can be stopped
+    if( (!mLoadGenerator || !mLoadGenerator->isRunning()) && mLoggingTimers.isEmpty()){
+        connect(response.requester(), SIGNAL(messageSent()), this, SLOT(requestQuit()));           
+    }
     
+
     TasLogger::logger()->debug("< ResourceLoggingService::executeService");
     return status;
 }
+
+void ResourceLoggingService::requestQuit()
+{
+    //small delay to allow the server to read the response 
+    QTimer::singleShot(100, QCoreApplication::instance(), SLOT(quit()));
+}
+
 
 int ResourceLoggingService::startLogging(
         ResourceLoggingService::ResourceType resourceType, 
