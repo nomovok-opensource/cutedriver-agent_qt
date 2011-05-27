@@ -47,6 +47,9 @@ FindObjectService::~FindObjectService()
 bool FindObjectService::executeService(TasCommandModel& model, TasResponse& response)
 {
     if(model.service() == serviceName()){
+        //remove objects that are no longer valid
+        TasPointerCache::instance()->removeNulls();
+
         //        TasLogger::logger()->debug("FindObjectService::executeService");
         bool traverseAll = false;
         TasDataModel* uiModel = new TasDataModel();
