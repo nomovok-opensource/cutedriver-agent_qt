@@ -171,9 +171,6 @@ void TasQtMemLogService::unReqisterServicePlugin()
     }
 }
 
-
-
-
 QString TasQtMemLogService::makeReqisterMessage(QString command, QMap<QString,QString> attributes)
 {    
     QString xml;
