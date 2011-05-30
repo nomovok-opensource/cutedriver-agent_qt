@@ -22,7 +22,7 @@
 
 TEMPLATE = subdirs
 
-upstart.files = qttasserver.conf
+upstart.files = qttasserver.conf qttas-testing.conf
 upstart.path = /etc/init/test
 
 INSTALLS += upstart

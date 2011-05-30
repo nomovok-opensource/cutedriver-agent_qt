@@ -27,6 +27,7 @@
 #include "uicommandservice.h"
 #include "tasgesturefactory.h"
 #include "tastoucheventgenerator.h"
+#include "tasmouseeventgenerator.h"
 
 class MultitouchHandler : public InteractionHandler
 {
@@ -47,6 +48,7 @@ private:
 	QStringList mReleaseCommands;
 	TasGestureFactory* mFactory;
 	TasTouchEventGenerator mTouchGen;
+	TasMouseEventGenerator mMouseGen;
 };
 
 #endif

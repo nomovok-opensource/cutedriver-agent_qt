@@ -7,64 +7,69 @@
 #include <memspy_rom.iby>
 #include <memspy.iby>
 
-#define TAS_UPGRADABLE_APP_REG_RSC(NAME) data=DATAZ_\private\10003A3F\import\APPS\ ## NAME ## _reg.rsc        Private\10003a3f\import\apps\ ## NAME ## _reg.rsc
-#define TAS_PLUGIN_STUB(NAME, SUBDIR) data=\epoc32\data\z\resource\qt\plugins\##SUBDIR##\##NAME##.qtplugin RESOURCE_FILES_DIR\qt\plugins\##SUBDIR##\##NAME##.qtplugin
-
 //qttasserver
-file=ABI_DIR\BUILD_DIR\qttasserver.exe                    SHARED_LIB_DIR\qttasserver.exe 
-TAS_UPGRADABLE_APP_REG_RSC(qttasserver)
+file=ABI_DIR/BUILD_DIR/qttasserver.exe                    SHARED_LIB_DIR/qttasserver.exe 
+data=DATAZ_/private/10003a3f/import/apps/qttasserver_reg.rsc    private/10003a3f/import/apps/qttasserver_reg.rsc
 S60_APP_RESOURCE(qttasserver)
 
 //qttas_ui
-file=ABI_DIR\BUILD_DIR\qttas_ui.exe                       SHARED_LIB_DIR\qttas_ui.exe 
-TAS_UPGRADABLE_APP_REG_RSC(qttas_ui)
+file=ABI_DIR/BUILD_DIR/qttas_ui.exe                       SHARED_LIB_DIR/qttas_ui.exe 
+data=DATAZ_/private/10003a3f/import/apps/qttas_ui_reg.rsc    private/10003a3f/import/apps/qttas_ui_reg.rsc
 S60_APP_RESOURCE(qttas_ui)
 
 //qttasmemlog_srv
-file=ABI_DIR\BUILD_DIR\qttasmemlog_srv.exe                SHARED_LIB_DIR\qttasmemlog_srv.exe
-TAS_UPGRADABLE_APP_REG_RSC(qttasmemlog_srv)
+file=ABI_DIR/BUILD_DIR/qttasmemlog_srv.exe                SHARED_LIB_DIR/qttasmemlog_srv.exe
+data=DATAZ_/private/10003a3f/import/apps/qttasmemlog_srv_reg.rsc    private/10003a3f/import/apps/qttasmemlog_srv_reg.rsc
 S60_APP_RESOURCE(qttasmemlog_srv)
 
 //qttasutilityap
-file=ABI_DIR\BUILD_DIR\qttasutilapp.exe                   SHARED_LIB_DIR\qttasutilapp.exe 
-TAS_UPGRADABLE_APP_REG_RSC(qttasutilapp)
+file=ABI_DIR/BUILD_DIR/qttasutilapp.exe                   SHARED_LIB_DIR/qttasutilapp.exe 
+data=DATAZ_/private/10003a3f/import/apps/qttasutilapp_reg.rsc    private/10003a3f/import/apps/qttasutilapp_reg.rsc
 S60_APP_RESOURCE(qttasutilapp)
 
 //qt_testability dll
-file=ABI_DIR\BUILD_DIR\qttestability.dll                  SHARED_LIB_DIR\qttestability.dll 
-data=\epoc32\data\z\system\data\qt_testability.ini        qt_testability\qt_testability.ini   
+file=ABI_DIR/BUILD_DIR/qttestability.dll                  SHARED_LIB_DIR/qttestability.dll 
+data=EPOCROOT##epoc32/data/z/system/data/qt_testability.ini        qt_testability/qt_testability.ini   
 
 
 //traverser plugins
-file=ABI_DIR\BUILD_DIR\qttraverse.dll                     SHARED_LIB_DIR\qttraverse.dll
-file=ABI_DIR\BUILD_DIR\viewitemtraverse.dll               SHARED_LIB_DIR\viewitemtraverse.dll
-file=ABI_DIR\BUILD_DIR\layouttraverse.dll                 SHARED_LIB_DIR\layouttraverse.dll
-file=ABI_DIR\BUILD_DIR\webkittraverse.dll                 SHARED_LIB_DIR\webkittraverse.dll
-TAS_PLUGIN_STUB(qttraverse, traversers)
-TAS_PLUGIN_STUB(viewitemtraverse, traversers)
-TAS_PLUGIN_STUB(layouttraverse, traversers)
-TAS_PLUGIN_STUB(webkittraverse, traversers)
+file=ABI_DIR/BUILD_DIR/qttraverse.dll                     SHARED_LIB_DIR/qttraverse.dll
+file=ABI_DIR/BUILD_DIR/viewitemtraverse.dll               SHARED_LIB_DIR/viewitemtraverse.dll
+file=ABI_DIR/BUILD_DIR/layouttraverse.dll                 SHARED_LIB_DIR/layouttraverse.dll
+file=ABI_DIR/BUILD_DIR/webkittraverse.dll                 SHARED_LIB_DIR/webkittraverse.dll
+data=EPOCROOT##epoc32/data/z/resource/qt/plugins/traversers/qttraverse.qtplugin    RESOURCE_FILES_DIR/qt/plugins/traversers/qttraverse.qtplugin
+data=EPOCROOT##epoc32/data/z/resource/qt/plugins/traversers/viewitemtraverse.qtplugin    RESOURCE_FILES_DIR/qt/plugins/traversers/viewitemtraverse.qtplugin
+data=EPOCROOT##epoc32/data/z/resource/qt/plugins/traversers/layouttraverse.qtplugin    RESOURCE_FILES_DIR/qt/plugins/traversers/layouttraverse.qtplugin
+data=EPOCROOT##epoc32/data/z/resource/qt/plugins/traversers/webkittraverse.qtplugin    RESOURCE_FILES_DIR/qt/plugins/traversers/webkittraverse.qtplugin
 
 //tasfixture plugins
-file=ABI_DIR\BUILD_DIR\tasfixture.dll                     SHARED_LIB_DIR\tasfixture.dll
-file=ABI_DIR\BUILD_DIR\tassignal.dll                      SHARED_LIB_DIR\tassignal.dll
-file=ABI_DIR\BUILD_DIR\fpsfixture.dll                     SHARED_LIB_DIR\fpsfixture.dll
-file=ABI_DIR\BUILD_DIR\popupfixture.dll                   SHARED_LIB_DIR\popupfixture.dll
-file=ABI_DIR\BUILD_DIR\filefixture.dll                    SHARED_LIB_DIR\filefixture.dll
-TAS_PLUGIN_STUB(tasfixture, tasfixtures)
-TAS_PLUGIN_STUB(tassignal, tasfixtures)
-TAS_PLUGIN_STUB(fpsfixture, tasfixtures)
-TAS_PLUGIN_STUB(popupfixture, tasfixtures)
-TAS_PLUGIN_STUB(filefixture, tasfixtures)
+file=ABI_DIR/BUILD_DIR/tasfixture.dll                     SHARED_LIB_DIR/tasfixture.dll
+file=ABI_DIR/BUILD_DIR/tassignal.dll                      SHARED_LIB_DIR/tassignal.dll
+file=ABI_DIR/BUILD_DIR/fpsfixture.dll                     SHARED_LIB_DIR/fpsfixture.dll
+file=ABI_DIR/BUILD_DIR/popupfixture.dll                   SHARED_LIB_DIR/popupfixture.dll
+file=ABI_DIR/BUILD_DIR/filefixture.dll                    SHARED_LIB_DIR/filefixture.dll
+file=ABI_DIR/BUILD_DIR/launchfixture.dll                  SHARED_LIB_DIR/launchfixture.dll
+file=ABI_DIR/BUILD_DIR/contactfixture.dll                 SHARED_LIB_DIR/contactfixture.dll
+file=ABI_DIR/BUILD_DIR/mobilitysysinfofixture.dll         SHARED_LIB_DIR/mobilitysysinfofixture.dll
+file=ABI_DIR/BUILD_DIR/settingfixture.dll                 SHARED_LIB_DIR/settingfixture.dll
+data=EPOCROOT##epoc32/data/z/resource/qt/plugins/tasfixtures/tasfixture.qtplugin    RESOURCE_FILES_DIR/qt/plugins/tasfixtures/tasfixture.qtplugin
+data=EPOCROOT##epoc32/data/z/resource/qt/plugins/tasfixtures/tassignal.qtplugin    RESOURCE_FILES_DIR/qt/plugins/tasfixtures/tassignal.qtplugin
+data=EPOCROOT##epoc32/data/z/resource/qt/plugins/tasfixtures/fpsfixture.qtplugin    RESOURCE_FILES_DIR/qt/plugins/tasfixtures/fpsfixture.qtplugin
+data=EPOCROOT##epoc32/data/z/resource/qt/plugins/tasfixtures/popupfixture.qtplugin    RESOURCE_FILES_DIR/qt/plugins/tasfixtures/popupfixture.qtplugin
+data=EPOCROOT##epoc32/data/z/resource/qt/plugins/tasfixtures/filefixture.qtplugin    RESOURCE_FILES_DIR/qt/plugins/tasfixtures/filefixture.qtplugin
+data=EPOCROOT##epoc32/data/z/resource/qt/plugins/tasfixtures/launchfixture.qtplugin    RESOURCE_FILES_DIR/qt/plugins/tasfixtures/launchfixture.qtplugin
+data=EPOCROOT##epoc32/data/z/resource/qt/plugins/tasfixtures/contactfixture.qtplugin    RESOURCE_FILES_DIR/qt/plugins/tasfixtures/contactfixture.qtplugin
+data=EPOCROOT##epoc32/data/z/resource/qt/plugins/tasfixtures/mobilitysysinfofixture.qtplugin    RESOURCE_FILES_DIR/qt/plugins/tasfixtures/mobilitysysinfofixture.qtplugin
+data=EPOCROOT##epoc32/data/z/resource/qt/plugins/tasfixtures/settingfixture.qtplugin    RESOURCE_FILES_DIR/qt/plugins/tasfixtures/settingfixture.qtplugin
 
 //testability loader plugin
-file=ABI_DIR\BUILD_DIR\testability.dll                    SHARED_LIB_DIR\testability.dll
-file=ABI_DIR\BUILD_DIR\testabilitystyle.dll               SHARED_LIB_DIR\testabilitystyle.dll
-TAS_PLUGIN_STUB(testability, testability)
-TAS_PLUGIN_STUB(testabilitystyle, styles)
+file=ABI_DIR/BUILD_DIR/testability.dll                    SHARED_LIB_DIR/testability.dll
+file=ABI_DIR/BUILD_DIR/testabilitystyle.dll               SHARED_LIB_DIR/testabilitystyle.dll
+data=EPOCROOT##epoc32/data/z/resource/qt/plugins/testability/testability.qtplugin    RESOURCE_FILES_DIR/qt/plugins/testability/testability.qtplugin
+data=EPOCROOT##epoc32/data/z/resource/qt/plugins/styles/testabilitystyle.qtplugin    RESOURCE_FILES_DIR/qt/plugins/styles/testabilitystyle.qtplugin
 
 // Stub SIS
-data=ZSYSTEM\install\tdriver_package_stub.sis              system\install\tdriver_package_stub.sis
+data=ZSYSTEM/install/tdriver_package_stub.sis              system/install/tdriver_package_stub.sis
 
 #endif
 

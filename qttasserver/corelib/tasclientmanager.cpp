@@ -391,21 +391,24 @@ void TasClientManager::removeAllClients(bool kill)
     QMutexLocker locker(&mMutex);   
     foreach (TasClient* app, mClients){
         app->closeConnection();
-        if(kill){
+        if(kill && mStartedPids.contains(app->processId())){
             bool ok;
             quint64 pid = app->processId().toULongLong(&ok, 10);       
             if(ok && pid != 0){
                 TasNativeUtils::killProcess(pid);
             }
         }
+        mStartedPids.removeAll(app->processId());
         delete app;
-        app = 0;
     }
     mClients.clear();
-   
-    emit allClientsRemoved();
 }
 
+
+void TasClientManager::addStartedPid(const QString& pid)
+{
+    mStartedPids << pid;
+}
 
 
 /*!
@@ -553,11 +556,18 @@ void TasClient::disconnected()
 
     if(mSocket){
         disconnect(mSocket, SIGNAL(socketClosed()), this, SLOT(disconnected()));    
-        mSocket = 0;
     }
+    socketDied();
+}
 
+void TasClient::socketDied()
+{    
+    if(mSocket){
+        disconnect(mSocket, SIGNAL(destroyed()), this, SLOT(socketDied()));    
+    }
     //no process remove the client from the list
     //will register again if so wants
+    mSocket = 0;
     TasClientManager::instance()->removeMe(*this);
     deleteLater();
 }
@@ -577,6 +587,7 @@ void TasClient::setSocket(TasSocket* socket)
 {
     mSocket = socket;
     connect(mSocket, SIGNAL(socketClosed()), this, SLOT(disconnected()));    
+    connect(mSocket, SIGNAL(destroyed()), this, SLOT(socketDied()));    
 }
 
 int TasClient::upTime()

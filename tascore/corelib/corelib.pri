@@ -26,6 +26,7 @@ PUBLIC_HEADERS += $$PWD/tasqtfixtureplugininterface.h
 PUBLIC_HEADERS += $$PWD/tastraverseinterface.h
 PUBLIC_HEADERS += $$PWD/taspluginloader.h 
 PUBLIC_HEADERS += $$PWD/tasextensioninterface.h
+PUBLIC_HEADERS += $$PWD/infologger.h 
 
 HEADERS += $$PWD/tasmessages.h 
 HEADERS += $$PWD/testabilitysettings.h 
@@ -33,11 +34,11 @@ HEADERS += $$PWD/tasdatashare.h
 HEADERS += $$PWD/tascommand.h 
 HEADERS += $$PWD/tasfixtureplugininterface.h 
 HEADERS += $$PWD/tasqtfixtureplugininterface.h 
-HEADERS += $$PWD/infologger.h 
 HEADERS += $$PWD/tasservicemanager.h 
 HEADERS += $$PWD/tasxmlwriter.h 
 HEADERS += $$PWD/tassocket.h 
 HEADERS += $$PWD/tasdeviceutils.h 
+HEADERS += $$PWD/taspointercache.h 
 #HEADERS += $$PWD/tascommandparser.h 
 
 SOURCES += $$PWD/tasmessages.cpp
@@ -53,12 +54,15 @@ SOURCES += $$PWD/tasdatashare.cpp
 SOURCES += $$PWD/testabilitysettings.cpp
 SOURCES += $$PWD/tascoreutils.cpp
 SOURCES += $$PWD/infologger.cpp
+SOURCES += $$PWD/taspointercache.cpp
 
 unix: {
     symbian: {
        HEADERS += $$PWD/gpuinfo_symbian.h 
+       HEADERS += $$PWD/pwrinfo_symbian.h
        SOURCES += $$PWD/tasdeviceutils_symbian.cpp
        SOURCES += $$PWD/gpuinfo_symbian.cpp
+       SOURCES += $$PWD/pwrinfo_symbian.cpp
     } else {
        macx|CONFIG(no_x):{
          SOURCES += $$PWD/tasdeviceutils.cpp	
@@ -74,10 +78,14 @@ win32: {
 }
 
 CONFIG(maemo){
-LIBS += -lqmsystem 
+LIBS += -lqmsystem2
 }
 
 
 unix:!symbian:!macx:!CONFIG(no_x) {
   LIBS += -lX11 -lXtst 
+}
+
+symbian: {
+    LIBS += -lcfclient -lcfservices -lHWRMPowerClient -lcentralrepository
 }

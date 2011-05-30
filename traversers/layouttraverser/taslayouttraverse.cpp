@@ -157,6 +157,7 @@ void TasLayoutTraverse::addGraphicsLayoutItem(TasObject& objectInfo, QGraphicsLa
         objectInfo.setId(TasCoreUtils::pointerId(item));
         if(item->isLayout()){
             objectInfo.addAttribute("objectType", TYPE_LAYOUT);
+            objectInfo.setType("QGraphicsLayout");        
         }
         else{
             objectInfo.addAttribute("objectType", TYPE_LAYOUT_ITEM);

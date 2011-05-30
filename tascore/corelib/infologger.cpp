@@ -29,6 +29,7 @@
 const static QString CPU = "cpu";
 const static QString GPU = "gpu";
 const static QString MEM = "mem";
+const static QString PWR = "pwr";
 const static QString ACTION = "action";
 const static QString APPEND = "append";
 const static QString CLEARLOG = "clearLog";
@@ -42,6 +43,7 @@ InfoLogger::InfoLogger()
     mCpu = 0;
 	mMem = 0;
 	mGpu = 0;
+	mPwr = 0;
     mState = 0;
     mDeviceUtils = new TasDeviceUtils();
     mTimer.setInterval(1000);
@@ -54,6 +56,7 @@ InfoLogger::~InfoLogger()
     if(mCpu) delete mCpu;
     if(mGpu) delete mGpu;
     if(mMem) delete mMem;
+    if(mPwr) delete mPwr;
     delete mDeviceUtils;
 }
 
@@ -132,6 +135,32 @@ void InfoLogger::performLogService(TasCommandModel& model, TasResponse& response
             }
 
         }
+        command = target->findCommand(PWR);
+        if(command){
+            if(command->parameter(ACTION) == "start"){
+                QString fileName;
+                if(!makeFileName(command, PWR, fileName)){
+                    response.setErrorMessage("File path must be defined for pwr logging!");
+                }
+                else{
+                    mState |= PwrLogging;
+                    if(mPwr){
+                        delete mPwr;
+                        mPwr = 0;
+                    }
+                    mPwr = openFile(fileName, command);
+                }
+                //to launch measuring if not running
+                mDeviceUtils->pwrDetails();
+            }
+            else if(command->parameter(ACTION) == "stop" || command->parameter(ACTION) == "load"){
+                loadPwrData(response, command);
+                if(command->parameter(ACTION) == "stop" ){
+                    mDeviceUtils->stopPwrData();
+                }
+            }
+
+        }
         //determines that does the interval need to be started or stopped
         checkLoggerState();
     }
@@ -161,15 +190,9 @@ bool InfoLogger::makeFileName(TasCommand* command, const QString& type, QString&
 }
 
 QFile* InfoLogger::openFile(const QString& fileName, TasCommand* command)
-{
-    QFile* file = new QFile(fileName);    
-    if(command->parameter(APPEND) == "true"){
-        file->open(QIODevice::ReadWrite | QIODevice::Text | QIODevice::Append);               
-    }
-    else{
-        file->open(QIODevice::ReadWrite | QIODevice::Text | QIODevice::Truncate);               
-    } 
-    return file;
+{    
+    bool append = (command->parameter(APPEND) == "true");    
+    return mLoggerUtil.openFile(fileName, append);
 }
 
 /*!
@@ -231,6 +254,25 @@ void InfoLogger::loadGpuData(TasResponse& response, TasCommand* command)
 }
 
 /*!
+  Loads power data from the file and sets the in xml format as
+  the response data.
+*/
+void InfoLogger::loadPwrData(TasResponse& response, TasCommand* command)
+{
+    if(mPwr){
+        response.setData(loadData(mPwr, "pwrUsage", command));
+        if(command->parameter(ACTION) == "stop"){
+            delete mPwr;
+            mPwr = 0;
+            mState ^= PwrLogging;
+        }
+    }
+    else{
+        response.setErrorMessage("No data collected!");
+    }
+}
+
+/*!
   Loads the data from the file and makes a tasdatamodel out of the 
   data. Serializes the data and returns a QByteArray containing the 
   serialized data.
@@ -238,44 +280,14 @@ void InfoLogger::loadGpuData(TasResponse& response, TasCommand* command)
 QByteArray InfoLogger::loadData(QFile* file, const QString& name, TasCommand* command)
 {
     mTimer.stop();
-
-    TasDataModel* tasModel = new TasDataModel();
-    QString qtVersion = "Qt" + QString(qVersion());
-    TasObjectContainer& container = tasModel->addNewObjectContainer(1, qtVersion, "qt");
-    TasObject& parentData = container.addNewObject(0, name, "logData");   
-
-    int counter = 0;
-    QTextStream in(file);
-    in.seek(0);
-    while (!in.atEnd()) {
-        TasObject& obj = parentData.addObject();
-        obj.setId(QString::number(counter));        
-        obj.setType("logEntry");
-        obj.setName("LogEntry");
-        //load attributes format is: title:value;title:value....
-        QStringList line = in.readLine().split(ATTR_DELIM, QString::SkipEmptyParts);
-        QString attrPair;
-        foreach(attrPair, line){
-            QStringList attribute = attrPair.split(VALUE_DELIM, QString::SkipEmptyParts);
-            obj.addAttribute(attribute.first(),attribute.last());
-        }
-        counter++;
-    }
-    parentData.addAttribute("entryCount", counter);
-
+    QByteArray xmlData = mLoggerUtil.loadLoggedData(file, name);
     if (command->parameter(CLEARLOG) != "false"){
         file->remove();
         if(command->parameter(ACTION) == "load"){
             file->open(QIODevice::ReadWrite | QIODevice::Text | QIODevice::Truncate);
         }
     }
-    
-    SerializeFilter* filter = new SerializeFilter();		    		
-    filter->serializeDuplicates(true);		    		
-    QByteArray xml;
-    tasModel->serializeModel(xml, filter);
-    delete tasModel;
-    return xml;
+    return xmlData;
 }
 
 /*!
@@ -305,6 +317,9 @@ void InfoLogger::timerEvent()
     if( (mState & GpuLogging) != 0){
         logGpu();
     }
+    if( (mState & PwrLogging) != 0){
+        logPwr();
+    }
 }
 
 void InfoLogger::logMem()
@@ -315,7 +330,7 @@ void InfoLogger::logMem()
     line.append("heapSize");
     line.append(VALUE_DELIM);
     line.append(QString::number(mDeviceUtils->currentProcessHeapSize()));
-    writeLine(line, mMem);
+    mLoggerUtil.writeLine(line, mMem);
 }
 
 void InfoLogger::logCpu()
@@ -341,7 +356,7 @@ void InfoLogger::logCpu()
         qreal cpuUsage = ( cpuDiff / elapsed ) * 100;        
         line.append(QString::number(cpuUsage));
     }
-    writeLine(line, mCpu);
+    mLoggerUtil.writeLine(line, mCpu);
 }
 
 void InfoLogger::logGpu()
@@ -376,14 +391,92 @@ void InfoLogger::logGpu()
     line.append("processSharedMem");
     line.append(VALUE_DELIM);
     line.append(QString::number(details.processSharedMem));    
-    writeLine(line, mGpu);
+    mLoggerUtil.writeLine(line, mGpu);
 }
 
-void InfoLogger::writeLine(const QString& line, QFile* file)
+void InfoLogger::logPwr()
+{
+    PwrDetails details = mDeviceUtils->pwrDetails();
+    QString line = "timeStamp:";
+    line.append(QDateTime::currentDateTime().toString(DATE_FORMAT));
+    line.append(ATTR_DELIM);
+    //not supported
+    if(!details.isValid){
+        details.voltage = -1;
+        details.current = -1;
+    }
+    line.append("voltage:");
+    line.append(QString::number(details.voltage));
+    line.append(ATTR_DELIM);
+    line.append("current");
+    line.append(VALUE_DELIM);
+    line.append(QString::number(details.current));
+    mLoggerUtil.writeLine(line, mPwr);
+}
+
+QByteArray TasInfoLoggerUtil::loadLoggedData(QFile* file, const QString& name )
+{
+    QHash<QString,QString> params;
+    return loadLoggedData(file, name, params);
+}
+
+
+QByteArray TasInfoLoggerUtil::loadLoggedData(QFile* file, const QString& name, QHash<QString,QString> params)
+{
+    TasDataModel* tasModel = new TasDataModel();
+    QString qtVersion = "Qt" + QString(qVersion());
+    TasObjectContainer& container = tasModel->addNewObjectContainer(1, qtVersion, "qt");
+    TasObject& parentData = container.addNewObject("0", name, "logData");   
+
+    int counter = 0;
+    QTextStream in(file);
+    in.seek(0);
+    while (!in.atEnd()) {
+        TasObject& obj = parentData.addObject();
+        obj.setId(QString::number(counter));        
+        obj.setType("logEntry");
+        obj.setName("LogEntry");
+        //load attributes format is: title:value;title:value....
+        QStringList line = in.readLine().split(ATTR_DELIM, QString::SkipEmptyParts);
+        QString attrPair;
+        foreach(attrPair, line){
+            QStringList attribute = attrPair.split(VALUE_DELIM, QString::SkipEmptyParts);
+            obj.addAttribute(attribute.first(),attribute.last());
+        }
+        counter++;
+    }
+    parentData.addAttribute("entryCount", counter);   
+    if(!params.isEmpty()){
+        foreach(QString key, params.keys()){
+            parentData.addAttribute(key, params.value(key));   
+        }
+    }
+    SerializeFilter* filter = new SerializeFilter();		    		
+    filter->serializeDuplicates(true);		    		
+    QByteArray xml;
+    tasModel->serializeModel(xml, filter);
+    delete tasModel;
+    return xml;
+}
+
+
+void TasInfoLoggerUtil::writeLine(const QString& line, QFile* file)
 {
     if(file && file->isWritable()){
         file->write(line.toAscii());
         file->write("\n");
         file->flush();        
     }
+}
+
+QFile* TasInfoLoggerUtil::openFile(const QString& fileName, bool append)
+{
+    QFile* file = new QFile(fileName);    
+    if(append){
+        file->open(QIODevice::ReadWrite | QIODevice::Text | QIODevice::Append);               
+    }
+    else{
+        file->open(QIODevice::ReadWrite | QIODevice::Text | QIODevice::Truncate);               
+    } 
+    return file;
 }

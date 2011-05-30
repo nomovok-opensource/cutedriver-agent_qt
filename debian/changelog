@@ -1,3 +1,56 @@
+qttas (1.1.1-5) unstable; urgency=low
+
+  * Fixes: NB#253492 - qttas upstart configuration files have to have "x" bit set
+
+ -- Testability Driver Team <testabilitydriver@nokia.com>  Mon, 9 May 2011 09:47:00 +0300
+
+qttas (1.1.1-4) unstable; urgency=low
+
+  * Fixes: NB#250975 - Wrong locale information reported for applications
+  * Fixes: NB#252522 - Unauthorized init script /etc/init/qttas-testing.conf 
+
+ -- Testability Driver Team <testabilitydriver@nokia.com>  Thu, 5 May 2011 09:47:00 +0300
+
+qttas (1.1.1-3) unstable; urgency=low
+
+  * Fixes: NB#251357 - qttas-server fails to start successfully with confined upstart job (
+
+ -- Testability Driver Team <testabilitydriver@nokia.com>  Mon, 2 May 2011 08:11:00 +0300
+
+qttas (1.1.1-2) unstable; urgency=low
+
+  * Fixes: NB#247007 - Force loading of qttas plugin for all apps
+  * Fixes: NB#245944 - Connection to plugin timedout!
+
+ -- Testability Driver Team <testabilitydriver@nokia.com>  Thu, 17 Apr 2011 13:01:00 +0200
+
+qttas (1.1.1-1) unstable; urgency=low
+
+  * new release version
+  * Fixes: NB#237003 - gesture directions are mixed up in vkb when in portrait mode
+
+ -- Testability Driver Team <testabilitydriver@nokia.com>  Thu, 30 Mar 2011 13:01:00 +0200
+
+qttas (1.1.0-1) unstable; urgency=low
+
+  * new release version
+  * Fixes: NB#204237 - Signals fixture is off-by-one regarding the signal parameters 
+
+ -- Testability Driver Team <testabilitydriver@nokia.com>  Thu, 15 Feb 2011 12:01:00 +0200
+
+qttas (1.0.4-3) unstable; urgency=low
+
+  * Fixes: NB#227508 - meego-im-uiserver crashes when running TDriver scripts
+  * Fixes: NB#223734 - Change QWidget::winId() to effectiveWinId
+
+ -- Testability Driver Team <testabilitydriver@nokia.com>  Thu, 15 Feb 2011 12:00:00 +0200
+
+qttas (1.0.4-2) unstable; urgency=low
+
+  * new release version
+
+ -- Testability Driver Team <testabilitydriver@nokia.com>  Thu, 10 Feb 2011 16:00:00 +0200
+
 qttas (1.0.4-1) unstable; urgency=low
 
   * new release version

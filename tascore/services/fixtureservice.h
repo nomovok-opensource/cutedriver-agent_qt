@@ -46,7 +46,7 @@ private:
 	TasPluginLoader* mPluginLoader;
     QQueue<TasCommandModel*> commandQueue;
     QTimer mTimer;
-
+	bool mInitialized;
 };
 
 #endif

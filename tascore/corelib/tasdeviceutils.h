@@ -46,28 +46,48 @@ public:
     virtual GpuMemDetails gpuData() = 0;
 };
 
+struct PwrDetails
+{
+  int voltage;
+  int current;
+  bool isValid;
+};
+
+class PwrDetailsInterface
+{
+public:
+    virtual ~PwrDetailsInterface(){}
+    virtual PwrDetails pwrData() = 0;
+};
+
 class TasDeviceUtils 
 {
 public:
     TasDeviceUtils();
-	~TasDeviceUtils(){if(gpuDetailsHandler) delete gpuDetailsHandler;}
+	~TasDeviceUtils(){if(gpuDetailsHandler) delete gpuDetailsHandler;if(pwrDetailsHandler) delete pwrDetailsHandler;}
 
     static void resetInactivity();
 	static int currentProcessHeapSize();
 	static void addSystemMemoryStatus(TasObject& object);
 	static void addSystemInformation(TasObject& object);
-	static void sendMouseEvent(int x, int y, Qt::MouseButton button, QEvent::Type);
+	static void sendMouseEvent(int x, int y, Qt::MouseButton button, QEvent::Type, uint pointerNumber);
 	/*!
 	  Return cpu time in millis
 	*/
 	static qreal currentProcessCpuTime();
 	
 	GpuMemDetails gpuMemDetails();
+	PwrDetails    pwrDetails();
+	void          stopPwrData();
 
 	static bool isServerRunning();
 
+  static int getOrientation();
+
+
 private:
 	GpuMemDetailsInterface* gpuDetailsHandler;
+	PwrDetailsInterface* pwrDetailsHandler;
 
 };
 

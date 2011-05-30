@@ -55,9 +55,6 @@ int pidOfXWindow(Display* display, Window win)
                 pid += prop[0];  
             }
         }
-        
-       
-
     }  
     if (prop) XFree(prop);
     return pid;
@@ -319,5 +316,9 @@ bool TasNativeUtils::processExitStatus(quint64 pid, int &status)
     if (verifyProcess(pid)) return false;
     status = 0;
     return true;
+}
+
+void TasNativeUtils::runningProcesses(TasObject& applist)
+{
 }
 

@@ -120,16 +120,8 @@ void TasQtTraverse::traverseObject(TasObject* objectInfo, QObject* object, TasCo
         //make sure that we are dealing with a widget
         if (object->isWidgetType()){      
             QWidget* widget = qobject_cast<QWidget*>(object);            
+            objectInfo->addAttribute("objectType", TYPE_STANDARD_VIEW );        
 
-            // Widgets inside proxies are forced into Web type 
-            // Operations are transformed into Web types
-            QGraphicsProxyWidget* proxy = TestabilityUtils::parentProxy(widget);
-            if (proxy) {
-                objectInfo->addAttribute("objectType", TYPE_WEB);
-            }
-            else if(object != qApp){
-                objectInfo->addAttribute("objectType", TYPE_STANDARD_VIEW );        
-            }
             addWidgetCoordinates(objectInfo, widget,command);
             mTraverseUtils->addFont(objectInfo, widget->font());
             //check is the widget a viewport to graphicsscene
@@ -158,7 +150,14 @@ void TasQtTraverse::traverseObject(TasObject* objectInfo, QObject* object, TasCo
                     objectInfo->addAttribute("transformM33",tr.m33());
                 }
             }
-            objectInfo->addBooleanAttribute("isViewPort", isViewPort);                    
+            objectInfo->addBooleanAttribute("isViewPort", isViewPort);       
+// Add special window id attribute into qwidget atttributes
+#if defined(Q_WS_X11) 
+            unsigned long wid = static_cast<unsigned long>(widget->effectiveWinId());
+            objectInfo->addAttribute("xWindow", (int)wid); // can this fail due to precision?
+#endif 
+
+             
         } else {
             if(object != qApp){
                 objectInfo->addAttribute("objectType", embeddedApp? TYPE_WEB : TYPE_STANDARD_VIEW );        

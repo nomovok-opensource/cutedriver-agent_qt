@@ -83,8 +83,7 @@ public:
   TasClient* logMemClient();
   void removeMe(const TasClient& client);
 
-signals:
-  void allClientsRemoved();
+  void addStartedPid(const QString& pid);
 
 private:
 
@@ -102,6 +101,7 @@ private:
   TasDataShare* mDataShare;
   QMutex mMutex;
   qint32 mMessageCounter;
+  QStringList mStartedPids;
 };
 
 class TasClient : public QObject
@@ -134,6 +134,7 @@ signals:
 
 private slots:    
   void disconnected();
+  void socketDied();
 
 private:
   TasSocket* mSocket;

@@ -17,12 +17,17 @@
 **
 ****************************************************************************/
 
-
+#include <QGraphicsObject>
 
 #include "testabilityutils.h"
 #include "taslogger.h"
 #include "testabilitysettings.h"
 #include "tasqtcommandmodel.h"
+#include "taspointercache.h"
+
+#if QT_VERSION >= 0x040700
+#include <QDeclarativeItem>
+#endif
 
 /*!
   \class TestabilityUtils
@@ -31,13 +36,19 @@
 */
 
 /*!
-  Casting direclty from the id does not work so we need to look
+  Casting directly from the id does not work so we need to look
   for the object with a matching id.
 */
 QWidget* TestabilityUtils::findWidget(const QString& id)
 {
-    TasLogger::logger()->debug("TestabilityUtils::findWidget id:" + id);
     QWidget* widget = NULL;
+    QObject* o = TasPointerCache::instance()->getObject(id);
+    if(o != 0){
+        widget = qobject_cast<QWidget*>(o);
+        if(widget){
+            return widget;
+        }
+    }
     QWidgetList widgetList = qApp->allWidgets();
     if (!widgetList.empty()){
         QWidgetList::iterator i;
@@ -63,6 +74,16 @@ QWidget* TestabilityUtils::findWidget(const QString& id)
 QGraphicsItem* TestabilityUtils::findGraphicsItem(const QString& id)
 {
     QGraphicsItem* item = NULL;
+    QObject* o = TasPointerCache::instance()->getObject(id);
+    if(o != 0){
+        TasLogger::logger()->debug("TestabilityUtils::findGraphicsItem Object found from cache try casting");    
+        QGraphicsObject* go = qobject_cast<QGraphicsObject*>(o);
+        if(go){
+            TasLogger::logger()->debug("TestabilityUtils::findGraphicsItem object ok returning it.");    
+            return go;
+        }
+    }
+
     QWidgetList widgetList = qApp->topLevelWidgets();
     if (!widgetList.empty()){
         QList<QWidget*>::iterator iter;
@@ -257,8 +278,12 @@ bool TestabilityUtils::isItemInView(QGraphicsView* view, QGraphicsItem* graphics
                         QGraphicsObject* topObject = topItem->toGraphicsObject();
                         QRectF sceneRect = topItem->sceneBoundingRect();
 
+                        // I am top
+                        if(topItem == graphicsItem){
+                            break;
+                        }
                         // ignore special overlay items
-                        if (topObject && isItemBlackListed(topObject->objectName(), topObject->metaObject()->className())) {
+                        else if (topObject && isItemBlackListed(topObject->objectName(), topObject->metaObject()->className())) {
                             continue;
                         }
                         // ignore items with no width or height - should not get these when using point??
@@ -371,12 +396,18 @@ bool TestabilityUtils::isVisibilityCheckOn()
 
 bool TestabilityUtils::isItemBlackListed(QString objectName, QString className)
 {
+    //black list will most likely contain names without dynamic qml extension
+    if(className.contains("_QML")){
+        QStringList stringList = className.split("_QML");
+        className = stringList.takeFirst();        
+    }
+
     QVariant value = TestabilitySettings::settings()->getValue(VISIBILITY_BLACKLIST);
     if(value.isValid() && value.canConvert<QString>()){
         QStringList blackList = value.toString().split(",");
         for (int i = 0; i < blackList.size(); i++){
             QString blackListed = blackList.at(i);
-            if(blackListed.contains(objectName)){
+            if(!objectName.isEmpty() && blackListed.contains(objectName)){
                 return true;
             }
             if(blackListed.contains(className)){
@@ -422,7 +453,7 @@ ItemLocationDetails TestabilityUtils::getItemLocationDetails(QGraphicsItem* grap
 {
     bool isVisible = false;
     QGraphicsView* view = getViewForItem(graphicsItem);
-    ItemLocationDetails locationDetails;
+    ItemLocationDetails locationDetails = {QPoint(), QPoint(), QPoint(), 0, 0, false};
     if(view){
         // for webkit
         // If the window is embedded into a another app, wee need to figure out if the widget is visible
@@ -503,6 +534,15 @@ ItemLocationDetails TestabilityUtils::getItemLocationDetails(QGraphicsItem* grap
             locationDetails.height = height;
         }
     }
+    
+#if QT_VERSION >= 0x040700
+    // Invisible items in QML are marked not visible
+    // This check could be for all apps?
+    if (qgraphicsitem_cast<QDeclarativeItem*>(graphicsItem) && graphicsItem->effectiveOpacity() == 0.0) {
+        isVisible = false;
+    }
+#endif
+
     locationDetails.visible = isVisible;
     return locationDetails;
 }

@@ -26,10 +26,11 @@
 #include "tasxmlwriter.h"
 #include "version.h"
 #include "tasqtdatamodel.h"
+#include <tascoreutils.h>
 
 //xml strings
 const char* const VERSION = "version";
-const char* const DATE_TIME = "dateTime";
+//const char* const DATE_TIME = "dateTime";
 const char* const NAME = "name";
 const char* const TYPE = "type";
 const char* const ENV = "env";
@@ -67,6 +68,11 @@ const char* const PARENT = "parent";
 */
 TasAttribute::TasAttribute()
 {    
+}
+
+TasAttribute::TasAttribute(const QString& name)
+{    
+    this->name = name; 
 }
 
 /*!
@@ -111,10 +117,17 @@ void TasAttribute::setDataType(const QString& type)
     Add the attribute value. One name can be mapped to multiple values. 
 
 */
-void TasAttribute::addValue(const QString& value)
+void TasAttribute::addValue(const QString& value) //, bool encodeString)
+{
+    //values << (encodeString ? TasCoreUtils::encodeString(value) : value);
+    values << TasCoreUtils::encodeString(value);
+}
+
+void TasAttribute::addValuePlainString(const QString& value)
 {
     values << value;
 }
+
 void TasAttribute::addValue(const QPoint& value)
 {
     QString attr;
@@ -161,7 +174,7 @@ void TasAttribute::addValue(const QRectF& value)
 void TasAttribute::serializeIntoString(TasXmlWriter& xmlWriter ,SerializeFilter& /*filter*/)
 {  
     QMap<QString, QString> attributes;
-    attributes[NAME] = name;
+    attributes[NAME] = TasCoreUtils::encodeString( name );
     if(!type.isEmpty()){
         attributes[TYPE] = type;
     }
@@ -272,15 +285,35 @@ TasAttribute& TasObject::addAttribute()
 
 /*!
 
+    Add new attribute to the object with name.
+
+*/
+TasAttribute& TasObject::addAttribute(const QString& name)
+{
+    TasAttribute* attribute = new TasAttribute(name); 
+    attributes.append(attribute);
+    return *attribute;
+}
+
+/*!
+
     Add new attribute to the object with the given name and value.
 
 */
 TasAttribute& TasObject::addAttribute(const QString& name, const QString& value)
 {
+/*
     TasAttribute& attribute = addAttribute();
     attribute.setName(name);
     attribute.addValue(value);    
     return attribute;
+*/
+
+    TasAttribute* attribute = new TasAttribute(name);
+    attribute->addValue(value);
+    attributes.append(attribute);
+    return *attribute;
+
 }
 
 /*!
@@ -288,7 +321,15 @@ TasAttribute& TasObject::addAttribute(const QString& name, const QString& value)
 */
 TasAttribute& TasObject::addAttribute(const QString& name, int value)
 {
+/*
     return addAttribute(name, QString::number(value));
+*/
+
+    TasAttribute* attribute = new TasAttribute(name);
+    attribute->addValuePlainString(QString::number(value));
+    attributes.append(attribute);
+    return *attribute;
+
 }
 
 /*!
@@ -296,7 +337,14 @@ TasAttribute& TasObject::addAttribute(const QString& name, int value)
 */
 TasAttribute& TasObject::addAttribute(const QString& name, qreal value)
 {
+/*
     return addAttribute(name, QString::number(value));
+*/
+    TasAttribute* attribute = new TasAttribute(name);
+    attribute->addValuePlainString(QString::number(value));
+    attributes.append(attribute);
+    return *attribute;
+
 }
 
 /*!
@@ -304,10 +352,17 @@ TasAttribute& TasObject::addAttribute(const QString& name, qreal value)
  */
 TasAttribute& TasObject::addAttribute(const QString& name, const QSize& value)
 {
+/*
     TasAttribute& attribute = addAttribute();
     attribute.setName(name);
     attribute.addValue(value);    
     return attribute;
+*/
+    TasAttribute* attribute = new TasAttribute(name);
+    attribute->addValue(value);
+    attributes.append(attribute);
+    return *attribute;
+
 }
 
 /*!
@@ -315,10 +370,17 @@ TasAttribute& TasObject::addAttribute(const QString& name, const QSize& value)
  */
 TasAttribute& TasObject::addAttribute(const QString& name, const QSizeF& value)
 {
+/*
     TasAttribute& attribute = addAttribute();
     attribute.setName(name);
     attribute.addValue(value);    
     return attribute;
+*/
+    TasAttribute* attribute = new TasAttribute(name);
+    attribute->addValue(value);
+    attributes.append(attribute);
+    return *attribute;
+
 }
 
 /*!
@@ -326,10 +388,17 @@ TasAttribute& TasObject::addAttribute(const QString& name, const QSizeF& value)
  */
 TasAttribute& TasObject::addAttribute(const QString& name, const QRect& value)
 {
+/*
     TasAttribute& attribute = addAttribute();
     attribute.setName(name);
     attribute.addValue(value);    
     return attribute;
+*/
+    TasAttribute* attribute = new TasAttribute(name);
+    attribute->addValue(value);
+    attributes.append(attribute);
+    return *attribute;
+
 }
 
 
@@ -338,10 +407,17 @@ TasAttribute& TasObject::addAttribute(const QString& name, const QRect& value)
  */
 TasAttribute& TasObject::addAttribute(const QString& name, const QRectF& value)
 {
+/*
     TasAttribute& attribute = addAttribute();
     attribute.setName(name);
     attribute.addValue(value);    
     return attribute;
+*/
+    TasAttribute* attribute = new TasAttribute(name);
+    attribute->addValue(value);
+    attributes.append(attribute);
+    return *attribute;
+
 }
 
 /*!
@@ -349,10 +425,17 @@ TasAttribute& TasObject::addAttribute(const QString& name, const QRectF& value)
  */
 TasAttribute& TasObject::addAttribute(const QString& name, const QPoint& value)
 {
+/*
     TasAttribute& attribute = addAttribute();
     attribute.setName(name);
     attribute.addValue(value);    
     return attribute;
+*/
+    TasAttribute* attribute = new TasAttribute(name);
+    attribute->addValue(value);
+    attributes.append(attribute);
+    return *attribute;
+
 }
 
 /*!
@@ -360,13 +443,18 @@ TasAttribute& TasObject::addAttribute(const QString& name, const QPoint& value)
 */
 TasAttribute& TasObject::addAttribute(const QString& name, const QPointF& value)
 {
+/*
     TasAttribute& attribute = addAttribute();
     attribute.setName(name);
     attribute.addValue(value);    
     return attribute;
+*/
+    TasAttribute* attribute = new TasAttribute(name);
+    attribute->addValue(value);
+    attributes.append(attribute);
+    return *attribute;
+
 }
-
-
 
 /*!
 
@@ -375,12 +463,20 @@ TasAttribute& TasObject::addAttribute(const QString& name, const QPointF& value)
 */
 TasAttribute& TasObject::addBooleanAttribute(const QString& name, bool value)
 {
-    TasAttribute& attribute = addAttribute();
-    attribute.setName(name);
-    attribute.addValue(value ? "true" : "false");    
+/*
+    //TasAttribute& attribute = addAttribute();
+    //attribute.setName(name);
+    TasAttribute& attribute = addAttribute(name);
+    //attribute.setName(name);
+    attribute.addValuePlainString(value ? "true" : "false");
     return attribute;
-}
+*/
+    TasAttribute* attribute = new TasAttribute(name);
+    attribute->addValuePlainString(value ? "true" : "false");
+    attributes.append(attribute);
+    return *attribute;
 
+}
 
 /*!
 
@@ -423,7 +519,7 @@ void TasObject::serializeIntoString(TasXmlWriter& xmlWriter ,SerializeFilter& fi
 { 
     QMap<QString, QString> attrs;
     attrs[ID] = id; 
-    attrs[NAME] = name;
+    attrs[NAME] = TasCoreUtils::encodeString( name );
     attrs[TYPE] = type;     
     if(!env.isEmpty()){
         attrs[ENV] = env;   
@@ -554,7 +650,7 @@ void TasObjectContainer::serializeIntoString(TasXmlWriter& xmlWriter, SerializeF
     if(!elementsOnly){
         QMap<QString, QString> attributes;
         attributes[ID] = id; 
-        attributes[NAME] = name; 
+        attributes[NAME] = TasCoreUtils::encodeString( name ); 
         attributes[TYPE] = type;     
         xmlWriter.openElement(CONTAINER_NAME, attributes);
     }
@@ -693,7 +789,7 @@ void TasDataModel::serializeIntoString(TasXmlWriter& xmlWriter, SerializeFilter&
 {
     QMap<QString, QString> attributes;
     attributes[VERSION] = TAS_VERSION; 
-    attributes[DATE_TIME] = QDateTime::currentDateTime().toString("yyyy.MM.dd hh:mm:ss.zzz"); 
+    //attributes[DATE_TIME] = QDateTime::currentDateTime().toString("yyyy.MM.dd hh:mm:ss.zzz"); 
     xmlWriter.openElement(ROOT_NAME, attributes);
     serializeObjects(xmlWriter, filter);
     xmlWriter.closeElement(ROOT_NAME);

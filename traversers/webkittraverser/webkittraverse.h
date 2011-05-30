@@ -68,7 +68,7 @@ private:
     void parseAttributes(QWebElement* webElement, TasObject* objInfo);
     QString parseElementText(QString innerXml);
 
-    int counter;
+    QGraphicsWebView* mTemporaryPointerToQGraphicsWebView;
 
 #endif
 

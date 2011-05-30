@@ -33,6 +33,16 @@
 #include "tasdeviceutils.h"
 #include "tasmessages.h"
 
+
+class TAS_EXPORT TasInfoLoggerUtil
+{
+public:
+  QByteArray loadLoggedData(QFile* file, const QString& name, QHash<QString,QString> params);
+  QByteArray loadLoggedData(QFile* file, const QString& name);
+  void writeLine(const QString& line, QFile* file);
+  QFile* openFile(const QString& fileName, bool append);
+};
+
 class InfoLogger : public QObject
 {
     Q_OBJECT
@@ -43,7 +53,8 @@ public:
 	  CpuLogging  = 0x01,
 	  MemLogging  = 0x02,
 	  GpuLogging  = 0x04,
-	  LoggingMask = 0x07
+	  PwrLogging  = 0x08,
+	  LoggingMask = CpuLogging | MemLogging | GpuLogging | PwrLogging
 	};
     Q_DECLARE_FLAGS(LoggingStates, LoggingState)
 
@@ -59,10 +70,12 @@ private:
 	void loadCpuData(TasResponse& response, TasCommand* command);
 	void loadGpuData(TasResponse& response, TasCommand* command);
 	void loadMemData(TasResponse& response, TasCommand* command);
+	void loadPwrData(TasResponse& response, TasCommand* command);
 
 	void logMem();
 	void logCpu();
 	void logGpu();
+	void logPwr();
 
 
 	QByteArray loadData(QFile* file, const QString& name, TasCommand* command);
@@ -80,9 +93,12 @@ private:
 	QFile* mCpu;
 	QFile* mMem;
 	QFile* mGpu;
+	QFile* mPwr;
+	QFile* mProperty;
 	QTime mInterval;
 	qreal mLastCpuTime;
 	TasDeviceUtils* mDeviceUtils;
+	TasInfoLoggerUtil mLoggerUtil;
 };
 
 #endif

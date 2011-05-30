@@ -26,7 +26,15 @@
 //#include <QTouchEvent>
 #include <QString>
 
+#include <QThread>
 #include "tasconstants.h"
+
+class TAS_EXPORT Sleeper: public QThread
+{
+public:
+    static void sleep(int ms);
+
+};
 
 class TAS_EXPORT TasCoreUtils
 {
@@ -40,6 +48,8 @@ public:
 	static QString pointerId(void* ptr);
 	static bool startServer();
 	static bool autostart();
+  static QString encodeString(const QString& source);
+
 };
 
 #endif

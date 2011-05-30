@@ -43,7 +43,7 @@ class TasExtensionInterface
 	   Provide application ui details not provided by the qt traversers. If the QByteArray returned is null it will not be appended
 	   to the response message. Empty implementations should return a null QByteArray.
 	  */
-	 virtual QByteArray traverseApplication(const QString& pid, const QString& name) = 0;
+	 virtual QByteArray traverseApplication(TasCommandModel& commandModel) = 0;
 
 	 /*!
 	   Perform the commands described ib the command model. The requester socket can be used to respond to the caller

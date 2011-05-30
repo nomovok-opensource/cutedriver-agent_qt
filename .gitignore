@@ -1,0 +1,22 @@
+#ignore generated files
+moc_*
+Makefile
+*.loc
+*.inf
+*.mmp
+*.rss
+*.cache
+*.sis
+*stubs*
+*.pkg
+*.o
+*.Release
+*.Debug
+*.*~
+lib/
+\#*
+\.#*
+bin/
+TAGS
+#don't ignore files in symbian folder
+!/symbian/*

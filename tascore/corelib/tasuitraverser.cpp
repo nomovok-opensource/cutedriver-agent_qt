@@ -32,6 +32,9 @@
 #include "tastraverserloader.h"
 #include "tasdeviceutils.h"
 
+#if defined(TAS_MAEMO) && defined(HAVE_QAPP)
+#include <MLocale>
+#endif
 
 TasUiTraverser::TasUiTraverser(QHash<QString, TasTraverseInterface*> traversers)
 {
@@ -249,7 +252,7 @@ void TasUiTraverser::addApplicationDetails(TasObject& application, TasCommand* c
     application.addAttribute("applicationUid", QString::number(uid));    
 #endif    
 
-
+    application.addAttribute("arguments", qApp->arguments().join(" ").toLatin1().data());
     application.addAttribute("exepath", qApp->applicationFilePath().toLatin1().data());    
     application.addAttribute("FullName", qApp->applicationFilePath().toLatin1().data());    
     application.addAttribute("dirpath", qApp->applicationDirPath().toLatin1().data());
@@ -258,10 +261,16 @@ void TasUiTraverser::addApplicationDetails(TasObject& application, TasCommand* c
     application.addAttribute("objectType", TYPE_APPLICATION_VIEW);
     application.addAttribute("objectId", TasCoreUtils::objectId(qApp));
 
+
     int mem = TasDeviceUtils::currentProcessHeapSize();
     if(mem != -1){
         application.addAttribute("memUsage", mem);
     }
+#if defined(TAS_MAEMO) && defined(HAVE_QAPP)
+    MLocale defaultMLocale;
+    application.addAttribute("localeMeegoName", defaultMLocale.name());
+    application.addAttribute("localeMeegoLanguage", defaultMLocale.language());
+#endif
     QLocale defaultLocale;
     application.addAttribute("localeName", defaultLocale.name());
     application.addAttribute("localeCountry", defaultLocale.countryToString(defaultLocale.country()));

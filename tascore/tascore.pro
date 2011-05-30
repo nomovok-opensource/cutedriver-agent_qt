@@ -33,9 +33,14 @@ DEPENDPATH += . corelib services services/interactionhandlers services/interacti
 INCLUDEPATH += . corelib services services/interactionhandlers services/interactionhandlers/gestures services/interactionhandlers/eventgenerator
 
 CONFIG(maemo){
-LIBS += -lqmsystem
+LIBS += -lqmsystem2
 DEFINES += TAS_MAEMO
+DEFINES += HAVE_QAPP
 CONFIG += meegotouch
+}
+
+CONFIG(qml_id){
+DEFINES += QML_ID
 }
 
 # Input
@@ -48,6 +53,8 @@ HEADERS += $$PUBLIC_HEADERS
 symbian: {	
     TARGET.CAPABILITY=CAP_GENERAL_DLL
     TARGET.EPOCALLOWDLLDATA = 1
+    TARGET.UID3 = 0x2003A9E2
+
     BLD_INF_RULES.prj_exports += "conf/qt_testability.ini /epoc32/winscw/c/qt_testability/qt_testability.ini"
     BLD_INF_RULES.prj_exports += "conf/qt_testability.ini /epoc32/data/z/system/data/qt_testability.ini"	
 	!CONFIG(no_mobility){
@@ -58,6 +65,8 @@ symbian: {
 	LIBS += -lcone 
     LIBS += -leikcore 
     LIBS += -lhal
+    LIBS += -lws32
+
 #if ( NCP_COMMON_S60_VERSION_SUPPORT >= S60_VERSION_50 && NCP_COMMON_FAMILY_ID >= 70 )
 	LIBS += -llibEGL
 #endif

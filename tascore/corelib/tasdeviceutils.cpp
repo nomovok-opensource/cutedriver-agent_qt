@@ -35,6 +35,7 @@
 TasDeviceUtils::TasDeviceUtils()
 {
     gpuDetailsHandler = 0;
+    pwrDetailsHandler = 0;
 }
 
 GpuMemDetails TasDeviceUtils::gpuMemDetails()
@@ -43,6 +44,16 @@ GpuMemDetails TasDeviceUtils::gpuMemDetails()
     details.isValid = false;
     return details;
 }
+
+PwrDetails TasDeviceUtils::pwrDetails()
+{
+    PwrDetails details;
+    details.isValid = false;
+    return details;
+}
+void TasDeviceUtils::stopPwrData()
+{}
+
 
 /*!
   Resets the inactivity timeout for the device. Usually for disabling the screensaver.
@@ -94,6 +105,12 @@ bool TasDeviceUtils::isServerRunning()
     return true;
 }
 
-void TasDeviceUtils::sendMouseEvent(int x, int y, Qt::MouseButton button, QEvent::Type type)
+void TasDeviceUtils::sendMouseEvent(int x, int y, Qt::MouseButton button, QEvent::Type type, uint pointerNumber)
 {
+}
+
+
+int TasDeviceUtils::getOrientation()
+{
+    return -1;
 }

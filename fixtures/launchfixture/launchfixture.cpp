@@ -26,13 +26,13 @@
 #include <testabilityutils.h>
 #include <tasqtdatamodel.h>
 
-#include "LaunchFixture.h"
+#include "launchfixture.h"
 
 #include <taslogger.h>
 
 
 #include <e32base.h>
-#include <APGCLI.H>
+#include <apgcli.h>
 
 Q_EXPORT_PLUGIN2(LaunchFixture, LaunchFixture)
 
@@ -90,7 +90,7 @@ bool LaunchFixture::execute(void * objectInstance, QString actionName, QHash<QSt
             cmdLine->SetCommandL(EApaCommandRun);
             User::LeaveIfError(session.StartApp(*cmdLine));
             //TasLogger::logger()->debug("  command line " );
-            stdOut.append(QString::fromUtf16(info.iFullName.Ptr()));
+            stdOut.append(QString((QChar*) info.iFullName.Ptr(), info.iFullName.Length()));
             CleanupStack::PopAndDestroy(2);
         );
         //T R A P D ends

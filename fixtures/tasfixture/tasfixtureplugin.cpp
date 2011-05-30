@@ -62,11 +62,17 @@ bool TasFixturePlugin::execute(void * objectInstance, QString actionName, QHash<
     // place your own code below
     bool result = true;
 
-    if(actionName == "showMessage"){
-        QMessageBox msgBox;        
-        msgBox.setText(parameters.value("text"));
-        int code = msgBox.exec();
-        TasLogger::logger()->debug("TasFixturePlugin::execute showMessage " + QString::number(code));
+    if(actionName.toLower() == "change_orientation"){
+        QWidget* appWindow = TestabilityUtils::getApplicationWindow();
+        if(appWindow){
+            QSize newSize(appWindow->height(), appWindow->width());
+            appWindow->resize(newSize);    
+            result =  true;
+        }
+        else{
+            stdOut = "Could not find application window.";
+            result =  false;
+        }
     }
     // set the stdOut if you wish to pass information back to Testtability Driver
     else if(actionName == "fail"){
@@ -150,22 +156,58 @@ bool TasFixturePlugin::execute(void * objectInstance, QString actionName, QHash<
 			}
 		}
 	}
-
+    else if(actionName == "logProperty" ){
+        QObject* o = castToObject(objectInstance, parameters.value(OBJECT_TYPE));
+        if(o){
+            result = mLogger.startPropertyLog(o, parameters, stdOut);
+        }
+    }
+    else if(actionName == "logPropertyResults" ){
+        QObject* o = castToObject(objectInstance, parameters.value(OBJECT_TYPE));
+        if(o){
+            stdOut.clear();
+            result = mLogger.getLogData(o, parameters, stdOut);
+        }
+    }
+    else if(actionName == "stopLogProperty" ){
+        QObject* o = castToObject(objectInstance, parameters.value(OBJECT_TYPE));
+        if(o){
+            stdOut.clear();
+            result = mLogger.getLogData(o, parameters, stdOut);
+            mLogger.stopLogger(o, parameters);
+        }
+    }
     else{
-        stdOut = "The execution was ok. Parameters were {";
+        stdOut = "The execution was ok. Parameters were { action: " + actionName ;
+        QHash<QString, QString>::const_iterator i = parameters.constBegin();
+        while (i != parameters.constEnd()) {
+            stdOut.append("(");
+            stdOut.append(i.key());
+            stdOut.append("=>");
+            stdOut.append(i.value());
+            stdOut.append(")");
+            ++i;
+            
+            stdOut.append("}");
+            // set the return value as boolean
+        }
         result =  true;
     }
-    QHash<QString, QString>::const_iterator i = parameters.constBegin();
-    while (i != parameters.constEnd()) {
-        stdOut.append("(");
-        stdOut.append(i.key());
-        stdOut.append("=>");
-        stdOut.append(i.value());
-        stdOut.append(")");
-        ++i;
-        
-        stdOut.append("}");
-        // set the return value as boolean
-    }
     return result;
+}
+
+QObject* TasFixturePlugin::castToObject(void* objectInstance, const QString& type)
+{
+    if(type == WIDGET_TYPE ){
+        QWidget* widget = reinterpret_cast<QWidget*>(objectInstance);
+        return widget;
+    }
+    else if(type == GRAPHICS_ITEM_TYPE ){
+        QGraphicsItem* item = reinterpret_cast<QGraphicsItem*>(objectInstance);  
+        return item->toGraphicsObject();
+    }
+    else if(type == APPLICATION_TYPE ){
+        return QCoreApplication::instance();
+    }
+    return 0;
 }

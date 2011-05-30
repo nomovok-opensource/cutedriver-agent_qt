@@ -44,7 +44,7 @@ void TasNativeUtils::changeOrientation(QString)
 bool TasNativeUtils::killProcess(quint64 pid)
 {
     HANDLE hProcess;
-    hProcess = OpenProcess( PROCESS_ALL_ACCESS, FALSE, pid );
+    hProcess = OpenProcess( PROCESS_TERMINATE, FALSE, pid );
     if( hProcess  ){
         TerminateProcess( hProcess, 0);
         CloseHandle(hProcess);
@@ -57,7 +57,7 @@ bool TasNativeUtils::verifyProcess(quint64 pid)
 {
     bool running = false;
     HANDLE hProcess;
-    hProcess = OpenProcess( PROCESS_ALL_ACCESS, FALSE, pid );
+    hProcess = OpenProcess( READ_CONTROL, FALSE, pid );
     if( hProcess  ){
         CloseHandle(hProcess);
         running = true;
@@ -69,7 +69,7 @@ bool TasNativeUtils::processExitStatus(quint64 pid, int &status)
 {
     bool stopped = true;
     HANDLE hProcess;
-    hProcess = OpenProcess( PROCESS_ALL_ACCESS, FALSE, pid );
+    hProcess = OpenProcess( PROCESS_QUERY_INFORMATION, FALSE, pid );
     if( hProcess  ){
         DWORD dwExitCode = 0;
         if(GetExitCodeProcess(hProcess, &dwExitCode)){
@@ -81,6 +81,7 @@ bool TasNativeUtils::processExitStatus(quint64 pid, int &status)
             }
         }
         else{
+            
             TasLogger::logger()->debug("TasNativeUtils::processExitStatus could not get status");
             //maybe no process since could not open
             status = 0;
@@ -88,4 +89,49 @@ bool TasNativeUtils::processExitStatus(quint64 pid, int &status)
         CloseHandle(hProcess);
     }
     return stopped;
+}
+
+void TasNativeUtils::runningProcesses(TasObject& applist)
+
+{
+     // Get the list of process identifiers.
+    DWORD aProcesses[1024], cbNeeded, cProcesses;
+    unsigned int i;
+    if ( !EnumProcesses( aProcesses, sizeof(aProcesses), &cbNeeded ) )
+    {
+        //return empty if fails
+        return ;
+    }
+    cProcesses = cbNeeded / sizeof(DWORD);
+
+    //get the details
+    for ( i = 0; i < cProcesses; i++ ){
+        if( aProcesses[i] != 0 ){
+            DWORD processID = aProcesses[i];
+            HANDLE hProcess = OpenProcess( PROCESS_QUERY_INFORMATION|PROCESS_VM_READ, FALSE, processID );
+            if (NULL != hProcess ){
+                HMODULE hMod;
+                DWORD cbNeeded;                
+                TCHAR szProcessName[MAX_PATH] = TEXT("unknown");
+                if ( EnumProcessModules( hProcess, &hMod, sizeof(hMod), &cbNeeded) ){
+                    GetModuleBaseName( hProcess, hMod, szProcessName, sizeof(szProcessName)/sizeof(TCHAR) );
+                }
+                QString processName;
+#ifdef UNICODE
+                processName = QString::fromUtf16((ushort*)szProcessName);
+#else
+                processName = QString::fromLocal8Bit(szProcessName);
+#endif                
+
+                processName = processName.split(".exe").first();
+                TasObject& processDetails = applist.addNewObject(QString::number(processID), processName, "process");
+                //add mem
+                PROCESS_MEMORY_COUNTERS pmc;
+                if(GetProcessMemoryInfo(hProcess,&pmc, sizeof(pmc))){
+                    processDetails.addAttribute("memUsage", (int)pmc.WorkingSetSize);
+                }            
+            }
+            CloseHandle( hProcess );
+        }
+    }
 }

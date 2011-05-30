@@ -1,53 +1,102 @@
 /*************************************************************************** 
-** 
-** Copyright (C) 2010 Nokia Corporation and/or its subsidiary(-ies). 
-** All rights reserved. 
-** Contact: Nokia Corporation (testabilitydriver@nokia.com) 
-** 
-** This file is part of Testability Driver Qt Agent
-** 
-** If you have questions regarding the use of this file, please contact 
-** Nokia at testabilitydriver@nokia.com . 
-** 
-** This library is free software; you can redistribute it and/or 
-** modify it under the terms of the GNU Lesser General Public 
-** License version 2.1 as published by the Free Software Foundation 
-** and appearing in the file LICENSE.LGPL included in the packaging 
-** of this file. 
-** 
-****************************************************************************/ 
+ ** 
+ ** Copyright (C) 2010 Nokia Corporation and/or its subsidiary(-ies). 
+ ** All rights reserved. 
+ ** Contact: Nokia Corporation (testabilitydriver@nokia.com) 
+ ** 
+ ** This file is part of Testability Driver Qt Agent
+ ** 
+ ** If you have questions regarding the use of this file, please contact 
+ ** Nokia at testabilitydriver@nokia.com . 
+ ** 
+ ** This library is free software; you can redistribute it and/or 
+ ** modify it under the terms of the GNU Lesser General Public 
+ ** License version 2.1 as published by the Free Software Foundation 
+ ** and appearing in the file LICENSE.LGPL included in the packaging 
+ ** of this file. 
+ ** 
+ ****************************************************************************/ 
  
 
  
 
 #include "tasdeviceutils.h"
 
+#if defined(TAS_MAEMO) && defined(HAVE_QAPP)
+#include <MApplication>
+#include <MWindow>
+#include <X11/Xlib.h>
+#include <X11/Xutil.h>
+#include <X11/Xatom.h>
+#endif
+#ifdef TAS_MAEMO
+#include <qmsystem2/qmdisplaystate.h>
+#endif
+
+
 #include <taslogger.h>
 #include <stdlib.h>
 #include <sys/resource.h>
-
 #include <X11/Xlib.h>
 #include <X11/extensions/XTest.h>
 
+
 #include <QEvent>
 
-#ifdef TAS_MAEMO
-#include <qmsystem/qmdisplaystate.h>
+
+#if defined(TAS_MAEMO) && defined(HAVE_QAPP)
+namespace {
+int getOrientationForWidget(QWidget* widget)
+{
+    Display* display = QX11Info::display();
+    Atom orientationAngleAtom = XInternAtom(display,
+                                            "_MEEGOTOUCH_ORIENTATION_ANGLE", True);
+    int orientation = -1;
+    Atom actual_type;
+    int actual_format;
+    unsigned long nitems;
+    unsigned long bytes_after;
+    unsigned char *prop = 0;
+    int status;
+    if (widget && orientationAngleAtom != None) {
+        TasLogger::logger()->debug("got widget and orientation angle");
+        status = XGetWindowProperty(display, widget->effectiveWinId(),
+                                    orientationAngleAtom, 0, 1024,
+                                    False, AnyPropertyType,
+                                    &actual_type, &actual_format, &nitems,
+                                    &bytes_after,
+                                    &prop);
+        if (status!=0 || !prop || actual_format == None) {
+            //NOP
+        } else {
+            TasLogger::logger()->debug("setting it!");
+            orientation = prop[1] * 256;
+            orientation += prop[0];  
+            if (prop) XFree(prop);
+            return orientation;
+        }
+    }
+    if (prop) XFree(prop);
+    return -1;
+}
+}
 #endif
+
 
 
 TasDeviceUtils::TasDeviceUtils()
 {
     gpuDetailsHandler = 0;
+    pwrDetailsHandler = 0;
 }
 
 void TasDeviceUtils::resetInactivity() 
 {
 #ifdef TAS_MAEMO
     TasLogger::logger()->debug("TasDeviceUtils:: resetting inactivity");
-    Maemo::QmDisplayState state; 
+    MeeGo::QmDisplayState state; 
   
-    if (!state.set(Maemo::QmDisplayState::On)) {
+    if (!state.set(MeeGo::QmDisplayState::On)) {
         TasLogger::logger()->warning("TasDeviceUtils:: setting displaystate failed!");
     }    
 
@@ -63,6 +112,16 @@ GpuMemDetails TasDeviceUtils::gpuMemDetails()
     details.isValid = false;
     return details;
 }
+
+PwrDetails TasDeviceUtils::pwrDetails()
+{
+    PwrDetails details;
+    details.isValid = false;
+    return details;
+}
+
+void TasDeviceUtils::stopPwrData()
+{}
 
 // TODO remove the duplicate code (maemo version)
  
@@ -94,7 +153,7 @@ int TasDeviceUtils::currentProcessHeapSize()
 
 /*!
  * /proc/cpuinfo data
-*/
+ */
 void TasDeviceUtils::addSystemInformation(TasObject& object)
 {
     QFile file("/proc/cpuinfo");
@@ -167,7 +226,7 @@ void TasDeviceUtils::addSystemMemoryStatus(TasObject& object)
 // }
 
 
-void TasDeviceUtils::sendMouseEvent(int x, int y, Qt::MouseButton button, QEvent::Type type)
+void TasDeviceUtils::sendMouseEvent(int x, int y, Qt::MouseButton button, QEvent::Type type, uint /*pointerNumber*/)
 {
     Display* dpy = 0;
     Window root = None;
@@ -217,9 +276,63 @@ void TasDeviceUtils::sendMouseEvent(int x, int y, Qt::MouseButton button, QEvent
 
 /*!
   Not implemented, true returned to avoid autostart.
- */
+*/
 bool TasDeviceUtils::isServerRunning()
 {
     return true;
+}
+
+
+
+int TasDeviceUtils::getOrientation()
+{
+    int orientation = -1;
+#if defined(TAS_MAEMO) && defined(HAVE_QAPP)
+    TasLogger::logger()->debug("how about active widget?");
+
+    QWidget* widget = QApplication::activeWindow();
+    if (widget) {
+        orientation = getOrientationForWidget(widget);
+    } else {
+        // If the window doesn't any active window, take first one from the list.
+        QWidgetList list = QApplication::topLevelWidgets();
+        if (!list.isEmpty()) {
+            foreach(QWidget* w, list) {
+                orientation = getOrientationForWidget(w);
+                if (orientation != -1) {
+                    break;
+                }
+
+            }
+        }
+    }
+
+    if (orientation == -1) {
+        TasLogger::logger()->debug("setting orientation per meegoapp");
+        MApplication* app = MApplication::instance();
+        if (app) {
+            // activeWindow() would SIGABORT if called without verifying the mapp instance
+            MWindow *w = MApplication::activeWindow(); 
+            if (w) {
+                M::OrientationAngle angle = w->orientationAngle();
+                switch(angle) {
+                case M::Angle90:
+                    orientation = 90;
+                    break;
+                case M::Angle180:
+                    orientation = 180;
+                    break;
+                case M::Angle270:
+                    orientation = 270;
+                    break;
+                case M::Angle0:
+                default:
+                    break;
+                }
+            }
+        }
+    }
+#endif
+    return orientation;
 }
 

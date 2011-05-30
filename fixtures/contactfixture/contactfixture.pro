@@ -38,6 +38,8 @@ symbian: {
                         WriteUserData \
                         ReadDeviceData \
                         WriteDeviceData
+    TARGET.UID3 = 0x2003A9F1
+
 	contact_fixture_plugin.sources = contactfixture.dll
 	contact_fixture_plugin.path = /resource/qt/plugins/tasfixtures
  
