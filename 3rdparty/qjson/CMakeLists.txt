@@ -39,7 +39,7 @@ SET( QT_DONT_USE_QTGUI TRUE )
 SET (LIB_SUFFIX "" CACHE STRING "Define suffix of directory name (32/64)" )
 SET (LIB_INSTALL_DIR "${CMAKE_INSTALL_PREFIX}/lib${LIB_SUFFIX}" CACHE STRING "Directory where lib will install")
 SET (INCLUDE_INSTALL_DIR "${CMAKE_INSTALL_PREFIX}/include" CACHE PATH "The directory the headers are installed in")
-SET (CMAKE_MODULES_INSTALL_DIR "${CMAKE_INSTALL_PREFIX}/share/apps/cmake/modules" CACHE PATH "The directory to install FindQRpc.cmake to")
+SET (CMAKE_MODULES_INSTALL_DIR "${CMAKE_ROOT}/Modules" CACHE PATH "The directory to install FindQJSON.cmake to")
 
 
 set(QJSON_LIB_MAJOR_VERSION "0")
@@ -72,10 +72,24 @@ ENDIF (KDE4_BUILD_TESTS OR QJSON_BUILD_TESTS)
 add_subdirectory(cmake/modules)
 
 
-#CONFIGURE_FILE(
-#  "${CMAKE_MODULE_PATH}/cmake_uninstall.cmake.in"
-#  "${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake"
-#  IMMEDIATE @ONLY)
+CONFIGURE_FILE(
+  "${CMAKE_MODULE_PATH}/cmake_uninstall.cmake.in"
+  "${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake"
+  IMMEDIATE @ONLY)
 
-#ADD_CUSTOM_TARGET(uninstall
-#  "${CMAKE_COMMAND}" -P "${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake")
+GET_TARGET_PROPERTY(LIB_OUT_NAME qjson LOCATION)
+GET_FILENAME_COMPONENT(LIB_OUT_NAME  ${LIB_OUT_NAME} NAME)
+
+# cmake-modules
+CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/qjson-config.cmake.in
+               ${CMAKE_CURRENT_BINARY_DIR}/qjson-config.cmake
+               @ONLY)
+CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/qjson-config-version.cmake.in
+               ${CMAKE_CURRENT_BINARY_DIR}/qjson-config-version.cmake
+               @ONLY)
+INSTALL(FILES ${CMAKE_CURRENT_BINARY_DIR}/qjson-config.cmake
+              ${CMAKE_CURRENT_BINARY_DIR}/qjson-config-version.cmake
+        DESTINATION "lib/cmake/qjson")
+
+ADD_CUSTOM_TARGET(uninstall
+  "${CMAKE_COMMAND}" -P "${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake")
