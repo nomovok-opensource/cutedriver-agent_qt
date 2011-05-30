@@ -25,7 +25,7 @@ SUBDIRS += viewitemtraverser
 
 SUBDIRS += layouttraverser
 
-!CONFIG(NO_WEBKIT) {
+!CONFIG(no_webkit) {
 SUBDIRS += webkittraverser
 }
 
