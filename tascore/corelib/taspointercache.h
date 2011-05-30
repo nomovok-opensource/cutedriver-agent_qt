@@ -30,6 +30,7 @@ public:
 
   QObject* getObject(const QString& pointerId);
   void storePointer(const QString& pointerId, QObject* pointer);
+  void removeNulls();
 
 protected:
   TasPointerCache();

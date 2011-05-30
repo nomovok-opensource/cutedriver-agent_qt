@@ -116,19 +116,20 @@ void TasNativeUtils::runningProcesses(TasObject& applist)
                 if ( EnumProcessModules( hProcess, &hMod, sizeof(hMod), &cbNeeded) ){
                     GetModuleBaseName( hProcess, hMod, szProcessName, sizeof(szProcessName)/sizeof(TCHAR) );
                 }
-                QString processName;
+                QString fullName;
 #ifdef UNICODE
-                processName = QString::fromUtf16((ushort*)szProcessName);
+                fullName = QString::fromUtf16((ushort*)szProcessName);
 #else
-                processName = QString::fromLocal8Bit(szProcessName);
+                fullName = QString::fromLocal8Bit(szProcessName);
 #endif                
 
-                processName = processName.split(".exe").first();
+                QString processName = fullName.split(".exe").first();
                 TasObject& processDetails = applist.addNewObject(QString::number(processID), processName, "process");
                 //add mem
                 PROCESS_MEMORY_COUNTERS pmc;
                 if(GetProcessMemoryInfo(hProcess,&pmc, sizeof(pmc))){
                     processDetails.addAttribute("memUsage", (int)pmc.WorkingSetSize);
+                    processDetails.addAttribute("fullName", fullName);
                 }            
             }
             CloseHandle( hProcess );

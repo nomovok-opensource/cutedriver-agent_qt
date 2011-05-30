@@ -108,6 +108,7 @@ int CpuLoadGenerator::start(int loadInPercentage)
     if (!error) {
         TasLogger::logger()->debug("Resuming thread");
         mLoadGeneratingThread.Resume();
+        mRunning = true;
     }
     return error;
 }
@@ -122,5 +123,6 @@ int CpuLoadGenerator::stop()
     int status = mLoadGeneratingThread.ExitReason();
     TasLogger::logger()->debug("Closing...");
     mLoadGeneratingThread.Close();
+    mRunning = false;
     return status;
 }

@@ -49,6 +49,7 @@ public:
     
 public slots:
     void timerError(int errorCode, QString& resourceIdentifier);
+    void requestQuit();
 
 private:
     int startLogging(

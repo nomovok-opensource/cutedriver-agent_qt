@@ -52,7 +52,6 @@ QString TasCoreUtils::getApplicationName()
 
 #if defined(Q_OS_UNIX) && !defined(Q_OS_SYMBIAN)
     QString name = "unk";
-    unsigned pid = -1;
     unsigned bytes = -1;
     char buf[50];
     char buf_name[300];
