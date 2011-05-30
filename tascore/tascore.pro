@@ -43,6 +43,10 @@ CONFIG(qml_id){
 DEFINES += QML_ID
 }
 
+CONFIG(no_webkit) {
+DEFINES += NO_WEBKIT
+}
+
 # Input
 include(corelib/uilib.pri)
 include(corelib/corelib.pri)
@@ -80,7 +84,12 @@ symbian: {
 }
 
 
-QT += network xml testlib gui #webkit 
+QT += network xml testlib gui
+
+!CONFIG(NO_WEBKIT) {
+QT += webkit 
+}
+
 contains(QT_VERSION, ^4\\.[0-6]\\..*) {
 	 message(Component declarative excluded from build due to old Qt version)
 } else {

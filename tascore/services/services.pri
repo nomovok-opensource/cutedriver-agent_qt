@@ -25,7 +25,9 @@ HEADERS += services/screenshotservice.h
 HEADERS += services/eventservice.h
 HEADERS += services/objectservice.h
 HEADERS += services/uicommandservice.h
-#HEADERS += services/webkitcommandservice.h
+!CONFIG(NO_WEBKIT) {
+HEADERS += services/webkitcommandservice.h
+}
 HEADERS += services/recorderservice.h
 HEADERS += services/confservice.h
 HEADERS += services/infoservice.h
@@ -39,7 +41,9 @@ SOURCES += services/screenshotservice.cpp
 SOURCES += services/eventservice.cpp
 SOURCES += services/objectservice.cpp
 SOURCES += services/uicommandservice.cpp
-#SOURCES += services/webkitcommandservice.cpp
+!CONFIG(NO_WEBKIT) {
+SOURCES += services/webkitcommandservice.cpp
+}
 SOURCES += services/recorderservice.cpp
 SOURCES += services/confservice.cpp
 SOURCES += services/infoservice.cpp
