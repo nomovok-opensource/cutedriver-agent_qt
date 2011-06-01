@@ -25,7 +25,7 @@
 
 
 #include <e32std.h>
-#include <HWRMPower.h>
+#include <hwrmpower.h>
 #include <centralrepository.h>
 #include <hwrm/hwrmpowerdomaincrkeys.h>
 #include <QList>
