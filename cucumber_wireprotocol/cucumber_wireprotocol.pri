@@ -17,34 +17,5 @@
 ##
 ############################################################################
 
-HEADERS += corelib/tasclientmanager.h
-HEADERS += corelib/tasserver.h
-HEADERS += corelib/tasservercommand.h
-HEADERS += corelib/tasnativeutils.h
-
-HEADERS += corelib/tasserverservicemanager.h
-
-SOURCES += corelib/tasclientmanager.cpp
-SOURCES += corelib/tasserver.cpp
-SOURCES += corelib/tasservercommand.cpp
-SOURCES += corelib/tasserverservicemanager.cpp
-
-
-unix:{
-        symbian: {
-            SOURCES += corelib/tasnativeutils_symbian.cpp
-        }
-        else{
-                !macx:!CONFIG(no_x) {
-                SOURCES += corelib/tasnativeutils_unix.cpp
-                }
-                else {
-                SOURCES += corelib/tasnativeutils.cpp
-        }
-        }
-}
-win32: {
-    SOURCES += corelib/tasnativeutils_win.cpp
-    LIBS += -lPsapi
-}
-
+INCLUDEPATH += $$PWD
+LIBS += -lcucumber_wireprotocol -L$$PWD/lib
