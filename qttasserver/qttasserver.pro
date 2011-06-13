@@ -27,7 +27,6 @@ mac {
 
 
 include(../tasbase.pri)
-include(../cucumber_wireprotocol/cucumber_wireprotocol.pri)
 
 message($$PWD LIBS $$LIBS)
 message($$PWD INCLUDEPATH $$INCLUDEPATH)
@@ -74,6 +73,7 @@ SOURCES += main.cpp
 include(corelib/corelib.pri)
 include(services/services.pri)
 include(../tascore/corelib/corelib.pri)
+include(cucumber_wireprotocol/cucumber_wireprotocol.pri)
 
 HEADERS += $$PUBLIC_HEADERS
 

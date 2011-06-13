@@ -20,8 +20,6 @@
 #ifndef CUCUMBERWIREPROTOCOLSERVER_H
 #define CUCUMBERWIREPROTOCOLSERVER_H
 
-#include "cucumber_wireprotocol_global.h"
-
 #include <QObject>
 #include <QByteArray>
 #include <QMap>
@@ -32,9 +30,9 @@
 class QTcpServer;
 class QIODevice;
 class CucumberStepData;
+class CucumberApplicationManager;
 
-
-class CUCUMBER_WIREPROTOCOLSHARED_EXPORT CucumberWireprotocolServer : public QObject {
+class CucumberWireprotocolServer : public QObject {
     Q_OBJECT
 
 public:
@@ -47,14 +45,13 @@ public:
     Q_INVOKABLE QString invokeDebugDump(const QString &regExpPattern, const QVariantList &args); // dummy step definition for testing/reference
 
 public slots:
-    void registerInternalStep(const QRegExp &regExp, QObject *object, const char *method, const char *sourceFile, int sourceLine);
-    void registerSutPluginStep(const QRegExp &regExp, QObject *object, const char *method, const char *sourceFile, int sourceLine);
+    void registerStep(const QRegExp &regExp, QObject *object, const char *method, const char *sourceFile, int sourceLine);
     void closeAllClients();
     void close();
     int start();
 
 signals:
-    void variantReceived(QVariant data, QIODevice *connection);
+    void gotJSONMessage(QVariant data, QIODevice *connection);
 
 private slots:
     void handleNewConnect();
@@ -63,7 +60,7 @@ private slots:
     void connectionReadyRead();
     void connectionBytesWritten(qint64 bytes);
 
-    void handleCucumberVariant(QVariant data, QIODevice *connection);
+    void handleJSONMessage(QVariant data, QIODevice *connection);
 
 private:
     QList<CucumberStepData*> steps;
@@ -71,6 +68,8 @@ private:
     QString mLastErrorString;
     QTcpServer *mServer;
     quint16 mListenPort;
+
+    CucumberApplicationManager *appManager;
 };
 
 #endif // CUCUMBERWIREPROTOCOLSERVER_H

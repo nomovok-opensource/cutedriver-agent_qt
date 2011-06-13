@@ -19,6 +19,7 @@
 
 #include "cucumberwireprotocolserver.h"
 
+#include "cucumberapplicationmanager.h"
 #include "cucumberstepdata.h"
 
 #include <QTcpServer>
@@ -50,10 +51,11 @@ CucumberWireprotocolServer::CucumberWireprotocolServer(quint16 port, QObject *pa
     QObject(parent)
   , mServer(new QTcpServer(this))
   , mListenPort(port)
+  , appManager(new CucumberApplicationManager(this))
 {
     connect(mServer, SIGNAL(newConnection()), SLOT(handleNewConnect()));
     mServer->setMaxPendingConnections(1);
-    connect(this, SIGNAL(variantReceived(QVariant,QIODevice*)), SLOT(handleCucumberVariant(QVariant,QIODevice*)));
+    connect(this, SIGNAL(gotJSONMessage(QVariant,QIODevice*)), SLOT(handleJSONMessage(QVariant,QIODevice*)));
 
     CucumberStepData tmpStep;
     tmpStep.targetType = CucumberStepData::ServerInternal;
@@ -61,13 +63,14 @@ CucumberWireprotocolServer::CucumberWireprotocolServer(quint16 port, QObject *pa
     tmpStep.targetMethod = "invokeDebugDump";
 
     QStringList stepDefs(QStringList()
-                         << "I launch application\\s+(.+)"
                          << "I perform pairs:"
                          << "current application is\\s+(.+)");
 
     foreach(QString pattern, stepDefs) {
-        registerInternalStep(QRegExp(pattern), this, "invokeDebugDump", __FILE__, LINE_invokeDebugDump);
+        registerStep(QRegExp(pattern), this, "invokeDebugDump", __FILE__, LINE_invokeDebugDump);
     }
+
+    appManager->registerSteps(this, "registerStep");
 }
 
 
@@ -85,19 +88,12 @@ QString CucumberWireprotocolServer::addressString()
 }
 
 
-void CucumberWireprotocolServer::registerInternalStep(const QRegExp &regExp,
+void CucumberWireprotocolServer::registerStep(const QRegExp &regExp,
                                                       QObject *object, const char *method,
                                                       const char *sourceFile, int sourceLine)
 {
+    qDebug() << DPL << regExp.pattern() << method << sourceFile << sourceLine;
     steps << new CucumberStepData(regExp, CucumberStepData::ServerInternal, object, method,
-                                  QString("%1:%2:%3").arg(sourceFile).arg(sourceLine).arg(method));
-}
-
-void CucumberWireprotocolServer::registerSutPluginStep(const QRegExp &regExp,
-                                                       QObject *object, const char *method,
-                                                       const char *sourceFile, int sourceLine)
-{
-    steps << new CucumberStepData(regExp, CucumberStepData::ServerInternal, this, method,
                                   QString("%1:%2:%3").arg(sourceFile).arg(sourceLine).arg(method));
 }
 
@@ -218,7 +214,7 @@ void CucumberWireprotocolServer::connectionReadyRead()
             QVariant result = parser.parse(data, &ok);
 
             if (ok) {
-                emit variantReceived(result, connection);
+                emit gotJSONMessage(result, connection);
                 data.clear();
             }
             else {
@@ -238,7 +234,7 @@ void CucumberWireprotocolServer::connectionBytesWritten(qint64 bytes)
     qDebug() << DP << bytes;
 }
 
-void CucumberWireprotocolServer::handleCucumberVariant(QVariant message, QIODevice *connection)
+void CucumberWireprotocolServer::handleJSONMessage(QVariant message, QIODevice *connection)
 {
     QVariantList msgList = message.toList();
 

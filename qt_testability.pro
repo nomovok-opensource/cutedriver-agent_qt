@@ -22,8 +22,7 @@ TEMPLATE = subdirs
 
 #for mac use "qmake -spec macx-g++" to avoid xcode files
 
-SUBDIRS += 3rdparty \
-    cucumber_wireprotocol
+SUBDIRS += 3rdparty
 
 SUBDIRS += tascore
 

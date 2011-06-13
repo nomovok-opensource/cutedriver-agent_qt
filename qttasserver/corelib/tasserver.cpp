@@ -52,7 +52,7 @@
 #include "startedappservice.h"
 
 #if defined(TAS_USE_CUCUMBER_WIRE_PROTOCOL)
-#include <cucumberwireprotocolserver.h>
+#include "../cucumber_wireprotocol/cucumberwireprotocolserver.h"
 #endif
 
 #ifdef Q_OS_SYMBIAN
