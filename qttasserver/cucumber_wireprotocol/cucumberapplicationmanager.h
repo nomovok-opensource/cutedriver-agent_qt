@@ -29,10 +29,11 @@ class CucumberApplicationManager : public QObject
 {
     Q_OBJECT
 public:
-    Q_INVOKABLE QString selectApp(const QString &regExpPattern, const QVariantList &args);
-    Q_INVOKABLE QString attachApp(const QString &regExpPattern, const QVariantList &args);
-    Q_INVOKABLE QString startApp(const QString &regExpPattern, const QVariantList &args);
-    Q_INVOKABLE QString startAppTable(const QString &regExpPattern, const QVariantList &args);
+    Q_INVOKABLE void verifySelectedApp(const QString &regExpPattern, const QVariantList &args, QObject *sender);
+    Q_INVOKABLE void selectApp(const QString &regExpPattern, const QVariantList &args, QObject *sender);
+    Q_INVOKABLE void attachApp(const QString &regExpPattern, const QVariantList &args, QObject *sender);
+    Q_INVOKABLE void startApp(const QString &regExpPattern, const QVariantList &args, QObject *sender);
+    Q_INVOKABLE void startAppTable(const QString &regExpPattern, const QVariantList &args, QObject *sender);
 
 
     explicit CucumberApplicationManager(QObject *parent = 0);
@@ -40,6 +41,9 @@ public:
     void registerSteps(QObject *registrarObject, const char *method);
     // method is of type:
     // void method(const QRegExp &regExp, QObject *object, const char *method, const char *sourceFile, int sourceLine);
+
+    void beginScenario();
+    void endScenario();
 
 signals:
 

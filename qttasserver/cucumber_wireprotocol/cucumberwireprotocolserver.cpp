@@ -30,6 +30,7 @@
 #include <QVariant>
 #include <QVariantList>
 #include <QVariantMap>
+#include <QTimer>
 
 #include <qjson/src/parser.h>
 #include <qjson/src/serializer.h>
@@ -39,10 +40,12 @@
 
 
 static const int LINE_invokeDebugDump = __LINE__ + 1;
-QString CucumberWireprotocolServer::invokeDebugDump(const QString &regExpPattern, const QVariantList &args)
+void CucumberWireprotocolServer::invokeDebugDump(const QString &regExpPattern, const QVariantList &args, QObject *sender)
 {
     qDebug() << DP << regExpPattern << args;
-    return QString();
+    if (sender) {
+        QMetaObject::invokeMethod(sender, "cucumberSuccessResponse", Qt::QueuedConnection);
+    }
 }
 
 
@@ -51,8 +54,14 @@ CucumberWireprotocolServer::CucumberWireprotocolServer(quint16 port, QObject *pa
     QObject(parent)
   , mServer(new QTcpServer(this))
   , mListenPort(port)
-  , appManager(new CucumberApplicationManager(this))
+  , mPendingResponse(false)
+  , mResponseTimeoutTimer(new QTimer(this))
+  , mAppManager(new CucumberApplicationManager(this))
+
 {
+    mResponseTimeoutTimer->setSingleShot(true);
+    connect(mResponseTimeoutTimer, SIGNAL(timeout()), SLOT(responseTimeout()));
+
     connect(mServer, SIGNAL(newConnection()), SLOT(handleNewConnect()));
     mServer->setMaxPendingConnections(1);
     connect(this, SIGNAL(gotJSONMessage(QVariant,QIODevice*)), SLOT(handleJSONMessage(QVariant,QIODevice*)));
@@ -70,14 +79,14 @@ CucumberWireprotocolServer::CucumberWireprotocolServer(quint16 port, QObject *pa
         registerStep(QRegExp(pattern), this, "invokeDebugDump", __FILE__, LINE_invokeDebugDump);
     }
 
-    appManager->registerSteps(this, "registerStep");
+    mAppManager->registerSteps(this, "registerStep");
 }
 
 
 CucumberWireprotocolServer::~CucumberWireprotocolServer()
 {
-    while (!steps.isEmpty()) {
-        CucumberStepData *step = steps.takeLast();
+    while (!mSteps.isEmpty()) {
+        CucumberStepData *step = mSteps.takeLast();
         if (step) delete step;
     }
 }
@@ -93,7 +102,7 @@ void CucumberWireprotocolServer::registerStep(const QRegExp &regExp,
                                                       const char *sourceFile, int sourceLine)
 {
     qDebug() << DPL << regExp.pattern() << method << sourceFile << sourceLine;
-    steps << new CucumberStepData(regExp, CucumberStepData::ServerInternal, object, method,
+    mSteps << new CucumberStepData(regExp, CucumberStepData::ServerInternal, object, method,
                                   QString("%1:%2:%3").arg(sourceFile).arg(sourceLine).arg(method));
 }
 
@@ -197,7 +206,7 @@ void CucumberWireprotocolServer::connectionReadyRead()
 {
     QIODevice *connection = qobject_cast<QIODevice*>(sender());
     if (connection) {
-        QByteArray data = connection->readAll().trimmed();
+        QByteArray data = connection->readAll();
 
         QByteArray copydata(data);
         makeDumpableData(copydata);
@@ -205,7 +214,7 @@ void CucumberWireprotocolServer::connectionReadyRead()
 
         data.prepend(mReadBufferMap[connection]);
 
-        if (data.isEmpty()) {
+        if (data.trimmed().isEmpty()) {
             qDebug() << DPL << "ignoring empty data";
         }
         else {
@@ -236,6 +245,15 @@ void CucumberWireprotocolServer::connectionBytesWritten(qint64 bytes)
 
 void CucumberWireprotocolServer::handleJSONMessage(QVariant message, QIODevice *connection)
 {
+    Q_ASSERT(connection);
+
+    if (mPendingResponse) {
+        Q_ASSERT(mResponseTimeoutTimer->isActive());
+        qCritical() << DP << "Got new request when previous one has pending reply!";
+        connection->close();
+        return;
+    }
+
     QVariantList msgList = message.toList();
 
     //qDebug() << DPL << result.typeName() << resultList.size() << ':';
@@ -243,7 +261,7 @@ void CucumberWireprotocolServer::handleJSONMessage(QVariant message, QIODevice *
     qDebug() << DPL << msgList.value(0).toString();
 
     QString errorMessage;
-    QVariantList outData;
+    QVariantList outMsg;
 
     if (message.type() != QVariant::List) {
         qDebug() << DP << "closing connection: badly structured data:" << message.typeName() << "when List expected";
@@ -268,86 +286,179 @@ void CucumberWireprotocolServer::handleJSONMessage(QVariant message, QIODevice *
         if (msgName == "step_matches") {
             QString name = msgMap.value("name_to_match").toString();
 
-            outData << "success";
-            QVariantList outList;
+            QVariantList outList = findMatchingSteps(name);
+            outMsg << "success" << QVariant(outList);
+        }
 
-            for (int ind = 0; ind < steps.size(); ++ind) {
-                CucumberStepData *step = steps.at(ind);
-                if (step && step->isValid() && step->regExp.exactMatch(name)) {
-                    QVariantList argsList;
-                    for(int ii=1; ii <= step->regExp.captureCount(); ++ii) {
-                        QVariantMap argInfoMap;
-                        argInfoMap.insert("val", step->regExp.cap(ii));
-                        argInfoMap.insert("pos", step->regExp.pos(ii)); // must be number
-                        argsList << argInfoMap;
-                    }
-                    QVariantMap idMap;
-                    idMap.insert("id", QByteArray::number(ind+1));
-                    idMap.insert("args", argsList);
-                    if (step->hasSource()) idMap.insert("source", step->source);
-                    idMap.insert("regexp", step->regExp.pattern());
-                    outList.append(idMap);
-                }
-            }
-            outData << QVariant(outList);
-        }
         else if (msgName == "begin_scenario") {
-            outData << "success";
+            mAppManager->beginScenario();
+            outMsg << "success";
         }
+
         else if (msgName == "invoke") {
-            int ind = msgMap.value("id").toInt() - 1;
-            CucumberStepData *step = steps.value(ind, NULL);
-            if (step && step->isValid()) {
-                QString ret;
-                QVariantList argsList = msgMap.value("args", QVariantList()).toList();
-                QMetaObject::invokeMethod(
-                            step->targetObject.data(), step->targetMethod, Qt::DirectConnection,
-                            Q_RETURN_ARG(QString, ret),
-                            Q_ARG(QString, step->regExp.pattern()), Q_ARG(QVariantList, argsList));
-                if (ret.isEmpty()) {
-                    outData << "success";
-                }
-                else {
-                    errorMessage = ret;
-                }
+            if (!startStep(msgMap, connection)) {
+                outMsg << "pending" << "step not done";
             }
-            else {
-                outData << "pending" << "step not done";
-            }
+            // else pending response data set
         }
+
         else if (msgName == "end_scenario") {
-            outData << "success";
+            mAppManager->endScenario();
+            outMsg << "success";
         }
+
         else if (msgName == "snippet_text") {
-            outData << "success";
+            outMsg << "success";
         }
+
         else {
             errorMessage = "unknown operation: " + msgName;
-            qDebug() << DP << "closing connection: unknown request:" << msgName;
+            qCritical() << DP << "closing connection: unknown request:" << msgName;
 
             connection->close();
+            return;
         }
     }
 
-    if (outData.isEmpty() && errorMessage.isEmpty()) {
-        errorMessage = "nothingness of internal logic error";
+    if (!mPendingResponse) {
+        if (outMsg.isEmpty() && errorMessage.isEmpty()) {
+            errorMessage = "nothingness of internal logic error";
+        }
+
+        if (!errorMessage.isEmpty()) {
+            outMsg.clear();
+            QVariantMap failMap;
+            failMap.insert("message", errorMessage);
+            outMsg << "fail" << failMap;
+        }
+        writeResponse(outMsg, connection);
+    }
+    else {
+        qDebug() << DPL << "RESPONSE PENDING...";
+    }
+}
+
+
+QVariantList CucumberWireprotocolServer::findMatchingSteps(const QString &name)
+{
+    QVariantList retList;
+    for (int ind = 0; ind < mSteps.size(); ++ind) {
+        CucumberStepData *step = mSteps.at(ind);
+        if (step && step->isValid() && step->regExp.exactMatch(name)) {
+            QVariantList argsList;
+            for(int ii=1; ii <= step->regExp.captureCount(); ++ii) {
+                QVariantMap argInfoMap;
+                argInfoMap.insert("val", step->regExp.cap(ii));
+                argInfoMap.insert("pos", step->regExp.pos(ii)); // must be number
+                argsList << argInfoMap;
+            }
+            QVariantMap idMap;
+            idMap.insert("id", QByteArray::number(ind+1));
+            idMap.insert("args", argsList);
+            if (step->hasSource()) idMap.insert("source", step->source);
+            idMap.insert("regexp", step->regExp.pattern());
+            retList.append(idMap);
+        }
     }
 
-    if (!errorMessage.isEmpty()) {
-        outData.clear();
-        QVariantMap failMap;
-        failMap.insert("message", errorMessage);
-        outData << "fail" << failMap;
+    return retList;
+}
+
+bool CucumberWireprotocolServer::startStep(const QVariantMap &args, QIODevice *connection)
+{
+    int ind = args.value("id").toInt() - 1;
+    CucumberStepData *step = mSteps.value(ind, NULL);
+    if (step && step->isValid()) {
+        QVariantList argsList = args.value("args", QVariantList()).toList();
+        QMetaObject::invokeMethod(
+                    step->targetObject.data(), step->targetMethod, Qt::QueuedConnection,
+                    Q_ARG(QString, step->regExp.pattern()), Q_ARG(QVariantList, argsList),
+                    Q_ARG(QObject*, this));
+        setResponseTimeout(10, connection); // sets mPendingResponse, which is tested below
+        return true;
+    }
+    else {
+        return false;
+    }
+}
+
+
+void CucumberWireprotocolServer::responseTimeout()
+{
+    if (!mPendingResponse) {
+        qDebug() << DP << "no pending response, ignoring";
+        resetResponseTimeout();
+    }
+    else {
+        cucumberFailResponse(QString("Timeout waiting for response."));
+    }
+}
+
+
+void CucumberWireprotocolServer::cucumberFailResponse(const QString &errorString)
+{
+    QVariantList outMsg;
+    QVariantMap failMap;
+    failMap.insert("message", errorString);
+    outMsg << "fail" << failMap;
+    cucumberResponse(outMsg);
+}
+
+
+void CucumberWireprotocolServer::cucumberSuccessResponse()
+{
+    QVariantList outMsg;
+    outMsg << "success";
+    cucumberResponse(outMsg);
+}
+
+
+void CucumberWireprotocolServer::cucumberResponse(const QVariantList &outMsg)
+{
+    if (!mPendingResponse) {
+        qCritical() << DP << "called without pending response for message:" << outMsg;
+        return;
     }
 
+    QIODevice *connection = mPendingConnection.data();
+    resetResponseTimeout();
+
+    if (!connection) {
+        qWarning() << DP << "called with expired connection for message:" << outMsg;
+    }
+    else {
+        qDebug() << DPL << "...SENDING PENDING RESPONSE";
+        writeResponse(outMsg, connection);
+    }
+}
+
+
+void CucumberWireprotocolServer::setResponseTimeout(int sec, QIODevice *connection)
+{
+    mPendingConnection = connection;
+    mPendingResponse = true;
+    mResponseTimeoutTimer->start(sec*1000);
+}
+
+
+void CucumberWireprotocolServer::resetResponseTimeout()
+{
+    mPendingConnection.clear();
+    mPendingResponse = false;
+    mResponseTimeoutTimer->stop();
+}
+
+
+void CucumberWireprotocolServer::writeResponse(const QVariantList &outMsg, QIODevice *connection)
+{
     QJson::Serializer serializer;
     //serializer.setIndentMode(QJson::IndentFull);
-    QByteArray outBuf = serializer.serialize(outData);
+    QByteArray outBuf = serializer.serialize(outMsg);
     if (!outBuf.endsWith('\n')) outBuf.append('\n');
     qDebug() << DPL << outBuf.size() << outBuf.trimmed();
     qint64 written = connection->write(outBuf);
     //qDebug() << DPL << "wrote" << written << '/' << outBuf.size() << "bytes";
     Q_ASSERT(written == outBuf.size());
-}
 
+}
 

@@ -26,7 +26,9 @@
 #include <QList>
 #include <QVariant>
 #include <QVariantList>
+#include <QWeakPointer>
 
+class QTimer;
 class QTcpServer;
 class QIODevice;
 class CucumberStepData;
@@ -42,7 +44,14 @@ public:
     QString addressString();
     QString lastErrorString() { return mLastErrorString; }
 
-    Q_INVOKABLE QString invokeDebugDump(const QString &regExpPattern, const QVariantList &args); // dummy step definition for testing/reference
+
+    // invokable methods meant to be called from step defintion methods
+    Q_INVOKABLE void cucumberFailResponse(const QString &errorString);
+    Q_INVOKABLE void cucumberSuccessResponse();
+    Q_INVOKABLE void cucumberResponse(const QVariantList &outMsg);
+
+    // step defintion method that just dumps the data, for testing/reference
+    Q_INVOKABLE void invokeDebugDump(const QString &regExpPattern, const QVariantList &args, QObject *sender);
 
 public slots:
     void registerStep(const QRegExp &regExp, QObject *object, const char *method, const char *sourceFile, int sourceLine);
@@ -61,15 +70,26 @@ private slots:
     void connectionBytesWritten(qint64 bytes);
 
     void handleJSONMessage(QVariant data, QIODevice *connection);
+    QVariantList findMatchingSteps(const QString &name);
+    bool startStep(const QVariantMap &args, QIODevice *connection);
+    void responseTimeout();
+    void setResponseTimeout(int sec, QIODevice *connection);
+    void resetResponseTimeout();
+
+    void writeResponse(const QVariantList &outMsg, QIODevice *connection);
+
 
 private:
-    QList<CucumberStepData*> steps;
+    QList<CucumberStepData*> mSteps;
     QMap<QIODevice*, QByteArray> mReadBufferMap;
     QString mLastErrorString;
     QTcpServer *mServer;
     quint16 mListenPort;
 
-    CucumberApplicationManager *appManager;
+    bool mPendingResponse;
+    QTimer *mResponseTimeoutTimer;
+    QWeakPointer<QIODevice> mPendingConnection;
+    CucumberApplicationManager *mAppManager;
 };
 
 #endif // CUCUMBERWIREPROTOCOLSERVER_H
