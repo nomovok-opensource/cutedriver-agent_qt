@@ -84,17 +84,10 @@ void TasServerServiceManager::handleServiceRequest(TasCommandModel& commandModel
     TasClient* targetClient = 0;
     if (!commandModel.id().isEmpty() && commandModel.id() != "1"){        
         targetClient = mClientManager->findByProcessId(commandModel.id());
+
         //no registered client check for platform specific handles for the process id
-        if(!targetClient){
-            foreach(TasExtensionInterface* extension, mExtensions){            
-                QByteArray data;
-                if(extension->performCommand(commandModel, data)){
-                    TasResponse response(responseId, data);
-                    requester->sendMessage(response);
-                    TasLogger::logger()->debug("TasServerServiceManager::handleServiceRequest: plat service done, returning");
-                    return;
-                }
-            }
+        if(!targetClient && extensionHandled(commandModel, requester, responseId)){            
+            return;        
         }
 
         if(!targetClient){
@@ -134,6 +127,15 @@ void TasServerServiceManager::handleServiceRequest(TasCommandModel& commandModel
                     needFragment = true;
                 }
             }
+
+#ifdef Q_OS_SYMBIAN   
+            QByteArray vkbData; 
+            if(appendVkbData(commandModel, vkbData)){
+                waiter->appendPlatformData(vkbData);
+                needFragment = true;
+            }
+#endif
+
         }
 
         if(commandModel.service() == CLOSE_APPLICATION){
@@ -153,14 +155,8 @@ void TasServerServiceManager::handleServiceRequest(TasCommandModel& commandModel
     }
     else{
         //check if platform specific handlers want to handle the request
-        foreach(TasExtensionInterface* extension, mExtensions){            
-            QByteArray data;
-            if(extension->performCommand(commandModel, data)){
-                TasLogger::logger()->debug("TasServerServiceManager::handleServiceRequest platform handler completed request.");
-                TasResponse response(responseId, data);
-                requester->sendMessage(response);
-                return;
-            }
+        if(extensionHandled(commandModel, requester, responseId)){
+            return;
         }
         if(commandModel.service() == SCREEN_SHOT){
             ResponseWaiter* waiter = new ResponseWaiter(responseId, requester);
@@ -182,6 +178,77 @@ void TasServerServiceManager::handleServiceRequest(TasCommandModel& commandModel
     }
 }
 
+/*!
+ * Some operation require custom platform specific handling. Will return true is handled by a special plugin.
+ */
+bool TasServerServiceManager::extensionHandled(TasCommandModel& commandModel, TasSocket* requester, qint32 responseId)
+{
+    bool handled = false;
+    foreach(TasExtensionInterface* extension, mExtensions){            
+        QByteArray data;
+        if(commandModel.service() == APPLICATION_STATE || commandModel.service() == FIND_OBJECT_SERVICE){
+            QByteArray uiState = extension->traverseApplication(commandModel);
+            if(!uiState.isEmpty()){
+                handled = true;
+#ifdef Q_OS_SYMBIAN   
+                appendVkbData(commandModel,uiState);
+#endif
+            }
+            data = QByteArray(TasServerServiceManager::responseHeader());
+            data.append(uiState);
+            data.append(QString("</tasInfo></tasMessage>").toUtf8());
+        }        
+        else {
+            handled = extension->performCommand(commandModel, data);
+        }
+        if(handled){
+            TasLogger::logger()->debug("TasServerServiceManager::handleServiceRequest platform handler completed request.");
+            TasResponse response(responseId, data);
+            requester->sendMessage(response);
+            break;
+        }
+    }
+    return handled;
+}
+
+#ifdef Q_OS_SYMBIAN   
+/*!
+ * Look for a special vkb and added if present and needed.
+ */
+bool TasServerServiceManager::appendVkbData(TasCommandModel& commandModel, QByteArray& data)
+{
+    TasLogger::logger()->debug("TasServerServiceManager::appendVkbData");
+    bool appended = false;
+    if( commandModel.name() != PENINPUT_SERVER && (commandModel.service() == FIND_OBJECT_SERVICE || commandModel.service() == APPLICATION_STATE) ){
+        TasClient* targetClient = mClientManager->findByApplicationName(PENINPUT_SERVER);
+        if(targetClient){
+            TasLogger::logger()->debug("TasServerServiceManager::appendVkbData peninputserver found");
+            bool requestVkb = false;
+            if(commandModel.service() == FIND_OBJECT_SERVICE){
+                foreach(TasTarget* target, commandModel.targetList()){
+                    TasTargetObject *targetObj = target->targetObject();   
+                    if(targetObj->className().contains(VKB_IDENTIFIER)){
+                        requestVkb = true;
+                        break;
+                    }
+                }
+            }
+            if(requestVkb || commandModel.service() == APPLICATION_STATE){
+                commandModel.addAttribute("needFragment", "true");
+                QByteArray vkbData = targetClient->socket()->syncRequest(qrand(), commandModel.sourceString(false));
+                if(!vkbData.isEmpty()){
+                    TasLogger::logger()->debug("TasServerServiceManager::appendVkbData append vkb data");
+                    appended = true;
+                    data.append(vkbData);
+                }
+            }
+        }
+    }
+    return appended;
+}
+#endif
+
+
 void TasServerServiceManager::loadExtensions()
 {
     TasLogger::logger()->debug("TasServerServiceManager::loadPlatformTraversers");
@@ -198,6 +265,8 @@ void TasServerServiceManager::loadExtensions()
     }
 
 }
+
+
 
 /*!
   Try to load a plugin from the given path. Returns null if no plugin loaded.

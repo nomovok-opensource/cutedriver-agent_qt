@@ -59,6 +59,10 @@ private slots:
 private:
 	void loadExtensions();
 	void loadExtension(const QString& filePath);
+    bool extensionHandled(TasCommandModel& commandModel, TasSocket* requester, qint32 responseId);
+#ifdef Q_OS_SYMBIAN   
+    bool appendVkbData(TasCommandModel& commandModel, QByteArray& data);
+#endif
 
 private:	
 	QHash<qint32, ResponseWaiter*> mResponseQueue;

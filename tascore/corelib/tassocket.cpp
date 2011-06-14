@@ -161,6 +161,62 @@ void TasSocket::clearHandlers()
     mRequestHandler = 0;
 }
 
+/*!
+ * Request data synchronously.
+ */
+QByteArray TasSocket::syncRequest(const qint32& messageId, const QString& requestMessage)
+{
+    return syncRequest(messageId, QByteArray(requestMessage.toUtf8()));
+}
+
+/*!
+ * Request data synchronously.
+ */
+QByteArray TasSocket::syncRequest(const qint32& messageId, const QByteArray& requestMessage)
+{
+    //disconnect response reader
+    disconnect(&mDevice, SIGNAL(readyRead()), mReader, SLOT(readMessageData()));
+
+    //send request as normal
+    sendRequest(messageId, requestMessage);
+
+    QByteArray data;
+    bool headerAvailable = false;
+        
+    //read response directly
+    forever{
+        if(!mDevice.waitForReadyRead ( READ_TIME_OUT )){
+            TasLogger::logger()->error("TasSocket::syncRequest timeout when waiting for the response");
+            //return empty data
+            break;
+        }
+        if(mDevice.bytesAvailable() >= HEADER_LENGTH){
+            headerAvailable = true;
+            break;
+        }
+    }
+    //header available so read message
+    if(headerAvailable){        
+        TasMessage message;
+        if(mReader->readOneMessage(message)){
+            if(message.messageId() != messageId){
+                //not the message we wanted
+                messageAvailable(message);
+                TasLogger::logger()->error("TasSocket::syncRequest message was not responded.");
+            }
+            else{
+                message.uncompressData();
+                data = message.data();
+            }
+        }
+        else{
+            TasLogger::logger()->error("TasSocket::syncRequest error when reading message.");
+        }
+    }
+    //reconnect response reader
+    connect(&mDevice, SIGNAL(readyRead()), mReader, SLOT(readMessageData()));    
+    return data;
+}
 
 
 /*!
@@ -354,6 +410,24 @@ void TasSocketReader::readMessageData()
 
     disconnect(&mDevice, SIGNAL(readyRead()), this, SLOT(readMessageData()));
 
+    TasMessage message;
+    if(readOneMessage(message)){
+        emit messageRead(message);   
+    }
+
+    connect(&mDevice, SIGNAL(readyRead()), this, SLOT(readMessageData()));    
+
+    //maybe there was a new message coming when the old one was still being processed.
+    if(mDevice.bytesAvailable() > 0){
+        readMessageData();   
+    }
+}
+
+/*!
+ * Read on message from the iodevice
+ */
+bool TasSocketReader::readOneMessage(TasMessage& message)
+{
     quint8 compressed = 0;
     qint32 bodySize = 0;
     quint16 crc = 0;
@@ -365,9 +439,7 @@ void TasSocketReader::readMessageData()
     in.setByteOrder(QDataStream::LittleEndian);   
     //read header
     in >> flag >> bodySize >> crc >> compressed >> messageId;
- 
     
-
     bool compression = false;
     if(compressed == COMPRESSION_ON ){
         compression = true;
@@ -411,27 +483,22 @@ void TasSocketReader::readMessageData()
 
     }    
 
-    connect(&mDevice, SIGNAL(readyRead()), this, SLOT(readMessageData()));    
+    bool messageRead = false;
 
-    if(!ok){
-        rawBytes.clear();
-        return;
+    if(ok){
+        //check crc
+        quint16 checkSum = qChecksum( rawBytes.data(), bodySize );
+        if ( checkSum != crc){
+            TasLogger::logger()->error("TasSocket::readMessageData CRC error " + QString::number(checkSum) + " read: " 
+                                       + QString::number(crc));                            
+        }
+        else{
+            message.setMessageId(messageId);
+            message.setFlag(flag);
+            message.setData(rawBytes, compression);
+            messageRead = true;
+        }
     }
-    //check crc
-    quint16 checkSum = qChecksum( rawBytes.data(), bodySize );
-    if ( checkSum != crc){
-        TasLogger::logger()->error("TasSocket::readMessageData CRC error " + QString::number(checkSum) + " read: " 
-                                   + QString::number(crc));                
-    }
-    else{
-        TasMessage message(flag, compression, rawBytes, messageId);
-        emit messageRead(message);
-    }
-    rawBytes.clear();
-    //maybe there was a new message coming when the old one was still being processed.
-    if(mDevice.bytesAvailable() > 0){
-        readMessageData();   
-    }
+    return messageRead;
 }
-
 

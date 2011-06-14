@@ -27,6 +27,7 @@ PUBLIC_HEADERS += $$PWD/tastraverseinterface.h
 PUBLIC_HEADERS += $$PWD/taspluginloader.h 
 PUBLIC_HEADERS += $$PWD/tasextensioninterface.h
 PUBLIC_HEADERS += $$PWD/infologger.h 
+PUBLIC_HEADERS += $$PWD/testabilityinterface.h
 
 HEADERS += $$PWD/tasmessages.h 
 HEADERS += $$PWD/testabilitysettings.h 

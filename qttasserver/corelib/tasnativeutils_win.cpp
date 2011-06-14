@@ -62,6 +62,10 @@ bool TasNativeUtils::verifyProcess(quint64 pid)
         CloseHandle(hProcess);
         running = true;
     }
+    if( GetLastError() == ERROR_ACCESS_DENIED){
+        TasLogger::logger()->warning("TasNativeUtils::verifyProcess could not verify process, access denied");
+        running = true;//will prevent testing if false
+    }
     return running;
 }
 
