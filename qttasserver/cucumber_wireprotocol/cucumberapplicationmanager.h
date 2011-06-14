@@ -24,17 +24,27 @@
 #include <QMap>
 #include <QVariant>
 #include <QStringList>
+#include <QVariantList>
+#include <QWeakPointer>
+
+class QTimer;
+
+class CucumberApplicationManager;
+
+typedef void (CucumberApplicationManager::*InvokableStepFn)(const QString &, const QVariantList &, QObject *);
 
 class CucumberApplicationManager : public QObject
 {
     Q_OBJECT
+
+
 public:
+
     Q_INVOKABLE void verifySelectedApp(const QString &regExpPattern, const QVariantList &args, QObject *sender);
     Q_INVOKABLE void selectApp(const QString &regExpPattern, const QVariantList &args, QObject *sender);
     Q_INVOKABLE void attachApp(const QString &regExpPattern, const QVariantList &args, QObject *sender);
     Q_INVOKABLE void startApp(const QString &regExpPattern, const QVariantList &args, QObject *sender);
     Q_INVOKABLE void startAppTable(const QString &regExpPattern, const QVariantList &args, QObject *sender);
-
 
     explicit CucumberApplicationManager(QObject *parent = 0);
 
@@ -47,13 +57,39 @@ public:
 
 signals:
 
+private slots:
+    void doRetryTimer();
+
 private:
     QString doStartApp(const QString &id, const QString &program, const QStringList &arguments);
+    void doReplyOrRetry(InvokableStepFn fn, const QString &errorString,
+                        const QString &regExpPattern, const QVariantList &args, QObject *sender);
 
     QMap<QString, QString> pidMap; // maps application id to it's "pid" as received from StartAppService
     QString currentApplicationId;
     QString workingDirectoryPath;
     QStringList startEnvironment;
+
+    struct StepRetryData {
+        InvokableStepFn stepFn; // NULL here means, nothing pending
+        QString regExpPattern;
+        QVariantList args;
+        QWeakPointer<QObject> sender;
+        int retriesLeft;
+
+        StepRetryData() : stepFn(NULL), retriesLeft(0) {}
+        void clear() { stepFn=NULL; sender.clear(); retriesLeft=0; }
+        bool equals(InvokableStepFn thisFn, const QString &thisRegExpPattern, const QVariantList &thisArgs, QObject *thisSender) {
+            return (thisFn == stepFn && thisSender == sender.data() && thisRegExpPattern == regExpPattern && thisArgs == args);
+        }
+    } retryData;
+
+    int retryTimeout;
+    int retryInterval;
+
+    QTimer *retryTimer;
+
+    static int retryTimerInterval;
 };
 
 #endif // APPLICATIONINSTANCE_H
