@@ -1,4 +1,4 @@
-qttas (1.1.2-1) unstable; urgency=low
+qttas (1.2.0-1) unstable; urgency=low
 
   * Fixes: NB#254845 - visibleOnScreen attribute incorrect for QML applications
   * Fixes: NB#253840 - Not able to close VKB using gesture method
