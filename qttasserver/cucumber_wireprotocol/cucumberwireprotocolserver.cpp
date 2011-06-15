@@ -34,6 +34,7 @@
 
 #ifdef USE_INCLUDED_QJSON
 // user internal version of qjson
+// define defined in qjson.pri, if internal version is needed
 #include <qjson/src/parser.h>
 #include <qjson/src/serializer.h>
 #else

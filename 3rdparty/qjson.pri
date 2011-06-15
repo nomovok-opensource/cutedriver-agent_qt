@@ -26,16 +26,16 @@
 
 unix:!symbian:!mac {
   # just use default library of the distribution, assume it's been installed
-    message(qjson unix)
+    message(Using platform QJSON library)
     LIBS += -lqjson
 }
 
-win32: {
-    message(qjson win32)
+win32|symbian|mac: {
+    message(Using included QJSON library)
     LIBS += -L$$PWD/qjson/lib -lqjson
     INCLUDEPATH += $$PWD
-    CXX_DEFINES += USE_INCLUDED_QJSON
-    message($$PWD LIBS $$LIBS)
-    message($$PWD INCLUDEPATH $$INCLUDEPATH)
+    DEFINES += USE_INCLUDED_QJSON
+    #message($$PWD LIBS $$LIBS)
+    #message($$PWD INCLUDEPATH $$INCLUDEPATH)
 }
 

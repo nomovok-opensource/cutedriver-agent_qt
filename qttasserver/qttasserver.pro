@@ -28,9 +28,6 @@ mac {
 
 include(../tasbase.pri)
 
-message($$PWD LIBS $$LIBS)
-message($$PWD INCLUDEPATH $$INCLUDEPATH)
-
 TARGET = qttasserver
 DESTDIR = bin
 target.path = $$TAS_TARGET_BIN
