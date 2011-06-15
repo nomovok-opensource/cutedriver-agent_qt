@@ -78,6 +78,10 @@ public:
     bool sendError(const qint32& messageId, const QString& message);
     bool sendError(const qint32& messageId, const QByteArray& message, bool compressed = false);
 	
+    QByteArray syncRequest(const qint32& messageId, const QByteArray& requestMessage);
+    QByteArray syncRequest(const qint32& messageId, const QString& requestMessage);
+    
+
 	bool sendMessage(TasMessage& message);
 
 	void setRequestHandler(RequestHandler* handler);
@@ -133,14 +137,13 @@ public:
     TasSocketReader(QIODevice& device, QObject* parent=0);
 	~TasSocketReader();
 
+    bool readOneMessage(TasMessage& message);
+
 signals:
 	void messageRead(TasMessage& message);
 
 private slots:
 	void readMessageData();
-
-private:
-  	bool readData(QDataStream& in, QByteArray& rawBytes, int amountOfBytes, int timeout);
 
 private:
 	QIODevice& mDevice;

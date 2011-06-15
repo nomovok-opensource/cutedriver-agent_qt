@@ -84,12 +84,11 @@ public:
   void removeMe(const TasClient& client);
 
   void addStartedPid(const QString& pid);
+  TasClient* findByApplicationName(const QString& applicationName, bool includeSocketLess=false);
 
 private:
 
-  TasClient* findByApplicationName(const QString& applicationName, bool includeSocketLess=false);
   TasClient* latestClient(bool includeSocketLess=false);
-
   TasClient* removeByProcessId(const QString& processId);  
 
   bool verifyClient(TasClient* client);
