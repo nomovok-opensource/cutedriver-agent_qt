@@ -90,7 +90,7 @@ void TasMouseEventGenerator::sendMouseEvent(QWidget* target, QMouseEvent* event,
     }
 }
 
-void TasMouseEventGenerator::moveCursor(QPoint point, uint pointerNumber)
+void TasMouseEventGenerator::moveCursor(QPoint point, uint /*pointerNumber*/)
 {
     if (mUseTapScreen) {
         //TasDeviceUtils::sendMouseEvent(point.x(), point.y(), Qt::NoButton, QEvent::MouseMove, pointerNumber);

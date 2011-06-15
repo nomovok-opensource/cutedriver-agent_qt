@@ -122,7 +122,7 @@ TasClient* TasClientManager::addClient(const QString& processId, const QString& 
   already exists only the data will be updated.
  */
 TasClient* TasClientManager::addRegisteredClient(const QString& processId, const QString& processName, TasSocket* socket,
-                                                 const QString& type, QString applicationUid)
+                                                 const QString& type, QString /*applicationUid*/)
 {
     QMutexLocker locker(&mMutex);
     TasLogger::logger()->info("TasClientManager::addRegisteredClient " + processName);

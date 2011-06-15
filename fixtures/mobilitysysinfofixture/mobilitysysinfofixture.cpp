@@ -56,7 +56,7 @@ MobilitySysInfoFixture::~MobilitySysInfoFixture()
 /*!
   Implementation for traverse so always true.
 */
-bool MobilitySysInfoFixture::execute(void * objectInstance, QString actionName, QHash<QString, QString> parameters, QString & stdOut)
+bool MobilitySysInfoFixture::execute(void * objectInstance, QString actionName, QHash<QString, QString> /*parameters*/, QString & stdOut)
 {
     Q_UNUSED(objectInstance);
 
