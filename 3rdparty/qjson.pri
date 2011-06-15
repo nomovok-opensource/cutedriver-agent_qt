@@ -24,8 +24,6 @@
 # Original source avaiable from:
 # http://gitorious.org/qjson/qjson/trees/0.7.1
 
-message(qjson pri)
-
 unix:!symbian:!mac {
   # just use default library of the distribution, assume it's been installed
     message(qjson unix)
@@ -36,6 +34,7 @@ win32: {
     message(qjson win32)
     LIBS += -L$$PWD/qjson/lib -lqjson
     INCLUDEPATH += $$PWD
+    CXX_DEFINES += USE_INCLUDED_QJSON
     message($$PWD LIBS $$LIBS)
     message($$PWD INCLUDEPATH $$INCLUDEPATH)
 }
