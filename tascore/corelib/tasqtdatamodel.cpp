@@ -34,15 +34,13 @@ const char* const VERSION = "version";
 const char* const NAME = "name";
 const char* const TYPE = "type";
 const char* const ENV = "env";
-const char* const DATA_TYPE = "dataType";
+const char* const DATA_TYPE = "type";
+const char* const ACCESS = "access";
 const char* const ID = "id";
 const char* const ROOT_NAME = "tasMessage";
 const char* const CONTAINER_NAME = "tasInfo";
-const char* const OBJECT_NAME = "object";
-const char* const OBJECTS_NAME = "objects";
-const char* const ATTRIBUTE_NAME = "attribute";
-const char* const ATTRIBUTES_NAME = "attributes";
-const char* const VALUE_NAME = "value";
+const char* const OBJECT_NAME = "obj";
+const char* const ATTRIBUTE_NAME = "attr";
 const char* const PARENT = "parent";
 
 
@@ -176,7 +174,7 @@ void TasAttribute::serializeIntoString(TasXmlWriter& xmlWriter ,SerializeFilter&
     QMap<QString, QString> attributes;
     attributes[NAME] = TasCoreUtils::encodeString( name );
     if(!type.isEmpty()){
-        attributes[TYPE] = type;
+        attributes[ACCESS] = type;
     }
     if(!dataType.isEmpty()){
         attributes[DATA_TYPE] = dataType;
@@ -185,9 +183,9 @@ void TasAttribute::serializeIntoString(TasXmlWriter& xmlWriter ,SerializeFilter&
 
     if (values.size() > 0){
         for (int i = 0; i < values.size(); ++i) {
-            xmlWriter.openElement(VALUE_NAME);
+            //            xmlWriter.openElement(VALUE_NAME);
             xmlWriter.addTextContent(values.at(i));
-            xmlWriter.closeElement(VALUE_NAME);
+            //            xmlWriter.closeElement(VALUE_NAME);
         }       
     }
     xmlWriter.closeElement(ATTRIBUTE_NAME);
@@ -529,24 +527,24 @@ void TasObject::serializeIntoString(TasXmlWriter& xmlWriter ,SerializeFilter& fi
     }
     xmlWriter.openElement(OBJECT_NAME, attrs);
     if (attributes.size() > 0){
-        xmlWriter.openElement(ATTRIBUTES_NAME);
+        //        xmlWriter.openElement(ATTRIBUTES_NAME);
         for (int i = 0; i < attributes.size(); ++i) {
             TasAttribute* attr = attributes.at(i);
             if( filter.serializeAttribute(*attr)){
                 attr->serializeIntoString(xmlWriter, filter);
             }
         }
-        xmlWriter.closeElement(ATTRIBUTES_NAME);
+        //        xmlWriter.closeElement(ATTRIBUTES_NAME);
     }
     if (objects.size() > 0){
-        xmlWriter.openElement(OBJECTS_NAME);
+        //xmlWriter.openElement(OBJECTS_NAME);
         for (int i = 0; i < objects.size(); ++i) {
             TasObject* object = objects.at(i);
             if(filter.serializeObject(*object)){                
                 object->serializeIntoString(xmlWriter, filter);
             }
         }
-        xmlWriter.closeElement(OBJECTS_NAME);
+        //xmlWriter.closeElement(OBJECTS_NAME);
     }
     xmlWriter.closeElement(OBJECT_NAME);
 }

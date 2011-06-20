@@ -211,6 +211,9 @@ const char* const VISIBILITY_CHECK = "visibility_check";
 const char* const VISIBILITY_BLACKLIST = "visibility_blacklist";
 
 
+const char* const PENINPUT_SERVER = "peninputserver";
+const char* const VKB_IDENTIFIER = "vkb_app";
+
 #ifdef TDTASSERVER
  #define TAS_EXPORT 
 #else

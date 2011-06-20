@@ -69,7 +69,9 @@ void EventService::performEventCommands(TasCommandModel& model, TasResponse& res
         if(command){
             TasEventFilter* filter = getFilterForTarget(commandTarget, true);
             if(filter){
-                QString eventsStr = command->parameter("EventsToListen");   
+                QString eventsStr = command->parameter("EventsToListen");
+                QString trackId = command->parameter("track_id");
+                filter->setTrackId(trackId);
                 filter->startFiltering(eventsStr.split(",", QString::SkipEmptyParts));
                 response.setData(QString(OK_MESSAGE));
             }
@@ -133,6 +135,7 @@ TasEventFilter* EventService::getFilterForTarget(TasTarget* commandTarget, bool 
     TasEventFilter* filter = 0;
     QString targetId = commandTarget->id();
     QString targetType = commandTarget->type();
+
     //are required for command completion
     if(targetId.isEmpty() || targetType.isEmpty()){
         return 0;
@@ -182,7 +185,7 @@ void EventService::addProcessStartEvent(QDateTime startTime)
 
 
 TasEventFilter::TasEventFilter(QObject* target, QObject* parent)
-    :QObject(parent)
+    :QObject(parent), trackId(""), found(false)
 {    
     mTarget = target;
     mTasModel = new TasDataModel();
@@ -222,31 +225,40 @@ bool TasEventFilter::eventFilter(QObject *target, QEvent *event)
         QString eventType = TestabilityUtils::eventType(event) ;
 
         // check that the event type is in the list of events to be listened or ALL is defined
-        if (!mEventsToListen.contains(eventType) && !mEventsToListen.contains(QString("ALL")))
+        if (found || (!mEventsToListen.contains(eventType) && !mEventsToListen.contains(QString("ALL"))))
             return false;
 
-        TasObject& eventObj = mTasEvents->addObject();
-        eventObj.setId(TasCoreUtils::pointerId(event));                                     
-        eventObj.setType(QString("event"));
-        eventObj.setName(eventType);
-        eventObj.addAttribute("timeStamp", QDateTime::currentDateTime().toString(DATE_FORMAT));
-        addMouseEventDetails(event, eventObj);
+        
 
-        if(target){
-            TasObject& targetObj = eventObj.addObject();
-            targetObj.setId(TasCoreUtils::objectId(target));
-            targetObj.setName(target->objectName() != NULL ? target->objectName() : "NoName");
-            targetObj.setType(target->metaObject()->className());
 
-            if(target->metaObject()){
-                const QMetaObject *metaobject = target->metaObject();
-                int count = metaobject->propertyCount();
-                for (int i=0; i<count; i++){
-                    QMetaProperty metaproperty = metaobject->property(i);
-                    const char *name = metaproperty.name();
-                    QVariant value = target->property(name);
-                    if(value.isValid()){
-                        targetObj.addAttribute(name, value.toString());
+        if (TasCoreUtils::objectId(target) == trackId) {
+            found = true;
+            mTasEvents->addAttribute("trackedFound", "true");
+        } else if (trackId == "") {
+            TasObject& eventObj = mTasEvents->addObject();
+            eventObj.setId(TasCoreUtils::pointerId(event));                                     
+
+            eventObj.setType(QString("event"));
+            eventObj.setName(eventType);
+            eventObj.addAttribute("timeStamp", QDateTime::currentDateTime().toString(DATE_FORMAT));
+            addMouseEventDetails(event, eventObj);
+
+            if(target){
+                TasObject& targetObj = eventObj.addObject();
+                targetObj.setId(TasCoreUtils::objectId(target));
+                targetObj.setName(target->objectName() != NULL ? target->objectName() : "NoName");
+                targetObj.setType(target->metaObject()->className());
+
+                if(target->metaObject()){
+                    const QMetaObject *metaobject = target->metaObject();
+                    int count = metaobject->propertyCount();
+                    for (int i=0; i<count; i++){
+                        QMetaProperty metaproperty = metaobject->property(i);
+                        const char *name = metaproperty.name();
+                        QVariant value = target->property(name);
+                        if(value.isValid()){
+                            targetObj.addAttribute(name, value.toString());
+                        }
                     }
                 }
             }
@@ -301,4 +313,9 @@ QByteArray TasEventFilter::getEvents()
         message = QByteArray(QString("Event listening not enabled!").toUtf8());
     }
     return message;
+}
+
+void TasEventFilter::setTrackId(const QString& id)
+{
+    trackId = id;
 }

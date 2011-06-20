@@ -32,7 +32,9 @@
 _LIT( KContextSource, "Sensor" );
 _LIT( KSensorSourceEventOrientation, "Event.Orientation" );
 _LIT( KContextValueRightUp, "DisplayRightUp" );
+_LIT( KContextValueLeftUp, "DisplayLeftUp" );
 _LIT( KContextValueTopUp, "DisplayUp" );
+_LIT( KContextValueDownUp, "DisplayDown" );
 
 
 class NativeUtils_p
@@ -117,26 +119,25 @@ void TasNativeUtils::changeOrientation(QString direction)
 {
     //T R A P D starts
     TRAPD(err,
-        if(direction == "rotate_right_up"){
-            MCFListener *cfListener= NULL;
-            CCFClient* client = CCFClient::NewLC( *cfListener );
-            CCFContextObject* co = CCFContextObject::NewLC();
-            co->SetSourceL( KContextSource() );
-            co->SetTypeL( KSensorSourceEventOrientation() );
-            co->SetValueL( KContextValueRightUp() );
-            TInt err = client->PublishContext( *co );
-            CleanupStack::PopAndDestroy(2);
-
-        } else if(direction == "rotate_top_up"){
-            MCFListener *cfListener= NULL;
-            CCFClient* client = CCFClient::NewLC( *cfListener );
-            CCFContextObject* co = CCFContextObject::NewLC();
-            co->SetSourceL( KContextSource() );
-            co->SetTypeL( KSensorSourceEventOrientation() );
-            co->SetValueL( KContextValueTopUp() );
-            TInt err = client->PublishContext( *co );
-            CleanupStack::PopAndDestroy(2);
-        }
+          MCFListener *cfListener= NULL;
+          CCFClient* client = CCFClient::NewLC( *cfListener );
+          CCFContextObject* co = CCFContextObject::NewLC();
+          co->SetSourceL( KContextSource() );
+          co->SetTypeL( KSensorSourceEventOrientation() );          
+          if(direction == "rotate_right_up"){
+              co->SetValueL( KContextValueRightUp() );
+          }         
+          else if(direction == "rotate_left_up"){
+              co->SetValueL( KContextValueLeftUp() );
+          }
+          else if(direction == "rotate_down_up"){
+              co->SetValueL( KContextValueDownUp() );
+          }
+          else{ // (direction == "rotate_top_up") as default
+              co->SetValueL( KContextValueTopUp() );
+          }
+          TInt err = client->PublishContext( *co );
+          CleanupStack::PopAndDestroy(2);
     );
     if( err != KErrNone ){
         TasLogger::logger()->error("<- TasNativeUtils::changeOrientation orientation changed failed, code: " + QString::number(err));

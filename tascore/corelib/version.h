@@ -16,8 +16,6 @@
 ** of this file. 
 ** 
 ****************************************************************************/ 
- 
 
-
-static QString TAS_VERSION = "1.1.2";
+static QString TAS_VERSION = "1.3";
 

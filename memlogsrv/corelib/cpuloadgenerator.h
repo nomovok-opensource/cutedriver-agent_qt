@@ -33,7 +33,8 @@ public:
     ~CpuLoadGenerator();
     int start(int loadInPercentage);
     int stop();
-    
+    bool isRunning(){return mRunning;}
+
 private: // Data
     int mLoadInPercentage;
 
@@ -41,7 +42,8 @@ private: // Platform specific data
 #ifdef Q_OS_SYMBIAN
     RThread mLoadGeneratingThread;    
 #endif
-    
+    bool mRunning;
+
 };
 
 #endif /* CPULOADGENERATOR_H_ */

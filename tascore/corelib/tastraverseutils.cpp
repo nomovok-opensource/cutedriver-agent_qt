@@ -35,6 +35,7 @@
 #include "tasqtcommandmodel.h"
 
 const char* const QT_PREFIX ="Qt_";
+const char* const VKB_APP_ID = "vkb_app_id";
 
 TasTraverseUtils::TasTraverseUtils()
 {
@@ -96,6 +97,10 @@ void TasTraverseUtils::addObjectDetails(TasObject* objectInfo, QObject* object)
     printProperties(objectInfo, object);      
     objectInfo->setName(object->objectName());
 
+    //allows to detect vkb
+    if(TasCoreUtils::getApplicationName().contains(PENINPUT_SERVER)){
+        objectInfo->addAttribute(VKB_APP_ID, QString::number(qApp->applicationPid()));
+    }
 }
 
 
@@ -195,13 +200,10 @@ void TasTraverseUtils::printProperties(TasObject* objectInfo, QObject* object)
             if(mTraverseFilter == 0 || !mTraverseFilter->filterProperties()){
                 QString propertyTypes = "";
                 if(metaproperty.isReadable()){
-                    propertyTypes = "readable";
+                    propertyTypes = "r";
                 }
                 if(metaproperty.isWritable ()){
-                    if(!propertyTypes.isEmpty()){
-                        propertyTypes += QString(", ");
-                    }
-                    propertyTypes += QString("writable");
+                    propertyTypes += QString("w");
                 }
                 attr.setType(propertyTypes);
             }
@@ -385,6 +387,12 @@ void TasTraverseUtils::printGraphicsItemProperties(TasObject* objectInfo, QGraph
         if(gObject && !gObject->property("z-value").isValid())
             objectInfo->addAttribute("z-value", QString::number(graphicsItem->zValue()));   
     }
+
+    //allows to detect vkb
+    if(TasCoreUtils::getApplicationName().contains(PENINPUT_SERVER)){
+        objectInfo->addAttribute(VKB_APP_ID, QString::number(qApp->applicationPid()));
+    }
+
 }
 
 

@@ -109,7 +109,11 @@ TasObject& TasUiTraverser::addModelRoot(TasDataModel& model, TasCommand* command
 {
     TasObjectContainer& container = model.addNewObjectContainer("qt", "sut");
     container.setId(qVersion());
-    TasObject& application = container.addNewObject(QString::number(qApp->applicationPid()), getApplicationName(), "application");          
+    QString appName = getApplicationName();   
+    TasObject& application = container.addNewObject(QString::number(qApp->applicationPid()), appName, "application");          
+    if(appName == PENINPUT_SERVER){
+        application.setType(VKB_IDENTIFIER);
+    }
     addApplicationDetails(application, command);
     return application;
 }

@@ -62,6 +62,13 @@ bool FindObjectService::executeService(TasCommandModel& model, TasResponse& resp
                targetObj->searchParameters().contains("type") && targetObj->searchParameters().value("type") == "application"){
                 continue;
             }
+            //the request is for vkb app so return only app details
+            if(targetObj->className() == VKB_IDENTIFIER && !TasCoreUtils::getApplicationName().contains(PENINPUT_SERVER)){
+                TasLogger::logger()->debug("FindObjectService::executeService really needs vkb returning app only");
+                traverseAll = false;   
+                break;
+            }
+
             TasCommand* command = 0;
             if(!target->commandList().isEmpty()){
                 command = target->commandList().at(0);
@@ -101,6 +108,19 @@ bool FindObjectService::executeService(TasCommandModel& model, TasResponse& resp
 
 bool FindObjectService::addObjectDetails(TasObject& parent, TasTargetObject *targetObj, TasCommand* command, QObject* parentObject)
 {
+    //special check skip if vkb
+    if(targetObj->className() == VKB_IDENTIFIER && TasCoreUtils::getApplicationName().contains(PENINPUT_SERVER)){
+        if(targetObj->child()){
+            //add the actual objects under the vkb (which really an app)
+            return addObjectDetails(parent, targetObj->child(), command, parentObject);
+        }
+        else{
+            //nothing needed as vkb added as app
+            return true;
+        }
+    }
+    
+
     bool cached = false;
     QList<QObject*> objects;
     //look from cache
