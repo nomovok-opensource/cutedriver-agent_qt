@@ -18,37 +18,27 @@
 ****************************************************************************/ 
  
 
-
-#ifndef TASQTFIXTUREPLUGININTERFACE_H
-#define TASQTFIXTUREPLUGININTERFACE_H
+#ifndef QtScriptFixturePlugin_H
+#define QtScriptFixturePlugin_H
 
 #include <QObject>
-#include <QString>
 #include <QHash>
+#include <tasqtfixtureplugininterface.h>
 
-const char* const OBJECT_TYPE = "__fixture_object_type";
-const char* const WIDGET_TYPE = "QWidget";
-const char* const GRAPHICS_ITEM_TYPE = "QGraphicsItem";
-const char* const APPLICATION_TYPE = "QApplication";
-const char* const NULL_TYPE = "Null";
-
-const char* const CUCUMBER_STEP_ACTION = "cucumberStep";
-
-class TasFixturePluginInterface  
+class QtScriptFixturePlugin : public QObject, public TasFixturePluginInterface
 {
+  Q_OBJECT
+  Q_INTERFACES(TasFixturePluginInterface)
+ 
 public:
-     virtual ~TasFixturePluginInterface() {}
+    QtScriptFixturePlugin(QObject* parent=0);
+    ~QtScriptFixturePlugin();
+    bool execute(
+        void* objectInstance, 
+        QString actionName, 
+        QHash<QString, QString> parameters, 
+        QString & stdOut);
+ };
 
-     /*!
-
-	Method for calling actions inside plugin.
-	
-     */
-     virtual bool execute(void * objectInstance, QString actionName, QHash<QString, QString> parameters, QString & stdOut) = 0;
-
-};
-
- Q_DECLARE_INTERFACE(TasFixturePluginInterface,
-                     "com.nokia.testability.TasFixturePluginInterface/1.0")
-
-#endif 
+#endif
+ 
