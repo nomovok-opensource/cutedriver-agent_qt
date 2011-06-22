@@ -60,6 +60,7 @@ win32: {
 
 INCLUDEPATH += .
 INCLUDEPATH += services corelib
+
 INCLUDEPATH += ../tascore/corelib
 
 DEPENDPATH += . inc src services corelib
@@ -69,8 +70,8 @@ SOURCES += main.cpp
 
 include(corelib/corelib.pri)
 include(services/services.pri)
-include(../tascore/corelib/corelib.pri)
 include(cucumber_wireprotocol/cucumber_wireprotocol.pri)
+include(../tascore/corelib/corelib.pri)
 
 HEADERS += $$PUBLIC_HEADERS
 

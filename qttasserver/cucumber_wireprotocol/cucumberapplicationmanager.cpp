@@ -20,14 +20,18 @@
 #include "cucumberapplicationmanager.h"
 
 #include <tasnativeutils.h>
+#include <tasqtfixtureplugininterface.h>
+#include <taslogger.h>
 #include <startappservice.h>
 
+
 #include <QtCore>
+
+#include <qjson_warpper.h>
 
 
 #define DP "CucumberWireprotocolServer" << __FUNCTION__
 #define DPL "CucumberWireprotocolServer" << QString("%1:%2").arg(__FUNCTION__).arg(__LINE__)
-
 
 
 
@@ -38,14 +42,19 @@ CucumberApplicationManager::CucumberApplicationManager(QObject *parent) :
   , retryTimeout(4*1000)
   , retryInterval(500)
   , retryTimer(new QTimer(this))
+  , pendingSender(0)
+  , pendingTimer(new QTimer(this))
 {
     retryTimer->setInterval(retryInterval);
     connect(retryTimer, SIGNAL(timeout()), SLOT(doRetryTimer()));
+
+    pendingTimer->setSingleShot(true);
+    pendingTimer->setInterval(120*1000);
+    connect(pendingTimer, SIGNAL(timeout()), SLOT(pendingSenderTimeout()));
 }
 
 
-static inline bool invokePlainSender(QObject *sender, const QString &errorMsg)
-{
+static inline bool invokePlainSender(QObject *sender, const QString &errorMsg) {
     if (!sender) {
         return false;
     }
@@ -57,6 +66,93 @@ static inline bool invokePlainSender(QObject *sender, const QString &errorMsg)
             return QMetaObject::invokeMethod(sender, "cucumberFailResponse", Qt::QueuedConnection,
                                              Q_ARG(QString, errorMsg));
         }
+    }
+}
+
+
+void CucumberApplicationManager::pendingSenderTimeout()
+{
+    if (pendingSender) {
+        QMetaObject::invokeMethod(pendingSender, "cucumberFailResponse", Qt::QueuedConnection,
+                                  Q_ARG(QString, "Fallback timeout waiting for response from fixture!"));
+        pendingSender = 0;
+    }
+}
+
+
+void CucumberApplicationManager::handleFixtureResult(bool success, const QString &text, quintptr callId)
+{
+    qDebug() << DPL << success << text << callId;
+    if (!callId || callId != reinterpret_cast<quintptr>(pendingSender)) {
+        TasLogger::logger()->error("CucumberApplicationManager::qtScriptResult called with invalid callId");
+    }
+    else {
+        pendingTimer->stop();
+
+        bool invokeOk;
+
+        if (success) {
+            invokeOk = QMetaObject::invokeMethod(pendingSender, "cucumberSuccessResponse", Qt::QueuedConnection);
+        }
+        else {
+            invokeOk = QMetaObject::invokeMethod(pendingSender, "cucumberFailResponse", Qt::QueuedConnection,
+                                             Q_ARG(QString, text));
+        }
+        qDebug() << DPL << success << "sender invokation" << invokeOk;
+        pendingSender = 0;
+    }
+}
+
+
+
+static const char *regExp_testCucumberStepService = "I test CucumberStepService ?(.*)";
+static const int line_testCucumberStepService = __LINE__ + 1;
+void CucumberApplicationManager::testCucumberStepService(const QString &regExpPattern, const QVariantList &args, QObject *sender)
+{
+    if (pendingSender) {
+        qDebug() << DPL << "ALREADY HAD pendingSender!";
+        pendingTimer->stop();
+        pendingSenderTimeout();
+    }
+
+    bool justReturn = false;
+    QString errorMsg;
+    if (args.size() != 1) {
+        errorMsg = QString("Expected test argument");
+    }
+    else {
+        QString arg = args.at(0).toString();
+
+        TasClientManager *clientManager = TasClientManager::instance();
+        QString processId = pidMap[currentApplicationId];
+        qDebug() << DPL << "looking for" << currentApplicationId << "pid" << processId;
+        TasClient *client = clientManager->findByProcessId(processId);
+
+        if (!client) {
+            errorMsg = QString("Application '%1' not found")
+                    .arg(currentApplicationId);
+        }
+        else {
+            QByteArray jsonData = QJson::Serializer().serialize(args);
+            errorMsg = jsonData;
+            QHash<QString, QString> argMap;
+            argMap["qjson"] = jsonData;
+
+            retryData.clear();
+            retryTimer->stop();
+
+            pendingSender = sender;
+            pendingTimer->start();
+            client->callFixture(this, "handleFixtureResult", reinterpret_cast<quintptr>(pendingSender),
+                                "qtscript", CUCUMBER_STEP_ACTION, argMap);
+            justReturn = true;
+            //TasMessage message(REQUEST_MSG, false, msgData, 0);
+            //client->socket()->sendRequest(0, )
+        }
+    }
+
+    if (!justReturn) {
+        doReplyOrRetry(&CucumberApplicationManager::testCucumberStepService, errorMsg, regExpPattern, args, sender);
     }
 }
 
@@ -247,6 +343,7 @@ void CucumberApplicationManager::registerSteps(QObject *registrarObject, const c
         STEPINFO(attachApp),
         STEPINFO(selectApp),
         STEPINFO(verifySelectedApp),
+        STEPINFO(testCucumberStepService),
         { 0, 0, 0 }
     };
 
@@ -297,10 +394,10 @@ void CucumberApplicationManager::doRetryTimer()
 
 
 void CucumberApplicationManager::doReplyOrRetry(InvokableStepFn fn, const QString &errorString,
-                                               const QString &regExpPattern, const QVariantList &args, QObject *sender)
+                                                const QString &regExpPattern, const QVariantList &args, QObject *sender)
 {
     qDebug() << DPL << "entry";
-    if (!retryData.equals(fn, regExpPattern, args, sender)) {
+    if (retryData.hasCallback() && !retryData.equals(fn, regExpPattern, args, sender)) {
         qCritical() << DPL << "new updateRetries called when previous not finished!";
         invokePlainSender(retryData.sender.data(), "Cancelled, because of getting a new request!");
         retryData.clear();
@@ -346,6 +443,7 @@ void CucumberApplicationManager::doReplyOrRetry(InvokableStepFn fn, const QStrin
     }
 
 }
+
 
 
 

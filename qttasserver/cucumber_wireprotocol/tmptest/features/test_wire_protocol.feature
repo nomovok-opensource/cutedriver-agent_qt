@@ -7,6 +7,7 @@ Feature: QtTasServer with Cucumber Wire Protocol
 
   Scenario: Testing stuff
     Given I launch application with command calculator -testability
+    And I test CucumberStepService test argument which has many words
     Given I launch application two with command:
         | calculator |
         | -testability |

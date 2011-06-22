@@ -32,15 +32,7 @@
 #include <QVariantMap>
 #include <QTimer>
 
-#ifdef USE_INCLUDED_QJSON
-// user internal version of qjson
-// define defined in qjson.pri, if internal version is needed
-#include <qjson/src/parser.h>
-#include <qjson/src/serializer.h>
-#else
-#include <qjson/parser.h>
-#include <qjson/serializer.h>
-#endif
+#include <qjson_warpper.h>
 
 #define DP "CucumberWireprotocolServer" << __FUNCTION__
 #define DPL "CucumberWireprotocolServer" << __FUNCTION__ << __LINE__

@@ -40,6 +40,9 @@ class CucumberApplicationManager : public QObject
 
 public:
 
+    Q_INVOKABLE void handleFixtureResult(bool success, const QString &text, quintptr callId);
+
+    Q_INVOKABLE void testCucumberStepService(const QString &regExpPattern, const QVariantList &args, QObject *sender);
     Q_INVOKABLE void verifySelectedApp(const QString &regExpPattern, const QVariantList &args, QObject *sender);
     Q_INVOKABLE void selectApp(const QString &regExpPattern, const QVariantList &args, QObject *sender);
     Q_INVOKABLE void attachApp(const QString &regExpPattern, const QVariantList &args, QObject *sender);
@@ -61,6 +64,8 @@ private slots:
     void doRetryTimer();
 
 private:
+    void pendingSenderTimeout();
+
     QString doStartApp(const QString &id, const QString &program, const QStringList &arguments);
     void doReplyOrRetry(InvokableStepFn fn, const QString &errorString,
                         const QString &regExpPattern, const QVariantList &args, QObject *sender);
@@ -79,6 +84,7 @@ private:
 
         StepRetryData() : stepFn(NULL), retriesLeft(0) {}
         void clear() { stepFn=NULL; sender.clear(); retriesLeft=0; }
+        bool hasCallback() { return (stepFn && !sender.isNull()); }
         bool equals(InvokableStepFn thisFn, const QString &thisRegExpPattern, const QVariantList &thisArgs, QObject *thisSender) {
             return (thisFn == stepFn && thisSender == sender.data() && thisRegExpPattern == regExpPattern && thisArgs == args);
         }
@@ -90,6 +96,9 @@ private:
     QTimer *retryTimer;
 
     static int retryTimerInterval;
+
+    QObject *pendingSender;
+    QTimer *pendingTimer;
 };
 
 #endif // APPLICATIONINSTANCE_H

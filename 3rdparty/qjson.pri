@@ -39,3 +39,6 @@ win32|symbian|mac: {
     #message($$PWD INCLUDEPATH $$INCLUDEPATH)
 }
 
+HEADERS += \
+    ../3rdparty/qjson_warpper.h
+INCLUDEPATH += $$PWD

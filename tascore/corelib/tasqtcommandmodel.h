@@ -137,7 +137,7 @@ public:
 	bool isMultitouch();
 	bool onlyFragment();
 
-	TasCommandModel* clone();
+        //TasCommandModel* clone();
 private:
     QList<TasTarget*> mTargets;
 	QDomDocument* mDocument;
