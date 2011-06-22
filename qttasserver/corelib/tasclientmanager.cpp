@@ -634,3 +634,15 @@ QString TasClient::pluginType()
 {
     return mPluginType;
 }
+
+void TasClient::callFixture(QObject *sender, const char *resultMethod, quintptr callId,
+                            const QString &fixtureName, const QString &actionName, QHash<QString, QString> parameters)
+{
+    if (sender && resultMethod) {
+        QString text = "Not implemented in "__FILE__;
+        QMetaObject::invokeMethod(sender, resultMethod, Qt::QueuedConnection,
+                                  Q_ARG(bool, false),
+                                  Q_ARG(QString, text),
+                                  Q_ARG(quintptr, callId));
+    }
+}

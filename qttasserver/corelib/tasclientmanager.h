@@ -129,6 +129,9 @@ public:
   void setPluginType(const QString& pluginType);
   QString pluginType();
 
+  void callFixture(QObject *sender, const char *resultMethod, quintptr callId,
+                   const QString &fixtureName, const QString &actionName, QHash<QString, QString> parameters);
+
 signals:
   void registered(const QString& ProcessId);
 
