@@ -35,6 +35,8 @@ int main(int argc, char *argv[])
     QCoreApplication::setOrganizationDomain("nokia.com");
     QCoreApplication::setApplicationName("QtTasserver");
 
+    qRegisterMetaType<quintptr>("quintptr");
+
     // Get arguments for binding style
     // No argument check done, only "any" or "localhost" will have an effect,
     // other settings will just be ignored and default host binding for current OS will be used
