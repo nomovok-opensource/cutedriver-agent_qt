@@ -137,8 +137,14 @@ bool QtScriptFixturePlugin::execute(
         targetObj = qobject_cast<QObject*>(reinterpret_cast<QWidget*>(objectInstance));
     }
     else if (objType == GRAPHICS_ITEM_TYPE) {
-        TasLogger::logger()->debug("QtScriptFixturePlugin::execute QGraphicsItem targets not supported");
-        //targetObj = qobject_cast<QObject*>(reinterpret_cast<QGraphicsItem*>(objectInstance));
+        QGraphicsItem *item = reinterpret_cast<QGraphicsItem*>(objectInstance);
+        targetObj = qobject_cast<QObject*>(item->toGraphicsObject());
+        if (!targetObj) {
+            targetObj = qobject_cast<QObject*>(item->scene());
+            if (!targetObj) {
+                stdOut = "could not generate QObject from target QGraphicsItem";
+            }
+        }
     }
 
     if (!targetObj){
