@@ -140,15 +140,18 @@ bool QtScriptFixturePlugin::execute(
         QGraphicsItem *item = reinterpret_cast<QGraphicsItem*>(objectInstance);
         targetObj = qobject_cast<QObject*>(item->toGraphicsObject());
         if (!targetObj) {
+            stdOut = "QGraphicsItem was not QGraphicsObject";
+            /*
             targetObj = qobject_cast<QObject*>(item->scene());
             if (!targetObj) {
                 stdOut = "could not generate QObject from target QGraphicsItem";
             }
+            */
         }
     }
 
     if (!targetObj){
-        TasLogger::logger()->warning("> QtScriptFixturePlugin::execute invalid taget object");
+        TasLogger::logger()->warning("> QtScriptFixturePlugin::execute invalid target object");
         return false;
     }
 
@@ -156,24 +159,28 @@ bool QtScriptFixturePlugin::execute(
 
     QScriptEngine engine;
 
+#if 1
+    QScriptValue contextObjectValue = engine.newQObject(targetObj);
+    engine.pushContext()->setThisObject(contextObjectValue);
+#else // not really needed, when "this" is target object
     {
-        QScriptValue tdriverValue = engine.newObject();
-        tdriverValue.setProperty("target", engine.newQObject(targetObj));
-        tdriverValue.setProperty("action", QScriptValue("actionName"));
-        TasLogger::logger()->debug("tdriverValue: " +  dumpQScriptValue(tdriverValue));
-        engine.globalObject().setProperty("tdriver", tdriverValue);
+        QScriptValue targetValue = engine.newObject();
+        targetValue.setProperty("target", engine.newQObject(targetObj));
+        targetValue.setProperty("action", QScriptValue("actionName"));
+        TasLogger::logger()->debug("targetValue: " +  dumpQScriptValue(targetValue));
+        engine.globalObject().setProperty("target", targetValue);
     }
-    TasLogger::logger()->debug("tdriver property: " +  dumpQScriptValue(engine.globalObject().property("tdriver")));
+    TasLogger::logger()->debug("target property: " +  dumpQScriptValue(engine.globalObject().property("target")));
+#endif
 
     {
-        QScriptValue fixtureValue = engine.newObject();
+        QScriptValue tmpVal = engine.newObject();
         foreach(const QString &key, parameters.keys()) {
-            fixtureValue.setProperty(key, parameters[key]);
+            tmpVal.setProperty(key, parameters[key]);
         }
-        TasLogger::logger()->debug("fixtureValue: " +  dumpQScriptValue(fixtureValue));
-        engine.globalObject().setProperty("fixture", fixtureValue);
+        engine.globalObject().setProperty("tdriver", tmpVal);
     }
-    TasLogger::logger()->debug("fixture property: " +  dumpQScriptValue(engine.globalObject().property("fixture")));
+    TasLogger::logger()->debug("tdriver property: " +  dumpQScriptValue(engine.globalObject().property("fixture")));
 
     if (actionName == "eval") {
         QString script = parameters.value("script");
