@@ -169,7 +169,7 @@ void ServerMonitor::serverResponse(const QString& message)
         QDomDocument doc("TasMessage");    
         if(mState == STATUS && doc.setContent(message)){
             emit serverDebug("Currently registered applications:");    
-            QDomNodeList targets = doc.elementsByTagName (QString("object"));
+            QDomNodeList targets = doc.elementsByTagName (QString("obj"));
             int count = targets.count();        
             for (int i = 0; i < count; i++){
                 QDomElement target = targets.item(i).toElement();

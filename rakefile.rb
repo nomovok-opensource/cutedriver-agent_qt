@@ -66,7 +66,7 @@ task :build_qttas do
   make = "make"
   sudo = ""	
 
-  if /win/ =~ RUBY_PLATFORM
+  if /win/ =~ RUBY_PLATFORM || /mingw32/ =~ RUBY_PLATFORM
     make = "mingw32-make"
   else
     sudo = "echo \"testability\" | sudo -S "
@@ -131,7 +131,7 @@ task :kill_qttasserver do
   puts "### Killing qttasserver                              ####"
   puts "#########################################################"
 
-  if /win/ =~ RUBY_PLATFORM
+  if /win/ =~ RUBY_PLATFORM || /mingw32/ =~ RUBY_PLATFORM
 
     cmd = "taskkill /F /IM qttasserver.exe"
     stdOut = system(cmd)
@@ -149,7 +149,7 @@ task :start_qttasserver do
   puts "### Starting qttasserver                             ####"
   puts "#########################################################"
 
-  if /win/ =~ RUBY_PLATFORM
+  if /win/ =~ RUBY_PLATFORM || /mingw32/ =~ RUBY_PLATFORM
   	require 'win32ole'
 		begin
       shell = WIN32OLE.new( 'Shell.Application' )

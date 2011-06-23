@@ -1,21 +1,21 @@
 /*************************************************************************** 
-** 
-** Copyright (C) 2010 Nokia Corporation and/or its subsidiary(-ies). 
-** All rights reserved. 
-** Contact: Nokia Corporation (testabilitydriver@nokia.com) 
-** 
-** This file is part of Testability Driver Qt Agent
-** 
-** If you have questions regarding the use of this file, please contact 
-** Nokia at testabilitydriver@nokia.com . 
-** 
-** This library is free software; you can redistribute it and/or 
-** modify it under the terms of the GNU Lesser General Public 
-** License version 2.1 as published by the Free Software Foundation 
-** and appearing in the file LICENSE.LGPL included in the packaging 
-** of this file. 
-** 
-****************************************************************************/ 
+ ** 
+ ** Copyright (C) 2010 Nokia Corporation and/or its subsidiary(-ies). 
+ ** All rights reserved. 
+ ** Contact: Nokia Corporation (testabilitydriver@nokia.com) 
+ ** 
+ ** This file is part of Testability Driver Qt Agent
+ ** 
+ ** If you have questions regarding the use of this file, please contact 
+ ** Nokia at testabilitydriver@nokia.com . 
+ ** 
+ ** This library is free software; you can redistribute it and/or 
+ ** modify it under the terms of the GNU Lesser General Public 
+ ** License version 2.1 as published by the Free Software Foundation 
+ ** and appearing in the file LICENSE.LGPL included in the packaging 
+ ** of this file. 
+ ** 
+ ****************************************************************************/ 
  
 
 #include <QtPlugin>
@@ -139,6 +139,57 @@ bool TasFixturePlugin::execute(void * objectInstance, QString actionName, QHash<
             }
             else {
                 TasLogger::logger()->debug("TasFixturePlugin::execute view == null");
+            }
+        }
+    }
+    else if(actionName == "ensureQmlVisible"){
+        TasLogger::logger()->debug("TasFixturePlugin::execute ensureQmlVisible");
+        if(parameters.value(OBJECT_TYPE) == GRAPHICS_ITEM_TYPE ){
+			QGraphicsItem* item = reinterpret_cast<QGraphicsItem*>(objectInstance);  
+			if(item){
+                QGraphicsItem* parentItem = item->parentItem();
+                while(parentItem){
+                    QGraphicsObject* parentObject = parentItem->toGraphicsObject();                 
+                    if(parentObject && parentObject->inherits("QDeclarativeFlickable")){
+                        //first check is the item already visibile (inside the flickable visible area)
+                        QVariant variant = parentObject->property("visibleArea");
+                        if(variant.isNull()){
+                            TasLogger::logger()->debug("TasFixturePlugin::execute ensureQmlVisible flickable has no fucking visible area ");
+                        }
+                        //try to get the are from property
+                        QObject* visibleArea = qvariant_cast<QObject*>(variant);
+                        //if fails look from children
+                        if(!visibleArea){
+                            foreach(QObject *o, parentObject->children()){
+                                if(o->inherits("QDeclarativeFlickableVisibleArea")){
+                                    visibleArea = o;
+                                    break;
+                                }
+                            }
+                        }
+                        if(visibleArea){
+                            qreal contentX = parentObject->property("contentX").toReal();
+                            qreal contentY = parentObject->property("contentY").toReal();
+                            qreal visibleWidth = parentObject->property("contentWidth").toReal()*
+                                visibleArea->property("widthRatio").toReal();
+                            qreal visibleHeight = parentObject->property("contentHeight").toReal()*
+                                visibleArea->property("heightRatio").toReal();
+
+                            if(item->x() < contentX || item->x() > (contentX + visibleWidth)){
+                                parentObject->setProperty("contentX", QVariant(item->x()));
+                            }
+                     
+                            if(item->y() < contentY || item->y() > (contentY + visibleHeight)){
+                                parentObject->setProperty("contentY", QVariant(item->y()));
+                            }                        
+                            break;
+                        }
+                        else{
+                            TasLogger::logger()->warning("TasFixturePlugin::execute ensureQmlVisible flickable visibleArea not found?");
+                        }
+                    }
+                    parentItem = parentItem->parentItem();
+                }
             }
         }
     }

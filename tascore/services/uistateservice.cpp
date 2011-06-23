@@ -23,6 +23,7 @@
 #include "taslogger.h"
 #include "testabilityutils.h"
 #include "tastraverserloader.h"
+#include "taspointercache.h"
 
 /*!
   \class UiStateService
@@ -54,6 +55,9 @@ bool UiStateService::executeService(TasCommandModel& model, TasResponse& respons
 
 QByteArray UiStateService::makeUiState(TasCommandModel& model)
 {
+    //remove objects that are no longer valid
+    TasPointerCache::instance()->removeNulls();
+
     TasCommand* command = 0;
     if (model.targetList().size() > 0) {
         // Pass first command to traverse, if available.

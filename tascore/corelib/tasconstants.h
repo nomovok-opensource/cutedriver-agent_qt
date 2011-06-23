@@ -53,6 +53,7 @@ const char* const RESOURCE_LOGGING_SERVICE   = "resourceLogging";
 const char* const FIND_OBJECT_SERVICE        = "findObject";
 const char* const CPU_LOAD_SERVICE           = "cpuLoad";
 const char* const VERSION_SERVICE            = "versionService";
+const char* const ENABLE_TIMESTAMPS          = "enableTimestamps";
 
 /*
  Message flags
@@ -210,6 +211,9 @@ const char* const AUTO_START = "autostart";
 const char* const VISIBILITY_CHECK = "visibility_check";
 const char* const VISIBILITY_BLACKLIST = "visibility_blacklist";
 
+
+const char* const PENINPUT_SERVER = "peninputserver";
+const char* const VKB_IDENTIFIER = "vkb_app";
 
 #ifdef TDTASSERVER
  #define TAS_EXPORT

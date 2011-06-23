@@ -85,12 +85,13 @@ public:
   void removeMe(const TasClient& client);
 
   void addStartedPid(const QString& pid);
+  TasClient* findByApplicationName(const QString& applicationName);
 
 private:
 
-  TasClient* latestClient();
 
-  TasClient* removeByProcessId(const QString& processId);
+  TasClient* latestClient();
+  TasClient* removeByProcessId(const QString& processId);  
 
   bool verifyClient(TasClient* client);
 

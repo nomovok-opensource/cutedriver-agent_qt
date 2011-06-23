@@ -55,7 +55,8 @@ symbian: {
 }
 
 win32: {
-        LIBS +=  -lUser32
+    LIBS += -lUser32
+    LIBS += -lKernel32
 }
 
 INCLUDEPATH += .
