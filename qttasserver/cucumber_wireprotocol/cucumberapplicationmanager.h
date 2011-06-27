@@ -42,8 +42,9 @@ public:
 
     Q_INVOKABLE void handleFixtureResult(bool success, const QString &text, quintptr callId);
 
-    Q_INVOKABLE void testCucumberStepService(const QString &regExpPattern, const QVariantList &args, QObject *sender);
-    Q_INVOKABLE void verifySelectedApp(const QString &regExpPattern, const QVariantList &args, QObject *sender);
+    Q_INVOKABLE void callScriptMethod(const QString &regExpPattern, const QVariantList &args, QObject *sender);
+    Q_INVOKABLE void checkScriptProperty(const QString &regExpPattern, const QVariantList &args, QObject *sender);
+
     Q_INVOKABLE void selectApp(const QString &regExpPattern, const QVariantList &args, QObject *sender);
     Q_INVOKABLE void attachApp(const QString &regExpPattern, const QVariantList &args, QObject *sender);
     Q_INVOKABLE void startApp(const QString &regExpPattern, const QVariantList &args, QObject *sender);
@@ -62,13 +63,17 @@ signals:
 
 private slots:
     void doRetryTimer();
-
-private:
     void pendingSenderTimeout();
 
-    QString doStartApp(const QString &id, const QString &program, const QStringList &arguments);
+
+    //void applicationRegistered();
+
+private:
+
+    QString doStartOrWaitApp(const QString &id, const QString &program, const QStringList &arguments);
     void doReplyOrRetry(InvokableStepFn fn, const QString &errorString,
                         const QString &regExpPattern, const QVariantList &args, QObject *sender);
+    bool invokePlainSender(QObject *sender, const QString &errorMsg);
 
     QMap<QString, QString> pidMap; // maps application id to it's "pid" as received from StartAppService
     QString currentApplicationId;

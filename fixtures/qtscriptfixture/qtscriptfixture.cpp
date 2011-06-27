@@ -130,7 +130,7 @@ bool QtScriptFixturePlugin::execute(
     QObject *targetObj = NULL;
 
     if (objType == APPLICATION_TYPE) {
-        targetObj = qApp;
+        targetObj = TestabilityUtils::getApplicationWindow();
         // objectInstance ignored
     }
     else if (objType == WIDGET_TYPE) {
@@ -151,9 +151,14 @@ bool QtScriptFixturePlugin::execute(
     }
 
     if (!targetObj){
-        TasLogger::logger()->warning("> QtScriptFixturePlugin::execute invalid target object");
+        TasLogger::logger()->warning("QtScriptFixturePlugin::execute invalid target object");
         return false;
     }
+
+    //    TasLogger::logger()->debug(QString(">> ") + targetObj->metaObject()->className() + " obj " + targetObj->objectName());
+    //    foreach (QObject* child, targetObj->children()) {
+    //        TasLogger::logger()->debug(QString(">>>>> ") + child->metaObject()->className() + " obj " + child->objectName());
+    //    }
 
     bool ret = false;
 
@@ -176,11 +181,12 @@ bool QtScriptFixturePlugin::execute(
     {
         QScriptValue tmpVal = engine.newObject();
         foreach(const QString &key, parameters.keys()) {
+            TasLogger::logger()->debug("param: " +  key + "=" + parameters[key]);
             tmpVal.setProperty(key, parameters[key]);
         }
         engine.globalObject().setProperty("tdriver", tmpVal);
     }
-    TasLogger::logger()->debug("tdriver property: " +  dumpQScriptValue(engine.globalObject().property("fixture")));
+    TasLogger::logger()->debug("tdriver property: " +  dumpQScriptValue(engine.globalObject().property("tdriver")));
 
     if (actionName == "eval") {
         QString script = parameters.value("script");
@@ -199,28 +205,43 @@ bool QtScriptFixturePlugin::execute(
     }
 
     else if (actionName == CUCUMBER_STEP_ACTION) {
-        TasLogger::logger()->debug("QtScriptFixturePlugin::execute cucumber step " + parameters.value("regExp"));
+        const QString regExp = parameters.value("regExp");
+        TasLogger::logger()->debug("QtScriptFixturePlugin::execute cucumber step " + regExp);
 
-        QScriptValue argsValue = engine.evaluate("JSON.parse(fixture.qjson)");
-        if (engine.hasUncaughtException()) {
-            stdOut = QString("JSON error:") + engine.uncaughtException().toString();
+        static QMap<QString, QString> regExpScripts;
+        if (regExpScripts.isEmpty()) {
+            regExpScripts["I call (\\S+) on application object (\\S+)"]
+                    = "eval('this.'+args[1]+'.'+args[0]+'()')";
+            regExpScripts["application object (\\S+) has (\\S+) ['\"](\\S+)['\"]"]
+                    = "if (args[2] != eval('this.'+args[0]+'.'+args[1]).toString()) { throw 'No match!'; } ";
+        }
+
+        if (!regExpScripts.contains(regExp)) {
+            stdOut = "no match for step '" + regExp + "'";
         }
         else {
-            engine.globalObject().setProperty("args", argsValue);
-            TasLogger::logger()->debug("argsValue: " + dumpQScriptValue(argsValue));
-            TasLogger::logger()->debug("args property: " + dumpQScriptValue(engine.globalObject().property("args")));
-
-            QScriptValue scriptReturnValue = engine.evaluate("'cucumberStep'");
+            QScriptValue argsValue = engine.evaluate("JSON.parse(tdriver.qjson)");
             if (engine.hasUncaughtException()) {
-                stdOut = QString("Cucumber step error:") + engine.uncaughtException().toString();
+                stdOut = QString("JSON error:") + engine.uncaughtException().toString();
             }
             else {
-                TasLogger::logger()->debug("> QtScriptFixturePlugin::execute evaluate result:" + scriptReturnValue.toString());
-                stdOut = scriptReturnValue.toString();
-                ret = true;
+                engine.globalObject().setProperty("args", argsValue);
+                TasLogger::logger()->debug("argsValue: " + dumpQScriptValue(argsValue));
+                TasLogger::logger()->debug("args property: " + dumpQScriptValue(engine.globalObject().property("args")));
+
+                QScriptValue scriptReturnValue = engine.evaluate(regExpScripts[regExp]);
+                if (engine.hasUncaughtException()) {
+                    stdOut = "QtScript code '" + regExpScripts[regExp] + "': " + engine.uncaughtException().toString();
+                }
+                else {
+                    TasLogger::logger()->debug("> QtScriptFixturePlugin::execute evaluate result:" + scriptReturnValue.toString());
+                    stdOut = scriptReturnValue.toString();
+                    ret = true;
+                }
             }
         }
     }
+
     else if (actionName == "test") {
         stdOut = "test successful";
         ret = true;

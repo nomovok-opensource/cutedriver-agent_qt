@@ -5,26 +5,19 @@ Feature: QtTasServer with Cucumber Wire Protocol
   I want to use Cucumber Wire Protocol to talk to QtTasServer
   so that I can do tests with QtScript and C++
 
-  Scenario: Testing stuff
-    Given I launch application with command calculator -testability
-    And I test CucumberStepService test argument which has many words
+  Scenario: Testing stuff    
     Given I launch application two with command:
         | calculator |
         | -testability |
+    And I call click on application object threeButton
+    And I call click on application object plusButton
+    And I call click on application object fiveButton
+    And I call click on application object equalButton
+    Then application object display has text "8"
     And I launch application four with command:
         | calculator |
         | -testability |
-    And I perform pairs:
-	| col1 | col 2 |
-	| 11   | 12    |
-	| 21   | 22    |
-	| 31   | 32    |
     And I find application three running with name calculator
-    And I select application
-    Then current application is calculator
+    And I select application three
     And I select application two	
-    Then current application is calculator
-    And I select application three	
-    Then current application is calculator
-    And I select application nocando
-    Then I click button foobar
+    And I select application threex

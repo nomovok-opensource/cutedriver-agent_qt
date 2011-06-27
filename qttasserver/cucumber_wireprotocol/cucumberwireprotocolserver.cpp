@@ -70,6 +70,8 @@ CucumberWireprotocolServer::CucumberWireprotocolServer(quint16 port, QObject *pa
     tmpStep.targetObject = this;
     tmpStep.targetMethod = "invokeDebugDump";
 
+#if 0
+    // register dummy step
     QStringList stepDefs(QStringList()
                          << "I perform pairs:"
                          << "current application is\\s+(.+)");
@@ -77,7 +79,9 @@ CucumberWireprotocolServer::CucumberWireprotocolServer(quint16 port, QObject *pa
     foreach(QString pattern, stepDefs) {
         registerStep(QRegExp(pattern), this, "invokeDebugDump", __FILE__, LINE_invokeDebugDump);
     }
+#endif
 
+    // ask CucumberApplicationManager instance to register it's steps
     mAppManager->registerSteps(this, "registerStep");
 }
 

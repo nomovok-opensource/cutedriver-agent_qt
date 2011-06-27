@@ -54,27 +54,13 @@ CucumberApplicationManager::CucumberApplicationManager(QObject *parent) :
 }
 
 
-static inline bool invokePlainSender(QObject *sender, const QString &errorMsg) {
-    if (!sender) {
-        return false;
-    }
-    else {
-        if (errorMsg.isEmpty()) {
-            return QMetaObject::invokeMethod(sender, "cucumberSuccessResponse", Qt::QueuedConnection);
-        }
-        else {
-            return QMetaObject::invokeMethod(sender, "cucumberFailResponse", Qt::QueuedConnection,
-                                             Q_ARG(QString, errorMsg));
-        }
-    }
-}
 
 
 void CucumberApplicationManager::pendingSenderTimeout()
 {
     if (pendingSender) {
         QMetaObject::invokeMethod(pendingSender, "cucumberFailResponse", Qt::QueuedConnection,
-                                  Q_ARG(QString, "Fallback timeout waiting for response from fixture!"));
+                                  Q_ARG(QString, "Fallback timeout waiting for response from application!"));
         pendingSender = 0;
     }
 }
@@ -105,9 +91,9 @@ void CucumberApplicationManager::handleFixtureResult(bool success, const QString
 
 
 
-static const char *regExp_testCucumberStepService = "I test CucumberStepService ?(.*)";
-static const int line_testCucumberStepService = __LINE__ + 1;
-void CucumberApplicationManager::testCucumberStepService(const QString &regExpPattern, const QVariantList &args, QObject *sender)
+static const char *regExp_callScriptMethod = "I call (\\S+) on application object (\\S+)";
+static const int line_callScriptMethod = __LINE__ + 1;
+void CucumberApplicationManager::callScriptMethod(const QString &regExpPattern, const QVariantList &args, QObject *sender)
 {
     if (pendingSender) {
         qDebug() << DPL << "ALREADY HAD pendingSender!";
@@ -115,28 +101,25 @@ void CucumberApplicationManager::testCucumberStepService(const QString &regExpPa
         pendingSenderTimeout();
     }
 
-    bool justReturn = false;
-    QString errorMsg;
-    if (args.size() != 1) {
-        errorMsg = QString("Expected test argument");
+    if (args.size() != 2) {
+        invokePlainSender(sender, "Expected 2 step arguments");
     }
     else {
-        QString arg = args.at(0).toString();
-
         TasClientManager *clientManager = TasClientManager::instance();
         QString processId = pidMap[currentApplicationId];
         qDebug() << DPL << "looking for" << currentApplicationId << "pid" << processId;
         TasClient *client = clientManager->findByProcessId(processId);
 
         if (!client) {
-            errorMsg = QString("Application '%1' not found")
-                    .arg(currentApplicationId);
+            QString errorMsg = QString("Application '%1' not found").arg(currentApplicationId);
+            doReplyOrRetry(&CucumberApplicationManager::callScriptMethod, errorMsg, regExpPattern, args, sender);
         }
         else {
             QByteArray jsonData = QJson::Serializer().serialize(args);
-            errorMsg = jsonData;
             QHash<QString, QString> argMap;
             argMap["qjson"] = jsonData;
+            argMap["regExp"] = regExpPattern;
+            qDebug() << DPL << argMap;
 
             retryData.clear();
             retryTimer->stop();
@@ -144,71 +127,78 @@ void CucumberApplicationManager::testCucumberStepService(const QString &regExpPa
             pendingSender = sender;
             pendingTimer->start();
             client->callFixture(this, "handleFixtureResult", reinterpret_cast<quintptr>(pendingSender),
-                                "qtscript", CUCUMBER_STEP_ACTION, argMap);
-            justReturn = true;
-            //TasMessage message(REQUEST_MSG, false, msgData, 0);
-            //client->socket()->sendRequest(0, )
+                                "qtscriptfixture", CUCUMBER_STEP_ACTION, argMap);
+            // callFixture will call handleFixtureResult, which will send response
         }
-    }
-
-    if (!justReturn) {
-        doReplyOrRetry(&CucumberApplicationManager::testCucumberStepService, errorMsg, regExpPattern, args, sender);
     }
 }
 
 
-static const char *regExp_verifySelectedApp = "current application name is (\\w+)";
-static const int line_verifySelectedApp = __LINE__ + 1;
-void CucumberApplicationManager::verifySelectedApp(const QString &regExpPattern, const QVariantList &args, QObject *sender)
+static const char *regExp_checkScriptProperty = "application object (\\S+) has (\\S+) ['\"](\\S+)['\"]";
+static const int line_checkScriptProperty = __LINE__ + 1;
+void CucumberApplicationManager::checkScriptProperty(const QString &regExpPattern, const QVariantList &args, QObject *sender)
 {
-    QString errorMsg;
-    if (args.size() != 1) {
-        errorMsg = QString("Expected single application name");
+    if (pendingSender) {
+        qDebug() << DPL << "ALREADY HAD pendingSender!";
+        pendingTimer->stop();
+        pendingSenderTimeout();
+    }
+
+    if (args.size() != 3) {
+        invokePlainSender(sender, "Expected 3 step arguments");
     }
     else {
-        QString name = args.at(0).toString();
-
         TasClientManager *clientManager = TasClientManager::instance();
-        qDebug() << DPL << "looking for" << name;
-        TasClient *client = clientManager->findByApplicationName(name);
+        QString processId = pidMap[currentApplicationId];
+        qDebug() << DPL << "looking for" << currentApplicationId << "pid" << processId;
+        TasClient *client = clientManager->findByProcessId(processId);
 
         if (!client) {
-            errorMsg = QString("Application with name '%1'' not found")
-                    .arg(name);
+            QString errorMsg = QString("Application '%1' not found").arg(currentApplicationId);
+            doReplyOrRetry(&CucumberApplicationManager::checkScriptProperty, errorMsg, regExpPattern, args, sender);
         }
+        else {
+            QByteArray jsonData = QJson::Serializer().serialize(args);
+            QHash<QString, QString> argMap;
+            argMap["qjson"] = jsonData;
+            argMap["regExp"] = regExpPattern;
+            qDebug() << DPL << argMap;
 
-        else if (client->processId() != pidMap[currentApplicationId]) {
-            errorMsg = QString("Queried application with name '%1' has pid %2, current applicaction has pid %3")
-                    .arg(name, client->processId(), currentApplicationId);
+            retryData.clear();
+            retryTimer->stop();
+
+            pendingSender = sender;
+            pendingTimer->start();
+            client->callFixture(this, "handleFixtureResult", reinterpret_cast<quintptr>(pendingSender),
+                                "qtscriptfixture", CUCUMBER_STEP_ACTION, argMap);
+            // callFixture will call handleFixtureResult, which will send response
         }
-        // else success, errorMsg==""
     }
 
-    doReplyOrRetry(&CucumberApplicationManager::verifySelectedApp, errorMsg, regExpPattern, args, sender);
 }
-
 
 
 static const char *regExp_selectApp = "I select application ?(\\w*)";
 static const int line_selectApp = __LINE__ + 1;
 void CucumberApplicationManager::selectApp(const QString &regExpPattern, const QVariantList &args, QObject *sender)
 {
-    QString errorMsg;
     if (args.size() != 1) {
-        errorMsg = QString("Expected single application id");
+        invokePlainSender(sender, "Expected single application id");
     }
     else {
+        QString errorMsg;
         QString id = args.at(0).toString();
         if (!pidMap.contains(id)) {
-            errorMsg = id.isEmpty() ? QString("No default application")
-                                    : QString("No application with id '%1' found").arg(id);
+            invokePlainSender(sender,
+                              id.isEmpty() ? QString("No default application")
+                                           : QString("No application with id '%1' found").arg(id));
         }
         else {
-            // success
+            // success, errorMsg is empty
             currentApplicationId = id;
+            doReplyOrRetry(&CucumberApplicationManager::selectApp, errorMsg, regExpPattern, args, sender);
         }
     }
-    doReplyOrRetry(&CucumberApplicationManager::selectApp, errorMsg, regExpPattern, args, sender);
 }
 
 
@@ -218,30 +208,32 @@ void CucumberApplicationManager::attachApp(const QString &regExpPattern, const Q
 {
     QString errorMsg;
     if (args.size() != 2) {
-        errorMsg = QString("Expected optional id and a single application name");
+        invokePlainSender(sender, "Expected optional id and a single application name");
     }
     else {
         QString id = args.at(0).toString();
 
         if (pidMap.contains(id)) {
-            errorMsg = id.isEmpty() ? QString("Default application already exists")
-                                    : QString("Application with id '%1' already exists").arg(id);
+            invokePlainSender(sender,
+                              id.isEmpty() ? QString("Default application already exists")
+                                           : QString("Application with id '%1' already exists").arg(id));
         }
         else {
-            QString name = args.at(1).toString();
-
+            // not in pidMap, wait for registration
             TasClientManager *clientManager = TasClientManager::instance();
+            QString processId = pidMap.value(id);
+            QString name = args.at(1).toString();
             TasClient *client = clientManager->findByApplicationName(name);
-            if (!client) {
-                errorMsg = QString("Application with name '%1' not found").arg(name);
+            if (client) {
+                pidMap.insert(id, client->processId());
+                invokePlainSender(sender, QString());
             }
             else {
-                // success
-                pidMap.insert(id, client->processId());
+                QString errorMsg = QString("Application with name '%1' not registered").arg(name);
+                doReplyOrRetry(&CucumberApplicationManager::attachApp, errorMsg, regExpPattern, args, sender);
             }
         }
     }
-    doReplyOrRetry(&CucumberApplicationManager::attachApp, errorMsg, regExpPattern, args, sender);
 }
 
 
@@ -249,9 +241,8 @@ static const char *regExp_startApp = "I launch application ?(\\w*) with command\
 static const int line_startApp = __LINE__ + 1;
 void CucumberApplicationManager::startApp(const QString &regExpPattern, const QVariantList &args, QObject *sender)
 {
-    QString errorMsg;
     if (args.size() != 2) {
-        errorMsg = QString("Expected optional id and a single command string");
+        invokePlainSender(sender, QString("Expected optional id and a single command string"));
     }
     else {
         QString id = args.at(0).toString();
@@ -259,10 +250,9 @@ void CucumberApplicationManager::startApp(const QString &regExpPattern, const QV
         QString program = arguments.takeFirst();
 
         qDebug() << DP << args << "->" << id << program << arguments;
-        errorMsg = doStartApp(id, program, arguments);
+        QString errorMsg = doStartOrWaitApp(id, program, arguments);
+        doReplyOrRetry(&CucumberApplicationManager::startApp, errorMsg, regExpPattern, args, sender);
     }
-    doReplyOrRetry(&CucumberApplicationManager::startApp, errorMsg, regExpPattern, args, sender);
-
 }
 
 
@@ -270,9 +260,9 @@ static const char *regExp_startAppTable = "I launch application ?(\\w*) with com
 static const int line_startAppTable = __LINE__ + 1;
 void CucumberApplicationManager::startAppTable(const QString &regExpPattern, const QVariantList &args, QObject *sender)
 {
-    QString errorMsg;
     if (args.size() != 2) {
-        errorMsg = QString("Expected optional id and then a list with command and arguments");
+        invokePlainSender(sender, QString("Expected optional id and then a list with command and arguments"));
+
     }
     else {
         QString id = args.at(0).toString();
@@ -286,42 +276,49 @@ void CucumberApplicationManager::startAppTable(const QString &regExpPattern, con
             }
         }
 
+        QString errorMsg;
         if (arguments.size() < 1) {
-            errorMsg = QString("Expected non-empty command and arguments list");
+            errorMsg = QString("Expected command and optional list of arguments");
         }
         else {
             QString program = arguments.takeFirst();
 
             qDebug() << DP << args << "->" << id << program << arguments;
-            errorMsg = doStartApp(id, program, arguments);
+            errorMsg = doStartOrWaitApp(id, program, arguments);
         }
+        doReplyOrRetry(&CucumberApplicationManager::startAppTable, errorMsg, regExpPattern, args, sender);
     }
-    doReplyOrRetry(&CucumberApplicationManager::startAppTable, errorMsg, regExpPattern, args, sender);
 }
 
 
-QString CucumberApplicationManager::doStartApp(const QString &id, const QString &program, const QStringList &arguments)
+QString CucumberApplicationManager::doStartOrWaitApp(const QString &id, const QString &program, const QStringList &arguments)
 {
     if (pidMap.contains(id)) {
-        return id.isEmpty() ? QString("Default application has already been started")
-                            : QString("Application with id '%1' has already been started").arg(id);
-    }
-
-    QString workingDirectory = workingDirectoryPath.isEmpty() ? QDir::currentPath()
-                                                              : workingDirectoryPath;
-    QString responseData, responseErrorMessage;
-    StartAppService::launchDetached(program, arguments, startEnvironment, workingDirectory, responseData, responseErrorMessage);
-    qDebug() << DPL << "->" << program << arguments << '@' << workingDirectory  <<":" << responseData << responseErrorMessage;
-
-    //bool result = QProcess::startDetached(program, arguments, workingDirectory, &pid);
-    //qDebug() << DPL << "->" << program << arguments << '@' << workingDirectory  <<":" << result << pid;
-
-    if (responseErrorMessage.isEmpty() && !responseData.isEmpty()) {
-        pidMap.insert(id, responseData);
-        return QString();
+        // already started, wait for it to register
+        TasClientManager *clientManager = TasClientManager::instance();
+        QString processId = pidMap.value(id);
+        TasClient *client = clientManager->findByProcessId(processId);
+        if (client) return QString(); // success
+        else return QString("Application with process id " + processId + " did not register");
     }
     else {
-        return QString("Command '%1 %2' gave StartAppService error: %3").arg(program, arguments.join(" "), responseErrorMessage);
+        QString workingDirectory = workingDirectoryPath.isEmpty() ? QDir::currentPath()
+                                                                  : workingDirectoryPath;
+        QString responseData, responseErrorMessage;
+        StartAppService::launchDetached(program, arguments, startEnvironment, workingDirectory, responseData, responseErrorMessage);
+        qDebug() << DPL << "->" << program << arguments << '@' << workingDirectory  <<":" << responseData << responseErrorMessage;
+
+        //bool result = QProcess::startDetached(program, arguments, workingDirectory, &pid);
+        //qDebug() << DPL << "->" << program << arguments << '@' << workingDirectory  <<":" << result << pid;
+
+        if (responseErrorMessage.isEmpty() && !responseData.isEmpty()) {
+            pidMap.insert(id, responseData);
+            currentApplicationId = id;
+            return QString("Waiting for process id " + responseData + " to register");
+        }
+        else {
+            return QString("Command '%1 %2' gave StartAppService error: %3").arg(program, arguments.join(" "), responseErrorMessage);
+        }
     }
 }
 
@@ -342,8 +339,8 @@ void CucumberApplicationManager::registerSteps(QObject *registrarObject, const c
         STEPINFO(startAppTable),
         STEPINFO(attachApp),
         STEPINFO(selectApp),
-        STEPINFO(verifySelectedApp),
-        STEPINFO(testCucumberStepService),
+        STEPINFO(callScriptMethod),
+        STEPINFO(checkScriptProperty),
         { 0, 0, 0 }
     };
 
@@ -372,9 +369,15 @@ void CucumberApplicationManager::endScenario()
 {
     TasClientManager *clientManager = TasClientManager::instance();
     //    TasClient *client = clientManager->findByApplicationName(name);
-    foreach(const QString &name, pidMap.keys()) {
-        clientManager->removeClient(pidMap[name], true);
+
+    // avoid killing a process twice by converting to set of processId values
+    QSet<QString> pidSet = QSet<QString>::fromList(pidMap.values());
+    for(QSet<QString>::iterator it = pidSet.begin(); it != pidSet.end(); ++it) {
+        QString processId = *it;
+        TasLogger::logger()->debug("CucumberApplicationManager::endScenario removing client pid " + processId);
+        clientManager->removeClient(*it, true);
     }
+    pidMap.clear();
 }
 
 
@@ -400,13 +403,10 @@ void CucumberApplicationManager::doReplyOrRetry(InvokableStepFn fn, const QStrin
     if (retryData.hasCallback() && !retryData.equals(fn, regExpPattern, args, sender)) {
         qCritical() << DPL << "new updateRetries called when previous not finished!";
         invokePlainSender(retryData.sender.data(), "Cancelled, because of getting a new request!");
-        retryData.clear();
     }
 
     if (errorString.isEmpty()) {
         // success!
-        retryData.clear();
-        retryTimer->stop();
         invokePlainSender(sender, errorString);
     }
     else {
@@ -435,8 +435,6 @@ void CucumberApplicationManager::doReplyOrRetry(InvokableStepFn fn, const QStrin
             }
             else {
                 // give up
-                retryData.clear();
-                retryTimer->stop();
                 invokePlainSender(sender, errorString);
             }
         }
@@ -445,5 +443,21 @@ void CucumberApplicationManager::doReplyOrRetry(InvokableStepFn fn, const QStrin
 }
 
 
+bool CucumberApplicationManager::invokePlainSender(QObject *sender, const QString &errorMsg)
+{
+    retryData.clear();
+    retryTimer->stop();
 
-
+    if (!sender) {
+        return false;
+    }
+    else {
+        if (errorMsg.isEmpty()) {
+            return QMetaObject::invokeMethod(sender, "cucumberSuccessResponse", Qt::QueuedConnection);
+        }
+        else {
+            return QMetaObject::invokeMethod(sender, "cucumberFailResponse", Qt::QueuedConnection,
+                                             Q_ARG(QString, errorMsg));
+        }
+    }
+}
