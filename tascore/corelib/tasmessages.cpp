@@ -22,15 +22,20 @@
 #include "tassocket.h"
 #include "taslogger.h"
 
-TasMessage::TasMessage()
+TasMessage::TasMessage() :
+    mFlag(0)
+  , mCompressed(false)
+  , mMessageId(0)
+  , mIsError(false)
 {
-    mCompressed = false;
 }
 
-TasMessage::TasMessage(quint8 flag, bool compressed, const QByteArray& data, qint32 messageId)
+TasMessage::TasMessage(quint8 flag, bool compressed, const QByteArray& data, qint32 messageId) :
+    mFlag(0)
+  , mCompressed(false)
+  , mMessageId(messageId)
+  , mIsError(false)
 {
-    mCompressed = false;
-    mMessageId = messageId;
     setFlag(flag);
     setData(data, compressed);
 }
