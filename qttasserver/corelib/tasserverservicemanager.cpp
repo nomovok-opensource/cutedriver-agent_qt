@@ -235,11 +235,12 @@ bool TasServerServiceManager::appendVkbData(TasCommandModel& commandModel, QByte
             }
             if(requestVkb || commandModel.service() == APPLICATION_STATE){
                 commandModel.addAttribute("needFragment", "true");
-                QByteArray vkbData = targetClient->socket()->syncRequest(qrand(), commandModel.sourceString(false));
-                if(!vkbData.isEmpty()){
+                TasMessage reply;
+                bool gotReply = targetClient->socket()->syncRequest(qrand(), commandModel.sourceString(false), reply);
+                if(gotReply && !reply.isError() && !reply.data().isEmpty()){
                     TasLogger::logger()->debug("TasServerServiceManager::appendVkbData append vkb data");
                     appended = true;
-                    data.append(vkbData);
+                    data.append(reply.data());
                 }
             }
         }
