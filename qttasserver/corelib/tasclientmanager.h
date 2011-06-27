@@ -85,11 +85,8 @@ public:
   void removeMe(const TasClient& client);
 
   void addStartedPid(const QString& pid);
-  TasClient* findByApplicationName(const QString& applicationName);
 
 private:
-
-
   TasClient* latestClient();
   TasClient* removeByProcessId(const QString& processId);  
 
@@ -131,7 +128,7 @@ public:
   QString pluginType();
 
   void callFixture(QObject *sender, const char *resultMethod, quintptr callId,
-                   const QString &fixtureName, const QString &actionName, QHash<QString, QString> parameters);
+                   const QString &pluginName, const QString &actionName, QHash<QString, QString> parameters);
 
 signals:
   void registered(const QString& ProcessId);

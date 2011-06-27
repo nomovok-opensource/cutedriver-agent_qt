@@ -417,7 +417,7 @@ void TasClientManager::addStartedPid(const QString& pid)
  */
 TasClient* TasClientManager::removeByProcessId(const QString& processId)
 {
-    if(processId.isNull() || processId.isEmpty()){
+    if(processId.isNull() || processId.isEmpty()) {
         return 0;
     }
     TasClient* app = 0;
@@ -636,13 +636,45 @@ QString TasClient::pluginType()
 }
 
 void TasClient::callFixture(QObject *sender, const char *resultMethod, quintptr callId,
-                            const QString &fixtureName, const QString &actionName, QHash<QString, QString> parameters)
+                            const QString &pluginName, const QString &actionName, QHash<QString, QString> parameters)
 {
+    TasCommandModel* model = TasCommandModel::createModel();
+
+    model->addAttribute("service", FIXTURE);
+
+    TasTarget& target = model->addTarget();
+    target.addAttribute("TasId", "app"); // this value isn't supposed to be used anywhere
+    target.addAttribute("type", TYPE_APPLICATION_VIEW);
+
+    TasCommand& command = target.addCommand();
+    command.addAttribute("name", "Fixture");
+    command.addAttribute("plugin", pluginName);
+    command.addAttribute("method", actionName);
+    foreach(const QString &key, parameters.keys()) {
+        command.addApiParameter(key, parameters.value(key), "QString");
+    }
+
+    QByteArray replyData;
+    bool success;
+    TasMessage reply;
+
+
+    if (socket()->syncRequest(callId, model->sourceString(), reply)) {
+        replyData = reply.data();
+        success = !reply.isError();
+    }
+    else {
+        replyData = "Fixture request could not be sent.";
+        success = false;
+
+    }
+
     if (sender && resultMethod) {
-        QString text = "Not implemented in "__FILE__;
         QMetaObject::invokeMethod(sender, resultMethod, Qt::QueuedConnection,
-                                  Q_ARG(bool, false),
-                                  Q_ARG(QString, text),
+                                  Q_ARG(bool, success),
+                                  Q_ARG(QString, QString(replyData)),
                                   Q_ARG(quintptr, callId));
     }
+
+    delete model;
 }
