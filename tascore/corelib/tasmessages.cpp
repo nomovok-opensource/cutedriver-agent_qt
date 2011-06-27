@@ -26,7 +26,6 @@ TasMessage::TasMessage() :
     mFlag(0)
   , mCompressed(false)
   , mMessageId(0)
-  , mIsError(false)
 {
 }
 
@@ -34,7 +33,6 @@ TasMessage::TasMessage(quint8 flag, bool compressed, const QByteArray& data, qin
     mFlag(0)
   , mCompressed(false)
   , mMessageId(messageId)
-  , mIsError(false)
 {
     setFlag(flag);
     setData(data, compressed);
@@ -121,15 +119,24 @@ void TasMessage::setErrorMessage(const QString& message)
     setData(message);
 }
 
-bool TasMessage::isError()
+bool TasMessage::isError() const
 {
-    return mIsError;
+    return (mFlag == ERROR_MSG);
+}
+
+bool TasMessage::isRequest() const
+{
+    return (mFlag == REQUEST_MSG);
+}
+
+bool TasMessage::isResponse() const
+{
+    return (mFlag == RESPONSE_MSG || mFlag == ERROR_MSG);
 }
 
 void TasMessage::setIsError(bool isError)
 {
-    mIsError = isError;
-    if(mIsError){
+    if(isError){
         setFlag(ERROR_MSG);
     }
     else{

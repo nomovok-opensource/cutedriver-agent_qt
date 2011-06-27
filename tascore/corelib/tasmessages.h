@@ -43,7 +43,9 @@ class TasMessage
 	void setIsError(bool isError);
 	void setErrorMessage(const QString& message);
 	void setData(const QByteArray& data, bool isCompressed = false);
-	bool isError();
+        bool isError() const;
+        bool isRequest() const;
+        bool isResponse() const;
 
 	QByteArray& data();	
 	QByteArray& dataCompressed();	
@@ -58,7 +60,6 @@ private:
 	quint8 mFlag;
     bool mCompressed;
 	qint32 mMessageId;
-	bool mIsError;
 };
 
 class TasResponse : public TasMessage

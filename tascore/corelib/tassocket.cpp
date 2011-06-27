@@ -288,10 +288,10 @@ bool TasSocket::sendMessage(TasMessage& message)
 //void TasSocket::dataAvailable()
 void TasSocket::messageAvailable(TasMessage& message)
 { 
-    if(message.flag() == REQUEST_MSG && mRequestHandler){
+    if(message.isRequest() && mRequestHandler){
         mRequestHandler->serviceRequest(message, this);        
     }
-    else if((message.flag() == RESPONSE_MSG || message.flag() == ERROR_MSG) && mResponseHandler){
+    else if(message.isResponse() && mResponseHandler){
         mResponseHandler->serviceResponse(message);        
     }
     else{
