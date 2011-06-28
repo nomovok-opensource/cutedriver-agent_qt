@@ -16,7 +16,7 @@
 ** of this file. 
 ** 
 ****************************************************************************/ 
- 
+
 
 #ifndef QtScriptFixturePlugin_H
 #define QtScriptFixturePlugin_H
@@ -25,11 +25,13 @@
 #include <QHash>
 #include <tasqtfixtureplugininterface.h>
 
+#include <cucumberutils.h>
+
 class QtScriptFixturePlugin : public QObject, public TasFixturePluginInterface
 {
-  Q_OBJECT
-  Q_INTERFACES(TasFixturePluginInterface)
- 
+    Q_OBJECT
+    Q_INTERFACES(TasFixturePluginInterface)
+
 public:
     QtScriptFixturePlugin(QObject* parent=0);
     ~QtScriptFixturePlugin();
@@ -38,7 +40,9 @@ public:
         QString actionName, 
         QHash<QString, QString> parameters, 
         QString & stdOut);
- };
+private:
+    CucumberUtils::StepDataMap mSteps;
+};
 
 #endif
- 
+

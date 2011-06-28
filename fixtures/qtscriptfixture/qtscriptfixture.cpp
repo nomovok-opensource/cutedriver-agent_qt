@@ -37,10 +37,20 @@ Q_EXPORT_PLUGIN2(qtscriptfixture, QtScriptFixturePlugin)
   \brief 
 */
 
-QtScriptFixturePlugin::QtScriptFixturePlugin(QObject* parent) :QObject(parent) {}
-QtScriptFixturePlugin::~QtScriptFixturePlugin() {}
+QtScriptFixturePlugin::QtScriptFixturePlugin(QObject* parent) :
+    QObject(parent)
+{
+    mSteps = CucumberUtils::readSteps("qtscriptfixture");
+}
 
-/*
+
+QtScriptFixturePlugin::~QtScriptFixturePlugin()
+{
+}
+
+
+#if 0
+/* test code for dumpQVariant, kept for reference
 QVariantMap testMap;
 testMap.insert("number", 1);
 testMap.insert("foo", "bar");
@@ -50,7 +60,7 @@ testList << 1 << "foobar" << testMap;
 TasLogger::logger()->debug("testDumpQVariant: " + dumpQVariant(testList));
 */
 
-static inline QString dumpQVariant(const QVariant &var) {
+static QString dumpQVariant(const QVariant &var) {
     QStringList result;
     const char *surround = "??";
     if(var.canConvert(QVariant::Map)) {
@@ -72,9 +82,10 @@ static inline QString dumpQVariant(const QVariant &var) {
     }
     return surround[0] + result.join(",") + surround[1];
 }
+#endif
 
-
-static inline QString dumpQScriptValue(const QScriptValue &value)
+#if 1
+static QString dumpQScriptValue(const QScriptValue &value)
 {
     QStringList result;
     const char *surround = "<>";
@@ -93,9 +104,10 @@ static inline QString dumpQScriptValue(const QScriptValue &value)
 
     return surround[0] + result.join(",") + surround[1];
 }
+#endif
 
-
-static inline QString checkScript(QScriptEngine &engine, const QString &script) {
+#if 1
+static QString checkScript(QScriptEngine &engine, const QString &script) {
 
     QScriptSyntaxCheckResult result(engine.checkSyntax(script));
     switch(result.state()) {
@@ -113,7 +125,7 @@ static inline QString checkScript(QScriptEngine &engine, const QString &script) 
                 .arg(result.errorMessage());
     }
 }
-
+#endif
 
 bool QtScriptFixturePlugin::execute(
         void* objectInstance, 
@@ -208,15 +220,7 @@ bool QtScriptFixturePlugin::execute(
         const QString regExp = parameters.value("regExp");
         TasLogger::logger()->debug("QtScriptFixturePlugin::execute cucumber step " + regExp);
 
-        static QMap<QString, QString> regExpScripts;
-        if (regExpScripts.isEmpty()) {
-            regExpScripts["I call (\\S+) on application object (\\S+)"]
-                    = "eval('this.'+args[1]+'.'+args[0]+'()')";
-            regExpScripts["application object (\\S+) has (\\S+) ['\"](\\S+)['\"]"]
-                    = "if (args[2] != eval('this.'+args[0]+'.'+args[1]).toString()) { throw 'No match!'; } ";
-        }
-
-        if (!regExpScripts.contains(regExp)) {
+        if (!mSteps.contains(regExp)) {
             stdOut = "no match for step '" + regExp + "'";
         }
         else {
@@ -229,9 +233,9 @@ bool QtScriptFixturePlugin::execute(
                 TasLogger::logger()->debug("argsValue: " + dumpQScriptValue(argsValue));
                 TasLogger::logger()->debug("args property: " + dumpQScriptValue(engine.globalObject().property("args")));
 
-                QScriptValue scriptReturnValue = engine.evaluate(regExpScripts[regExp]);
+                QScriptValue scriptReturnValue = engine.evaluate(mSteps.value(regExp).text);
                 if (engine.hasUncaughtException()) {
-                    stdOut = "QtScript code '" + regExpScripts[regExp] + "': " + engine.uncaughtException().toString();
+                    stdOut = "QtScript code '" + mSteps.value(regExp).text + "': " + engine.uncaughtException().toString();
                 }
                 else {
                     TasLogger::logger()->debug("> QtScriptFixturePlugin::execute evaluate result:" + scriptReturnValue.toString());

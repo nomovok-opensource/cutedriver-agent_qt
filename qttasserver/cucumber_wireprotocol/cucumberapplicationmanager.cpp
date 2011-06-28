@@ -271,7 +271,7 @@ void CucumberApplicationManager::startAppTable(const QString &regExpPattern, con
         QVariantList rowList = args.at(1).toList();
         foreach(QVariant row, rowList) {
             foreach(QVariant item, row.toList()) {
-                qDebug() << DPL << "--------------" << item;
+                //qDebug() << DPL << "--------------" << item;
                 arguments << item.toString();
             }
         }

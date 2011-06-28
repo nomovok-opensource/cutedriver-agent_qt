@@ -27,13 +27,16 @@
 TestabilitySettings *TestabilitySettings::mInstance = 0;
 
 #if defined(Q_OS_LINUX) || defined(Q_WS_MAC) 
+static QString basePath = "/etc/qt_testability";
 static QString fileName = "/etc/qt_testability/qt_testability.ini";
 #elif defined(Q_OS_SYMBIAN)
 //in symbian we need to check that drive based on installation (c, or z)
-static QString fileName = "c:\\qt_testability\\qt_testability.ini";
-static QString romFileName = "z:\\qt_testability\\qt_testability.ini";
+static QString basePath = "c:/qt_testability";
+static QString fileName = "c:/qt_testability/qt_testability.ini";
+static QString romFileName = "z:/qt_testability/qt_testability.ini";
 #else
-static QString fileName = "\\qttas\\conf\\qt_testability.ini";
+static QString basePath = "c:/qttas";
+static QString fileName = "/qttas/conf/qt_testability.ini";
 #endif
 
 TestabilitySettings::TestabilitySettings()
@@ -41,10 +44,11 @@ TestabilitySettings::TestabilitySettings()
 #if defined(Q_OS_SYMBIAN)
     if(!QFile::exists(fileName) && QFile::exists(romFileName)){
         //copy from rom to c
-        QDir dir("c:\\");
-        dir.mkpath("c:\\qt_testability\\"); 
+        QDir dir("c:/");
+        dir.mkpath("c:/qt_testability/");
         QFile::copy(romFileName, fileName);
         QFile::setPermissions(fileName, QFile::ReadOther | QFile::WriteOther | QFile::ReadOwner | QFile::WriteOwner);
+#warning Does not copy cucumber step defintions yet!
     }
 #endif
     mSettings = new QSettings(fileName, QSettings::IniFormat);
@@ -83,4 +87,10 @@ bool TestabilitySettings::setValue(const QString& key, const QVariant& value)
         wasSet =  true;
     }
     return wasSet;
+}
+
+QString TestabilitySettings::getBasePath(const QString &append)
+{
+    if (append.isEmpty()) return basePath;
+    else return basePath + "/" + append;
 }
