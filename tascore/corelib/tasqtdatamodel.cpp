@@ -618,10 +618,10 @@ void TasDataModel::serializeModel(QByteArray& xmlData, bool containers)
 {
     //only containers
     if(containers){
-        QTextStream xmlStream(xmlData);
-        xmlStream.setCodec("UTF-8");
         foreach(TasObjectContainer* container, mContainers){
-            xmlStream << container->domElement();
+            QTextStream xmlStream(&xmlData, QIODevice::Append);
+            xmlStream.setCodec("UTF-8");            
+            container->domElement().save(xmlStream, -1);
         }        
     }
     else{
