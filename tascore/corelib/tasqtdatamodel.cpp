@@ -513,6 +513,7 @@ TasObject& TasObjectContainer::addNewObject(const QString& id, const QString& na
 TasDataModel::TasDataModel()
     :mDocument(ROOT_NAME)
 {
+    QDomImplementation::setInvalidDataPolicy(QDomImplementation::DropInvalidChars);
     mElement = mDocument.createElement(ROOT_NAME);
     mDocument.appendChild(mElement);
     addDomAttribute(VERSION, TAS_VERSION);
@@ -523,8 +524,8 @@ TasDataModel::TasDataModel()
  */
 TasDataModel::~TasDataModel()
 {    
-    clearModel();
- }
+    qDeleteAll(mContainers);
+}
 
 
 /*!
@@ -534,7 +535,10 @@ void TasDataModel::clearModel()
 {
     qDeleteAll(mContainers);
     mContainers.clear();        
+    mDocument.removeChild(mElement);
     mElement.clear();
+    mElement = mDocument.createElement(ROOT_NAME);
+    mDocument.appendChild(mElement);
 }
 
 /*!
