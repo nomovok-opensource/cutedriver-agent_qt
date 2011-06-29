@@ -133,11 +133,8 @@ void TasSignalPlugin::printErrorMsg(QHash<QString, QString> parameters, QString&
 
 bool TasSignalPlugin::printSignals(QString& stdOut)
 {
-    SerializeFilter* filter = new SerializeFilter();		    		
-    filter->serializeDuplicates(true);		
-    //filter is deleted by model
     QByteArray xml;
-    mOccuredSignals->serializeModel(xml, filter);    
+    mOccuredSignals->serializeModel(xml);    
     stdOut.append(QString::fromUtf8(xml.data()));
     return true;
 }
@@ -174,12 +171,8 @@ bool TasSignalPlugin::listSignals(void* objectInstance, QString ptrType, QString
             if (target->metaObject()->method(i).methodType() == QMetaMethod::Signal)
                 container.addNewObject(QString::number(i), QString::fromLatin1(target->metaObject()->method(i).signature()), "QtSignal");
         }
-
-        SerializeFilter* filter = new SerializeFilter();		    		
-        filter->serializeDuplicates(true);		
-        //filter is deleted by model
         QByteArray xml;
-        model->serializeModel(xml, filter);    
+        model->serializeModel(xml);    
         stdOut.append(QString::fromUtf8(xml.data()));
         delete model;
         result =  true;

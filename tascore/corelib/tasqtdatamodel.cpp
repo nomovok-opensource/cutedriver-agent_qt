@@ -26,6 +26,7 @@
 #include "tasxmlwriter.h"
 #include "version.h"
 #include "tasqtdatamodel.h"
+#include "taslogger.h"
 #include <tascoreutils.h>
 
 //xml strings
@@ -64,13 +65,15 @@ const char* const PARENT = "parent";
     TasObject instance that they belong to.
     
 */
-TasAttribute::TasAttribute()
+TasAttribute::TasAttribute(QDomElement element)
 {    
+    mElement = element;
 }
 
-TasAttribute::TasAttribute(const QString& name)
+TasAttribute::TasAttribute(QDomElement element, const QString& name)
 {    
-    this->name = name; 
+    mElement = element;
+    addDomAttribute(NAME, name);
 }
 
 /*!
@@ -78,7 +81,6 @@ TasAttribute::TasAttribute(const QString& name)
 */
 TasAttribute::~TasAttribute()
 {    
-    values.clear();            
 }
 
 /*!
@@ -89,7 +91,7 @@ TasAttribute::~TasAttribute()
 */
 void TasAttribute::setName(const QString& name)
 {
-    this->name = name; 
+    addDomAttribute(NAME, name);
 }
 
 /*!
@@ -97,7 +99,7 @@ void TasAttribute::setName(const QString& name)
 */
 void TasAttribute::setType(const QString& type)
 {
-    this->type = type; 
+    addDomAttribute(ACCESS, type);
 }
 
 /*!
@@ -105,9 +107,8 @@ void TasAttribute::setType(const QString& type)
 */
 void TasAttribute::setDataType(const QString& type)
 {
-    this->dataType = type; 
+    addDomAttribute(DATA_TYPE, type);
 }
-
 
 
 /*!
@@ -117,78 +118,49 @@ void TasAttribute::setDataType(const QString& type)
 */
 void TasAttribute::addValue(const QString& value) //, bool encodeString)
 {
-    //values << (encodeString ? TasCoreUtils::encodeString(value) : value);
-    values << TasCoreUtils::encodeString(value);
+    setText(value);
 }
 
 void TasAttribute::addValuePlainString(const QString& value)
 {
-    values << value;
+    setText(value);
 }
 
 void TasAttribute::addValue(const QPoint& value)
 {
     QString attr;
     QTextStream(&attr) << value.x() << "," << value.y();
-    values << attr;
+    setText(attr);
 }
 void TasAttribute::addValue(const QPointF& value)
 {
     QString attr;
     QTextStream(&attr) << value.x() << "," << value.y();
-    values << attr;
+    setText(attr);
 }
 void TasAttribute::addValue(const QSize& value)
 {
     QString attr;
     QTextStream(&attr) << value.width() << "," << value.height();
-    values << attr;
+    setText(attr);
 }
 void TasAttribute::addValue(const QSizeF& value)
 {
     QString attr;
     QTextStream(&attr) << value.width() << "," << value.height();
-    values << attr;
+    setText(attr);
 }
 void TasAttribute::addValue(const QRect& value)
 {
     QString attr;
     QTextStream(&attr) << value.x() << "," << value.y() << "," << value.width() << "," << value.height();
-    values << attr;
+    setText(attr);
 }
 void TasAttribute::addValue(const QRectF& value)
 {
     QString attr;
     QTextStream(&attr) << value.x() << "," << value.y() << "," << value.width() << "," << value.height();
-    values << attr;
-}
-
-/*!
-
-    Seralize TasAttribute to xml format. Created the element using the given dom document.
-    Returns the created element as is and not appended to any element inside the doc.
-
-*/
-void TasAttribute::serializeIntoString(TasXmlWriter& xmlWriter ,SerializeFilter& /*filter*/)
-{  
-    QMap<QString, QString> attributes;
-    attributes[NAME] = TasCoreUtils::encodeString( name );
-    if(!type.isEmpty()){
-        attributes[ACCESS] = type;
-    }
-    if(!dataType.isEmpty()){
-        attributes[DATA_TYPE] = dataType;
-    }
-    xmlWriter.openElement(ATTRIBUTE_NAME, attributes);
-
-    if (values.size() > 0){
-        for (int i = 0; i < values.size(); ++i) {
-            //            xmlWriter.openElement(VALUE_NAME);
-            xmlWriter.addTextContent(values.at(i));
-            //            xmlWriter.closeElement(VALUE_NAME);
-        }       
-    }
-    xmlWriter.closeElement(ATTRIBUTE_NAME);
+    setText(attr);
 }
 
 /*!
@@ -207,9 +179,10 @@ void TasAttribute::serializeIntoString(TasXmlWriter& xmlWriter ,SerializeFilter&
     TasContainer instance that they belong to.
     
 */
-TasObject::TasObject()
+TasObject::TasObject(QDomElement element)
 {
-    setEnv("qt");
+    mElement = element;
+    addDomAttribute(ENV, "qt");
 }
 
 /*!
@@ -232,7 +205,7 @@ TasObject::~TasObject()
 */
 void TasObject::setId(const QString& itemId)
 {
-    this->id = itemId;
+    addDomAttribute(ID, itemId);
 }
 
 /*!
@@ -242,17 +215,17 @@ void TasObject::setId(const QString& itemId)
 */
 void TasObject::setType(const QString& type)
 {
-    this->type = type;
+    addDomAttribute(TYPE, type);
 }
 
 QString TasObject::getType()
 {
-    return type;
+    return parameter(TYPE);
 }
 
 void TasObject::setEnv(const QString& env)
 {
-    this->env = env;
+    addDomAttribute(ENV, env);
 }
 
 /*!
@@ -265,7 +238,7 @@ void TasObject::setEnv(const QString& env)
 */
 void TasObject::setName(const QString& name)
 {
-    this->name = name;
+    addDomAttribute(NAME, name);
 }
 
 
@@ -276,7 +249,8 @@ void TasObject::setName(const QString& name)
 */
 TasAttribute& TasObject::addAttribute()
 {
-    TasAttribute* attribute = new TasAttribute(); 
+    QDomElement element = addChild(ATTRIBUTE_NAME);
+    TasAttribute* attribute = new TasAttribute(element); 
     attributes.append(attribute);
     return *attribute;
 }
@@ -288,7 +262,8 @@ TasAttribute& TasObject::addAttribute()
 */
 TasAttribute& TasObject::addAttribute(const QString& name)
 {
-    TasAttribute* attribute = new TasAttribute(name); 
+    QDomElement element = addChild(ATTRIBUTE_NAME);
+    TasAttribute* attribute = new TasAttribute(element, name); 
     attributes.append(attribute);
     return *attribute;
 }
@@ -300,17 +275,9 @@ TasAttribute& TasObject::addAttribute(const QString& name)
 */
 TasAttribute& TasObject::addAttribute(const QString& name, const QString& value)
 {
-/*
-    TasAttribute& attribute = addAttribute();
-    attribute.setName(name);
-    attribute.addValue(value);    
+    TasAttribute& attribute = addAttribute(name);
+    attribute.addValue(value);
     return attribute;
-*/
-
-    TasAttribute* attribute = new TasAttribute(name);
-    attribute->addValue(value);
-    attributes.append(attribute);
-    return *attribute;
 
 }
 
@@ -319,15 +286,9 @@ TasAttribute& TasObject::addAttribute(const QString& name, const QString& value)
 */
 TasAttribute& TasObject::addAttribute(const QString& name, int value)
 {
-/*
-    return addAttribute(name, QString::number(value));
-*/
-
-    TasAttribute* attribute = new TasAttribute(name);
-    attribute->addValuePlainString(QString::number(value));
-    attributes.append(attribute);
-    return *attribute;
-
+    TasAttribute& attribute = addAttribute(name);
+    attribute.addValue(QString::number(value));
+    return attribute;
 }
 
 /*!
@@ -335,13 +296,9 @@ TasAttribute& TasObject::addAttribute(const QString& name, int value)
 */
 TasAttribute& TasObject::addAttribute(const QString& name, qreal value)
 {
-/*
-    return addAttribute(name, QString::number(value));
-*/
-    TasAttribute* attribute = new TasAttribute(name);
-    attribute->addValuePlainString(QString::number(value));
-    attributes.append(attribute);
-    return *attribute;
+    TasAttribute& attribute = addAttribute(name);
+    attribute.addValuePlainString(QString::number(value));
+    return attribute;
 
 }
 
@@ -350,17 +307,9 @@ TasAttribute& TasObject::addAttribute(const QString& name, qreal value)
  */
 TasAttribute& TasObject::addAttribute(const QString& name, const QSize& value)
 {
-/*
-    TasAttribute& attribute = addAttribute();
-    attribute.setName(name);
-    attribute.addValue(value);    
+    TasAttribute& attribute = addAttribute(name);
+    attribute.addValue(value);
     return attribute;
-*/
-    TasAttribute* attribute = new TasAttribute(name);
-    attribute->addValue(value);
-    attributes.append(attribute);
-    return *attribute;
-
 }
 
 /*!
@@ -368,17 +317,9 @@ TasAttribute& TasObject::addAttribute(const QString& name, const QSize& value)
  */
 TasAttribute& TasObject::addAttribute(const QString& name, const QSizeF& value)
 {
-/*
-    TasAttribute& attribute = addAttribute();
-    attribute.setName(name);
-    attribute.addValue(value);    
+    TasAttribute& attribute = addAttribute(name);
+    attribute.addValue(value);
     return attribute;
-*/
-    TasAttribute* attribute = new TasAttribute(name);
-    attribute->addValue(value);
-    attributes.append(attribute);
-    return *attribute;
-
 }
 
 /*!
@@ -386,17 +327,9 @@ TasAttribute& TasObject::addAttribute(const QString& name, const QSizeF& value)
  */
 TasAttribute& TasObject::addAttribute(const QString& name, const QRect& value)
 {
-/*
-    TasAttribute& attribute = addAttribute();
-    attribute.setName(name);
-    attribute.addValue(value);    
+    TasAttribute& attribute = addAttribute(name);
+    attribute.addValue(value);
     return attribute;
-*/
-    TasAttribute* attribute = new TasAttribute(name);
-    attribute->addValue(value);
-    attributes.append(attribute);
-    return *attribute;
-
 }
 
 
@@ -405,17 +338,9 @@ TasAttribute& TasObject::addAttribute(const QString& name, const QRect& value)
  */
 TasAttribute& TasObject::addAttribute(const QString& name, const QRectF& value)
 {
-/*
-    TasAttribute& attribute = addAttribute();
-    attribute.setName(name);
-    attribute.addValue(value);    
+    TasAttribute& attribute = addAttribute(name);
+    attribute.addValue(value);
     return attribute;
-*/
-    TasAttribute* attribute = new TasAttribute(name);
-    attribute->addValue(value);
-    attributes.append(attribute);
-    return *attribute;
-
 }
 
 /*!
@@ -423,17 +348,9 @@ TasAttribute& TasObject::addAttribute(const QString& name, const QRectF& value)
  */
 TasAttribute& TasObject::addAttribute(const QString& name, const QPoint& value)
 {
-/*
-    TasAttribute& attribute = addAttribute();
-    attribute.setName(name);
-    attribute.addValue(value);    
+    TasAttribute& attribute = addAttribute(name);
+    attribute.addValue(value);
     return attribute;
-*/
-    TasAttribute* attribute = new TasAttribute(name);
-    attribute->addValue(value);
-    attributes.append(attribute);
-    return *attribute;
-
 }
 
 /*!
@@ -441,17 +358,9 @@ TasAttribute& TasObject::addAttribute(const QString& name, const QPoint& value)
 */
 TasAttribute& TasObject::addAttribute(const QString& name, const QPointF& value)
 {
-/*
-    TasAttribute& attribute = addAttribute();
-    attribute.setName(name);
-    attribute.addValue(value);    
+    TasAttribute& attribute = addAttribute(name);
+    attribute.addValue(value);
     return attribute;
-*/
-    TasAttribute* attribute = new TasAttribute(name);
-    attribute->addValue(value);
-    attributes.append(attribute);
-    return *attribute;
-
 }
 
 /*!
@@ -461,19 +370,9 @@ TasAttribute& TasObject::addAttribute(const QString& name, const QPointF& value)
 */
 TasAttribute& TasObject::addBooleanAttribute(const QString& name, bool value)
 {
-/*
-    //TasAttribute& attribute = addAttribute();
-    //attribute.setName(name);
     TasAttribute& attribute = addAttribute(name);
-    //attribute.setName(name);
-    attribute.addValuePlainString(value ? "true" : "false");
+    attribute.addValue(value ? "true" : "false");
     return attribute;
-*/
-    TasAttribute* attribute = new TasAttribute(name);
-    attribute->addValuePlainString(value ? "true" : "false");
-    attributes.append(attribute);
-    return *attribute;
-
 }
 
 /*!
@@ -483,7 +382,8 @@ TasAttribute& TasObject::addBooleanAttribute(const QString& name, bool value)
 */
 TasObject& TasObject::addObject()
 {
-    TasObject* object = new TasObject(); 
+    QDomElement element = addChild(OBJECT_NAME);
+    TasObject* object = new TasObject(element); 
     objects.append(object);
     return *object;
 }
@@ -504,51 +404,8 @@ TasObject& TasObject::addNewObject(QString id, const QString& name, const QStrin
 
 void TasObject::setParentId(const QString& parentId )
 {
-    this->parentId = parentId;
+    addAttribute(PARENT, parentId);
 }
-
-/*!
-
-    Serialize TasObject to xml format. Created the element using the given dom document.
-    Returns the created element as is and not appended to any element inside the doc.
-
-*/
-void TasObject::serializeIntoString(TasXmlWriter& xmlWriter ,SerializeFilter& filter)
-{ 
-    QMap<QString, QString> attrs;
-    attrs[ID] = id; 
-    attrs[NAME] = TasCoreUtils::encodeString( name );
-    attrs[TYPE] = type;     
-    if(!env.isEmpty()){
-        attrs[ENV] = env;   
-    }  
-    if(!parentId.isEmpty()){
-        attrs[PARENT] = parentId;     
-    }
-    xmlWriter.openElement(OBJECT_NAME, attrs);
-    if (attributes.size() > 0){
-        //        xmlWriter.openElement(ATTRIBUTES_NAME);
-        for (int i = 0; i < attributes.size(); ++i) {
-            TasAttribute* attr = attributes.at(i);
-            if( filter.serializeAttribute(*attr)){
-                attr->serializeIntoString(xmlWriter, filter);
-            }
-        }
-        //        xmlWriter.closeElement(ATTRIBUTES_NAME);
-    }
-    if (objects.size() > 0){
-        //xmlWriter.openElement(OBJECTS_NAME);
-        for (int i = 0; i < objects.size(); ++i) {
-            TasObject* object = objects.at(i);
-            if(filter.serializeObject(*object)){                
-                object->serializeIntoString(xmlWriter, filter);
-            }
-        }
-        //xmlWriter.closeElement(OBJECTS_NAME);
-    }
-    xmlWriter.closeElement(OBJECT_NAME);
-}
-
 
 /*!
 
@@ -561,8 +418,9 @@ void TasObject::serializeIntoString(TasXmlWriter& xmlWriter ,SerializeFilter& fi
      
 */
 
-TasObjectContainer::TasObjectContainer()
+TasObjectContainer::TasObjectContainer(QDomElement element)
 {    
+    mElement = element;
 }
 
 TasObjectContainer::~TasObjectContainer()
@@ -580,14 +438,13 @@ TasObjectContainer::~TasObjectContainer()
 */
 void TasObjectContainer::setId(int id)
 {
-    this->id = QString::number(id);
+    addDomAttribute(ID, QString::number(id));
 }
 
 void TasObjectContainer::setId(QString id)
 {
-    this->id = id;
+    addDomAttribute(ID, id);
 }
-
 
 /*!
     
@@ -597,7 +454,7 @@ void TasObjectContainer::setId(QString id)
 */
 void TasObjectContainer::setName(const QString& name)
 {
-    this->name = name;
+    addDomAttribute(NAME, name);
 }
 
 
@@ -608,7 +465,7 @@ void TasObjectContainer::setName(const QString& name)
 */
 void TasObjectContainer::setType(const QString& type)
 {
-    this->type = type;
+    addDomAttribute(TYPE, TYPE);
 }
 
 /*!
@@ -617,8 +474,9 @@ void TasObjectContainer::setType(const QString& type)
 
 */
 TasObject& TasObjectContainer::addNewObject()
-{    
-    TasObject* object = new TasObject(); 
+{
+    QDomElement element = addChild(OBJECT_NAME);
+    TasObject* object = new TasObject(element);     
     objects.append(object);
     return *object;
 }
@@ -639,33 +497,6 @@ TasObject& TasObjectContainer::addNewObject(const QString& id, const QString& na
 
 /*!
 
-    Seralize TasObjectContainer to xml format. Created the element using the given dom document.
-    Returns the created element as is and not appended to any element inside the doc.
-
-*/
-void TasObjectContainer::serializeIntoString(TasXmlWriter& xmlWriter, SerializeFilter& filter, bool elementsOnly)
-{
-    if(!elementsOnly){
-        QMap<QString, QString> attributes;
-        attributes[ID] = id; 
-        attributes[NAME] = TasCoreUtils::encodeString( name ); 
-        attributes[TYPE] = type;     
-        xmlWriter.openElement(CONTAINER_NAME, attributes);
-    }
-    for (int i = 0; i < objects.size(); ++i) {
-        TasObject* object = objects.at(i);
-        if(filter.serializeObject(*object)){
-            object->serializeIntoString(xmlWriter, filter);
-        }
-    }
-    if(!elementsOnly){
-        xmlWriter.closeElement(CONTAINER_NAME);
-    }
-}
-
-
-/*!
-
     \class TasDataModel
     \brief TasDataModel Root class of the data model
 
@@ -681,7 +512,12 @@ void TasObjectContainer::serializeIntoString(TasXmlWriter& xmlWriter, SerializeF
   
  */
 TasDataModel::TasDataModel()
-{}
+    :mDocument(ROOT_NAME)
+{
+    mElement = mDocument.createElement(ROOT_NAME);
+    mDocument.appendChild(mElement);
+    addDomAttribute(VERSION, TAS_VERSION);
+}
 
 /*!
     Destructor
@@ -689,7 +525,7 @@ TasDataModel::TasDataModel()
 TasDataModel::~TasDataModel()
 {    
     clearModel();
-}
+ }
 
 
 /*!
@@ -697,8 +533,9 @@ TasDataModel::~TasDataModel()
 */
 void TasDataModel::clearModel()
 {
-    qDeleteAll(containers);
-    containers.clear();        
+    qDeleteAll(mContainers);
+    mContainers.clear();        
+    mElement.clear();
 }
 
 /*!
@@ -710,8 +547,9 @@ void TasDataModel::clearModel()
 */
 TasObjectContainer& TasDataModel::addNewObjectContainer()
 {
-    TasObjectContainer* container = new TasObjectContainer();
-    containers.append(container);
+    QDomElement element = addChild(CONTAINER_NAME);
+    TasObjectContainer* container = new TasObjectContainer(element);
+    mContainers.append(container);
     return *container;
 }
 
@@ -750,9 +588,9 @@ TasObjectContainer& TasDataModel::addNewObjectContainer(int id, const QString& n
 TasObjectContainer* TasDataModel::findObjectContainer(const QString& id)
 {
     TasObjectContainer* match = 0;
-    for (int i = 0; i < containers.size(); ++i) {
-        TasObjectContainer* container = containers.at(i);
-        if(container->id == id){
+    for (int i = 0; i < mContainers.size(); ++i) {
+        TasObjectContainer* container = mContainers.at(i);
+        if(container->parameter(ID) == id){
             match = container;
             break;
         }
@@ -761,128 +599,30 @@ TasObjectContainer* TasDataModel::findObjectContainer(const QString& id)
 }
 
 /*!
-
-    Serialize the model into xml format specified by testabililty.
-    Filter ownership is assumed and it will be removed once
-    the serializing has been completed.
+  DEPRACATED, use TasDataModel::serializeModel(QByteArray& xmlData, bool containers)
 */
-void TasDataModel::serializeModel(QByteArray& xmlData, SerializeFilter* filter, bool containers)
+void TasDataModel::serializeModel(QByteArray& xmlData, SerializeFilter* /*filter*/, bool containers)
 {
-    if(!filter){
-        filter = new SerializeFilter();
-    }
-    QTextStream stream(&xmlData, QIODevice::WriteOnly);
-    stream.setCodec(QTextCodec::codecForName("UTF-8"));
-    TasXmlWriter tasXmlWriter(stream);
+    TasLogger::logger()->warning("TasDataModel::serializeModel this method is depracated.");
+    TasLogger::logger()->warning("Use TasDataModel::serializeModel(QByteArray& xmlData, bool mContainers)");
+    serializeModel(xmlData, containers);
+}
+
+/*!
+  Serializes the model or only containers (including children).
+ */
+void TasDataModel::serializeModel(QByteArray& xmlData, bool containers)
+{
+    //only containers
     if(containers){
-        serializeObjects(tasXmlWriter, *filter, true);
+        QTextStream xmlStream(xmlData);
+        xmlStream.setCodec("UTF-8");
+        foreach(TasObjectContainer* container, mContainers){
+            xmlStream << container->domElement();
+        }        
     }
     else{
-        serializeIntoString(tasXmlWriter, *filter);
+        xmlData = mDocument.toByteArray(-1);
     }
-    delete filter;
 }
-
-void TasDataModel::serializeIntoString(TasXmlWriter& xmlWriter, SerializeFilter& filter)
-{
-    QMap<QString, QString> attributes;
-    attributes[VERSION] = TAS_VERSION; 
-    //attributes[DATE_TIME] = QDateTime::currentDateTime().toString("yyyy.MM.dd hh:mm:ss.zzz"); 
-    xmlWriter.openElement(ROOT_NAME, attributes);
-    serializeObjects(xmlWriter, filter);
-    xmlWriter.closeElement(ROOT_NAME);
-}
-
-
-void TasDataModel::serializeObjects(TasXmlWriter& xmlWriter, SerializeFilter& filter, bool elementsOnly)
-{
-    for (int i = 0; i < containers.size(); ++i) {
-        TasObjectContainer* container = containers.at(i);
-        if ( filter.serializeContainer(*container)){
-            container->serializeIntoString(xmlWriter, filter, elementsOnly);
-        }
-    }       
-}
-
-/*!
-
-    \class SerializeFilter
-    \brief Allows to filter some elements from the xml tree
-
-    The SerializeFilter makes it possible to set filters to avoid
-    the models into producing too much information and therefore 
-    slowing thing down. The metaproperty system will at time 
-    produce a lot of information that may not always be what is 
-    needed. 
-
-*/
-
-/*!
-  
-    Constructor 
-  
- */
-SerializeFilter::SerializeFilter()
-{
-    allowDuplicates = true; //default
-}
-
-SerializeFilter::~SerializeFilter()
-{
-    serializedObjects.clear();
-}
-
-/*!
-   
-    Set the filter to block or allow duplicates.
-
-*/
-void SerializeFilter::serializeDuplicates(bool allow)
-{
-    allowDuplicates = allow;
-}
-
-/*!
-  
-  Checks the attribute and returns false if the attribute should not 
-  be added to the model.
-    
- */
-bool SerializeFilter::serializeAttribute(TasAttribute& /*attribute*/)
-{
-    return true;
-}
-
-/*!
-  
-  Checks the container and returns false if the container should not 
-  be added to the model.
-    
- */
-bool SerializeFilter::serializeContainer(TasObjectContainer& /*container*/)
-{
-    return true;
-}
-
-/*!
-  
-  Checks the object and returns false if the object should not 
-  be added to the model.
-  Default implementation check duplicates.
-    
- */
-bool SerializeFilter::serializeObject(TasObject& object)
-{        
-    bool serialize = true;
-    if(!serializedObjects.contains(object.id)){       
-        serializedObjects << object.id;        
-    }
-    else if(!allowDuplicates){
-        serialize = false;        
-    }    
-    return serialize;
-}
-
-
-
 

@@ -38,7 +38,7 @@ class TasCommandModel;
 class TasDomObject
 {
 public:
-    void addAttribute(const QString& name, const QString& value);
+    void addDomAttribute(const QString& name, const QString& value);
 	void setText(const QString& text);
     QDomElement domElement() const;
     QString parameter(const QString& name);

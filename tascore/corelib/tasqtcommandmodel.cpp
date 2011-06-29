@@ -32,7 +32,7 @@ QDomElement TasDomObject::domElement() const
     return mElement;
 }
 
-void TasDomObject::addAttribute(const QString& name, const QString& value)
+void TasDomObject::addDomAttribute(const QString& name, const QString& value)
 {
     mElement.setAttribute(name, value);
 }

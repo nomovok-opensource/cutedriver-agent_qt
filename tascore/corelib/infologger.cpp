@@ -451,10 +451,8 @@ QByteArray TasInfoLoggerUtil::loadLoggedData(QFile* file, const QString& name, Q
             parentData.addAttribute(key, params.value(key));   
         }
     }
-    SerializeFilter* filter = new SerializeFilter();		    		
-    filter->serializeDuplicates(true);		    		
     QByteArray xml;
-    tasModel->serializeModel(xml, filter);
+    tasModel->serializeModel(xml);
     delete tasModel;
     return xml;
 }

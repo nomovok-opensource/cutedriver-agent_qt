@@ -414,14 +414,14 @@ void TestabilityService::enableSignalTracking(QString signal, QString timeStamp)
 {
     //need to make a commandmodel for the fixture
     TasCommandModel* model = TasCommandModel::createModel();
-    model->addAttribute("service", FIXTURE);
+    model->addDomAttribute("service", FIXTURE);
     TasTarget& target = model->addTarget();
-    target.addAttribute("TasId", TasCoreUtils::objectId( qApp ));
-    target.addAttribute("type", TYPE_APPLICATION_VIEW);
+    target.addDomAttribute("TasId", TasCoreUtils::objectId( qApp ));
+    target.addDomAttribute("type", TYPE_APPLICATION_VIEW);
     TasCommand& command = target.addCommand();
-    command.addAttribute("name", "Fixture");
-    command.addAttribute("plugin","tassignal");
-    command.addAttribute("method","enable_signal");
+    command.addDomAttribute("name", "Fixture");
+    command.addDomAttribute("plugin","tassignal");
+    command.addDomAttribute("method","enable_signal");
     command.addApiParameter(SIGNAL_KEY,signal, "QString");    
     command.addApiParameter(PROCESS_START_TIME,timeStamp, "QString");
     QString message;

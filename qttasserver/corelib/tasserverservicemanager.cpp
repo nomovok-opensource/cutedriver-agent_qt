@@ -145,7 +145,7 @@ void TasServerServiceManager::handleServiceRequest(TasCommandModel& commandModel
         connect(waiter, SIGNAL(responded(qint32)), this, SLOT(removeWaiter(qint32)));
         mResponseQueue.insert(responseId, waiter);
         if(needFragment){
-            commandModel.addAttribute("needFragment", "true");
+            commandModel.addDomAttribute("needFragment", "true");
             targetClient->socket()->sendRequest(responseId, commandModel.sourceString(false));            
         }
         else{
