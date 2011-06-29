@@ -42,10 +42,13 @@ class CucumberApplicationManager : public QObject
 
 public:
 
-    Q_INVOKABLE void handleFixtureResult(bool success, const QString &text, quintptr callId);
+    Q_INVOKABLE void pluginResultCB(bool success, const QString &text, quintptr callId);
 
-    Q_INVOKABLE void callScriptMethod(const QString &regExpPattern, const QVariantList &args, QObject *sender);
-    Q_INVOKABLE void checkScriptProperty(const QString &regExpPattern, const QVariantList &args, QObject *sender);
+
+    Q_INVOKABLE void callStepInPlugin(const QString &regExpPattern, const QVariantList &args, QObject *sender);
+
+    //Q_INVOKABLE void callScriptMethod(const QString &regExpPattern, const QVariantList &args, QObject *sender);
+    //Q_INVOKABLE void checkScriptProperty(const QString &regExpPattern, const QVariantList &args, QObject *sender);
 
     Q_INVOKABLE void selectApp(const QString &regExpPattern, const QVariantList &args, QObject *sender);
     Q_INVOKABLE void attachApp(const QString &regExpPattern, const QVariantList &args, QObject *sender);
@@ -72,15 +75,17 @@ private slots:
 
 private:
 
+    void checkPendingSender();
+
     QString doStartOrWaitApp(const QString &id, const QString &program, const QStringList &arguments);
     void doReplyOrRetry(InvokableStepFn fn, const QString &errorString,
                         const QString &regExpPattern, const QVariantList &args, QObject *sender);
     bool invokePlainSender(QObject *sender, const QString &errorMsg);
 
-    QMap<QString, QString> pidMap; // maps application id to it's "pid" as received from StartAppService
-    QString currentApplicationId;
-    QString workingDirectoryPath;
-    QStringList startEnvironment;
+    QMap<QString, QString> mPidMap; // maps application id to it's "pid" as received from StartAppService
+    QString mCurrentApplicationId;
+    QString mWorkingDirectoryPath;
+    QStringList mStartEnvironment;
 
     struct StepRetryData {
         InvokableStepFn stepFn; // NULL here means, nothing pending
@@ -95,17 +100,18 @@ private:
         bool equals(InvokableStepFn thisFn, const QString &thisRegExpPattern, const QVariantList &thisArgs, QObject *thisSender) {
             return (thisFn == stepFn && thisSender == sender.data() && thisRegExpPattern == regExpPattern && thisArgs == args);
         }
-    } retryData;
+    } mRetryData;
 
-    int retryTimeout;
-    int retryInterval;
+    int mRetryTimeout;
+    int mRetryInterval;
 
-    QTimer *retryTimer;
+    QTimer *mRetryTimer;
 
-    static int retryTimerInterval;
+    QObject *mPendingSender;
+    QTimer *mPendingTimer;
 
-    QObject *pendingSender;
-    QTimer *pendingTimer;
+    CucumberStepDataMap mPluginSteps;
+
 };
 
 #endif // APPLICATIONINSTANCE_H

@@ -54,7 +54,7 @@ public:
     Q_INVOKABLE void invokeDebugDump(const QString &regExpPattern, const QVariantList &args, QObject *sender);
 
 public slots:
-    void registerStep(const QRegExp &regExp, QObject *object, const char *method, const char *sourceFile, int sourceLine);
+    void registerStep(const QRegExp &regExp, QObject *object, const char *method, const QString &sourceFileSpec);
     void closeAllClients();
     void close();
     int start();
@@ -63,6 +63,7 @@ signals:
     void gotJSONMessage(QVariant data, QIODevice *connection);
 
 private slots:
+    void reRegisterSteps();
     void handleNewConnect();
     void connectionDisconnect();
     void connectionError();

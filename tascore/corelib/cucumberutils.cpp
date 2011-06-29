@@ -20,10 +20,13 @@
 #include "cucumberutils.h"
 #include <testabilitysettings.h>
 #include <taslogger.h>
+#include <tasconstants.h>
+#include <tasfixtureplugininterface.h>
 
 #include <QDirIterator>
 #include <QFile>
 #include <QRegExp>
+#include <QFileInfo>
 
 CucumberUtils::CucumberUtils()
 {
@@ -68,8 +71,11 @@ CucumberStepDataMap CucumberUtils::readAllSteps()
          ; !filePath.isEmpty()
          ; filePath = it.next() ) {
 
+        TasLogger::logger()->info(QString("CucumberUtils::readAllSteps processing %1").arg(filePath));
+
         if (it.fileName().endsWith(suffix) && it.fileInfo().isFile()) {
-            addFileContents(ret, it.fileInfo().canonicalPath());
+            TasLogger::logger()->info(QString("CucumberUtils::readAllSteps trying to read %1").arg(it.fileInfo().canonicalPath()));
+            addFileContents(ret, it.fileInfo().canonicalFilePath());
         }
     }
 
@@ -93,11 +99,28 @@ static void parseFlags(QHash<QString, QString> &flagMap, QStringList flagList)
 static void insertStepData(CucumberStepDataMap &map, CucumberStepData &data)
 {
     if (!data.regExp.isEmpty()) {
+#if 1
+        // test against empty, since other code must be able to assume these have value
+        if (data.flags.value("action").isEmpty()) {
+            data.flags.insert("action", CUCUMBER_STEP_DEFAULTACTION);
+        }
+        CucumberUtils *p;
+        void *vp = p;
+        quintptr *qp = (quintptr*)vp;
+        if (data.flags.value("plugin").isEmpty()) {
+            int pos = data.stepFileSpec.lastIndexOf('/')+1; // pos >= 0
+            int len = qMax(0, data.stepFileSpec.indexOf('.', pos) - pos); // if no '.', len is 0
+            data.flags.insert("plugin", data.stepFileSpec.mid(pos, len));
+        }
+#else
+        // responsibility of the caller to get fixture action with code like
+        // ...flags.value("action", CUCUMBER_STEP_DEFAULTACTION)
+#endif
         map.insert(data.regExp, data);
         TasLogger::logger()->debug(QString("CucumberUtils::insertStepData %1").arg(data.toDebugString()));
     }
     else {
-        TasLogger::logger()->debug(QString("CucumberUtils::addFileContents ignoring incomplete step data %1").arg(data.toDebugString()));
+        //TasLogger::logger()->debug(QString("CucumberUtils::addFileContents ignoring incomplete step data %1").arg(data.toDebugString()));
         // else ignore incomplete data
     }
 }
@@ -111,7 +134,6 @@ void CucumberUtils::addFileContents(CucumberStepDataMap &map, const QString &fil
         const QString fileSpecBase = filePath + ":";
 
         bool lastEmpty = true;
-        QString lastLine;
         CucumberStepData data;
         int lineNum = 0;
 
@@ -156,7 +178,7 @@ void CucumberUtils::addFileContents(CucumberStepDataMap &map, const QString &fil
                 data.regExp = trimmedLine;
             }
             else {
-                data.text.append(lastLine);
+                data.text.append(line);
             }
 
         }

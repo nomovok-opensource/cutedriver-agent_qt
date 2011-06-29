@@ -208,7 +208,7 @@ bool QtScriptFixturePlugin::execute(
         }
     }
 
-    else if (actionName == CUCUMBER_STEP_ACTION) {
+    else if (actionName == CUCUMBER_STEP_DEFAULTACTION) {
         const QString regExp = parameters.value("regExp");
         TasLogger::logger()->debug("QtScriptFixturePlugin::execute cucumber step for: " + regExp);
 

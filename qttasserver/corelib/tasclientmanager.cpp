@@ -638,6 +638,8 @@ QString TasClient::pluginType()
 void TasClient::callFixture(QObject *sender, const char *resultMethod, quintptr callId,
                             const QString &pluginName, const QString &actionName, QHash<QString, QString> parameters)
 {
+    if (pluginName.isEmpty() || actionName.isEmpty()) return;
+
     TasCommandModel* model = TasCommandModel::createModel();
 
     model->addAttribute("service", FIXTURE);
@@ -669,7 +671,7 @@ void TasClient::callFixture(QObject *sender, const char *resultMethod, quintptr 
 
     }
 
-    if (sender && resultMethod) {
+    if (sender && resultMethod && *resultMethod) {
         QMetaObject::invokeMethod(sender, resultMethod, Qt::QueuedConnection,
                                   Q_ARG(bool, success),
                                   Q_ARG(QString, QString(replyData)),

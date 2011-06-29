@@ -41,39 +41,35 @@ class CucumberWireprotocolServer_StepData
 {
 public:
     QRegExp regExp;
-    enum TargetType { Invalid, Undefined, ServerInternal, ServerPlugin, ApplicationPlugin } targetType;
     QWeakPointer<QObject> targetObject;
     const char *targetMethod;
     QVariant source;
 
-    CucumberWireprotocolServer_StepData() : targetType(Invalid), targetMethod(NULL) {}
+    CucumberWireprotocolServer_StepData() : targetMethod(NULL) {}
 
     CucumberWireprotocolServer_StepData(const CucumberWireprotocolServer_StepData &other) :
         regExp(other.regExp)
-      , targetType(other.targetType)
       , targetObject(other.targetObject)
       , targetMethod(other.targetMethod)
       , source(other.source)
     {}
 
-    CucumberWireprotocolServer_StepData(const QRegExp &regExp, TargetType targetType, QObject *targetObject, const char *targetMethod, QVariant source=QVariant()) :
+    CucumberWireprotocolServer_StepData(const QRegExp &regExp, QObject *targetObject, const char *targetMethod, QVariant source=QVariant()) :
         regExp(regExp)
-      , targetType(targetType)
       , targetObject(targetObject)
       , targetMethod(targetMethod)
       , source(source)
     {}
 
-    CucumberWireprotocolServer_StepData(const QRegExp &regExp, TargetType targetType, const QWeakPointer<QObject> targetObject, const char *targetMethod, QVariant source=QVariant()) :
+    CucumberWireprotocolServer_StepData(const QRegExp &regExp, const QWeakPointer<QObject> targetObject, const char *targetMethod, QVariant source=QVariant()) :
         regExp(regExp)
-      , targetType(targetType)
       , targetObject(targetObject)
       , targetMethod(targetMethod)
       , source(source)
     {}
 
-    bool isValid() { return (targetType != Invalid && !targetObject.isNull() && targetMethod != NULL); }
-    void invalidate() { targetType = Invalid; targetObject.clear(); targetMethod = NULL; }
+    bool isValid() { return (!targetObject.isNull() && targetMethod != NULL); }
+    void invalidate() { targetObject.clear(); targetMethod = NULL; }
 
     bool hasSource() { return !source.isNull(); }
 };
@@ -90,7 +86,6 @@ void CucumberWireprotocolServer::invokeDebugDump(const QString &regExpPattern, c
 }
 
 
-
 CucumberWireprotocolServer::CucumberWireprotocolServer(quint16 port, QObject *parent) :
     QObject(parent)
   , mServer(new QTcpServer(this))
@@ -98,7 +93,6 @@ CucumberWireprotocolServer::CucumberWireprotocolServer(quint16 port, QObject *pa
   , mPendingResponse(false)
   , mResponseTimeoutTimer(new QTimer(this))
   , mAppManager(new CucumberApplicationManager(this))
-
 {
     mResponseTimeoutTimer->setSingleShot(true);
     connect(mResponseTimeoutTimer, SIGNAL(timeout()), SLOT(responseTimeout()));
@@ -107,24 +101,22 @@ CucumberWireprotocolServer::CucumberWireprotocolServer(quint16 port, QObject *pa
     mServer->setMaxPendingConnections(1);
     connect(this, SIGNAL(gotJSONMessage(QVariant,QIODevice*)), SLOT(handleJSONMessage(QVariant,QIODevice*)));
 
+
+#if 0
     CucumberWireprotocolServer_StepData tmpStep;
-    tmpStep.targetType = CucumberWireprotocolServer_StepData::ServerInternal;
     tmpStep.targetObject = this;
     tmpStep.targetMethod = "invokeDebugDump";
 
-#if 0
     // register dummy step
     QStringList stepDefs(QStringList()
                          << "I perform pairs:"
                          << "current application is\\s+(.+)");
 
     foreach(QString pattern, stepDefs) {
-        registerStep(QRegExp(pattern), this, "invokeDebugDump", __FILE__, LINE_invokeDebugDump);
+        registerStep(QRegExp(pattern), this, "invokeDebugDump", QString("%1:%2").arg(__FILE__).arg(LINE_invokeDebugDump));
     }
 #endif
 
-    // ask CucumberApplicationManager instance to register it's steps
-    mAppManager->registerSteps(this, "registerStep");
 }
 
 
@@ -142,13 +134,11 @@ QString CucumberWireprotocolServer::addressString()
 }
 
 
-void CucumberWireprotocolServer::registerStep(const QRegExp &regExp,
-                                                      QObject *object, const char *method,
-                                                      const char *sourceFile, int sourceLine)
+void CucumberWireprotocolServer::registerStep(const QRegExp &regExp, QObject *object,
+                                              const char *method, const QString &sourceFileSpec)
 {
-    qDebug() << DPL << regExp.pattern() << method << sourceFile << sourceLine;
-    mSteps << new CucumberWireprotocolServer_StepData(regExp, CucumberWireprotocolServer_StepData::ServerInternal, object, method,
-                                  QString("%1:%2:%3").arg(sourceFile).arg(sourceLine).arg(method));
+    qDebug() << DPL << regExp.pattern() << method << sourceFileSpec;
+    mSteps << new CucumberWireprotocolServer_StepData(regExp, object, method, sourceFileSpec);
 }
 
 
@@ -199,6 +189,15 @@ void cucumberStep(const QString &stepText, const QRegExp &matchedRegEx)
 }
 
 
+void CucumberWireprotocolServer::reRegisterSteps()
+{
+    mSteps.clear();
+    // ask CucumberApplicationManager instance to register it's steps
+    mAppManager->registerSteps(this, "registerStep");
+}
+
+
+
 void CucumberWireprotocolServer::handleNewConnect()
 {
     QTcpSocket *connection = mServer->nextPendingConnection();
@@ -206,6 +205,8 @@ void CucumberWireprotocolServer::handleNewConnect()
         qDebug() << DP << "got signal for new connection, but none were found";
         return;
     }
+
+    reRegisterSteps();
 
     connect(connection, SIGNAL(disconnected()), SLOT(connectionDisconnect()));
     connect(connection, SIGNAL(error(QAbstractSocket::SocketError)), SLOT(connectionError()));
@@ -225,11 +226,12 @@ void CucumberWireprotocolServer::connectionDisconnect()
 
 
 void CucumberWireprotocolServer::connectionError()
-{
-    qDebug() << DP;
-
+{    
     QIODevice *connection = qobject_cast<QIODevice*>(sender());
-    if (connection) mReadBufferMap.remove(connection);
+    if (connection) {
+        qDebug() << DPL << connection->errorString();
+        mReadBufferMap.remove(connection);
+    }
 }
 
 

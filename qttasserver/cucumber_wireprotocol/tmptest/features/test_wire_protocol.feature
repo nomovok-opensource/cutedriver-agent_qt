@@ -8,35 +8,35 @@ Feature: QtTasServer with Cucumber Wire Protocol
     Given I launch application one with command:
         | calculator |
         | -testability |
-    And I call click on application object fourButton
-    And I call click on application object plusButton
-    And I call click on application object fiveButton
-    And I call click on application object equalButton
-    Then application object display has text "9"
+    And I do click on object fourButton
+    And I do click on object plusButton
+    And I do click on object fiveButton
+    And I do click on object equalButton
+    Then object display has property text value "9"
 
     And I launch application two with command calculator -testability
-    And I call click on application object threeButton
-    And I call click on application object plusButton
-    And I call click on application object fiveButton
-    And I call click on application object equalButton
-    Then application object display has text "8"
+    And I do click on object threeButton
+    And I do click on object plusButton
+    And I do click on object fiveButton
+    And I do click on object equalButton
+    Then object display has property text value "8"
 
     And I select application one
-    And I call click on application object threeButton
-    And I call click on application object plusButton
-    And I call click on application object fiveButton
-    And I call click on application object equalButton
-    Then application object display has text "8"
+    And I do click on object threeButton
+    And I do click on object plusButton
+    And I do click on object fiveButton
+    And I do click on object equalButton
+    Then object display has property text value "8"
 
   @ignore
   Scenario: Testing QML
     Given I launch application foo with command:
       | calculator |
       | -testability |
-    Then I call click on application object fiveButton
+    Then I do click on object fiveButton
     Given I launch application with command:
-     | /home/arhyttin/test/simpleqmlapp-build-desktop/simpleqmlapp |
-     |-testability |
-     Then application object objectName has toString() "mainwindow"
-     And application object objectName has toString() "mainwindow"
-     Then I call click on application object mainrect.quitarea
+      | /home/arhyttin/test/simpleqmlapp-build-desktop/simpleqmlapp |
+      |-testability |
+    Then object objectName has property toString() value "mainwindow"
+    And I do toString() on property objectName to get "mainwindow"
+    Then I do click on object mainrect.quitarea

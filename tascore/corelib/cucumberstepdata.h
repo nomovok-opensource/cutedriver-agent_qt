@@ -33,8 +33,7 @@ struct CucumberStepData {
     CucumberStepData() {}
     CucumberStepData(const CucumberStepData &other) : stepFileSpec(other.stepFileSpec), regExp(other.regExp), text(other.text), flags(other.flags) {}
     void clear() { stepFileSpec.clear(); regExp.clear(); text.clear(); flags.clear(); }
-    QString getPluginName() const { return stepFileSpec.left(stepFileSpec.indexOf('.')); }
-    QString toDebugString() const { return QString("%1:%2=%3").arg(stepFileSpec,regExp,text.simplified()); }
+    QString toDebugString() const { return QString("%1:'%2'='%3' (action=%4, plugin=%5)").arg(stepFileSpec,regExp,text.simplified(), flags.value("action"), flags.value("plugin")); }
 };
 
 typedef QHash<QString, CucumberStepData> CucumberStepDataMap;
