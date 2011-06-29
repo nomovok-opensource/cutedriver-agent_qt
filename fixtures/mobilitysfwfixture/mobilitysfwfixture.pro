@@ -54,3 +54,4 @@ LIBS += -L../../tascore/lib/ -lqttestability
 
 CONFIG += mobility
 MOBILITY += serviceframework
+QT += xml
