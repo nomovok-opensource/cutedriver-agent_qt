@@ -41,7 +41,7 @@ public:
         QHash<QString, QString> parameters, 
         QString & stdOut);
 private:
-    CucumberUtils::StepDataMap mSteps;
+    CucumberStepDataMap mSteps;
 };
 
 #endif

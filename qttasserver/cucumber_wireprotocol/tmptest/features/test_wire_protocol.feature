@@ -26,7 +26,7 @@ Feature: QtTasServer with Cucumber Wire Protocol
     And I call click on application object plusButton
     And I call click on application object fiveButton
     And I call click on application object equalButton
-    Then application object display has text "81"
+    Then application object display has text "8"
 
   @ignore
   Scenario: Testing QML

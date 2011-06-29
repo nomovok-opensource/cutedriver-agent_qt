@@ -20,7 +20,6 @@
 #include "cucumberwireprotocolserver.h"
 
 #include "cucumberapplicationmanager.h"
-#include "cucumberstepdata.h"
 
 #include <QTcpServer>
 #include <QTcpSocket>
@@ -36,6 +35,49 @@
 
 #define DP "CucumberWireprotocolServer" << __FUNCTION__
 #define DPL "CucumberWireprotocolServer" << __FUNCTION__ << __LINE__
+
+
+class CucumberWireprotocolServer_StepData
+{
+public:
+    QRegExp regExp;
+    enum TargetType { Invalid, Undefined, ServerInternal, ServerPlugin, ApplicationPlugin } targetType;
+    QWeakPointer<QObject> targetObject;
+    const char *targetMethod;
+    QVariant source;
+
+    CucumberWireprotocolServer_StepData() : targetType(Invalid), targetMethod(NULL) {}
+
+    CucumberWireprotocolServer_StepData(const CucumberWireprotocolServer_StepData &other) :
+        regExp(other.regExp)
+      , targetType(other.targetType)
+      , targetObject(other.targetObject)
+      , targetMethod(other.targetMethod)
+      , source(other.source)
+    {}
+
+    CucumberWireprotocolServer_StepData(const QRegExp &regExp, TargetType targetType, QObject *targetObject, const char *targetMethod, QVariant source=QVariant()) :
+        regExp(regExp)
+      , targetType(targetType)
+      , targetObject(targetObject)
+      , targetMethod(targetMethod)
+      , source(source)
+    {}
+
+    CucumberWireprotocolServer_StepData(const QRegExp &regExp, TargetType targetType, const QWeakPointer<QObject> targetObject, const char *targetMethod, QVariant source=QVariant()) :
+        regExp(regExp)
+      , targetType(targetType)
+      , targetObject(targetObject)
+      , targetMethod(targetMethod)
+      , source(source)
+    {}
+
+    bool isValid() { return (targetType != Invalid && !targetObject.isNull() && targetMethod != NULL); }
+    void invalidate() { targetType = Invalid; targetObject.clear(); targetMethod = NULL; }
+
+    bool hasSource() { return !source.isNull(); }
+};
+
 
 
 static const int LINE_invokeDebugDump = __LINE__ + 1;
@@ -65,8 +107,8 @@ CucumberWireprotocolServer::CucumberWireprotocolServer(quint16 port, QObject *pa
     mServer->setMaxPendingConnections(1);
     connect(this, SIGNAL(gotJSONMessage(QVariant,QIODevice*)), SLOT(handleJSONMessage(QVariant,QIODevice*)));
 
-    CucumberStepData tmpStep;
-    tmpStep.targetType = CucumberStepData::ServerInternal;
+    CucumberWireprotocolServer_StepData tmpStep;
+    tmpStep.targetType = CucumberWireprotocolServer_StepData::ServerInternal;
     tmpStep.targetObject = this;
     tmpStep.targetMethod = "invokeDebugDump";
 
@@ -89,7 +131,7 @@ CucumberWireprotocolServer::CucumberWireprotocolServer(quint16 port, QObject *pa
 CucumberWireprotocolServer::~CucumberWireprotocolServer()
 {
     while (!mSteps.isEmpty()) {
-        CucumberStepData *step = mSteps.takeLast();
+        CucumberWireprotocolServer_StepData *step = mSteps.takeLast();
         if (step) delete step;
     }
 }
@@ -105,7 +147,7 @@ void CucumberWireprotocolServer::registerStep(const QRegExp &regExp,
                                                       const char *sourceFile, int sourceLine)
 {
     qDebug() << DPL << regExp.pattern() << method << sourceFile << sourceLine;
-    mSteps << new CucumberStepData(regExp, CucumberStepData::ServerInternal, object, method,
+    mSteps << new CucumberWireprotocolServer_StepData(regExp, CucumberWireprotocolServer_StepData::ServerInternal, object, method,
                                   QString("%1:%2:%3").arg(sourceFile).arg(sourceLine).arg(method));
 }
 
@@ -346,7 +388,7 @@ QVariantList CucumberWireprotocolServer::findMatchingSteps(const QString &name)
 {
     QVariantList retList;
     for (int ind = 0; ind < mSteps.size(); ++ind) {
-        CucumberStepData *step = mSteps.at(ind);
+        CucumberWireprotocolServer_StepData *step = mSteps.at(ind);
         if (step && step->isValid() && step->regExp.exactMatch(name)) {
             QVariantList argsList;
             for(int ii=1; ii <= step->regExp.captureCount(); ++ii) {
@@ -370,7 +412,7 @@ QVariantList CucumberWireprotocolServer::findMatchingSteps(const QString &name)
 bool CucumberWireprotocolServer::startStep(const QVariantMap &args, QIODevice *connection)
 {
     int ind = args.value("id").toInt() - 1;
-    CucumberStepData *step = mSteps.value(ind, NULL);
+    CucumberWireprotocolServer_StepData *step = mSteps.value(ind, NULL);
     if (step && step->isValid()) {
         QVariantList argsList = args.value("args", QVariantList()).toList();
         QMetaObject::invokeMethod(

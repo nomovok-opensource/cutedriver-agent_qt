@@ -17,26 +17,26 @@
 **
 ****************************************************************************/
 
-#ifndef CUCUMBERUTILS_H
-#define CUCUMBERUTILS_H
+#ifndef CUCUMBERSTEPDATA_H
+#define CUCUMBERSTEPDATA_H
 
 #include <QString>
 #include <QHash>
 
-#include "cucumberstepdata.h"
 
+struct CucumberStepData {
+    QString stepFileSpec;
+    QString regExp;
+    QString text;
+    QHash<QString, QString> flags;
 
-class CucumberUtils
-{
-public:
-    CucumberUtils();
-
-    static CucumberStepDataMap readSteps(const QString &pluginName);
-    static CucumberStepDataMap readAllSteps();
-
-private:
-    static void addFileContents(CucumberStepDataMap &map, const QString &filePath);
-
+    CucumberStepData() {}
+    CucumberStepData(const CucumberStepData &other) : stepFileSpec(other.stepFileSpec), regExp(other.regExp), text(other.text), flags(other.flags) {}
+    void clear() { stepFileSpec.clear(); regExp.clear(); text.clear(); flags.clear(); }
+    QString getPluginName() const { return stepFileSpec.left(stepFileSpec.indexOf('.')); }
+    QString toDebugString() const { return QString("%1:%2=%3").arg(stepFileSpec,regExp,text.simplified()); }
 };
 
-#endif // CUCUMBERUTILS_H
+typedef QHash<QString, CucumberStepData> CucumberStepDataMap;
+
+#endif // CUCUMBERSTEPDATA_H

@@ -31,7 +31,7 @@
 class QTimer;
 class QTcpServer;
 class QIODevice;
-class CucumberStepData;
+class CucumberWireprotocolServer_StepData;
 class CucumberApplicationManager;
 
 class CucumberWireprotocolServer : public QObject {
@@ -80,7 +80,7 @@ private slots:
 
 
 private:
-    QList<CucumberStepData*> mSteps;
+    QList<CucumberWireprotocolServer_StepData*> mSteps;
     QMap<QIODevice*, QByteArray> mReadBufferMap;
     QString mLastErrorString;
     QTcpServer *mServer;

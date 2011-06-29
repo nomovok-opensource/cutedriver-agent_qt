@@ -18,11 +18,9 @@
 ############################################################################
 
 SOURCES += $$PWD/cucumberwireprotocolserver.cpp \
-    $$PWD/cucumberstepdata.cpp \
     $$PWD/cucumberapplicationmanager.cpp
 
 HEADERS += $$PWD/cucumberwireprotocolserver.h\
-    $$PWD/cucumberstepdata.h \
     $$PWD/cucumberapplicationmanager.h
 
 include(../../3rdparty/qjson.pri)

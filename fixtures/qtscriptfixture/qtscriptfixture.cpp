@@ -40,6 +40,7 @@ Q_EXPORT_PLUGIN2(qtscriptfixture, QtScriptFixturePlugin)
 QtScriptFixturePlugin::QtScriptFixturePlugin(QObject* parent) :
     QObject(parent)
 {
+    TasLogger::logger()->info("QtScriptFixturePlugin::QtScriptFixturePlugin reading steps");
     mSteps = CucumberUtils::readSteps("qtscriptfixture");
 }
 
@@ -136,7 +137,7 @@ bool QtScriptFixturePlugin::execute(
 
     Q_UNUSED(stdOut);
 
-    TasLogger::logger()->debug("> QtScriptFixturePlugin::execute");
+//    TasLogger::logger()->debug("QtScriptFixturePlugin::execute " + actionName);
 
     QString objType = parameters.value(OBJECT_TYPE);
     QObject *targetObj = NULL;
@@ -176,32 +177,23 @@ bool QtScriptFixturePlugin::execute(
 
     QScriptEngine engine;
 
-#if 1
     QScriptValue contextObjectValue = engine.newQObject(targetObj);
     engine.pushContext()->setThisObject(contextObjectValue);
-#else // not really needed, when "this" is target object
-    {
-        QScriptValue targetValue = engine.newObject();
-        targetValue.setProperty("target", engine.newQObject(targetObj));
-        targetValue.setProperty("action", QScriptValue("actionName"));
-        TasLogger::logger()->debug("targetValue: " +  dumpQScriptValue(targetValue));
-        engine.globalObject().setProperty("target", targetValue);
-    }
-    TasLogger::logger()->debug("target property: " +  dumpQScriptValue(engine.globalObject().property("target")));
-#endif
 
     {
         QScriptValue tmpVal = engine.newObject();
         foreach(const QString &key, parameters.keys()) {
-            TasLogger::logger()->debug("param: " +  key + "=" + parameters[key]);
+            //TasLogger::logger()->debug("param: " +  key + "=" + parameters[key]);
             tmpVal.setProperty(key, parameters[key]);
         }
         engine.globalObject().setProperty("tdriver", tmpVal);
     }
-    TasLogger::logger()->debug("tdriver property: " +  dumpQScriptValue(engine.globalObject().property("tdriver")));
+    //TasLogger::logger()->debug("tdriver property: " +  dumpQScriptValue(engine.globalObject().property("tdriver")));
 
     if (actionName == "eval") {
         QString script = parameters.value("script");
+
+        TasLogger::logger()->debug("QtScriptFixturePlugin::execute eval script: " + script.simplified());
 
         stdOut = checkScript(engine, script);
         if (stdOut.isEmpty()) {
@@ -218,7 +210,7 @@ bool QtScriptFixturePlugin::execute(
 
     else if (actionName == CUCUMBER_STEP_ACTION) {
         const QString regExp = parameters.value("regExp");
-        TasLogger::logger()->debug("QtScriptFixturePlugin::execute cucumber step " + regExp);
+        TasLogger::logger()->debug("QtScriptFixturePlugin::execute cucumber step for: " + regExp);
 
         if (!mSteps.contains(regExp)) {
             stdOut = "no match for step '" + regExp + "'";
@@ -230,15 +222,14 @@ bool QtScriptFixturePlugin::execute(
             }
             else {
                 engine.globalObject().setProperty("args", argsValue);
-                TasLogger::logger()->debug("argsValue: " + dumpQScriptValue(argsValue));
-                TasLogger::logger()->debug("args property: " + dumpQScriptValue(engine.globalObject().property("args")));
+                //TasLogger::logger()->debug("argsValue: " + dumpQScriptValue(argsValue));
+                //TasLogger::logger()->debug("args property: " + dumpQScriptValue(engine.globalObject().property("args")));
 
                 QScriptValue scriptReturnValue = engine.evaluate(mSteps.value(regExp).text);
                 if (engine.hasUncaughtException()) {
                     stdOut = "QtScript code '" + mSteps.value(regExp).text + "': " + engine.uncaughtException().toString();
                 }
                 else {
-                    TasLogger::logger()->debug("> QtScriptFixturePlugin::execute evaluate result:" + scriptReturnValue.toString());
                     stdOut = scriptReturnValue.toString();
                     ret = true;
                 }
@@ -247,9 +238,13 @@ bool QtScriptFixturePlugin::execute(
     }
 
     else if (actionName == "test") {
+        TasLogger::logger()->debug("QtScriptFixturePlugin::execute test");
         stdOut = "test successful";
         ret = true;
     }
+
+    QString retStr = QString(ret ? "true: " : "false: ") + stdOut.simplified();
+    TasLogger::logger()->debug("QtScriptFixturePlugin::execute result: " + retStr);
 
     return ret;
 }

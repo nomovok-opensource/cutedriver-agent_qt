@@ -27,6 +27,8 @@
 #include <QVariantList>
 #include <QWeakPointer>
 
+#include <cucumberstepdata.h>
+
 class QTimer;
 
 class CucumberApplicationManager;

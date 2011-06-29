@@ -1,5 +1,25 @@
+/***************************************************************************
+**
+** Copyright (C) 2010 Nokia Corporation and/or its subsidiary(-ies).
+** All rights reserved.
+** Contact: Nokia Corporation (testabilitydriver@nokia.com)
+**
+** This file is part of Testability Driver Qt Agent
+**
+** If you have questions regarding the use of this file, please contact
+** Nokia at testabilitydriver@nokia.com .
+**
+** This library is free software; you can redistribute it and/or
+** modify it under the terms of the GNU Lesser General Public
+** License version 2.1 as published by the Free Software Foundation
+** and appearing in the file LICENSE.LGPL included in the packaging
+** of this file.
+**
+****************************************************************************/
+
 #include "cucumberutils.h"
 #include <testabilitysettings.h>
+#include <taslogger.h>
 
 #include <QDirIterator>
 #include <QFile>
@@ -10,9 +30,9 @@ CucumberUtils::CucumberUtils()
 }
 
 
-CucumberUtils::StepDataMap CucumberUtils::readSteps(const QString &pluginName)
+CucumberStepDataMap CucumberUtils::readSteps(const QString &pluginName)
 {
-    StepDataMap ret;
+    CucumberStepDataMap ret;
 
     QString path = TestabilitySettings::getBasePath("cucumber");
     QDirIterator it(path, QDirIterator::Subdirectories);
@@ -23,9 +43,12 @@ CucumberUtils::StepDataMap CucumberUtils::readSteps(const QString &pluginName)
          ; !filePath.isEmpty()
          ; filePath = it.next() ) {
 
+        TasLogger::logger()->info(QString("CucumberUtils::readSteps processing %1").arg(filePath));
+
         QString fileName = it.fileName();
         if (fileName.endsWith(suffix) && fileName.startsWith(prefix)  && it.fileInfo().isFile()) {
-            addFileContents(ret, it.fileInfo().canonicalPath());
+            TasLogger::logger()->info(QString("CucumberUtils::readSteps trying to read %1").arg(it.fileInfo().canonicalPath()));
+            addFileContents(ret, it.fileInfo().canonicalFilePath());
         }
     }
 
@@ -33,9 +56,9 @@ CucumberUtils::StepDataMap CucumberUtils::readSteps(const QString &pluginName)
 }
 
 
-CucumberUtils::StepDataMap CucumberUtils::readAllSteps()
+CucumberStepDataMap CucumberUtils::readAllSteps()
 {
-    StepDataMap ret;
+    CucumberStepDataMap ret;
 
     QString path = TestabilitySettings::getBasePath("cucumber");
     QDirIterator it(path, QDirIterator::Subdirectories);
@@ -67,16 +90,20 @@ static void parseFlags(QHash<QString, QString> &flagMap, QStringList flagList)
 }
 
 
-static void insertStepData(CucumberUtils::StepDataMap &map, CucumberUtils::StepData &data)
+static void insertStepData(CucumberStepDataMap &map, CucumberStepData &data)
 {
     if (!data.regExp.isEmpty()) {
         map.insert(data.regExp, data);
+        TasLogger::logger()->debug(QString("CucumberUtils::insertStepData %1").arg(data.toDebugString()));
     }
-    // else ignore incomplete data
+    else {
+        TasLogger::logger()->debug(QString("CucumberUtils::addFileContents ignoring incomplete step data %1").arg(data.toDebugString()));
+        // else ignore incomplete data
+    }
 }
 
 
-void CucumberUtils::addFileContents(CucumberUtils::StepDataMap &map, const QString &filePath)
+void CucumberUtils::addFileContents(CucumberStepDataMap &map, const QString &filePath)
 {
     QFile file(filePath);
     if (file.open(QFile::ReadOnly)) {
@@ -85,13 +112,15 @@ void CucumberUtils::addFileContents(CucumberUtils::StepDataMap &map, const QStri
 
         bool lastEmpty = true;
         QString lastLine;
-        StepData data;
+        CucumberStepData data;
         int lineNum = 0;
 
         while (!file.atEnd()) {
             QString line = file.readLine();
             ++lineNum;
             QString trimmedLine = line.trimmed();
+
+            TasLogger::logger()->debug(QString("CucumberUtils::addFileContents %1:%2").arg(lineNum).arg(line));
 
             // skip empty lines
             if (trimmedLine.isEmpty()) {
@@ -137,4 +166,8 @@ void CucumberUtils::addFileContents(CucumberUtils::StepDataMap &map, const QStri
 
         file.close();
     }
+    else {
+        TasLogger::logger()->warning(QString("CucumberUtils::addFileContents file %1 error: %2").arg(filePath, file.errorString()));
+    }
+
 }
