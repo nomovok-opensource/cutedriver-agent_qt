@@ -215,7 +215,6 @@ bool TasSocket::syncRequest(const qint32& messageId, const QByteArray& requestMe
 
     //reconnect response reader
     connect(&mDevice, SIGNAL(readyRead()), mReader, SLOT(readMessageData()));    
-    qDebug() << "-------------------------" << success << reply.isError() << reply.data() << messageId;
     return success;
 }
 

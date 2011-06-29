@@ -21,6 +21,8 @@
 
 #include "cucumberapplicationmanager.h"
 
+#include <taslogger.h>
+
 #include <QTcpServer>
 #include <QTcpSocket>
 
@@ -32,6 +34,8 @@
 #include <QTimer>
 
 #include <qjson_warpper.h>
+
+
 
 #define DP "CucumberWireprotocolServer" << __FUNCTION__
 #define DPL "CucumberWireprotocolServer" << __FUNCTION__ << __LINE__
@@ -75,15 +79,16 @@ public:
 };
 
 
-
+#if 0
 static const int LINE_invokeDebugDump = __LINE__ + 1;
 void CucumberWireprotocolServer::invokeDebugDump(const QString &regExpPattern, const QVariantList &args, QObject *sender)
 {
-    qDebug() << DP << regExpPattern << args;
+    //qDebug() << DP << regExpPattern << args;
     if (sender) {
         QMetaObject::invokeMethod(sender, "cucumberSuccessResponse", Qt::QueuedConnection);
     }
 }
+#endif
 
 
 CucumberWireprotocolServer::CucumberWireprotocolServer(quint16 port, QObject *parent) :
@@ -137,7 +142,7 @@ QString CucumberWireprotocolServer::addressString()
 void CucumberWireprotocolServer::registerStep(const QRegExp &regExp, QObject *object,
                                               const char *method, const QString &sourceFileSpec)
 {
-    qDebug() << DPL << regExp.pattern() << method << sourceFileSpec;
+    //qDebug() << DPL << regExp.pattern() << method << sourceFileSpec;
     mSteps << new CucumberWireprotocolServer_StepData(regExp, object, method, sourceFileSpec);
 }
 
@@ -162,31 +167,24 @@ int CucumberWireprotocolServer::start()
 {
     if (mServer->isListening()) {
         if (mServer->serverPort() == mListenPort) {
-            qDebug() << DP << "already listeining on" << addressString();
             return mListenPort;
         }
         else {
-            qDebug() << DP << "stopping to listen on" << addressString();
             mServer->close();
         }
     }
 
     if (!mServer->listen(QHostAddress::Any, mListenPort)) {
         mLastErrorString = mServer->errorString();
-        qDebug() << DP << mListenPort << "listen error:" << mLastErrorString;
+        TasLogger::logger()->error(QString("CucumberWireprotocolServer::start listen error %1 on port %2").arg(mLastErrorString).arg(mListenPort));
         return -1;
     }
 
-    qDebug() << DP << "started to listen on" << addressString();
+    TasLogger::logger()->info("CucumberWireprotocolServer::start listening on port " + QString::number(mListenPort));
 
     return mServer->serverPort();
 }
 
-
-void cucumberStep(const QString &stepText, const QRegExp &matchedRegEx)
-{
-    qDebug() << DP << stepText << "with" << matchedRegEx.captureCount() << "matches:" << matchedRegEx.capturedTexts();
-}
 
 
 void CucumberWireprotocolServer::reRegisterSteps()
@@ -201,49 +199,37 @@ void CucumberWireprotocolServer::reRegisterSteps()
 void CucumberWireprotocolServer::handleNewConnect()
 {
     QTcpSocket *connection = mServer->nextPendingConnection();
-    if (!connection) {
-        qDebug() << DP << "got signal for new connection, but none were found";
-        return;
+    if (connection) {
+        reRegisterSteps();
+
+        connect(connection, SIGNAL(disconnected()), SLOT(connectionDisconnect()));
+        connect(connection, SIGNAL(error(QAbstractSocket::SocketError)), SLOT(connectionError()));
+        connect(connection, SIGNAL(readyRead()), SLOT(connectionReadyRead()));
     }
-
-    reRegisterSteps();
-
-    connect(connection, SIGNAL(disconnected()), SLOT(connectionDisconnect()));
-    connect(connection, SIGNAL(error(QAbstractSocket::SocketError)), SLOT(connectionError()));
-    connect(connection, SIGNAL(readyRead()), SLOT(connectionReadyRead()));
-    connect(connection, SIGNAL(bytesWritten(qint64)), SLOT(connectionBytesWritten(qint64)));
 }
 
 
 void CucumberWireprotocolServer::connectionDisconnect()
 {
-    qDebug() << DP;
+    TasLogger::logger()->info("CucumberWireprotocolServer::connectionDisconnect");
 
-    QIODevice *connection = qobject_cast<QIODevice*>(sender());
-    if (connection) mReadBufferMap.remove(connection);
-
-}
-
-
-void CucumberWireprotocolServer::connectionError()
-{    
     QIODevice *connection = qobject_cast<QIODevice*>(sender());
     if (connection) {
-        qDebug() << DPL << connection->errorString();
         mReadBufferMap.remove(connection);
     }
 }
 
 
-static void makeDumpableData(QByteArray &data)
-{
-    for (int ii=0; ii < data.size(); ++ii) {
-        char byte = data[ii];
-        if (byte < 32) data[ii] = '§';
-        else if (byte > 126) data[ii] = '§';
+void CucumberWireprotocolServer::connectionError()
+{    
+
+    QIODevice *connection = qobject_cast<QIODevice*>(sender());
+    if (connection) {
+        TasLogger::logger()->info("CucumberWireprotocolServer::connectionError " + connection->errorString());
+
+        mReadBufferMap.remove(connection);
     }
 }
-
 
 
 // Warning: code below assumes an entire single JSON message is read with readAll
@@ -255,14 +241,10 @@ void CucumberWireprotocolServer::connectionReadyRead()
     if (connection) {
         QByteArray data = connection->readAll();
 
-        QByteArray copydata(data);
-        makeDumpableData(copydata);
-        qDebug() << DPL << "new data:" << copydata.size() << copydata;
-
         data.prepend(mReadBufferMap[connection]);
 
         if (data.trimmed().isEmpty()) {
-            qDebug() << DPL << "ignoring empty data";
+            //qDebug() << DPL << "ignoring empty data";
         }
         else {
             QJson::Parser parser;
@@ -274,21 +256,17 @@ void CucumberWireprotocolServer::connectionReadyRead()
                 data.clear();
             }
             else {
-                qDebug() << DPL << "parse error, wait for more data";
+                //qDebug() << DPL << "parse error, wait for more data";
             }
         }
         mReadBufferMap[connection] = data;
     }
     else {
-        qDebug() << DP << "ignoring signal from bad sender class:" << sender()->metaObject()->className();
+        //qDebug() << DP << "ignoring signal from bad sender class:" << sender()->metaObject()->className();
     }
 }
 
 
-void CucumberWireprotocolServer::connectionBytesWritten(qint64 bytes)
-{
-    qDebug() << DP << bytes;
-}
 
 void CucumberWireprotocolServer::handleJSONMessage(QVariant message, QIODevice *connection)
 {
@@ -303,27 +281,23 @@ void CucumberWireprotocolServer::handleJSONMessage(QVariant message, QIODevice *
 
     QVariantList msgList = message.toList();
 
-    //qDebug() << DPL << result.typeName() << resultList.size() << ':';
-    //qDebug() << DPL << result;
-    qDebug() << DPL << msgList.value(0).toString();
-
     QString errorMessage;
     QVariantList outMsg;
 
     if (message.type() != QVariant::List) {
-        qDebug() << DP << "closing connection: badly structured data:" << message.typeName() << "when List expected";
+        //qDebug() << DP << "closing connection: badly structured data:" << message.typeName() << "when List expected";
         errorMessage = "incompatible message structure (expected a list structure)";
     }
     else if (msgList.isEmpty() || msgList.size() > 2) {
-        qDebug() << DP << "closing connection: badly structured data: list size" << msgList.size() << "not in range 1-2";
+        //qDebug() << DP << "closing connection: badly structured data: list size" << msgList.size() << "not in range 1-2";
         errorMessage = "incompatible message structure (expected 1 or 2 list items)";
     }
     else if (!msgList.at(0).type() == QVariant::String) {
-        qDebug() << DP << "closing connection: badly structured data: 1st list item type not string:" << msgList.at(0).typeName();
+        //qDebug() << DP << "closing connection: badly structured data: 1st list item type not string:" << msgList.at(0).typeName();
         errorMessage = "incompatible message structure (expected string as the 1st list item)";
     }
     else if (msgList.size() == 2 && msgList.at(1).type() != QVariant::Map) {
-        qDebug() << DP << "closing connection: badly structured data: 2nd list item type not map:" << msgList.at(1).typeName();
+        //qDebug() << DP << "closing connection: badly structured data: 2nd list item type not map:" << msgList.at(1).typeName();
         errorMessage = "incompatible message structure (expected map as the 2nd list item)";
     }
     else {
@@ -381,7 +355,7 @@ void CucumberWireprotocolServer::handleJSONMessage(QVariant message, QIODevice *
         writeResponse(outMsg, connection);
     }
     else {
-        qDebug() << DPL << "RESPONSE PENDING...";
+        //qDebug() << DPL << "RESPONSE PENDING...";
     }
 }
 
@@ -433,7 +407,7 @@ bool CucumberWireprotocolServer::startStep(const QVariantMap &args, QIODevice *c
 void CucumberWireprotocolServer::responseTimeout()
 {
     if (!mPendingResponse) {
-        qDebug() << DP << "no pending response, ignoring";
+        //qDebug() << DP << "no pending response, ignoring";
         resetResponseTimeout();
     }
     else {
@@ -463,7 +437,7 @@ void CucumberWireprotocolServer::cucumberSuccessResponse()
 void CucumberWireprotocolServer::cucumberResponse(const QVariantList &outMsg)
 {
     if (!mPendingResponse) {
-        qCritical() << DP << "called without pending response for message:" << outMsg;
+        TasLogger::logger()->debug("CucumberWireprotocolServer::cucumberResponse called without pending response");
         return;
     }
 
@@ -471,10 +445,10 @@ void CucumberWireprotocolServer::cucumberResponse(const QVariantList &outMsg)
     resetResponseTimeout();
 
     if (!connection) {
-        qWarning() << DP << "called with expired connection for message:" << outMsg;
+        TasLogger::logger()->debug("CucumberWireprotocolServer::cucumberResponse for expired connection");
     }
     else {
-        qDebug() << DPL << "...SENDING PENDING RESPONSE";
+        TasLogger::logger()->debug("CucumberWireprotocolServer::cucumberResponse sending response");
         writeResponse(outMsg, connection);
     }
 }
@@ -502,9 +476,7 @@ void CucumberWireprotocolServer::writeResponse(const QVariantList &outMsg, QIODe
     //serializer.setIndentMode(QJson::IndentFull);
     QByteArray outBuf = serializer.serialize(outMsg);
     if (!outBuf.endsWith('\n')) outBuf.append('\n');
-    qDebug() << DPL << outBuf.size() << outBuf.trimmed();
     qint64 written = connection->write(outBuf);
-    //qDebug() << DPL << "wrote" << written << '/' << outBuf.size() << "bytes";
     Q_ASSERT(written == outBuf.size());
 
 }

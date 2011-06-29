@@ -79,11 +79,11 @@ void CucumberApplicationManager::pendingSenderTimeout()
 
 void CucumberApplicationManager::pluginResultCB(bool success, const QString &text, quintptr callId)
 {
-    qDebug() << DPL << success << text << callId;
     if (!callId || callId != reinterpret_cast<quintptr>(mPendingSender)) {
-        TasLogger::logger()->error("CucumberApplicationManager::qtScriptResult called with invalid callId");
+        TasLogger::logger()->debug("CucumberApplicationManager::qtScriptResult called with invalid callId");
     }
     else {
+        TasLogger::logger()->error("CucumberApplicationManager::qtScriptResult " + QString(success?"success":"fail"));
         mPendingTimer->stop();
 
         bool invokeOk;
@@ -95,7 +95,6 @@ void CucumberApplicationManager::pluginResultCB(bool success, const QString &tex
             invokeOk = QMetaObject::invokeMethod(mPendingSender, "cucumberFailResponse", Qt::QueuedConnection,
                                              Q_ARG(QString, text));
         }
-        qDebug() << DPL << success << "sender invokation" << invokeOk;
         mPendingSender = 0;
     }
 }
@@ -111,7 +110,6 @@ void CucumberApplicationManager::callStepInPlugin(const QString &regExpPattern, 
     else {
         TasClientManager *clientManager = TasClientManager::instance();
         QString processId = mPidMap[mCurrentApplicationId];
-        qDebug() << DPL << "looking for" << mCurrentApplicationId << "pid" << processId;
         TasClient *client = clientManager->findByProcessId(processId);
 
         if (!client) {
@@ -123,7 +121,6 @@ void CucumberApplicationManager::callStepInPlugin(const QString &regExpPattern, 
             QHash<QString, QString> argMap;
             argMap["qjson"] = jsonData;
             argMap["regExp"] = regExpPattern;
-            qDebug() << DPL << argMap;
 
             mRetryData.clear();
             mRetryTimer->stop();
@@ -153,7 +150,6 @@ void CucumberApplicationManager::callScriptMethod(const QString &regExpPattern, 
     else {
         TasClientManager *clientManager = TasClientManager::instance();
         QString processId = mPidMap[mCurrentApplicationId];
-        qDebug() << DPL << "looking for" << mCurrentApplicationId << "pid" << processId;
         TasClient *client = clientManager->findByProcessId(processId);
 
         if (!client) {
@@ -165,7 +161,6 @@ void CucumberApplicationManager::callScriptMethod(const QString &regExpPattern, 
             QHash<QString, QString> argMap;
             argMap["qjson"] = jsonData;
             argMap["regExp"] = regExpPattern;
-            qDebug() << DPL << argMap;
 
             mRetryData.clear();
             mRetryTimer->stop();
@@ -192,7 +187,6 @@ void CucumberApplicationManager::checkScriptProperty(const QString &regExpPatter
     else {
         TasClientManager *clientManager = TasClientManager::instance();
         QString processId = mPidMap[mCurrentApplicationId];
-        qDebug() << DPL << "looking for" << mCurrentApplicationId << "pid" << processId;
         TasClient *client = clientManager->findByProcessId(processId);
 
         if (!client) {
@@ -204,7 +198,6 @@ void CucumberApplicationManager::checkScriptProperty(const QString &regExpPatter
             QHash<QString, QString> argMap;
             argMap["qjson"] = jsonData;
             argMap["regExp"] = regExpPattern;
-            qDebug() << DPL << argMap;
 
             mRetryData.clear();
             mRetryTimer->stop();
@@ -289,9 +282,11 @@ void CucumberApplicationManager::startApp(const QString &regExpPattern, const QV
     else {
         QString id = args.at(0).toString();
         QStringList arguments = args.at(1).toString().split(QRegExp("\\s+"));
+
+        TasLogger::logger()->debug("CucumberApplicationManager::startApp " + arguments.join(" "));
+
         QString program = arguments.takeFirst();
 
-        qDebug() << DP << args << "->" << id << program << arguments;
         QString errorMsg = doStartOrWaitApp(id, program, arguments);
         doReplyOrRetry(&CucumberApplicationManager::startApp, errorMsg, regExpPattern, args, sender);
     }
@@ -323,9 +318,9 @@ void CucumberApplicationManager::startAppTable(const QString &regExpPattern, con
             errorMsg = QString("Expected command and optional list of arguments");
         }
         else {
-            QString program = arguments.takeFirst();
+            TasLogger::logger()->debug("CucumberApplicationManager::startAppTable " + arguments.join(" "));
 
-            qDebug() << DP << args << "->" << id << program << arguments;
+            QString program = arguments.takeFirst();
             errorMsg = doStartOrWaitApp(id, program, arguments);
         }
         doReplyOrRetry(&CucumberApplicationManager::startAppTable, errorMsg, regExpPattern, args, sender);
@@ -348,7 +343,7 @@ QString CucumberApplicationManager::doStartOrWaitApp(const QString &id, const QS
                                                                   : mWorkingDirectoryPath;
         QString responseData, responseErrorMessage;
         StartAppService::launchDetached(program, arguments, mStartEnvironment, workingDirectory, responseData, responseErrorMessage);
-        qDebug() << DPL << "->" << program << arguments << '@' << workingDirectory  <<":" << responseData << responseErrorMessage;
+        //qDebug() << DPL << "->" << program << arguments << '@' << workingDirectory  <<":" << responseData << responseErrorMessage;
 
         //bool result = QProcess::startDetached(program, arguments, workingDirectory, &pid);
         //qDebug() << DPL << "->" << program << arguments << '@' << workingDirectory  <<":" << result << pid;
@@ -406,7 +401,7 @@ void CucumberApplicationManager::registerSteps(QObject *registrarObject, const c
 
     CucumberStepDataMap::const_iterator it;
     for (it = mPluginSteps.begin(); it != mPluginSteps.end(); ++it) {
-        qDebug() << ".........." << it.value().toDebugString();
+        TasLogger::logger()->debug("CucumberApplicationManager::registerSteps " + it.value().toDebugString());
         QMetaObject::invokeMethod(registrarObject, method,
                                   Q_ARG(QRegExp, QRegExp(it.value().regExp)),
                                   Q_ARG(QObject*, static_cast<QObject*>(this)),
@@ -441,7 +436,6 @@ void CucumberApplicationManager::endScenario()
 
 void CucumberApplicationManager::doRetryTimer()
 {
-    qDebug() << DPL << "entry";
     if (mRetryData.stepFn) {
         // call member function of this object through pointer retryData.stepFn
         ((this)->*(mRetryData.stepFn))(mRetryData.regExpPattern, mRetryData.args, mRetryData.sender.data());
@@ -457,7 +451,7 @@ void CucumberApplicationManager::doRetryTimer()
 void CucumberApplicationManager::doReplyOrRetry(InvokableStepFn fn, const QString &errorString,
                                                 const QString &regExpPattern, const QVariantList &args, QObject *sender)
 {
-    qDebug() << DPL << "entry";
+    TasLogger::logger()->debug("CucumberApplicationManager::doReplyOrRetry");
     if (mRetryData.hasCallback() && !mRetryData.equals(fn, regExpPattern, args, sender)) {
         qCritical() << DPL << "new updateRetries called when previous not finished!";
         invokePlainSender(mRetryData.sender.data(), "Cancelled, because of getting a new request!");
@@ -489,7 +483,7 @@ void CucumberApplicationManager::doReplyOrRetry(InvokableStepFn fn, const QStrin
                     qWarning() << DPL << "retryTimer was not active on update, starting...";
                     mRetryTimer->start();
                 }
-                qDebug() << DPL << "retry after error:" << errorString;
+                //qDebug() << DPL << "retry after error:" << errorString;
             }
             else {
                 // give up

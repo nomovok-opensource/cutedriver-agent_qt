@@ -22,11 +22,10 @@ Feature: QtTasServer with Cucumber Wire Protocol
     Then object display has property text value "8"
 
     And I select application one
-    And I do click on object threeButton
     And I do click on object plusButton
     And I do click on object fiveButton
     And I do click on object equalButton
-    Then object display has property text value "8"
+    Then object display has property text value "14"
 
   @ignore
   Scenario: Testing QML

@@ -51,7 +51,7 @@ public:
     Q_INVOKABLE void cucumberResponse(const QVariantList &outMsg);
 
     // step defintion method that just dumps the data, for testing/reference
-    Q_INVOKABLE void invokeDebugDump(const QString &regExpPattern, const QVariantList &args, QObject *sender);
+    //Q_INVOKABLE void invokeDebugDump(const QString &regExpPattern, const QVariantList &args, QObject *sender);
 
 public slots:
     void registerStep(const QRegExp &regExp, QObject *object, const char *method, const QString &sourceFileSpec);
@@ -68,7 +68,6 @@ private slots:
     void connectionDisconnect();
     void connectionError();
     void connectionReadyRead();
-    void connectionBytesWritten(qint64 bytes);
 
     void handleJSONMessage(QVariant data, QIODevice *connection);
     QVariantList findMatchingSteps(const QString &name);
