@@ -22,8 +22,6 @@
  
 	what if scenarios:
 		1) singal enabled to e.g button and button object is deleted, does get_signal work anymore due to tasserver cannot retrieve button object?
-			
-			
  
  
 */

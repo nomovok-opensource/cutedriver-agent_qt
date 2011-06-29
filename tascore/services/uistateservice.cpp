@@ -16,8 +16,6 @@
 ** of this file. 
 ** 
 ****************************************************************************/ 
- 
-
 
 #include "uistateservice.h"
 #include "taslogger.h"

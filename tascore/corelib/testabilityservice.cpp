@@ -16,8 +16,6 @@
 ** of this file. 
 ** 
 ****************************************************************************/ 
- 
-
 
 #include "tasxmlwriter.h"
 #include "testabilityservice.h"

@@ -16,8 +16,6 @@
 ** of this file. 
 ** 
 ****************************************************************************/ 
- 
-
 
 #ifndef TASTDATAMODEL_H
 #define TASTDATAMODEL_H

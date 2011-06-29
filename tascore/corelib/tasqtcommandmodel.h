@@ -16,8 +16,6 @@
 ** of this file. 
 ** 
 ****************************************************************************/ 
- 
-
 
 #ifndef TASTCOMMANDMODEL_H
 #define TASTCOMMANDMODEL_H
