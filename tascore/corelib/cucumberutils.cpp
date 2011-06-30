@@ -104,9 +104,7 @@ static void insertStepData(CucumberStepDataMap &map, CucumberStepData &data)
         if (data.flags.value("action").isEmpty()) {
             data.flags.insert("action", CUCUMBER_STEP_DEFAULTACTION);
         }
-        CucumberUtils *p;
-        void *vp = p;
-        quintptr *qp = (quintptr*)vp;
+
         if (data.flags.value("plugin").isEmpty()) {
             int pos = data.stepFileSpec.lastIndexOf('/')+1; // pos >= 0
             int len = qMax(0, data.stepFileSpec.indexOf('.', pos) - pos); // if no '.', len is 0

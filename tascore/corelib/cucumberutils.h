@@ -24,9 +24,9 @@
 #include <QHash>
 
 #include "cucumberstepdata.h"
+#include "tasconstants.h"
 
-
-class CucumberUtils
+class TAS_EXPORT CucumberUtils
 {
 public:
     CucumberUtils();
