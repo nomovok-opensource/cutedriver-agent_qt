@@ -122,6 +122,7 @@ CucumberWireprotocolServer::CucumberWireprotocolServer(quint16 port, QObject *pa
     }
 #endif
 
+    reRegisterSteps();
 }
 
 
@@ -189,6 +190,7 @@ int CucumberWireprotocolServer::start()
 
 void CucumberWireprotocolServer::reRegisterSteps()
 {
+    while (!mSteps.isEmpty()) delete mSteps.takeFirst();
     mSteps.clear();
     // ask CucumberApplicationManager instance to register it's steps
     mAppManager->registerSteps(this, "registerStep");
@@ -200,7 +202,7 @@ void CucumberWireprotocolServer::handleNewConnect()
 {
     QTcpSocket *connection = mServer->nextPendingConnection();
     if (connection) {
-        reRegisterSteps();
+        //reRegisterSteps();
 
         connect(connection, SIGNAL(disconnected()), SLOT(connectionDisconnect()));
         connect(connection, SIGNAL(error(QAbstractSocket::SocketError)), SLOT(connectionError()));
