@@ -47,10 +47,10 @@ class TAS_EXPORT SerializeFilter
 {
 public:
     virtual ~SerializeFilter(){}
-    virtual bool serializeObject(TasObject& object){return true;}
-    virtual bool serializeAttribute(TasAttribute& attribute){return true;}
-    virtual bool serializeContainer(TasObjectContainer& container){return true;}
-	virtual void serializeDuplicates(bool allow){}
+    virtual bool serializeObject(TasObject& object){Q_UNUSED(object); return true;}
+    virtual bool serializeAttribute(TasAttribute& attribute){Q_UNUSED(attribute); return true;}
+    virtual bool serializeContainer(TasObjectContainer& container){Q_UNUSED(container); return true;}
+    virtual void serializeDuplicates(bool allow){Q_UNUSED(allow); }
 };
 
 

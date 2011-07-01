@@ -27,8 +27,8 @@
 #include "taslogger.h"
 
 /*!
-  \class FixtureService
-  \brief FixtureService closes the application
+  \class ScreenshotService
+  \brief ScreenshotService closes the application
 
 */
 

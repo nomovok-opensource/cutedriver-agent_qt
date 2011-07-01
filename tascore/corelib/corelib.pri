@@ -28,8 +28,10 @@ PUBLIC_HEADERS += $$PWD/taspluginloader.h
 PUBLIC_HEADERS += $$PWD/tasextensioninterface.h
 PUBLIC_HEADERS += $$PWD/infologger.h 
 PUBLIC_HEADERS += $$PWD/testabilityinterface.h
+PUBLIC_HEADERS += $$PWD/cucumberutils.h
+PUBLIC_HEADERS += $$PWD/cucumberstepdata.h
 
-HEADERS += $$PWD/tasmessages.h 
+HEADERS += $$PWD/tasmessages.h
 HEADERS += $$PWD/testabilitysettings.h 
 HEADERS += $$PWD/tasdatashare.h 
 HEADERS += $$PWD/tascommand.h 
@@ -43,6 +45,7 @@ HEADERS += $$PWD/taspointercache.h
 #HEADERS += $$PWD/tascommandparser.h 
 
 SOURCES += $$PWD/tasmessages.cpp
+SOURCES += $$PWD/cucumberutils.cpp
 #SOURCES += $$PWD/tascommandparser.cpp 
 SOURCES += $$PWD/taslogger.cpp 
 SOURCES += $$PWD/taspluginloader.cpp 

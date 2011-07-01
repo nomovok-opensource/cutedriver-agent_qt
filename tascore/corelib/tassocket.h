@@ -78,8 +78,8 @@ public:
     bool sendError(const qint32& messageId, const QString& message);
     bool sendError(const qint32& messageId, const QByteArray& message, bool compressed = false);
 	
-    QByteArray syncRequest(const qint32& messageId, const QByteArray& requestMessage);
-    QByteArray syncRequest(const qint32& messageId, const QString& requestMessage);
+    bool syncRequest(const qint32& messageId, const QByteArray& requestMessage, TasMessage &reply);
+    bool syncRequest(const qint32& messageId, const QString& requestMessage, TasMessage &reply);
     
 
 	bool sendMessage(TasMessage& message);

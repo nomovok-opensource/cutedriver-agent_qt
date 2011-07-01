@@ -16,7 +16,7 @@
 ** of this file. 
 ** 
 ****************************************************************************/ 
- 
+
 
 
 #ifndef TESTABILITYUSETTINGS_H
@@ -33,15 +33,16 @@ private:
     ~TestabilitySettings();
 
 public:
-	static TestabilitySettings* settings();
-	static void deleteInstance();
+    static TestabilitySettings* settings();
+    static void deleteInstance();
 
-	QVariant getValue(const QString& key);
-	bool setValue(const QString& key, const QVariant& value);
+    QVariant getValue(const QString& key);
+    bool setValue(const QString& key, const QVariant& value);
+    static QString getBasePath(const QString &append=QString());
 
 private:
     static TestabilitySettings *mInstance;
-	QSettings* mSettings;
+    QSettings* mSettings;
 
 };
 

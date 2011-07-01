@@ -239,7 +239,7 @@ bool TasServerServiceManager::appendVkbData(TasCommandModel& commandModel, QByte
                 if(!vkbData.isEmpty()){
                     TasLogger::logger()->debug("TasServerServiceManager::appendVkbData append vkb data");
                     appended = true;
-                    data.append(vkbData);
+                    data.append(reply.data());
                 }
             }
         }

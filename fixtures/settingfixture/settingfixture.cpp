@@ -63,7 +63,7 @@ SettingFixture::~SettingFixture()
 /*!
 
 */
-bool SettingFixture::execute(void * objectInstance, QString actionName, QHash<QString, QString> parameters, QString & stdOut)
+bool SettingFixture::execute(void * /*objectInstance*/, QString actionName, QHash<QString, QString> parameters, QString & stdOut)
 {
     bool returnValue = true;
     //check the type of settings
