@@ -10,3 +10,4 @@ usr/lib/qt4/plugins/traversers/liblayouttraverse.so
 usr/lib/qt4/plugins/traversers/libqttraverse.so
 usr/lib/qt4/plugins/traversers/libviewitemtraverse.so
 usr/lib/qt4/plugins/traversers/libwebkittraverse.so
+etc/qt_testability/cucumber/qtscriptfixture.default.steps

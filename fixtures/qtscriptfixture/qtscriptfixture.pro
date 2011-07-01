@@ -26,6 +26,8 @@ include(../../tasbase.pri)
 QT += script
 
 target.path = $$TAS_TARGET_PLUGIN/tasfixtures
+stepsfiles.path = $$TAS_TARGET_STEPS
+stepsfiles.files = qtscriptfixture.default.steps
 
 symbian: {
         TARGET.EPOCALLOWDLLDATA = 1
@@ -46,5 +48,6 @@ SOURCES += qtscriptfixture.cpp
 DESTDIR = lib
 
 INSTALLS += target
+INSTALLS += stepsfiles
 
 LIBS += -L../../tascore/lib/ -lqttestability
