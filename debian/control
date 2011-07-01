@@ -2,7 +2,7 @@ Source: qttas
 Section: devel
 Priority: extra
 Maintainer: Petri Kiiskinen <ext-petri.ak.kiiskinen@nokia.com>
-Build-Depends: debhelper (>= 5), libqt4-dev (>=4.6.1~), libqtwebkit-dev (>=2.1~), libqmsystem2-dev (>= 0.1.33~), x11proto-xext-dev, libxtst-dev, libqtcontacts-dev, libqtm-serviceframework-dev,libqtm-systeminfo-dev,libmeegotouch-dev, aegis-builder
+Build-Depends: debhelper (>= 5), libqt4-dev (>=4.6.1~), libqtwebkit-dev (>=2.1~), libqmsystem2-dev (>= 0.1.33~), x11proto-xext-dev, libxtst-dev, libqtcontacts-dev, libqtm-serviceframework-dev,libqtm-systeminfo-dev,libmeegotouch-dev, aegis-builder, libqjson-dev
 Standards-Version: 3.7.2
 
 Package: qttas-server
