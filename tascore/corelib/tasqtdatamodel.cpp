@@ -464,7 +464,7 @@ void TasObjectContainer::setName(const QString& name)
 */
 void TasObjectContainer::setType(const QString& type)
 {
-    addDomAttribute(TYPE, TYPE);
+    addDomAttribute(TYPE, type);
 }
 
 /*!
