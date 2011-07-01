@@ -124,7 +124,7 @@ CucumberWireprotocolServer::CucumberWireprotocolServer(quint16 port, QObject *pa
     }
 #endif
 
-    reRegisterSteps();
+    //reRegisterSteps();
 }
 
 
@@ -221,7 +221,7 @@ void CucumberWireprotocolServer::handleNewConnect()
 {
     QTcpSocket *connection = mServer->nextPendingConnection();
     if (connection) {
-        //reRegisterSteps();
+        reRegisterSteps();
 
         connect(connection, SIGNAL(disconnected()), SLOT(connectionDisconnect()));
         connect(connection, SIGNAL(error(QAbstractSocket::SocketError)), SLOT(connectionError()));
