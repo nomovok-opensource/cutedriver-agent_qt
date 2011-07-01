@@ -97,7 +97,7 @@ TasClient* TasClientManager::addClient(const QString& processId, const QString& 
 
 #ifdef Q_OS_SYMBIAN
     if(app == 0 && !processName.isEmpty()){
-        app = findByApplicationName(processName, true);
+        app = findByApplicationName(processName);
         if(app){
             TasLogger::logger()->debug("TasClientManager::addClient existing client found by name!");
         }
@@ -122,7 +122,7 @@ TasClient* TasClientManager::addClient(const QString& processId, const QString& 
   already exists only the data will be updated.
  */
 TasClient* TasClientManager::addRegisteredClient(const QString& processId, const QString& processName, TasSocket* socket,
-                                                 const QString& type, QString /*applicationUid*/)
+                                                 const QString& type, QString applicationUid)
 {
     QMutexLocker locker(&mMutex);
     TasLogger::logger()->info("TasClientManager::addRegisteredClient " + processName);
@@ -135,7 +135,7 @@ TasClient* TasClientManager::addRegisteredClient(const QString& processId, const
 
 #ifdef Q_OS_SYMBIAN
     if(app == 0 && !processName.isEmpty()){
-        app = findByApplicationName(processName, true);
+        app = findByApplicationName(processName);
         if(app && app->applicationUid() == applicationUid){
             TasLogger::logger()->debug("TasClientManager::addRegisteredClient existing client found by name!");
         }
