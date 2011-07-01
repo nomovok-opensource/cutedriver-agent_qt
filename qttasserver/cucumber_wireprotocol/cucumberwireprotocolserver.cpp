@@ -23,6 +23,8 @@
 
 #include <taslogger.h>
 
+#include <testabilitysettings.h>
+
 #include <QTcpServer>
 #include <QTcpSocket>
 
@@ -37,8 +39,8 @@
 
 
 
-#define DP "CucumberWireprotocolServer" << __FUNCTION__
-#define DPL "CucumberWireprotocolServer" << __FUNCTION__ << __LINE__
+//#define DP "CucumberWireprotocolServer" << __FUNCTION__
+//#define DPL "CucumberWireprotocolServer" << __FUNCTION__ << __LINE__
 
 
 class CucumberWireprotocolServer_StepData
@@ -134,6 +136,20 @@ CucumberWireprotocolServer::~CucumberWireprotocolServer()
     }
 }
 
+
+/*static*/
+bool CucumberWireprotocolServer::enabledInSettings()
+{
+    QVariant value = TestabilitySettings::settings()->getValue(CUCUMBER_WIRE_SERVER);
+    if(value.isValid() && value.canConvert<QString>()){
+        if(value.toString() == "on"){
+            return true;
+        }
+    }
+    return false;
+}
+
+
 QString CucumberWireprotocolServer::addressString()
 {
     return mServer->serverAddress().toString() + ":" + QString::number(mServer->serverPort());
@@ -190,7 +206,10 @@ int CucumberWireprotocolServer::start()
 
 void CucumberWireprotocolServer::reRegisterSteps()
 {
-    while (!mSteps.isEmpty()) delete mSteps.takeFirst();
+    while (!mSteps.isEmpty()) {
+        CucumberWireprotocolServer_StepData *step = mSteps.takeLast();
+        if (step) delete step;
+    }
     mSteps.clear();
     // ask CucumberApplicationManager instance to register it's steps
     mAppManager->registerSteps(this, "registerStep");
@@ -218,6 +237,7 @@ void CucumberWireprotocolServer::connectionDisconnect()
     QIODevice *connection = qobject_cast<QIODevice*>(sender());
     if (connection) {
         mReadBufferMap.remove(connection);
+        connection->deleteLater();
     }
 }
 
@@ -230,6 +250,7 @@ void CucumberWireprotocolServer::connectionError()
         TasLogger::logger()->info("CucumberWireprotocolServer::connectionError " + connection->errorString());
 
         mReadBufferMap.remove(connection);
+        connection->deleteLater();
     }
 }
 
@@ -275,8 +296,8 @@ void CucumberWireprotocolServer::handleJSONMessage(QVariant message, QIODevice *
     Q_ASSERT(connection);
 
     if (mPendingResponse) {
-        Q_ASSERT(mResponseTimeoutTimer->isActive());
-        qCritical() << DP << "Got new request when previous one has pending reply!";
+        //Q_ASSERT(mResponseTimeoutTimer->isActive());
+        TasLogger::logger()->info("CucumberWireprotocolServer::handleJSONMessage got new request before finishing previous");
         connection->close();
         return;
     }
@@ -336,8 +357,7 @@ void CucumberWireprotocolServer::handleJSONMessage(QVariant message, QIODevice *
 
         else {
             errorMessage = "unknown operation: " + msgName;
-            qCritical() << DP << "closing connection: unknown request:" << msgName;
-
+            TasLogger::logger()->warning("CucumberWireprotocolServer::handleJSONMessage closing coneection, because received unknown request: " + msgName);
             connection->close();
             return;
         }

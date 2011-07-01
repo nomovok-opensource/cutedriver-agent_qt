@@ -41,6 +41,9 @@ public:
 
     CucumberWireprotocolServer(quint16 port, QObject *parent = 0);
     ~CucumberWireprotocolServer();
+
+    static bool enabledInSettings();
+
     QString addressString();
     QString lastErrorString() { return mLastErrorString; }
 
@@ -52,6 +55,7 @@ public:
 
     // step defintion method that just dumps the data, for testing/reference
     //Q_INVOKABLE void invokeDebugDump(const QString &regExpPattern, const QVariantList &args, QObject *sender);
+
 
 public slots:
     void registerStep(const QRegExp &regExp, QObject *object, const char *method, const QString &sourceFileSpec);

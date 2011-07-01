@@ -216,9 +216,14 @@ void TasServer::createServers()
 #endif
 
 #if defined(TAS_USE_CUCUMBER_WIRE_PROTOCOL)
-    if (!mCucumberServer) {
+    bool cwpEnabled = CucumberWireprotocolServer::enabledInSettings();
+    if (!mCucumberServer &&  cwpEnabled) {
         mCucumberServer = new CucumberWireprotocolServer(QT_CUCUMBER_SERVER_OUT, this);
     }
+    else {
+        TasLogger::logger()->info("TasServer::createServers Cucumber wire server not enabled");
+    }
+    //else if (mCucumberServer && !cwpEnabled) {        delete mCucumberServer;        mCucumberServer = NULL;    }
 #endif
 }
 
@@ -273,14 +278,16 @@ bool TasServer::startServer()
 #endif
 
 #if defined(TAS_USE_CUCUMBER_WIRE_PROTOCOL)
-    if (mCucumberServer->start() > 0) {
-        TasLogger::logger()->info("TasServer::startServer cucumber wire protocol listening " + mCucumberServer->addressString());
-    }
-    else {
-        TasLogger::logger()->warning("TasServer::startServer cucumber wire protocol listen failed on "
-                                     + mCucumberServer->addressString()
-                                     + ", error: " + mCucumberServer->lastErrorString());
-        mCucumberServer->close();
+    if (mCucumberServer) {
+        if (mCucumberServer->start() > 0) {
+            TasLogger::logger()->info("TasServer::startServer cucumber wire server listening " + mCucumberServer->addressString());
+        }
+        else {
+            TasLogger::logger()->warning("TasServer::startServer cucumber wire server listen failed on "
+                                         + mCucumberServer->addressString()
+                                         + ", error: " + mCucumberServer->lastErrorString());
+            mCucumberServer->close();
+        }
     }
 #endif
 

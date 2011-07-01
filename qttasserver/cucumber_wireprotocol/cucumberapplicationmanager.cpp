@@ -33,8 +33,7 @@
 #include <qjson_warpper.h>
 
 
-#define DP "CucumberWireprotocolServer" << __FUNCTION__
-#define DPL "CucumberWireprotocolServer" << QString("%1:%2").arg(__FUNCTION__).arg(__LINE__)
+//#define DPL "CucumberWireprotocolServer" << QString("%1:%2").arg(__FUNCTION__).arg(__LINE__)
 
 
 
@@ -441,7 +440,7 @@ void CucumberApplicationManager::doRetryTimer()
         ((this)->*(mRetryData.stepFn))(mRetryData.regExpPattern, mRetryData.args, mRetryData.sender.data());
     }
     else {
-        qWarning() << DPL << "called with NULL stepFn, stopping timer and clearing retryData";
+        TasLogger::logger()->debug("CucumberApplicationManager::doRetryTimer called with NULL stepFn (debug warning)");
         mRetryTimer->stop();
         mRetryData.clear();
     }
@@ -453,7 +452,7 @@ void CucumberApplicationManager::doReplyOrRetry(InvokableStepFn fn, const QStrin
 {
     TasLogger::logger()->debug("CucumberApplicationManager::doReplyOrRetry");
     if (mRetryData.hasCallback() && !mRetryData.equals(fn, regExpPattern, args, sender)) {
-        qCritical() << DPL << "new updateRetries called when previous not finished!";
+        TasLogger::logger()->debug("CucumberApplicationManager::doReplyOrRetry called with pending callBack (internal warning)");
         invokePlainSender(mRetryData.sender.data(), "Cancelled, because of getting a new request!");
     }
 
@@ -480,7 +479,7 @@ void CucumberApplicationManager::doReplyOrRetry(InvokableStepFn fn, const QStrin
             --mRetryData.retriesLeft;
             if (mRetryData.retriesLeft > 0) {
                 if (!mRetryTimer->isActive()) {
-                    qWarning() << DPL << "retryTimer was not active on update, starting...";
+                    TasLogger::logger()->debug("CucumberApplicationManager::doReplyOrRetry called with inactive retryTimer (debug warning)");
                     mRetryTimer->start();
                 }
                 //qDebug() << DPL << "retry after error:" << errorString;
