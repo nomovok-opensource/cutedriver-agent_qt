@@ -189,6 +189,10 @@ void TasClientManager::addStartedApp(const QString& processName, const QString& 
 void TasClientManager::removeClient(const QString& processId, bool kill)
 {
     QMutexLocker locker(&mMutex);   
+
+    bool ok;
+    quint64 pid = processId.toULongLong(&ok, 10);       
+
     TasClient* app = removeByProcessId(processId);
     if(app){
 
@@ -196,8 +200,6 @@ void TasClientManager::removeClient(const QString& processId, bool kill)
         app->closeConnection();
 
         if(kill){
-            bool ok;
-            quint64 pid = app->processId().toULongLong(&ok, 10);       
             if(ok && pid != 0){
                 TasNativeUtils::killProcess(pid);
             }
@@ -205,6 +207,9 @@ void TasClientManager::removeClient(const QString& processId, bool kill)
 
         delete app;
         app = 0;
+    }
+    else if(kill && ok && pid != 0){
+        TasNativeUtils::killProcess(pid);
     }
     TasLogger::logger()->info("TasClientManager::removeClient client count" + QString::number(mClients.size()));
 }
