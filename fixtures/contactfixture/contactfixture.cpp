@@ -272,12 +272,12 @@ QContactManager * ContactFixture::connectContactManager(QHash<QString, QString> 
     return manager;
 }
 
-void ContactFixture::addContact(QHash<QString, QString> parameters, QString& stdOut)
+void ContactFixture::addContact(QHash<QString, QString> /*parameters*/, QString& /*stdOut*/)
 {
     TasLogger::logger()->debug("> ContactFixture::addContact ");
 }
 
-void ContactFixture::removeContact(QHash<QString, QString> parameters, QString& stdOut)
+void ContactFixture::removeContact(QHash<QString, QString> /*parameters*/, QString& /*stdOut*/)
 {
     TasLogger::logger()->debug("> ContactFixture::removeContact ");
 }

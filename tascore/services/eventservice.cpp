@@ -16,7 +16,6 @@
 ** of this file. 
 ** 
 ****************************************************************************/ 
- 
 
 
 #include <QApplication>
@@ -305,9 +304,7 @@ QByteArray TasEventFilter::getEvents()
 {
     QByteArray message;
     if(mTasEvents != 0){
-        SerializeFilter* filter = new SerializeFilter();		    		
-        filter->serializeDuplicates(true);		    		
-        mTasModel->serializeModel(message, filter);
+        mTasModel->serializeModel(message);
     }
     else{
         message = QByteArray(QString("Event listening not enabled!").toUtf8());

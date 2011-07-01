@@ -16,8 +16,6 @@
 ** of this file. 
 ** 
 ****************************************************************************/ 
- 
-
 
 #include "uistateservice.h"
 #include "taslogger.h"
@@ -65,7 +63,7 @@ QByteArray UiStateService::makeUiState(TasCommandModel& model)
     }
     QByteArray xml;
     TasDataModel* uiModel = mTraverser->getUiState(command);
-    uiModel->serializeModel(xml, 0, model.onlyFragment());
+    uiModel->serializeModel(xml, model.onlyFragment());
     delete uiModel;
     return xml;
 }

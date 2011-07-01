@@ -1,22 +1,22 @@
-/*************************************************************************** 
-** 
-** Copyright (C) 2010 Nokia Corporation and/or its subsidiary(-ies). 
-** All rights reserved. 
-** Contact: Nokia Corporation (testabilitydriver@nokia.com) 
-** 
+/***************************************************************************
+**
+** Copyright (C) 2010 Nokia Corporation and/or its subsidiary(-ies).
+** All rights reserved.
+** Contact: Nokia Corporation (testabilitydriver@nokia.com)
+**
 ** This file is part of Testability Driver Qt Agent
-** 
-** If you have questions regarding the use of this file, please contact 
-** Nokia at testabilitydriver@nokia.com . 
-** 
-** This library is free software; you can redistribute it and/or 
-** modify it under the terms of the GNU Lesser General Public 
-** License version 2.1 as published by the Free Software Foundation 
-** and appearing in the file LICENSE.LGPL included in the packaging 
-** of this file. 
-** 
-****************************************************************************/ 
- 
+**
+** If you have questions regarding the use of this file, please contact
+** Nokia at testabilitydriver@nokia.com .
+**
+** This library is free software; you can redistribute it and/or
+** modify it under the terms of the GNU Lesser General Public
+** License version 2.1 as published by the Free Software Foundation
+** and appearing in the file LICENSE.LGPL included in the packaging
+** of this file.
+**
+****************************************************************************/
+
 
 
 #ifndef TASCLIENTMANAGER_H
@@ -44,26 +44,26 @@ private:
   ~TasClientManager();
 
 public:
-	
-	enum ClientError {
-		NoError,
-		InsertError,
-		QueryError,
-		RemoveError
-	};
 
-	enum CloseStatus {
-   	    Ok,
-		Stalled,
-		Crashed
-	};
+        enum ClientError {
+                NoError,
+                InsertError,
+                QueryError,
+                RemoveError
+        };
+
+        enum CloseStatus {
+            Ok,
+                Stalled,
+                Crashed
+        };
 
   static TasClientManager* instance();
   static void deleteInstance();
 
   TasClient* addClient(const QString& processId, const QString& processName=QString());
-  TasClient* addRegisteredClient(const QString& processId, const QString& processName, TasSocket* socket, 
-								 const QString& type=TAS_PLUGIN, QString applicationUid=QString());  
+  TasClient* addRegisteredClient(const QString& processId, const QString& processName, TasSocket* socket,
+                                                                 const QString& type=TAS_PLUGIN, QString applicationUid=QString());
   void addStartedApp(const QString& processName, const QString& timestamp);
 
   void removeClient(const QString& processId, bool kill=false);
@@ -76,19 +76,18 @@ public:
   bool detachFromStartupData(const QString& identifier);
 
   TasClient* findClient(TasCommandModel& request);
-  TasClient* findByProcessId(const QString& processId, bool includeSocketLess=false);
+  TasClient* findByProcessId(const QString& processId);
+  TasClient* findByApplicationName(const QString& applicationName);
 #ifdef Q_OS_SYMBIAN
   TasClient* findByApplicationUid(const QString applicationUid);
-#endif  
+#endif
   TasClient* logMemClient();
   void removeMe(const TasClient& client);
 
   void addStartedPid(const QString& pid);
-  TasClient* findByApplicationName(const QString& applicationName, bool includeSocketLess=false);
 
 private:
-
-  TasClient* latestClient(bool includeSocketLess=false);
+  TasClient* latestClient();
   TasClient* removeByProcessId(const QString& processId);  
 
   bool verifyClient(TasClient* client);
@@ -128,10 +127,13 @@ public:
   void setPluginType(const QString& pluginType);
   QString pluginType();
 
+  void callFixture(QObject *sender, const char *resultMethod, quintptr callId,
+                   const QString &pluginName, const QString &actionName, QHash<QString, QString> parameters);
+
 signals:
   void registered(const QString& ProcessId);
 
-private slots:    
+private slots:
   void disconnected();
   void socketDied();
 

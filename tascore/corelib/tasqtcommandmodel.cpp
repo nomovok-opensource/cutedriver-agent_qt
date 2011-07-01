@@ -1,7 +1,7 @@
 /*************************************************************************** 
 ** 
 ** Copyright (C) 2010 Nokia Corporation and/or its subsidiary(-ies). 
-** All rights reserved. 
+** All rights reserved.  
 ** Contact: Nokia Corporation (testabilitydriver@nokia.com) 
 ** 
 ** This file is part of Testability Driver Qt Agent
@@ -32,7 +32,7 @@ QDomElement TasDomObject::domElement() const
     return mElement;
 }
 
-void TasDomObject::addAttribute(const QString& name, const QString& value)
+void TasDomObject::addDomAttribute(const QString& name, const QString& value)
 {
     mElement.setAttribute(name, value);
 }

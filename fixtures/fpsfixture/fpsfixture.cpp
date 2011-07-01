@@ -1,6 +1,6 @@
 /*************************************************************************** 
 ** 
-** Copyright (C) 2010 Nokia Corporation and/or its subsidiary(-ies). 
+** Copyright (C) 2010 Nokia Corporation and/or its subsidiary(-ies).  
 ** All rights reserved. 
 ** Contact: Nokia Corporation (testabilitydriver@nokia.com) 
 ** 
@@ -137,12 +137,8 @@ void FpsFixture::printFpsResults(QList< QPair<QString,int> > fpsData, QObject* t
         fpsD.addAttribute("timeStamp", value.first);
         fpsD.addAttribute("frameCount", value.second);
     }
-  
-    SerializeFilter* filter = new SerializeFilter();		    		
-    filter->serializeDuplicates(true);		
-    //filter is deleted by model
     QByteArray xml;
-    model->serializeModel(xml, filter);    
+    model->serializeModel(xml);    
     stdOut.append(QString::fromUtf8(xml.data()));
     delete model;
 }

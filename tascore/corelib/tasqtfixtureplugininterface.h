@@ -32,6 +32,8 @@ const char* const GRAPHICS_ITEM_TYPE = "QGraphicsItem";
 const char* const APPLICATION_TYPE = "QApplication";
 const char* const NULL_TYPE = "Null";
 
+const char* const CUCUMBER_STEP_DEFAULTACTION = "cucumberStep";
+
 class TasFixturePluginInterface  
 {
 public:

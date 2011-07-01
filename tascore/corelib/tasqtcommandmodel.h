@@ -16,8 +16,6 @@
 ** of this file. 
 ** 
 ****************************************************************************/ 
- 
-
 
 #ifndef TASTCOMMANDMODEL_H
 #define TASTCOMMANDMODEL_H
@@ -38,7 +36,7 @@ class TasCommandModel;
 class TasDomObject
 {
 public:
-    void addAttribute(const QString& name, const QString& value);
+    void addDomAttribute(const QString& name, const QString& value);
 	void setText(const QString& text);
     QDomElement domElement() const;
     QString parameter(const QString& name);
@@ -137,7 +135,7 @@ public:
 	bool isMultitouch();
 	bool onlyFragment();
 
-	TasCommandModel* clone();
+        //TasCommandModel* clone();
 private:
     QList<TasTarget*> mTargets;
 	QDomDocument* mDocument;

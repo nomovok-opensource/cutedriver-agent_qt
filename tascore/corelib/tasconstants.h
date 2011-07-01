@@ -1,29 +1,29 @@
-/*************************************************************************** 
-** 
-** Copyright (C) 2010 Nokia Corporation and/or its subsidiary(-ies). 
-** All rights reserved. 
-** Contact: Nokia Corporation (testabilitydriver@nokia.com) 
-** 
+/***************************************************************************
+**
+** Copyright (C) 2010 Nokia Corporation and/or its subsidiary(-ies).
+** All rights reserved.
+** Contact: Nokia Corporation (testabilitydriver@nokia.com)
+**
 ** This file is part of Testability Driver Qt Agent
-** 
-** If you have questions regarding the use of this file, please contact 
-** Nokia at testabilitydriver@nokia.com . 
-** 
-** This library is free software; you can redistribute it and/or 
-** modify it under the terms of the GNU Lesser General Public 
-** License version 2.1 as published by the Free Software Foundation 
-** and appearing in the file LICENSE.LGPL included in the packaging 
-** of this file. 
-** 
-****************************************************************************/ 
- 
- 
+**
+** If you have questions regarding the use of this file, please contact
+** Nokia at testabilitydriver@nokia.com .
+**
+** This library is free software; you can redistribute it and/or
+** modify it under the terms of the GNU Lesser General Public
+** License version 2.1 as published by the Free Software Foundation
+** and appearing in the file LICENSE.LGPL included in the packaging
+** of this file.
+**
+****************************************************************************/
+
+
 
 #ifndef TASCONSTANTS_H
 #define TASCONSTANTS_H
-   
+
 #include <QtGlobal>
- 
+
 /*!
   Services
  */
@@ -45,7 +45,7 @@ const char* const LIST_APPS                  = "listApps";
 const char* const STARTED_APPS               = "startedApps";
 const char* const RECORD_EVENTS              = "recordEvents";
 const char* const CONF_SERVICE               = "confService";
-const char* const INFO_SERVICE               = "infoService";                                                  
+const char* const INFO_SERVICE               = "infoService";
 const char* const LIST_CRASHED_APPS          = "listCrashedApps";
 const char* const BRING_TO_FOREGROUND        = "bringToForeground";
 const char* const SYSTEM_INFO_SERVICE        = "systemInfo";
@@ -56,7 +56,7 @@ const char* const VERSION_SERVICE            = "versionService";
 const char* const ENABLE_TIMESTAMPS          = "enableTimestamps";
 
 /*
- Message flags 
+ Message flags
  */
 static const quint8 ERROR_MSG = 0;
 static const quint8 REQUEST_MSG = 1;
@@ -110,7 +110,7 @@ const char* const TRUE_MSG = "true";
 const char* const FALSE_MSG = "false";
 
 /*
-  TasServer name used in QLocalServer   
+  TasServer name used in QLocalServer
  */
 const char* const TAS_SERVER_NAME = "tas_server";
 
@@ -128,11 +128,12 @@ const char* const SERVER_EXECUTABLE = "qttasserver";
 const char* const QT_SERVER_NAME = "127.0.0.1";
 static const int QT_SERVER_PORT = 55534;
 static const int QT_SERVER_PORT_OUT = 55535;
+static const int QT_CUCUMBER_SERVER_OUT = 55536;
 
 #ifdef TAS_MAEMO
 // Duo to bug in security system explicit declaration. Remove if works.
 const char* const LOCAL_SERVER_NAME = "/var/tmp/qttasserver_pipe";
-#else 
+#else
 const char* const LOCAL_SERVER_NAME = "qttasserver_pipe";
 #endif
 
@@ -148,13 +149,13 @@ const char* const SIGNAL_KEY = "signal";
 const char* const PROCESS_START_TIME = "ProcessStarted";
 
 /*!
-  Timer based system file paths  
+  Timer based system file paths
  */
 const char* const COMMAND_FILE= "C:\\TasCommands.xml";
 const char* const UI_STATE_FILE = "C:\\QTDumpUi.xml";
 
 /*!
-  Object types. Graphics type object (GraphicsItem) need special 
+  Object types. Graphics type object (GraphicsItem) need special
   operations to enable event sending.
   Application view means application level (e.g screenshot)
 */
@@ -167,7 +168,7 @@ const char* const TYPE_LAYOUT_ITEM = "LayoutItem";
 const char* const TYPE_WEB = "Web";
 const char* const TYPE_QWEB = "QWeb";
 /*!
-  Command Xml strings 
+  Command Xml strings
  */
 const char* const COMMAND_TARGET = "Target";
 const char* const COMMAND_ROOT = "TasCommands";
@@ -205,6 +206,7 @@ const char* const COMMAND_EXEC_JS_ON_QWEBFRAME = "ExecuteJavaScriptOnQWebFrame";
 const char* const COMMAND_EXEC_SCROLL_QWEBFRAME = "ScrollQWebFrame";
 
 //settings
+const char* const CUCUMBER_WIRE_SERVER = "cucumber_wire_server";
 const char* const BLACK_LISTED = "black_list";
 const char* const AUTO_START = "autostart";
 const char* const VISIBILITY_CHECK = "visibility_check";
@@ -215,7 +217,7 @@ const char* const PENINPUT_SERVER = "peninputserver";
 const char* const VKB_IDENTIFIER = "vkb_app";
 
 #ifdef TDTASSERVER
- #define TAS_EXPORT 
+ #define TAS_EXPORT
 #else
  #ifdef BUILD_TAS
   #define TAS_EXPORT Q_DECL_EXPORT
@@ -228,11 +230,12 @@ const char* const VKB_IDENTIFIER = "vkb_app";
 // no local sockets for 0.5.0 release
 
 //#ifdef Q_OS_SYMBIAN
-//#define TAS_NOLOCALSOCKET 
+//#define TAS_NOLOCALSOCKET
 //#else
-#define TAS_USELOCALSOCKET 
+#define TAS_USELOCALSOCKET
 //#endif
 
+#define TAS_USE_CUCUMBER_WIRE_PROTOCOL
 
 
 #endif

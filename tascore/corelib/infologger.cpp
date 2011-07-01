@@ -1,7 +1,7 @@
 /*************************************************************************** 
 ** 
 ** Copyright (C) 2010 Nokia Corporation and/or its subsidiary(-ies). 
-** All rights reserved. 
+** All rights reserved.  
 ** Contact: Nokia Corporation (testabilitydriver@nokia.com) 
 ** 
 ** This file is part of Testability Driver Qt Agent
@@ -451,10 +451,8 @@ QByteArray TasInfoLoggerUtil::loadLoggedData(QFile* file, const QString& name, Q
             parentData.addAttribute(key, params.value(key));   
         }
     }
-    SerializeFilter* filter = new SerializeFilter();		    		
-    filter->serializeDuplicates(true);		    		
     QByteArray xml;
-    tasModel->serializeModel(xml, filter);
+    tasModel->serializeModel(xml);
     delete tasModel;
     return xml;
 }
