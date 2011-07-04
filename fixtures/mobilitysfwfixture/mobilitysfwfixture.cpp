@@ -64,7 +64,7 @@ MobilitySfwFixture::~MobilitySfwFixture()
 /*!
   Implementation for traverse so always true.
 */
-bool MobilitySfwFixture::execute(void * objectInstance, QString actionName, QHash<QString, QString> parameters, QString & stdOut)
+bool MobilitySfwFixture::execute(void * objectInstance, QString actionName, QHash<QString, QString> /*parameters*/, QString & stdOut)
 {
     Q_UNUSED(objectInstance);
 

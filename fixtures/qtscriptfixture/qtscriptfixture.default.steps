@@ -1,0 +1,16 @@
+STEP action=cucumberStep plugin=qtscriptfixture
+I do (\S+) on object (\S+)
+eval('this.'+args[1]+'.'+args[0]+'()')
+
+STEP
+object (\S+) has property (\S+) value ['"](\S+)['"]
+if (args[2] != eval('this.'+args[0]+'.'+args[1]).toString()) {
+   throw 'No match!';
+}
+
+
+STEP
+I do (\S+) on property (\S+) to get ['"](\S+)['"]
+if (args[2] != eval('this.'+args[1]+'.'+args[0]).toString()) {
+   throw 'No match!';
+}

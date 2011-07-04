@@ -17,6 +17,7 @@
 ** 
 ****************************************************************************/ 
 
+
 #include <QObject>
 
 #if QT_VERSION >= 0x040700
@@ -96,7 +97,7 @@ bool FindObjectService::executeService(TasCommandModel& model, TasResponse& resp
         }
         //        TasLogger::logger()->debug("FindObjectService::executeService make return message.");
         QByteArray xml;
-        uiModel->serializeModel(xml, 0, model.onlyFragment());
+        uiModel->serializeModel(xml, model.onlyFragment());
         delete uiModel;
         response.setData(xml);
         return true;

@@ -113,7 +113,14 @@ void StartAppService::startApplication(TasCommand& command, TasResponse& respons
 #endif
         arguments.removeAll(DETACH_MODE);
         arguments.removeAll(NO_WAIT);
-        launchDetached(applicationPath, arguments, environmentVars, dir, response);
+
+        {
+            QString responseData, responseErrorMessage;
+            launchDetached(applicationPath, arguments, environmentVars, dir, responseData, responseErrorMessage);
+            if (!responseData.isEmpty()) response.setData(responseData);
+            if (!responseErrorMessage.isEmpty()) response.setErrorMessage(responseErrorMessage);
+        }
+
         //add pids to startedapp pid list
         if(!response.isError() && !response.dataAsString().isEmpty() ){
             TasClientManager::instance()->addStartedPid(response.dataAsString());
@@ -228,9 +235,9 @@ static void qt_create_symbian_commandline(
 #endif
 
 
-void StartAppService::launchDetached(const QString& applicationPath, const QStringList& arguments,
-                                     const QStringList& environmentVars, const QString &workingDirectory,
-                                     TasResponse& response)
+void StartAppService::launchDetached(const QString &applicationPath, const QStringList &arguments,
+                                     const QStringList &environmentVars, const QString &workingDirectory,
+                                     QString &responseData, QString responseErrorMessage)
 {
     QString additionalMessage;
 #ifdef Q_OS_SYMBIAN
@@ -253,7 +260,7 @@ void StartAppService::launchDetached(const QString& applicationPath, const QStri
         pid = process.Id().Id();
         process.Close();
         TasClientManager::instance()->addStartedApp(applicationPath, QDateTime::currentDateTime().toString("yyyyMMddhhmmsszzz"));
-        response.setData(QString::number(pid));
+        responseData = QString::number(pid);
     }
 #elif (defined(Q_OS_WIN32) || defined(Q_OS_WINCE))
 
@@ -313,7 +320,7 @@ void StartAppService::launchDetached(const QString& applicationPath, const QStri
         CloseHandle( pi.hThread );
         TasLogger::logger()->debug( QString("TasServer::launchDetached: Child PID: %1").arg(pid) );
         TasClientManager::instance()->addStartedApp(applicationPath, QDateTime::currentDateTime().toString("yyyyMMddhhmmsszzz"));
-        response.setData(pid);
+        responseData = pid;
 
     }
 
@@ -353,10 +360,10 @@ void StartAppService::launchDetached(const QString& applicationPath, const QStri
     QString filePath("");
     const QString path = QString::fromLocal8Bit(::getenv("PATH"));
     const QString file = QString::fromLocal8Bit(paramListArray[0]);
-    if (!file.contains('/') && !path.isEmpty()) 
+    if (!file.contains('/') && !path.isEmpty())
     {
         QStringList pathEntries = path.split(QLatin1Char(':'));
-        foreach(QString dir, pathEntries) 
+        foreach(QString dir, pathEntries)
         {
             if (!dir.endsWith(QDir::separator())) {
                 dir += QDir::separator();
@@ -500,17 +507,17 @@ void StartAppService::launchDetached(const QString& applicationPath, const QStri
             if (actualpid == 0)
             {
                 TasLogger::logger()->error("TasServer::launchDetached: Error getting the PID for the new application " + applicationPath);
-                response.setErrorMessage("Could not start the application " + applicationPath);
+                responseErrorMessage = "Could not start the application " + applicationPath;
             }
             else if (childreturn != 0)
             {
                 TasLogger::logger()->error("TasServer::launchDetached: Error waiting for zombie child " + applicationPath);
-                response.setErrorMessage("Could not start the application " + applicationPath);
+                responseErrorMessage = "Could not start the application " + applicationPath;
             }
             else
             {
                 TasLogger::logger()->debug( QString("TasServer::launchDetached: Child PID: %1").arg((int)actualpid) );
-                response.setData(QString::number((int) actualpid));
+                responseData = QString::number((int) actualpid);
             }
         }
         else
@@ -523,7 +530,7 @@ void StartAppService::launchDetached(const QString& applicationPath, const QStri
                 if (mem.isAttached()) Sleeper::sleep(100);
             }
             TasLogger::logger()->error("TasServer::launchDetached: Failed first fork(). Could not start the application " + applicationPath);
-            response.setErrorMessage("Could not start the application " + applicationPath);
+            responseErrorMessage = "Could not start the application " + applicationPath;
 
         }
     }
@@ -534,7 +541,7 @@ void StartAppService::launchDetached(const QString& applicationPath, const QStri
     if(QProcess::startDetached(applicationPath, arguments, ".", &pid)){
 
             TasClientManager::instance()->addStartedApp(applicationPath, QDateTime::currentDateTime().toString("yyyyMMddhhmmsszzz"));
-        response.setData(QString::number(pid));
+        responseData = QString::number(pid);
     }
 #endif
     else{
@@ -548,7 +555,7 @@ void StartAppService::launchDetached(const QString& applicationPath, const QStri
         }
 #endif
         TasLogger::logger()->error("TasServer::launchDetached: Could not start the application " + applicationPath);
-        response.setErrorMessage("Could not start the application " + applicationPath + additionalMessage);
+        responseErrorMessage = "Could not start the application " + applicationPath + additionalMessage;
     }
 #if (defined(Q_OS_WIN32) || defined(Q_OS_WINCE))
         free(envp);

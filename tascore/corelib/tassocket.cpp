@@ -16,9 +16,9 @@
 ** of this file. 
 ** 
 ****************************************************************************/ 
- 
 
-                
+
+
 #include <QDebug>    
 #include <QStack>    
 #include <QObject>
@@ -35,7 +35,7 @@
     The TasSocket class takes care of the communication details including messaging and connection
     details.
 
- 
+
     Messages are parsed and generated acording to the small protocol defined between tas modules.
     The protocol is very simple it consists of a header and body. 
     Message Header    
@@ -164,58 +164,58 @@ void TasSocket::clearHandlers()
 /*!
  * Request data synchronously.
  */
-QByteArray TasSocket::syncRequest(const qint32& messageId, const QString& requestMessage)
+bool TasSocket::syncRequest(const qint32& messageId, const QString& requestMessage, TasMessage &reply)
 {
-    return syncRequest(messageId, QByteArray(requestMessage.toUtf8()));
+    return syncRequest(messageId, QByteArray(requestMessage.toUtf8()), reply);
 }
 
 /*!
  * Request data synchronously.
  */
-QByteArray TasSocket::syncRequest(const qint32& messageId, const QByteArray& requestMessage)
+bool TasSocket::syncRequest(const qint32& messageId, const QByteArray& requestMessage, TasMessage &reply)
 {
     //disconnect response reader
     disconnect(&mDevice, SIGNAL(readyRead()), mReader, SLOT(readMessageData()));
 
     //send request as normal
-    sendRequest(messageId, requestMessage);
+    bool success = sendRequest(messageId, requestMessage);
 
-    QByteArray data;
-    bool headerAvailable = false;
-        
     //read response directly
-    forever{
+    while (success) {
         if(!mDevice.waitForReadyRead ( READ_TIME_OUT )){
             TasLogger::logger()->error("TasSocket::syncRequest timeout when waiting for the response");
             //return empty data
-            break;
+            success = false;
         }
-        if(mDevice.bytesAvailable() >= HEADER_LENGTH){
-            headerAvailable = true;
+        else if(mDevice.bytesAvailable() >= HEADER_LENGTH){
+            // got header, exit loop with success==true
             break;
         }
     }
-    //header available so read message
-    if(headerAvailable){        
-        TasMessage message;
-        if(mReader->readOneMessage(message)){
-            if(message.messageId() != messageId){
+
+    //read message if all ok
+    if(success) {
+        if(mReader->readOneMessage(reply)){
+            if(reply.messageId() != messageId) {
                 //not the message we wanted
-                messageAvailable(message);
+                messageAvailable(reply);
                 TasLogger::logger()->error("TasSocket::syncRequest message was not responded.");
+                success = false;
             }
-            else{
-                message.uncompressData();
-                data = message.data();
+            else {
+                reply.uncompressData();
+                Q_ASSERT(success);
             }
         }
         else{
             TasLogger::logger()->error("TasSocket::syncRequest error when reading message.");
+            success = false;
         }
     }
+
     //reconnect response reader
     connect(&mDevice, SIGNAL(readyRead()), mReader, SLOT(readMessageData()));    
-    return data;
+    return success;
 }
 
 
@@ -287,10 +287,10 @@ bool TasSocket::sendMessage(TasMessage& message)
 //void TasSocket::dataAvailable()
 void TasSocket::messageAvailable(TasMessage& message)
 { 
-    if(message.flag() == REQUEST_MSG && mRequestHandler){
+    if(message.isRequest() && mRequestHandler){
         mRequestHandler->serviceRequest(message, this);        
     }
-    else if((message.flag() == RESPONSE_MSG || message.flag() == ERROR_MSG) && mResponseHandler){
+    else if(message.isResponse() && mResponseHandler){
         mResponseHandler->serviceResponse(message);        
     }
     else{

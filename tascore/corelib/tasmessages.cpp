@@ -22,15 +22,18 @@
 #include "tassocket.h"
 #include "taslogger.h"
 
-TasMessage::TasMessage()
+TasMessage::TasMessage() :
+    mFlag(0)
+  , mCompressed(false)
+  , mMessageId(0)
 {
-    mCompressed = false;
 }
 
-TasMessage::TasMessage(quint8 flag, bool compressed, const QByteArray& data, qint32 messageId)
+TasMessage::TasMessage(quint8 flag, bool compressed, const QByteArray& data, qint32 messageId) :
+    mFlag(0)
+  , mCompressed(false)
+  , mMessageId(messageId)
 {
-    mCompressed = false;
-    mMessageId = messageId;
     setFlag(flag);
     setData(data, compressed);
 }
@@ -116,15 +119,24 @@ void TasMessage::setErrorMessage(const QString& message)
     setData(message);
 }
 
-bool TasMessage::isError()
+bool TasMessage::isError() const
 {
-    return mIsError;
+    return (mFlag == ERROR_MSG);
+}
+
+bool TasMessage::isRequest() const
+{
+    return (mFlag == REQUEST_MSG);
+}
+
+bool TasMessage::isResponse() const
+{
+    return (mFlag == RESPONSE_MSG || mFlag == ERROR_MSG);
 }
 
 void TasMessage::setIsError(bool isError)
 {
-    mIsError = isError;
-    if(mIsError){
+    if(isError){
         setFlag(ERROR_MSG);
     }
     else{

@@ -1,5 +1,5 @@
 /*************************************************************************** 
-** 
+**  
 ** Copyright (C) 2010 Nokia Corporation and/or its subsidiary(-ies). 
 ** All rights reserved. 
 ** Contact: Nokia Corporation (testabilitydriver@nokia.com) 
@@ -145,7 +145,7 @@ void TasServerServiceManager::handleServiceRequest(TasCommandModel& commandModel
         connect(waiter, SIGNAL(responded(qint32)), this, SLOT(removeWaiter(qint32)));
         mResponseQueue.insert(responseId, waiter);
         if(needFragment){
-            commandModel.addAttribute("needFragment", "true");
+            commandModel.addDomAttribute("needFragment", "true");
             targetClient->socket()->sendRequest(responseId, commandModel.sourceString(false));            
         }
         else{
@@ -234,12 +234,14 @@ bool TasServerServiceManager::appendVkbData(TasCommandModel& commandModel, QByte
                 }
             }
             if(requestVkb || commandModel.service() == APPLICATION_STATE){
-                commandModel.addAttribute("needFragment", "true");
-                QByteArray vkbData = targetClient->socket()->syncRequest(qrand(), commandModel.sourceString(false));
-                if(!vkbData.isEmpty()){
-                    TasLogger::logger()->debug("TasServerServiceManager::appendVkbData append vkb data");
-                    appended = true;
-                    data.append(vkbData);
+                commandModel.addDomAttribute("needFragment", "true");
+                TasMessage reply;
+                if(targetClient->socket()->syncRequest(qrand(), commandModel.sourceString(false), reply)){
+                    if(!reply.data().isEmpty()){
+                        TasLogger::logger()->debug("TasServerServiceManager::appendVkbData append vkb data");
+                        appended = true;
+                        data.append(reply.data());
+                    }
                 }
             }
         }

@@ -60,3 +60,4 @@ DESTDIR = lib
 INSTALLS += target
 
 LIBS += -L../../tascore/lib/ -lqttestability
+QT += xml

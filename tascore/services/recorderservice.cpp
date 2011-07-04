@@ -16,8 +16,6 @@
 ** of this file. 
 ** 
 ****************************************************************************/ 
- 
-
 
 #include <QApplication>
 #include <QPoint>
@@ -88,10 +86,8 @@ void RecorderService::performRecorderCommands(TasCommandModel& model, TasRespons
             if(command){
                 if(mTasEvents != 0){
                     mTasEvents->addAttribute("eventCount", eventCounter);
-                    SerializeFilter* filter = new SerializeFilter();		    		
-                    filter->serializeDuplicates(true);		    		
                     message.clear();
-                    mTasModel->serializeModel(message, filter);
+                    mTasModel->serializeModel(message);
                     response.setData(message);
                 }
                 else{

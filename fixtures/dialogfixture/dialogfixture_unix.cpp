@@ -23,19 +23,19 @@
 // it's assumed that TCHAR is wchar_t. If it isn't, then compilation will hopefully fail.
 
 
-QString DialogFixture::dumpDialog(const QString &dialogName)
+QString DialogFixture::dumpDialog(const QString &/*dialogName*/)
 {
     return QString(); // not implemented
 }
 
 
-int DialogFixture::tap(const QRegExp &childName, const QRegExp &childClass, const QString &dialogName)
+int DialogFixture::tap(const QRegExp &/*childName*/, const QRegExp &/*childClass*/, const QString &/*dialogName*/)
 {
     return -2; // not implemented
 }
 
 
-int DialogFixture::sendText(const QString &text, const QRegExp &childName, const QRegExp &childClass, const QString &dialogName)
+int DialogFixture::sendText(const QString &/*text*/, const QRegExp &/*childName*/, const QRegExp &/*childClass*/, const QString &/*dialogName*/)
 {
     return -2; // not implemented
 }

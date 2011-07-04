@@ -37,6 +37,10 @@ SUBDIRS += filefixture
 
 SUBDIRS += popupfixture
 
+!symbian: {
+SUBDIRS += qtscriptfixture
+}
+
 symbian: {
 #	SUBDIRS += utilfixture
         SUBDIRS += launchfixture

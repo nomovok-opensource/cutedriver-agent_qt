@@ -1,24 +1,24 @@
-/*************************************************************************** 
-** 
-** Copyright (C) 2010 Nokia Corporation and/or its subsidiary(-ies). 
-** All rights reserved. 
-** Contact: Nokia Corporation (testabilitydriver@nokia.com) 
-** 
+/***************************************************************************
+**
+** Copyright (C) 2010 Nokia Corporation and/or its subsidiary(-ies).
+** All rights reserved.
+** Contact: Nokia Corporation (testabilitydriver@nokia.com)
+**
 ** This file is part of Testability Driver Qt Agent
-** 
-** If you have questions regarding the use of this file, please contact 
-** Nokia at testabilitydriver@nokia.com . 
-** 
-** This library is free software; you can redistribute it and/or 
-** modify it under the terms of the GNU Lesser General Public 
-** License version 2.1 as published by the Free Software Foundation 
-** and appearing in the file LICENSE.LGPL included in the packaging 
-** of this file. 
-** 
-****************************************************************************/ 
- 
-                 
-                 
+**
+** If you have questions regarding the use of this file, please contact
+** Nokia at testabilitydriver@nokia.com .
+**
+** This library is free software; you can redistribute it and/or
+** modify it under the terms of the GNU Lesser General Public
+** License version 2.1 as published by the Free Software Foundation
+** and appearing in the file LICENSE.LGPL included in the packaging
+** of this file.
+**
+****************************************************************************/
+
+
+
 #include <QDebug>
 #include <QTcpSocket>
 #include <QCoreApplication>
@@ -51,6 +51,10 @@
 #include "resourceloggingservice.h"
 #include "startedappservice.h"
 
+#if defined(TAS_USE_CUCUMBER_WIRE_PROTOCOL)
+#include "../cucumber_wireprotocol/cucumberwireprotocolserver.h"
+#endif
+
 #ifdef Q_OS_SYMBIAN
 #include <e32property.h>
  // TasServer Secure ID
@@ -64,13 +68,13 @@ const TInt KQtTasRunning = 1;
 
 /*!
   \class TasServer
-  \brief TasTcpServer acts as the service layer for the tas plugins and pc side test framework     
-    
-  TasServer uses the TasTcpServer to listen to pc side service requests. These requests 
+  \brief TasTcpServer acts as the service layer for the tas plugins and pc side test framework
+
+  TasServer uses the TasTcpServer to listen to pc side service requests. These requests
   are passed to registered tas plugins using a local socket connection.
-    
+
   TasPlugins reqister to this component and responed to the service requests by sending the
-  current ui state as response.    
+  current ui state as response.
 
 */
 
@@ -80,15 +84,15 @@ const TInt KQtTasRunning = 1;
   Constructs a new TasServer with \a parent.
 */
 TasServer::TasServer(QString hostBinding, QObject *parent)
-    : QObject(parent) 
-{ 
+    : QObject(parent)
+{
     TasLogger::logger()->setLogFile("qttasserver.log");
     //TasLogger::logger()->disableLogger();
     TasLogger::logger()->setLevel(DEBUG);
 
     TasLogger::logger()->debug("Logger created");
-    
-    mClientManager = TasClientManager::instance();    
+
+    mClientManager = TasClientManager::instance();
 
     TasLogger::logger()->debug("Creating services...");
     mServiceManager = new TasServerServiceManager(this);
@@ -104,14 +108,18 @@ TasServer::TasServer(QString hostBinding, QObject *parent)
     mServiceManager->registerCommand(new UiCommandService());
     mServiceManager->registerCommand(new ForegroundService());
     mServiceManager->registerCommand(new SystemInfoService());
-    mServiceManager->registerCommand(new ResourceLoggingService());    
-    mServiceManager->registerCommand(new StartedAppsService());    
+    mServiceManager->registerCommand(new ResourceLoggingService());
+    mServiceManager->registerCommand(new StartedAppsService());
 
     mTcpServer = 0;
 #if defined(TAS_USELOCALSOCKET)
     mLocalServer = 0;
 #else
     mInternalTcpServer = 0;
+#endif
+
+#if defined(TAS_USE_CUCUMBER_WIRE_PROTOCOL)
+    mCucumberServer = 0;
 #endif
 
     if(hostBinding == "any"){
@@ -132,7 +140,7 @@ TasServer::TasServer(QString hostBinding, QObject *parent)
 }
 
 TasServer::~TasServer()
-{ 
+{
 }
 
 void TasServer::shutdown()
@@ -175,20 +183,29 @@ void TasServer::closeServer()
         mInternalTcpServer->deleteLater();
         mInternalTcpServer = 0;
     }
-#endif     
+#endif
+
+#if defined(TAS_USE_CUCUMBER_WIRE_PROTOCOL)
+    if (mCucumberServer) {
+        mCucumberServer->close();
+        mCucumberServer->deleteLater();
+        mCucumberServer = 0;
+    }
+#endif
+
 }
 
 void TasServer::killAllStartedProcesses()
 {
-    mClientManager->removeAllClients();  
+    mClientManager->removeAllClients();
 }
 
 void TasServer::createServers()
-{    
+{
     if(!mTcpServer){
-        mTcpServer = new TasTcpServer(QT_SERVER_PORT_OUT, *mServiceManager,this);    
+        mTcpServer = new TasTcpServer(QT_SERVER_PORT_OUT, *mServiceManager,this);
     }
-#if defined(TAS_USELOCALSOCKET)            
+#if defined(TAS_USELOCALSOCKET)
     if(!mLocalServer){
         mLocalServer = new TasLocalServer(LOCAL_SERVER_NAME, *mServiceManager, this);
     }
@@ -197,17 +214,27 @@ void TasServer::createServers()
         mInternalTcpServer = new TasTcpServer(QT_SERVER_PORT, *mServiceManager, this);
     }
 #endif
-    
+
+#if defined(TAS_USE_CUCUMBER_WIRE_PROTOCOL)
+    bool cwpEnabled = CucumberWireprotocolServer::enabledInSettings();
+    if (!mCucumberServer &&  cwpEnabled) {
+        mCucumberServer = new CucumberWireprotocolServer(QT_CUCUMBER_SERVER_OUT, this);
+    }
+    else {
+        TasLogger::logger()->info("TasServer::createServers Cucumber wire server not enabled");
+    }
+    //else if (mCucumberServer && !cwpEnabled) {        delete mCucumberServer;        mCucumberServer = NULL;    }
+#endif
 }
 
 /*!
   Starts the server and initializes all other components used for
-  communication. 
+  communication.
   Returns true is the starting all components succeeded false otherwise.
-  In false situations the server will not function properly. 
+  In false situations the server will not function properly.
 */
 bool TasServer::startServer()
-{    
+{
     //create servers if needed.
     createServers();
 
@@ -215,14 +242,14 @@ bool TasServer::startServer()
     if (!mTcpServer->start()){
         return false;
     }
-            
-#if defined(TAS_USELOCALSOCKET)        
+
+#if defined(TAS_USELOCALSOCKET)
     //second start the local server for listening to plugin message
     if(!mLocalServer->start()){
         mTcpServer->close();
         return false;
-    }   
-    TasLogger::logger()->info("TasServer::startServer listening " + mLocalServer->fullServerName());   
+    }
+    TasLogger::logger()->info("TasServer::startServer listening " + mLocalServer->fullServerName());
     QFile handle(mLocalServer->fullServerName());
     if (handle.exists()) {
         // Allow everything on the socket
@@ -241,7 +268,7 @@ bool TasServer::startServer()
             TasLogger::logger()->warning("TasServer::startServer failed to set global write for local socket");
         }
     }
-    
+
 #else
     //start second tcp server for listeting plugin reqister messages
     if (!mInternalTcpServer->start()){
@@ -250,13 +277,27 @@ bool TasServer::startServer()
     }
 #endif
 
+#if defined(TAS_USE_CUCUMBER_WIRE_PROTOCOL)
+    if (mCucumberServer) {
+        if (mCucumberServer->start() > 0) {
+            TasLogger::logger()->info("TasServer::startServer cucumber wire server listening " + mCucumberServer->addressString());
+        }
+        else {
+            TasLogger::logger()->warning("TasServer::startServer cucumber wire server listen failed on "
+                                         + mCucumberServer->addressString()
+                                         + ", error: " + mCucumberServer->lastErrorString());
+            mCucumberServer->close();
+        }
+    }
+#endif
+
 #ifdef Q_OS_SYMBIAN
     TInt err = RProperty::Set(KHTISecID, KQtTasserverStarted, KQtTasRunning);
     if(err == KErrNone ){
-        TasLogger::logger()->info("TasServer::startServer server started and ps key set.");        
+        TasLogger::logger()->info("TasServer::startServer server started and ps key set.");
     }
     else{
-        TasLogger::logger()->warning("TasServer::startServer server started ok but could not set ps key error : " 
+        TasLogger::logger()->warning("TasServer::startServer server started ok but could not set ps key error : "
                                      + QString::number(err));
     }
 #endif
@@ -264,7 +305,7 @@ bool TasServer::startServer()
 }
 
 /*!
- Returns the port that server is listening. 
+ Returns the port that server is listening.
 */
 int TasServer::getServerPort()
 {
@@ -272,7 +313,7 @@ int TasServer::getServerPort()
 }
 
 /*!
-  Returns the address that server is listening. 
+  Returns the address that server is listening.
 */
 QString TasServer::getServerAddress()
 {
@@ -305,16 +346,16 @@ void TasTcpServer::incomingConnection ( int socketDescriptor )
         delete tcpSocket;
     }
     else{
-        TasLogger::logger()->info("TasTcpServer::incomingConnection number " +QString::number(mConnectionCount) 
+        TasLogger::logger()->info("TasTcpServer::incomingConnection number " +QString::number(mConnectionCount)
                                    + " for server " + QString::number(mPort));
-        TasServerSocket *socket = new TasServerSocket(*tcpSocket, this);   
+        TasServerSocket *socket = new TasServerSocket(*tcpSocket, this);
         socket->setIdentification(QString::number(mPort));
-        connect(tcpSocket, SIGNAL(disconnected()), socket, SLOT(disconnected()));            
-        connect(tcpSocket, SIGNAL(disconnected()), tcpSocket, SLOT(deleteLater()));            
-        
+        connect(tcpSocket, SIGNAL(disconnected()), socket, SLOT(disconnected()));
+        connect(tcpSocket, SIGNAL(disconnected()), tcpSocket, SLOT(deleteLater()));
+
         socket->setRequestHandler(&mServiceManager);
         socket->setResponseHandler(&mServiceManager);
-    }                              
+    }
 }
 
 bool TasTcpServer::start()
@@ -403,9 +444,9 @@ void TasLocalServer::incomingConnection ( quintptr socketDescriptor )
     }
     else{
         TasLogger::logger()->debug("TasLocalServer::incomingConnection number " + QString::number(mConnectionCount));
-        TasServerSocket *socket = new TasServerSocket(*localSocket, this);      
-        connect(localSocket, SIGNAL(disconnected()), socket, SLOT(disconnected()));            
-        connect(localSocket, SIGNAL(disconnected()), localSocket, SLOT(deleteLater()));            
+        TasServerSocket *socket = new TasServerSocket(*localSocket, this);
+        connect(localSocket, SIGNAL(disconnected()), socket, SLOT(disconnected()));
+        connect(localSocket, SIGNAL(disconnected()), localSocket, SLOT(deleteLater()));
 
         socket->setRequestHandler(&mServiceManager);
         socket->setResponseHandler(&mServiceManager);

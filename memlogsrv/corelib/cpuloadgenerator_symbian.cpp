@@ -88,8 +88,10 @@ CpuLoadGenerator::CpuLoadGenerator()
 CpuLoadGenerator::~CpuLoadGenerator() 
 {
     TasLogger::logger()->debug("CpuLoadGenerator::~CpuLoadGenerator");
-    if (mLoadGeneratingThread.ExitType() == EExitPending) {
-        mLoadGeneratingThread.Kill(KErrNone);
+    if (mRunning ){
+        if( mLoadGeneratingThread.ExitType() == EExitPending) {
+            mLoadGeneratingThread.Kill(KErrNone);
+        }
         mLoadGeneratingThread.Close();
     }
 }
