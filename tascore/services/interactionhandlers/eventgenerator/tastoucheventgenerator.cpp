@@ -148,6 +148,19 @@ QTouchEvent::TouchPoint TasTouchEventGenerator::makeTouchPoint(QWidget* target, 
     touchPoint.setPressure(1.0);
     touchPoint.setState(states);
     touchPoint.setPos(target->mapFromGlobal(points.screenPoint));    
+
+    QWidget* parentWidget = target->parentWidget();
+    if(parentWidget && parentWidget->inherits("QGraphicsView")){
+        QGraphicsView* view = qobject_cast<QGraphicsView*>(parentWidget);
+        if (view) {
+            touchPoint.setScenePos(view->mapToScene(points.screenPoint));
+        }
+    } else {
+        touchPoint.setScenePos(points.screenPoint);
+    }
+
+
+
     touchPoint.setScreenPos(points.screenPoint);    
     QRect screenGeometry = QApplication::desktop()->screenGeometry(points.screenPoint);
     touchPoint.setNormalizedPos(QPointF(points.screenPoint.x() / screenGeometry.width(),
