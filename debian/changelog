@@ -1,3 +1,9 @@
+qttas (1.2.2-1) unstable; urgency=low
+
+  * Fixes: NB#269902 - Flick gesture stops working on device
+
+ -- Testability Driver Team <testabilitydriver@nokia.com>  Mon, 4 Jul 2011 10:17:00 +0300
+
 qttas (1.2.0-1) unstable; urgency=low
 
   * Fixes: NB#254845 - visibleOnScreen attribute incorrect for QML applications
