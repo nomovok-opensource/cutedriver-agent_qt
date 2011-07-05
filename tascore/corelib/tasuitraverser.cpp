@@ -33,6 +33,7 @@
 #include "tasdeviceutils.h"
 
 #if defined(TAS_MAEMO) && defined(HAVE_QAPP)
+#include <MApplication>
 #include <MLocale>
 #endif
 
@@ -271,14 +272,25 @@ void TasUiTraverser::addApplicationDetails(TasObject& application, TasCommand* c
         application.addAttribute("memUsage", mem);
     }
 #if defined(TAS_MAEMO) && defined(HAVE_QAPP)
-    MLocale defaultMLocale;
-    application.addAttribute("localeMeegoName", defaultMLocale.name());
-    application.addAttribute("localeMeegoLanguage", defaultMLocale.language());
-#endif
+    MApplication* app = MApplication::instance();
+    if (app){
+        MLocale defaultMLocale;
+        application.addAttribute("localeName", defaultMLocale.name());
+        application.addAttribute("localeCountry", defaultMLocale.country());
+        application.addAttribute("localeLanguage", defaultMLocale.language());
+    }
+    else{
+        QLocale defaultLocale;
+        application.addAttribute("localeName", defaultLocale.name());
+        application.addAttribute("localeCountry", defaultLocale.countryToString(defaultLocale.country()));
+        application.addAttribute("localeLanguage", defaultLocale.languageToString(defaultLocale.language()));
+    }
+#else
     QLocale defaultLocale;
     application.addAttribute("localeName", defaultLocale.name());
     application.addAttribute("localeCountry", defaultLocale.countryToString(defaultLocale.country()));
     application.addAttribute("localeLanguage", defaultLocale.languageToString(defaultLocale.language()));
+#endif
 }
 
 
