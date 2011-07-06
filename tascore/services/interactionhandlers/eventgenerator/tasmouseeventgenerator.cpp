@@ -82,6 +82,7 @@ void TasMouseEventGenerator::sendMouseEvent(QWidget* target, QMouseEvent* event,
         }
 #endif
         TasDeviceUtils::sendMouseEvent(event->globalX(), event->globalY(), event->button(), event->type(), pointerNumber);
+        qApp->processEvents();
         TasLogger::logger()->debug("TasMouseEventGenerator::sendMouseEvent done");
     } else {
         QSpontaneKeyEvent::setSpontaneous(event);
