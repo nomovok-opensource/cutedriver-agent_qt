@@ -1,21 +1,21 @@
 /*************************************************************************** 
-** 
-** Copyright (C) 2010 Nokia Corporation and/or its subsidiary(-ies). 
-** All rights reserved. 
-** Contact: Nokia Corporation (testabilitydriver@nokia.com) 
-** 
-** This file is part of Testability Driver Qt Agent
-** 
-** If you have questions regarding the use of this file, please contact 
-** Nokia at testabilitydriver@nokia.com . 
-** 
-** This library is free software; you can redistribute it and/or 
-** modify it under the terms of the GNU Lesser General Public 
-** License version 2.1 as published by the Free Software Foundation 
-** and appearing in the file LICENSE.LGPL included in the packaging 
-** of this file. 
-** 
-****************************************************************************/ 
+ ** 
+ ** Copyright (C) 2010 Nokia Corporation and/or its subsidiary(-ies). 
+ ** All rights reserved. 
+ ** Contact: Nokia Corporation (testabilitydriver@nokia.com) 
+ ** 
+ ** This file is part of Testability Driver Qt Agent
+ ** 
+ ** If you have questions regarding the use of this file, please contact 
+ ** Nokia at testabilitydriver@nokia.com . 
+ ** 
+ ** This library is free software; you can redistribute it and/or 
+ ** modify it under the terms of the GNU Lesser General Public 
+ ** License version 2.1 as published by the Free Software Foundation 
+ ** and appearing in the file LICENSE.LGPL included in the packaging 
+ ** of this file. 
+ ** 
+ ****************************************************************************/ 
 
 #include <QApplication>
 
@@ -29,7 +29,12 @@ TasGestureRunner::TasGestureRunner(TasGesture* gesture, QObject* parent)
     connect(&mTimeLine, SIGNAL(valueChanged(qreal)), this, SLOT(timerEvent(qreal)));
     connect(&mTimeLine, SIGNAL(finished()), this, SLOT(finished()));
     qApp->installEventFilter(this);
+#ifdef TAS_MAEMO
+    // Non tap screen events no longer work, so forcing it on (in maemo). Also, send touches manually.
+    mMouseGen.setUseTapScreen(true);
+#else
     mMouseGen.setUseTapScreen(gesture->getUseTapScreen());
+#endif
     startGesture();
 }
 
@@ -46,6 +51,17 @@ void TasGestureRunner::startGesture()
     mTimeLine.setFrameRange(0,duration/FRAME_RANGE_DIV);    
 
     if(mGesture->isPress()){
+#ifdef TAS_MAEMO
+        // tap screen is forced on, send it via X and touch via normals
+        if(mGesture->pointerType() == MouseHandler::TypeMouse || mGesture->pointerType() == MouseHandler::TypeBoth){
+            mMouseGen.doMousePress(mGesture->getTarget(), mGesture->getMouseButton(), mGesture->startPoints().first().screenPoint);
+        }
+        
+        if(mGesture->pointerType() == MouseHandler::TypeTouch || mGesture->pointerType() == MouseHandler::TypeBoth){
+            bool sendPrimary = (mGesture->pointerType() == MouseHandler::TypeBoth);
+            mTouchGen.doTouchBegin(mGesture->getTarget(), mGesture->startPoints(), sendPrimary, mGesture->touchPointIdKey());
+        }            
+#else
         if(!mGesture->getUseTapScreen()){
             if(mGesture->pointerType() == MouseHandler::TypeTouch || mGesture->pointerType() == MouseHandler::TypeBoth){
                 bool sendPrimary = (mGesture->pointerType() == MouseHandler::TypeBoth);
@@ -60,6 +76,7 @@ void TasGestureRunner::startGesture()
                 mMouseGen.doMousePress(mGesture->getTarget(),  mGesture->getMouseButton(), mGesture->startPoints().at(n).screenPoint, n);
             }
         }
+#endif
     }
 
     mTimeLine.start();
@@ -91,6 +108,17 @@ void TasGestureRunner::finished()
 
 void TasGestureRunner::releaseMouse()
 {
+
+#ifdef TAS_MAEMO
+    if(mGesture->pointerType() == MouseHandler::TypeMouse || mGesture->pointerType() == MouseHandler::TypeBoth){
+        mMouseGen.doMouseRelease(mGesture->getTarget(), mGesture->getMouseButton(), mGesture->endPoints().first().screenPoint);
+    }        
+
+    if(mGesture->pointerType() == MouseHandler::TypeTouch || mGesture->pointerType() == MouseHandler::TypeBoth){
+        bool sendPrimary = (mGesture->pointerType() == MouseHandler::TypeBoth);
+        mTouchGen.doTouchEnd(mGesture->getTarget(), mGesture->endPoints(), sendPrimary, mGesture->touchPointIdKey());       
+    }   
+#else
     if(!mGesture->getUseTapScreen()){
         if(mGesture->pointerType() == MouseHandler::TypeTouch || mGesture->pointerType() == MouseHandler::TypeBoth){
             bool sendPrimary = (mGesture->pointerType() == MouseHandler::TypeBoth);
@@ -106,6 +134,8 @@ void TasGestureRunner::releaseMouse()
         }
     }
 
+#endif
+
     qApp->removeEventFilter(this);
     deleteLater();
 }
@@ -120,6 +150,16 @@ void TasGestureRunner::move(QList<TasTouchPoints> points, bool force)
         }
     }
 
+#ifdef TAS_MAEMO
+    if(mGesture->pointerType() == MouseHandler::TypeMouse || mGesture->pointerType() == MouseHandler::TypeBoth){
+        mMouseGen.doMouseMove(mGesture->getTarget(), points.first().screenPoint, mGesture->getMouseButton());
+    }        
+
+    if(mGesture->pointerType() == MouseHandler::TypeTouch || mGesture->pointerType() == MouseHandler::TypeBoth){
+        bool sendPrimary = (mGesture->pointerType() == MouseHandler::TypeBoth);
+        mTouchGen.doTouchUpdate(mGesture->getTarget(), points, sendPrimary, mGesture->touchPointIdKey());       
+    }
+#else
     if(!mGesture->getUseTapScreen()){        
         if(mGesture->pointerType() == MouseHandler::TypeTouch || mGesture->pointerType() == MouseHandler::TypeBoth){
             bool sendPrimary = (mGesture->pointerType() == MouseHandler::TypeBoth);
@@ -135,6 +175,7 @@ void TasGestureRunner::move(QList<TasTouchPoints> points, bool force)
             mMouseGen.doMouseMove(mGesture->getTarget(),touchpoint.screenPoint,mGesture->getMouseButton(), n);
         }
     }
+#endif
 }
 
 bool TasGestureRunner::eventFilter(QObject *target, QEvent *event)
