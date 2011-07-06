@@ -406,7 +406,6 @@ bool TasCoreUtils::autostart()
 
 QString TasCoreUtils::encodeString(const QString& source)
 {
-
     QString encoded = source;
 
     encoded.replace( "&", "&amp;" );
@@ -415,11 +414,22 @@ QString TasCoreUtils::encodeString(const QString& source)
     encoded.replace( "\"", "&quot;" );
     encoded.replace( "\'", "&apos;" );
 
-    // ASCII #27 is not valid character in XML 1.0 specification
-    encoded.replace( QChar::fromAscii(27), "\\e" );
-
-    // ASCII #1 is not valid character in XML 1.0 specification
-    encoded.replace( QChar::fromAscii(1), "" );
-
-    return encoded;
+    QString result;
+    for (int i = 0; i < encoded.size(); ++i) {
+        QChar c = encoded.at(i);
+        if (isChar(c)) {
+            result.append(c);
+        }
+    }
+    return result;
 }
+
+bool TasCoreUtils::isChar(const QChar c)
+{
+    return (c.unicode() >= 0x0020 && c.unicode() <= 0xD7FF)
+           || c.unicode() == 0x0009
+           || c.unicode() == 0x000A
+           || c.unicode() == 0x000D
+           || (c.unicode() >= 0xE000 && c.unicode() <= 0xFFFD);
+}
+
