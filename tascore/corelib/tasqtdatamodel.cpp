@@ -762,7 +762,7 @@ TasObjectContainer* TasDataModel::findObjectContainer(const QString& id)
 
 void TasDataModel::serializeModel(QByteArray& xmlData,  bool containers)
 {
-    serializeModel(xmlData, containers);
+    serializeModel(xmlData, 0, containers);
 }
 
 /*!
