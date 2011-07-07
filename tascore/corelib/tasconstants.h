@@ -235,8 +235,8 @@ const char* const VKB_IDENTIFIER = "vkb_app";
 #define TAS_USELOCALSOCKET
 //#endif
 
-#ifndef Q_OS_SYMBIAN
-#define TAS_USE_CUCUMBER_WIRE_PROTOCOL
-#endif
+//#ifndef Q_OS_SYMBIAN
+//#define TAS_USE_CUCUMBER_WIRE_PROTOCOL
+//#endif
 
 #endif

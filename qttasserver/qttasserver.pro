@@ -72,9 +72,9 @@ SOURCES += main.cpp
 include(corelib/corelib.pri)
 include(services/services.pri)
 
-!symbian: {
-include(cucumber_wireprotocol/cucumber_wireprotocol.pri)
-}
+#!symbian: {
+#include(cucumber_wireprotocol/cucumber_wireprotocol.pri)
+#}
 
 include(../tascore/corelib/corelib.pri)
 
