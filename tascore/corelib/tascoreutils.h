@@ -48,7 +48,8 @@ public:
 	static QString pointerId(void* ptr);
 	static bool startServer();
 	static bool autostart();
-  static QString encodeString(const QString& source);
+    static QString encodeString(const QString& source);
+    static bool isChar(const QChar c);
 
 };
 

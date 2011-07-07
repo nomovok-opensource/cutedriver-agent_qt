@@ -16,6 +16,8 @@
 ** of this file. 
 ** 
 ****************************************************************************/ 
+ 
+
 
 #ifndef TASTDATAMODEL_H
 #define TASTDATAMODEL_H
@@ -29,8 +31,6 @@
 #include <QTextStream>
 
 #include "tasconstants.h"
-#include "tasqtcommandmodel.h"
-
 
 class TasAttribute;
 class TasObject;
@@ -38,34 +38,35 @@ class TasObjectContainer;
 class TasDataModel;
 class TasXmlWriter;
 
-
-/*!
-  This class is depracated and is no longer used anywhere.
-  Kept for compatibility issues.
-*/
 class TAS_EXPORT SerializeFilter
 {
 public:
-    virtual ~SerializeFilter(){}
-    virtual bool serializeObject(TasObject& object){Q_UNUSED(object); return true;}
-    virtual bool serializeAttribute(TasAttribute& attribute){Q_UNUSED(attribute); return true;}
-    virtual bool serializeContainer(TasObjectContainer& container){Q_UNUSED(container); return true;}
-    virtual void serializeDuplicates(bool allow){Q_UNUSED(allow); }
+    SerializeFilter(); 
+    virtual ~SerializeFilter();
+    
+    virtual bool serializeObject(TasObject& object);
+    virtual bool serializeAttribute(TasAttribute& attribute);
+    virtual bool serializeContainer(TasObjectContainer& container);
+    virtual void serializeDuplicates(bool allow);
+    
+private:
+    QStringList serializedObjects;
+
+    bool allowDuplicates;
 };
 
-
-class TAS_EXPORT TasAttribute : public TasDomObject
+class TAS_EXPORT TasAttribute 
 {
 private:
-    TasAttribute(QDomElement element);
-    TasAttribute(QDomElement element, const QString& name);
+    TasAttribute();
+    TasAttribute(const QString& name);
     
 public:    
     ~TasAttribute();
 
     void setName(const QString& name);    
-    void setType(const QString& type);    
-    void setDataType(const QString& type);    
+	  void setType(const QString& type);    
+	  void setDataType(const QString& type);    
     void addValue(const QString& value);
     void addValuePlainString(const QString& value); // doesn't call TasCoreUtils::encodeString
     void addValue(const QSize& value);    
@@ -75,6 +76,9 @@ public:
     void addValue(const QRect& value);    
     void addValue(const QRectF& value);    
     
+private:
+    void serializeIntoString(TasXmlWriter& xmlWriter, SerializeFilter& filter);
+
 private:    
     QString name;    
     QString type;    
@@ -82,14 +86,15 @@ private:
     QStringList values;
     
 private:
+    friend class SerializeFilter;
     friend class TasObject;
     friend class TasObjectContainer;
 };
 
-class TAS_EXPORT TasObject : public TasDomObject
+class TAS_EXPORT TasObject 
 {
 private:
-    TasObject(QDomElement element);
+    TasObject();
     
 public:    
     ~TasObject();
@@ -114,17 +119,26 @@ public:
 	void setEnv(const QString& env);
 	QString getType();
     void setParentId(const QString& id );
-     
+        
+private:
+    void serializeIntoString(TasXmlWriter& xmlWriter, SerializeFilter& filter);    
+
 private:
     QList<TasAttribute*> attributes;
     QList<TasObject*> objects;
+    QString id;
+    QString parentId;
+    QString type;    
+    QString name;
+    QString env;
     friend class TasObjectContainer; 
+    friend class SerializeFilter;
 };
 
-class TAS_EXPORT TasObjectContainer : public TasDomObject
+class TAS_EXPORT TasObjectContainer 
 {
 private:
-    TasObjectContainer(QDomElement element);
+    TasObjectContainer();
     
 public:
     ~TasObjectContainer();
@@ -137,11 +151,19 @@ public:
     TasObject& addNewObject(const QString& id, const QString& name, const QString& type);
 
 private:
-    QList<TasObject*> objects;   
+    void serializeIntoString(TasXmlWriter& xmlWriter, SerializeFilter& filter, bool elementsOnly=false);    
+
+private:
+    QString id;
+    QString name;
+    QString type;    
+    QList<TasObject*> objects;
+    
     friend class TasDataModel;    
+    friend class SerializeFilter;
 };
 
-class TAS_EXPORT TasDataModel : public TasDomObject
+class TAS_EXPORT TasDataModel  
 {    
 public:
     TasDataModel();
@@ -151,17 +173,21 @@ public:
     TasObjectContainer& addNewObjectContainer();
     TasObjectContainer& addNewObjectContainer(const QString& name, const QString& type);
     TasObjectContainer& addNewObjectContainer(int id, const QString& name, const QString& type);	
-	
-    void serializeModel(QByteArray& xmlData, SerializeFilter* filter, bool containers=false);    
-    void serializeModel(QByteArray& xmlData, bool containers=false);    
+
+    void serializeModel(QByteArray& xmlData,  bool containers);
+    void serializeModel(QByteArray& xmlData, SerializeFilter* filter = 0, bool containers=false);    
 	void clearModel();
 
 	TasObjectContainer* findObjectContainer(const QString& id);
 
 private:
-	QDomDocument mDocument;
-    QList<TasObjectContainer*> mContainers;
-       
+	void serializeObjects(TasXmlWriter& xmlWriter, SerializeFilter& filter, bool elementsOnly=false);
+    void serializeIntoString(TasXmlWriter& xmlWriter, SerializeFilter& filter);
+
+private:
+    QList<TasObjectContainer*> containers;
+    friend class SerializeFilter;
+        
 };
 
 
