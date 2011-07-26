@@ -241,9 +241,10 @@ QGraphicsView* TestabilityUtils::getViewForItem(QGraphicsItem* graphicsItem)
 /*! Return true if widgets belongs to custom traversed object, i.e.
  * Will be traversed even if not visible */
 bool TestabilityUtils::isCustomTraverse() {
-    return getApplicationName() == "webwidgetrunner" ||
-        getApplicationName() == "mappletrunner" ||
-        getApplicationName() == "duiappletrunner";
+
+    QString applicationName = getApplicationName();
+
+    return( applicationName == "webwidgetrunner" || applicationName == "mappletrunner" || applicationName == "duiappletrunner" );
 
 }
 
