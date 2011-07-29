@@ -346,7 +346,6 @@ QWidget* TestabilityUtils::getApplicationWindow()
                 TasLogger::logger()->debug("TestabilityUtils::getApplicationWindow no active window - look for suitable");
 
                 //no active, take first from list and use it
-                QWidgetList list = qApp->topLevelWidgets();
                 QListIterator<QWidget*> iter(qApp->topLevelWidgets());
 
                 while(iter.hasNext()){
