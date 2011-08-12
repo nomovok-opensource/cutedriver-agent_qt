@@ -46,11 +46,10 @@ CucumberStepDataMap CucumberUtils::readSteps(const QString &pluginName)
          ; !filePath.isEmpty()
          ; filePath = it.next() ) {
 
-        TasLogger::logger()->info(QString("CucumberUtils::readSteps processing %1").arg(filePath));
 
         QString fileName = it.fileName();
         if (fileName.endsWith(suffix) && fileName.startsWith(prefix)  && it.fileInfo().isFile()) {
-            TasLogger::logger()->info(QString("CucumberUtils::readSteps trying to read %1").arg(it.fileInfo().canonicalPath()));
+            TasLogger::logger()->info(QString("Reading Cucumber Wire Protocol steps for plugin %1 from %2").arg(pluginName, filePath));
             addFileContents(ret, it.fileInfo().canonicalFilePath());
         }
     }
@@ -71,10 +70,9 @@ CucumberStepDataMap CucumberUtils::readAllSteps()
          ; !filePath.isEmpty()
          ; filePath = it.next() ) {
 
-        TasLogger::logger()->info(QString("CucumberUtils::readAllSteps processing %1").arg(filePath));
 
         if (it.fileName().endsWith(suffix) && it.fileInfo().isFile()) {
-            TasLogger::logger()->info(QString("CucumberUtils::readAllSteps trying to read %1").arg(it.fileInfo().canonicalPath()));
+            TasLogger::logger()->info(QString("Reading Cucumber Wire Protocol steps from %1").arg(filePath));
             addFileContents(ret, it.fileInfo().canonicalFilePath());
         }
     }
@@ -115,7 +113,7 @@ static void insertStepData(CucumberStepDataMap &map, CucumberStepData &data)
         // ...flags.value("action", CUCUMBER_STEP_DEFAULTACTION)
 #endif
         map.insert(data.regExp, data);
-        TasLogger::logger()->debug(QString("CucumberUtils::insertStepData %1").arg(data.toDebugString()));
+        //TasLogger::logger()->debug(QString("CucumberUtils::insertStepData %1").arg(data.toDebugString()));
     }
     else {
         //TasLogger::logger()->debug(QString("CucumberUtils::addFileContents ignoring incomplete step data %1").arg(data.toDebugString()));
@@ -139,8 +137,6 @@ void CucumberUtils::addFileContents(CucumberStepDataMap &map, const QString &fil
             QString line = file.readLine();
             ++lineNum;
             QString trimmedLine = line.trimmed();
-
-            TasLogger::logger()->debug(QString("CucumberUtils::addFileContents %1:%2").arg(lineNum).arg(line));
 
             // skip empty lines
             if (trimmedLine.isEmpty()) {
