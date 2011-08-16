@@ -23,7 +23,7 @@ TEMPLATE = subdirs
 #for mac use "qmake -spec macx-g++" to avoid xcode files
 
 !symbian: {
-    SUBDIRS += 3rdparty
+#    SUBDIRS += 3rdparty
 }
 SUBDIRS += tascore
 
