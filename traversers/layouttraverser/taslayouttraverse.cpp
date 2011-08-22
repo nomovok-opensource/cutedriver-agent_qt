@@ -114,6 +114,7 @@ void TasLayoutTraverse::recurseLayout(TasObject* parentInfo, QLayout *layout)
             mTraverseUtils->addObjectDetails(&layoutInfo, layout);
             layoutInfo.addAttribute("count", layout->count());
             layoutInfo.addBooleanAttribute("enabled", layout->isEnabled());
+            layoutInfo.addAttribute("objectType", TYPE_LAYOUT);
 
             setGenericLayoutInfo(layoutInfo, static_cast<QLayoutItem*>(layout));
 
