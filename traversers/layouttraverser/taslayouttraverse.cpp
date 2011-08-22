@@ -1,22 +1,22 @@
-/*************************************************************************** 
-** 
-** Copyright (C) 2010 Nokia Corporation and/or its subsidiary(-ies). 
-** All rights reserved. 
-** Contact: Nokia Corporation (testabilitydriver@nokia.com) 
-** 
+/***************************************************************************
+**
+** Copyright (C) 2010 Nokia Corporation and/or its subsidiary(-ies).
+** All rights reserved.
+** Contact: Nokia Corporation (testabilitydriver@nokia.com)
+**
 ** This file is part of Testability Driver Qt Agent
-** 
-** If you have questions regarding the use of this file, please contact 
-** Nokia at testabilitydriver@nokia.com . 
-** 
-** This library is free software; you can redistribute it and/or 
-** modify it under the terms of the GNU Lesser General Public 
-** License version 2.1 as published by the Free Software Foundation 
-** and appearing in the file LICENSE.LGPL included in the packaging 
-** of this file. 
-** 
-****************************************************************************/ 
- 
+**
+** If you have questions regarding the use of this file, please contact
+** Nokia at testabilitydriver@nokia.com .
+**
+** This library is free software; you can redistribute it and/or
+** modify it under the terms of the GNU Lesser General Public
+** License version 2.1 as published by the Free Software Foundation
+** and appearing in the file LICENSE.LGPL included in the packaging
+** of this file.
+**
+****************************************************************************/
+
 
 #include <QtPlugin>
 #include <QDebug>
@@ -35,7 +35,7 @@ Q_EXPORT_PLUGIN2(layouttraverse, TasLayoutTraverse)
 /*!
     \class TasLayoutTraverse
     \brief TasLayoutTraverse traverse layouts
-        
+
     Adds a layout object to the given object if it has a layout
 */
 
@@ -44,6 +44,7 @@ Q_EXPORT_PLUGIN2(layouttraverse, TasLayoutTraverse)
 */
 TasLayoutTraverse::TasLayoutTraverse(QObject* parent)
     :QObject(parent)
+    , mLayoutRecursionDepth(0)
 {
     mTraverseUtils = new TasTraverseUtils();
 }
@@ -73,7 +74,7 @@ void TasLayoutTraverse::traverseGraphicsItem(TasObject* objectInfo, QGraphicsIte
 {
     Q_UNUSED(command)
     if (graphicsItem->isWindow() || graphicsItem->isWidget()) {
-        QGraphicsWidget* widget = (QGraphicsWidget*)graphicsItem;        
+        QGraphicsWidget* widget = (QGraphicsWidget*)graphicsItem;
         if(widget && widget->layout()){
             addGraphicsWidgetLayout(objectInfo->addObject(), widget->layout(), widget);
         }
@@ -86,60 +87,74 @@ void TasLayoutTraverse::traverseObject(TasObject* objectInfo, QObject* object, T
 {
     Q_UNUSED(command)
     if (object->isWidgetType()){
-        QWidget* widget = qobject_cast<QWidget*>(object);            
+        QWidget* widget = qobject_cast<QWidget*>(object);
         if(widget){
             QLayout* layout = widget->layout();
             if(layout){
-                TasObject& layoutInfo = objectInfo->addObject();
-                mTraverseUtils->addObjectDetails(&layoutInfo, layout);
-                layoutInfo.addAttribute("count", layout->count());
-                layoutInfo.addBooleanAttribute("enabled", layout->isEnabled());
-                addLayoutItem(layoutInfo, layout);
-                for(int i = 0 ; i < layout->count(); i++){
-                    QLayoutItem* item = layout->itemAt(i);
-                    if(item){
-                        addLayoutItem(layoutInfo.addObject(), item);
-                    }
-                }
+                recurseLayout(objectInfo, layout);
             }
         }
     }
     else if(object->inherits("QGraphicsWidget")){
-        QGraphicsWidget* graphicsWidget = qobject_cast<QGraphicsWidget*>(object);               
+        QGraphicsWidget* graphicsWidget = qobject_cast<QGraphicsWidget*>(object);
         if(graphicsWidget && graphicsWidget->layout()){
             addGraphicsWidgetLayout(objectInfo->addObject(), graphicsWidget->layout(), graphicsWidget);
         }
     }
 }
 
-void TasLayoutTraverse::addLayoutItem(TasObject& objectInfo, QLayoutItem* item)
+void TasLayoutTraverse::recurseLayout(TasObject* parentInfo, QLayout *layout)
+{
+
+    if (layout && parentInfo) {
+        // arbitrary limit for maximum depth of recursion into nested layouts
+        if (++mLayoutRecursionDepth < 42) {
+            TasObject& layoutInfo = parentInfo->addObject();
+
+            mTraverseUtils->addObjectDetails(&layoutInfo, layout);
+            layoutInfo.addAttribute("count", layout->count());
+            layoutInfo.addBooleanAttribute("enabled", layout->isEnabled());
+
+            setGenericLayoutInfo(layoutInfo, static_cast<QLayoutItem*>(layout));
+
+            for(int i = 0 ; i < layout->count(); i++){
+                QLayoutItem* item = layout->itemAt(i);
+                QLayout *sublayout = item->layout();
+                if (sublayout) {
+                    recurseLayout(&layoutInfo, sublayout);
+                }
+                else {
+                    TasObject& layoutItemInfo = layoutInfo.addObject();
+                    layoutItemInfo.addAttribute("objectType", TYPE_LAYOUT_ITEM);
+                    layoutItemInfo.setType("QLayoutItem");
+                    layoutItemInfo.setId(TasCoreUtils::pointerId(item));
+                    setGenericLayoutInfo(layoutItemInfo, item);
+                }
+            }
+        }
+        --mLayoutRecursionDepth;
+    }
+}
+
+void TasLayoutTraverse::setGenericLayoutInfo(TasObject& objectInfo, QLayoutItem* item)
 {
     if(item){
-        if(!item->layout()){
-            objectInfo.addAttribute("objectType", TYPE_LAYOUT_ITEM);
-            objectInfo.setType("QLayoutItem");           
-            objectInfo.setId(TasCoreUtils::pointerId(item));
-        }
-        else{
-            objectInfo.addAttribute("objectType", TYPE_LAYOUT);
-        }
-
         if(item->widget()){
             objectInfo.addAttribute("itemId", TasCoreUtils::objectId((QObject*)item->widget()));
         }
 
         objectInfo.addAttribute("minimumSize", item->minimumSize());
-        objectInfo.addAttribute("maximumSize", item->maximumSize());    
+        objectInfo.addAttribute("maximumSize", item->maximumSize());
         objectInfo.addAttribute("geometry", item->geometry());
         objectInfo.addBooleanAttribute("hasHeightForWidth", item->hasHeightForWidth());
-        objectInfo.addAttribute("expandingDirections", item->expandingDirections());      
-        objectInfo.addAttribute("alignment", item->alignment());      
+        objectInfo.addAttribute("expandingDirections", item->expandingDirections());
+        objectInfo.addAttribute("alignment", item->alignment());
     }
 }
 
 void TasLayoutTraverse::addGraphicsWidgetLayout(TasObject& objectInfo, QGraphicsLayout* layout, QGraphicsItem* parent)
 {
-    objectInfo.setType("QGraphicsLayout");        
+    objectInfo.setType("QGraphicsLayout");
     objectInfo.addAttribute("count", layout->count());
     objectInfo.addBooleanAttribute("activated", layout->isActivated());
     addGraphicsLayoutItem(objectInfo, layout, parent);
@@ -157,11 +172,11 @@ void TasLayoutTraverse::addGraphicsLayoutItem(TasObject& objectInfo, QGraphicsLa
         objectInfo.setId(TasCoreUtils::pointerId(item));
         if(item->isLayout()){
             objectInfo.addAttribute("objectType", TYPE_LAYOUT);
-            objectInfo.setType("QGraphicsLayout");        
+            objectInfo.setType("QGraphicsLayout");
         }
         else{
             objectInfo.addAttribute("objectType", TYPE_LAYOUT_ITEM);
-            objectInfo.setType("QGraphicsLayoutItem");        
+            objectInfo.setType("QGraphicsLayoutItem");
         }
         QRectF geometry = item->geometry();
 
@@ -171,17 +186,17 @@ void TasLayoutTraverse::addGraphicsLayoutItem(TasObject& objectInfo, QGraphicsLa
             QTransform transform = view->viewportTransform();
             QRectF itemSceneRect = parent->sceneBoundingRect();
             QRectF itemTransformedRect = transform.mapRect(itemSceneRect);
-            
+
             QRectF sceneRect = parent->mapRectToScene(geometry);
             QRectF transformedRect = transform.mapRect(sceneRect);
-            transformedRect.moveTopLeft(transformedRect.topLeft() - itemTransformedRect.topLeft());                        
-            objectInfo.addAttribute("geometry", transformedRect);            
+            transformedRect.moveTopLeft(transformedRect.topLeft() - itemTransformedRect.topLeft());
+            objectInfo.addAttribute("geometry", transformedRect);
         }
         else{
             objectInfo.addAttribute("geometry", geometry);
         }
 
-        if(item->graphicsItem()){            
+        if(item->graphicsItem()){
             QGraphicsWidget* qWidget = TestabilityUtils::castToGraphicsWidget(item->graphicsItem());
             if(qWidget) {
                 objectInfo.addAttribute("itemId", TasCoreUtils::objectId(qWidget));
@@ -196,14 +211,14 @@ void TasLayoutTraverse::addGraphicsLayoutItem(TasObject& objectInfo, QGraphicsLa
         objectInfo.addAttribute("preferredSize", item->preferredSize());
         objectInfo.addAttribute("preferredHeight", item->preferredHeight());
         objectInfo.addAttribute("preferredWidth", item->preferredWidth());
-        
+
         objectInfo.addAttribute("contentsRect", item->contentsRect());
         QSizePolicy policy = item->sizePolicy();
         objectInfo.addAttribute("horizontalStretch", policy.horizontalStretch());
         objectInfo.addAttribute("verticalStretch", policy.verticalStretch());
         objectInfo.addAttribute("verticalPolicy", printPolicy(policy.verticalPolicy()));
         objectInfo.addAttribute("horizontalPolicy", printPolicy(policy.horizontalPolicy()));
-        objectInfo.addAttribute("expandingDirections", policy.expandingDirections());      
+        objectInfo.addAttribute("expandingDirections", policy.expandingDirections());
     }
 }
 
