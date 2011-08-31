@@ -3,4 +3,4 @@ usr/bin/qttas_ui
 usr/lib/libqttestability.*
 etc/init/test/qttasserver.conf
 etc/init/test/qttas-testing.conf
-etc/qt_testability/*
+etc/qt_testability/qt_testability.ini

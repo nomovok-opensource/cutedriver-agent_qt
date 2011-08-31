@@ -246,6 +246,7 @@ void TasViewItemTraverse::traverseTreeWidgetItem(QTreeWidgetItem* item, TasObjec
     objectInfo.addBooleanAttribute("firstColumnSpanned", item->isFirstColumnSpanned());
     objectInfo.addBooleanAttribute("hidden", item->isHidden());
     objectInfo.addBooleanAttribute("selected", item->isSelected());
+    objectInfo.addAttribute("childCount", item->childCount());
     objectInfo.addAttribute("parentWidget", TasCoreUtils::pointerId(treeWidget));
 
     //add location
@@ -274,10 +275,12 @@ void TasViewItemTraverse::traverseTreeWidgetItem(QTreeWidgetItem* item, TasObjec
         column.addAttribute("parentWidget", TasCoreUtils::pointerId(treeWidget));
         column.addAttribute("parentItem", TasCoreUtils::pointerId(item));
     }
-    //iterate children
-    count = item->childCount();
-    for(int i = 0 ; i < count; i++){
-        traverseTreeWidgetItem(item->child(i), objectInfo.addObject(), treeWidget);
+    //iterate children if item is expanded
+    if (item->isExpanded()){
+      count = item->childCount();
+      for(int i = 0 ; i < count; i++){
+          traverseTreeWidgetItem(item->child(i), objectInfo.addObject(), treeWidget);
+      }
     }
 }
 

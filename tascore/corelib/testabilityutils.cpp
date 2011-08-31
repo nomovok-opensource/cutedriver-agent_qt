@@ -241,9 +241,10 @@ QGraphicsView* TestabilityUtils::getViewForItem(QGraphicsItem* graphicsItem)
 /*! Return true if widgets belongs to custom traversed object, i.e.
  * Will be traversed even if not visible */
 bool TestabilityUtils::isCustomTraverse() {
-    return getApplicationName() == "webwidgetrunner" ||
-        getApplicationName() == "mappletrunner" ||
-        getApplicationName() == "duiappletrunner";
+
+    QString applicationName = getApplicationName();
+
+    return( applicationName == "webwidgetrunner" || applicationName == "mappletrunner" || applicationName == "duiappletrunner" );
 
 }
 
@@ -345,7 +346,6 @@ QWidget* TestabilityUtils::getApplicationWindow()
                 TasLogger::logger()->debug("TestabilityUtils::getApplicationWindow no active window - look for suitable");
 
                 //no active, take first from list and use it
-                QWidgetList list = qApp->topLevelWidgets();
                 QListIterator<QWidget*> iter(qApp->topLevelWidgets());
 
                 while(iter.hasNext()){

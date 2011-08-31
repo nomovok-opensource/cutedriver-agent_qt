@@ -172,7 +172,6 @@ void TasClientManager::addStartedApp(const QString& processName, const QString& 
 {
     QMutexLocker locker(&mMutex);
     TasLogger::logger()->info("TasClientManager::addStartedApp " + processName + " " + timestamp);
-
     mStartedApps[processName] = timestamp;
 }
 
@@ -218,6 +217,7 @@ void TasClientManager::removeMe(const TasClient &client)
 {
     QMutexLocker locker(&mMutex);
     mClients.remove(client.processId());
+    mStartedPids.removeAll(client.processId());
 }
 
 
@@ -428,6 +428,7 @@ TasClient* TasClientManager::removeByProcessId(const QString& processId)
     TasClient* app = 0;
     if(mClients.contains(processId)){
         app = mClients.take(processId);
+        mStartedPids.removeAll(processId);
     }
     return app;
 }
