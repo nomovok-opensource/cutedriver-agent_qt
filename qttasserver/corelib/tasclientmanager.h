@@ -84,6 +84,7 @@ public:
   TasClient* logMemClient();
   void removeMe(const TasClient& client);
 
+  void removeStartedPid(const QString& pid);
   void addStartedPid(const QString& pid);
 
 private:

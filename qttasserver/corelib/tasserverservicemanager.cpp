@@ -203,6 +203,10 @@ bool TasServerServiceManager::extensionHandled(TasCommandModel& commandModel, Ta
         }
         if(handled){
             TasLogger::logger()->debug("TasServerServiceManager::handleServiceRequest platform handler completed request.");
+            //make sure the pid is removed from the started apps list
+            if(commandModel.service() == CLOSE_APPLICATION){
+                TasClientManager::instance()->removeStartedPid(commandModel.id());
+            }
             TasResponse response(responseId, data);
             requester->sendMessage(response);
             break;
