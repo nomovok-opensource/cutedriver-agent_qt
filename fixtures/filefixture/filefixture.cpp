@@ -65,8 +65,12 @@ bool FileFixture::execute(void * objectInstance, QString actionName, QHash<QStri
 
     if (actionName == "read_file") {
         readFile(parameters.value(FILE_NAME), stdOut);
+    }else if (actionName == "read_file_part") {
+        readFilePart(parameters.value(FILE_NAME),parameters.value(FILE_OFFSET).toInt(),parameters.value(DATA_LENGHT).toInt(), stdOut);
     } else if(actionName == "write_file") {
         writeFile(parameters.value(FILE_NAME), parameters.value(FILE_DATA), stdOut);
+    } else if(actionName == "write_file_append") {
+        writeFileAppend(parameters.value(FILE_NAME), parameters.value(FILE_DATA),parameters.value(FILE_OFFSET).toInt(),parameters.value(DATA_LENGHT).toInt(), stdOut);
     } else if(actionName == "delete_file") {
         deleteFile(parameters.value(FILE_NAME), stdOut);
     } else if(actionName == "mk_dir") {
@@ -107,6 +111,34 @@ void FileFixture::readFile(QString fileName, QString& stdOut)
     }
 }
 
+void FileFixture::readFilePart(QString fileName, int offset, int lenght, QString& stdOut)
+{
+    TasLogger::logger()->debug("> FileFixture::readFile:" + fileName);
+    QFile file(fileName);
+    if(file.exists()) {
+//        TasLogger::logger()->debug("> FileFixture::readFile: file exists");
+
+        file.open(QIODevice::ReadOnly);
+
+        if(file.isOpen() && file.isReadable())
+        {
+            file.seek(offset);
+            QByteArray array = file.read(lenght).toBase64();
+            stdOut.append(array);
+            file.close();
+            stdOut.append(FILE_OK);
+        }
+        else {
+            TasLogger::logger()->debug("> FileFixture::writeFile: file could not be open for reading" + fileName);
+            stdOut.append(FILE_FAILED);
+        }
+    }
+    else
+    {
+        stdOut.append(FILE_FAILED);
+    }
+}
+
 void FileFixture::writeFile(QString fileName,QString fileIn, QString& stdOut)
 {
     TasLogger::logger()->debug("> FileFixture::writeFile:" + fileName);
@@ -126,6 +158,24 @@ void FileFixture::writeFile(QString fileName,QString fileIn, QString& stdOut)
     }
 }
 
+void FileFixture::writeFileAppend(QString fileName, QString fileIn, int /*offset*/, int lenght, QString& stdOut)
+{
+    TasLogger::logger()->debug("> FileFixture::writeFilePart:" + fileName);
+    QFile file(fileName);
+
+    file.open(QIODevice::WriteOnly | QIODevice::Append);
+    if(file.isOpen() && file.isWritable())
+    {
+        QByteArray array = QByteArray::fromBase64(fileIn.toUtf8());
+        file.write(array,lenght);
+        file.close();
+        stdOut.append(FILE_OK);
+    }
+    else {
+        TasLogger::logger()->debug("> FileFixture::writeFile: file could not be open for writing" + fileName);
+        stdOut.append(FILE_FAILED);
+    }
+}
 void FileFixture::deleteFile(QString fileName, QString& stdOut)
 {
     TasLogger::logger()->debug("> FileFixture::deleteFile:" + fileName);
