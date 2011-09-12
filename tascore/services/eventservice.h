@@ -70,6 +70,7 @@ public:
 
 private:
     void addMouseEventDetails(QEvent *event, TasObject& eventObject);
+    void addTouchEventDetails(QEvent *event, TasObject& eventObject);
 
 private:	
     QString trackId;

@@ -241,6 +241,7 @@ bool TasEventFilter::eventFilter(QObject *target, QEvent *event)
             eventObj.setName(eventType);
             eventObj.addAttribute("timeStamp", QDateTime::currentDateTime().toString(DATE_FORMAT));
             addMouseEventDetails(event, eventObj);
+            addTouchEventDetails(event, eventObj);
 
             if(target){
                 TasObject& targetObj = eventObj.addObject();
@@ -299,6 +300,32 @@ void TasEventFilter::addMouseEventDetails(QEvent *event, TasObject& eventObj)
     }
 }
 
+
+void TasEventFilter::addTouchEventDetails(QEvent *event, TasObject& eventObj)
+{
+    QEvent::Type type = event->type();
+    if(type == QEvent::TouchBegin ||  type == QEvent::TouchEnd || QEvent::TouchUpdate) {
+        QTouchEvent* tev = dynamic_cast<QTouchEvent*>(event);
+        if (tev) {
+            QList<QTouchEvent::TouchPoint> touchPoints = tev->touchPoints();
+            foreach (QTouchEvent::TouchPoint point, touchPoints) {
+                QString id = QString::number(point.id());
+
+                eventObj.addAttribute("position_"+id, point.pos()).setType("QPointF");
+                eventObj.addAttribute("scenePosition_"+id, point.scenePos()).setType("QPointF");
+                eventObj.addAttribute("screenPosition_"+id, point.screenPos()).setType("QPoint");
+                eventObj.addAttribute("lastPosition_"+id, point.lastPos()).setType("QPointF");
+
+                eventObj.addAttribute("lastScenePosition_"+id, point.lastScenePos()).setType("QPointF");
+                eventObj.addAttribute("lastScreenPosition_"+id, point.lastScreenPos()).setType("QPoint");
+        
+                eventObj.addAttribute("pressure_"+id, point.pressure());
+
+            }
+        }
+    }
+
+}
 
 QByteArray TasEventFilter::getEvents()
 {
