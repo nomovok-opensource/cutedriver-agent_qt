@@ -415,6 +415,10 @@ void TasClientManager::addStartedPid(const QString& pid)
     mStartedPids << pid;
 }
 
+void TasClientManager::removeStartedPid(const QString& pid)
+{
+    mStartedPids.removeAll(pid);
+}
 
 /*!
   Searches for a client with the given process id and removes it from the list.

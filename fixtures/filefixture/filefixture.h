@@ -30,6 +30,9 @@ static const QString FILE_NAME = "file_name";
 static const QString FILE_PATH = "file_path";
 static const QString FILE_DATA = "file_data";
 
+static const QString FILE_OFFSET = "file_offset";
+static const QString DATA_LENGHT = "data_lenght";
+
 static const QString FILE_OK = "OK";
 static const QString FILE_FAILED = "FAILED";
 
@@ -45,7 +48,10 @@ public:
 
 private:
      void readFile(QString fileName, QString& stdOut);
+     void readFilePart(QString fileName, int offset, int lenght, QString& stdOut);
+
      void writeFile(QString fileName, QString fileIn, QString& stdOut);
+     void writeFileAppend(QString fileName, QString fileIn, int offset, int lenght, QString& stdOut);
 
      void deleteFile(QString dirName, QString& stdOut);
 

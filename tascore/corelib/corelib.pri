@@ -29,8 +29,8 @@ PUBLIC_HEADERS += $$PWD/tasextensioninterface.h
 PUBLIC_HEADERS += $$PWD/infologger.h 
 PUBLIC_HEADERS += $$PWD/testabilityinterface.h
 !symbian: {
-PUBLIC_HEADERS += $$PWD/cucumberutils.h
-PUBLIC_HEADERS += $$PWD/cucumberstepdata.h
+#PUBLIC_HEADERS += $$PWD/cucumberutils.h
+#PUBLIC_HEADERS += $$PWD/cucumberstepdata.h
 }
 
 HEADERS += $$PWD/tasmessages.h
@@ -48,7 +48,7 @@ HEADERS += $$PWD/taspointercache.h
 
 SOURCES += $$PWD/tasmessages.cpp
 !symbian: {
-SOURCES += $$PWD/cucumberutils.cpp
+#SOURCES += $$PWD/cucumberutils.cpp
 }
 #SOURCES += $$PWD/tascommandparser.cpp 
 SOURCES += $$PWD/taslogger.cpp 
