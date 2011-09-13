@@ -1,3 +1,9 @@
+qttas (1.3.1-1) unstable; urgency=low
+
+  * new release version
+
+ -- Testability Driver Team <testabilitydriver@nokia.com>  Tue, 13 Sep 2011 09:00:00 +0200
+ 
 qttas (1.3.0-1) unstable; urgency=low
 
   * Fixes NB#252123 - It is not possible to use wait_for_signal method on object that is not visible
