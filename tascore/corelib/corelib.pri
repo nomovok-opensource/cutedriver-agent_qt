@@ -96,5 +96,5 @@ unix:!symbian:!macx:!CONFIG(no_x) {
 }
 
 symbian: {
-    LIBS += -lcfclient -lcfservices -lHWRMPowerClient -lcentralrepository
+    LIBS += -lcfclient -lcfservices -lhwrmpowerclient -lcentralrepository
 }
