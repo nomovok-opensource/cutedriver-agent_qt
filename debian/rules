@@ -85,7 +85,7 @@ binary-arch: build install
 #	dh_installinfo
 	dh_installman 
 	dh_link
-#	dh_strip
+	dh_strip --dbg-package=qttas-server-dbg
 	dh_compress
 	dh_fixperms
 #	dh_perl

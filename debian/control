@@ -34,6 +34,11 @@ Description: Required plugins for QT Tas Server
  Testability and traverser plugins
 
 
+Package: qttas-server-dbg
+Architecture: any
+Depends: qttas-server (= ${Source-Version})
+Description: Debug files for qttas-server
+
 Package: qttas-dev
 Architecture: any
 Depends: qttas-server (= ${Source-Version})
