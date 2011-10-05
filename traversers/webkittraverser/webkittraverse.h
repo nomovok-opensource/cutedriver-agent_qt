@@ -60,13 +60,26 @@ private:
 #if QT_VERSION >= 0x040600
     void traverseWebElement(TasObject* parent, QPoint parentPos, QPoint screenPos, QWebElement* webElement, const QString& webFrameId);
     void traverseQWebView(TasObject* objectInfo, QWebView* webView);
-    void traverseQWebPage(TasObject& pageInfo, QWebPage* webPage, 
-                           const QPoint& webViewPos, const QPoint& screenPos);
+    void traverseQWebPage(TasObject& pageInfo, QWebPage* webPage, const QPoint& webViewPos, const QPoint& screenPos);
+
     void traverseQGraphicsWebView(TasObject* objectInfo, QGraphicsWebView* webView, TasCommand* command);
+
     void traverseFrame(QWebFrame * webFrame, TasObject& parent, QString parentId, const QPoint& parentPos, const QPoint& screenPos);
 
-    void parseAttributes(QWebElement* webElement, TasObject* objInfo);
+//    void parseAttributes(QWebElement* webElement, TasObject* objInfo); // deprecated
+
+    void parseAttributes(QWebElement* webElement, TasObject& objInfo);
+
     QString parseElementText(QString innerXml);
+
+    void addAttribute( TasObject& object, const QString &name, QWebPage* webPage );
+    void addAttribute( TasObject& object, const QString &name, const QPoint& point );
+    void addAttribute( TasObject& object, const QString &name, QWebElement* webElement );
+    void addAttribute( TasObject& object, const QString &name, QWebFrame* webFrame );
+
+    void addAttribute( TasObject& object, const QString &name, int value );
+    void addAttribute( TasObject& object, const QString& name, const QString& string );
+    void addAttribute( TasObject& object, const QString &name, bool value );
 
     QGraphicsWebView* mTemporaryPointerToQGraphicsWebView;
 
@@ -78,4 +91,3 @@ private:
  };
 
 #endif
- 
