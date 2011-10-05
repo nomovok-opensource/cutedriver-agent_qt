@@ -36,6 +36,7 @@
 #include "webkittraverse.h"
 #include "taslogger.h"
 #include "tasqtcommandmodel.h"
+#include "tastraverseutils.h"
 #include <testabilityutils.h>
 
 Q_EXPORT_PLUGIN2(webkittraverse, WebKitTraverse)
@@ -94,19 +95,19 @@ void WebKitTraverse::traverseObject(TasObject* objectInfo, QObject* object, TasC
 
     //TasLogger::logger()->debug("WebKitTaverse::traverseObject");
 #if QT_VERSION >= 0x040600
-    if(object->inherits("QWebView")){
+    if (object->inherits("QWebView")){
         TasLogger::logger()->debug("WebKitTaverse::traverseObject QWebView");
         QWebView* webView = qobject_cast<QWebView*>(object);               
-        if(webView){
+        if (webView){
             traverseQWebView(objectInfo, webView);
         }        
     }
 
-    if(object->inherits("QGraphicsWebView")){
-        TasLogger::logger()->debug("WebKitTaverse::traverseObject QGraphicsWebView");
+    if (object->inherits("QGraphicsWebView")){
+        //TasLogger::logger()->debug("WebKitTaverse::traverseObject QGraphicsWebView");
         //store to class variable for to be used in treverserwebelement mapToScene
         mTemporaryPointerToQGraphicsWebView = qobject_cast<QGraphicsWebView*>(object);
-        if (mTemporaryPointerToQGraphicsWebView) {
+        if (mTemporaryPointerToQGraphicsWebView){ 
             objectInfo->addAttribute("zoomScale", mTemporaryPointerToQGraphicsWebView->scale());
             traverseQGraphicsWebView(objectInfo, mTemporaryPointerToQGraphicsWebView, command);
         }
@@ -115,22 +116,22 @@ void WebKitTraverse::traverseObject(TasObject* objectInfo, QObject* object, TasC
 
 
 
-    if (object->inherits("DuiApplication")) {
-        TasLogger::logger()->debug("WebKitTaverse::traverseObject DuiApplication.");
+    if (object->inherits("DuiApplication")){ 
+        //TasLogger::logger()->debug("WebKitTaverse::traverseObject DuiApplication.");
         
         QVariant angelPid = object->property("angelPid");
         
-        if (angelPid.isValid()) {
+        if (angelPid.isValid()){ 
             int pid = angelPid.toInt();
-            TasLogger::logger()->debug("WebKitTaverse::traverseObject Actually an angel pid.");
+            //TasLogger::logger()->debug("WebKitTaverse::traverseObject Actually an angel pid.");
                     TasObject& obj = objectInfo->addObject();            
                     obj.setId(0);
                     obj.setType("TDriverRef");    
                     obj.setName("TDriverRef");
-                    TasLogger::logger()->debug("WebKit::traverseObject referring to " + 
-                                               QString::number(pid));
-                    
-                    obj.addAttribute("uri", QString::number(pid));
+                    //TasLogger::logger()->debug("WebKit::traverseObject referring to " + QString::number(pid));
+         
+           
+                    addAttribute(obj, "uri", QString::number(pid));
 
             
             return;
@@ -140,12 +141,12 @@ void WebKitTraverse::traverseObject(TasObject* objectInfo, QObject* object, TasC
 
         QList<QObject*> list = object->findChildren<QObject*>();
         TasLogger::logger()->debug(">>>> Found : " + QString::number(list.size())  + " children");
-        foreach (QObject* obj, list) {
+        foreach (QObject* obj, list){ 
             const QMetaObject* mObj = obj->metaObject();
             TasLogger::logger()->debug(">>>> Found : " + QString(mObj->className()));
 
 
-            if (QString(mObj->className()) == "WRT::Maemo::WebAppletRunner") {
+            if (QString(mObj->className()) == "WRT::Maemo::WebAppletRunner"){ 
                 TasLogger::logger()->debug("Found communication server");
                 QGraphicsWebView* view = 0;
                 TasLogger::logger()->debug("Invoking method for communicationserver");
@@ -153,7 +154,7 @@ void WebKitTraverse::traverseObject(TasObject* objectInfo, QObject* object, TasC
                 QMetaObject::invokeMethod(obj, "view",
                                           Qt::DirectConnection,
                                           Q_RETURN_ARG(QGraphicsWebView*, view));
-                if (view) {
+                if (view){ 
                     TasLogger::logger()->debug("Traversing webpage");
                     TasObject& obj = objectInfo->addObject();        
                     QPoint p;
@@ -161,7 +162,7 @@ void WebKitTraverse::traverseObject(TasObject* objectInfo, QObject* object, TasC
                     TasLogger::logger()->debug("Trying to retrieve parent xy");
                     QString xpos = command->parameter("x_parent_absolute");
                     QString ypos = command->parameter("y_parent_absolute");
-                    if (!xpos.isEmpty() && !ypos.isEmpty()) {
+                    if (!xpos.isEmpty() && !ypos.isEmpty()){ 
                         TasLogger::logger()->debug("XY: " + xpos + " " + ypos);
 
                         p = QPoint(xpos.toInt(), ypos.toInt());
@@ -175,7 +176,7 @@ void WebKitTraverse::traverseObject(TasObject* objectInfo, QObject* object, TasC
     }
 
     // support for Symbian CWRT 9.2 and 10.1 - Fullscreen mode only
-    if (object->inherits("WRT__WrtWebView")) {
+    if (object->inherits("WRT__WrtWebView")){ 
         TasLogger::logger()->debug("WebKitTaverse::traverseObject WRT__WrtWebView");
         
         QGraphicsWebView* view = 0;    
@@ -183,7 +184,7 @@ void WebKitTraverse::traverseObject(TasObject* objectInfo, QObject* object, TasC
                                   Qt::DirectConnection,
                                   Q_RETURN_ARG(QGraphicsWebView*, view));
                 
-        if (view) {
+        if (view){ 
             TasLogger::logger()->debug("Traversing webpage");
             TasObject& webPageObject = objectInfo->addObject();        
             QPoint p;
@@ -191,7 +192,7 @@ void WebKitTraverse::traverseObject(TasObject* objectInfo, QObject* object, TasC
             TasLogger::logger()->debug("Trying to retrieve parent xy");
             QString xpos = "0"; //command->parameter("x_parent_absolute");
             QString ypos = "0"; //command->parameter("y_parent_absolute");
-            if (!xpos.isEmpty() && !ypos.isEmpty()) {
+            if (!xpos.isEmpty() && !ypos.isEmpty()){ 
                 TasLogger::logger()->debug("XY: " + xpos + " " + ypos);
 
                 p = QPoint(xpos.toInt(), ypos.toInt());
@@ -203,20 +204,20 @@ void WebKitTraverse::traverseObject(TasObject* objectInfo, QObject* object, TasC
                 
     }
 
-    if (object->inherits("GVA::WebChromeItem")) {
+    if (object->inherits("GVA::WebChromeItem")){ 
 //        TasLogger::logger()->debug(" WebKitTaverse::traverseObject found " + QString(object->metaObject()->className()) );
 
         QWebElement* element = 0;
         QMetaObject::invokeMethod(object, "element",
                                   Qt::AutoConnection,
                                   Q_RETURN_ARG(QWebElement*, element));
-        if (element) {
+        if (element){ 
 //          TasLogger::logger()->debug("Traversing webelement");
           TasObject& tas_object = objectInfo->addObject();
 
           QGraphicsWidget* item = qobject_cast<QGraphicsWidget*>(object);
-          if(item){
-              QPoint p(item->pos().x()-element->geometry().x(),item->pos().y()-element->geometry().y());              
+          if (item){
+              QPoint p(item->pos().x() - element->geometry().x(),item->pos().y() - element->geometry().y());              
               QString tasId = TasCoreUtils::objectId(object);              
               traverseWebElement(&tas_object,p,p,element, tasId);
           }
@@ -235,30 +236,27 @@ void WebKitTraverse::traverseObject(TasObject* objectInfo, QObject* object, TasC
 void WebKitTraverse::traverseQGraphicsWebView(TasObject* objectInfo, QGraphicsWebView* webView, TasCommand* command) 
 {
     objectInfo->setType("QGraphicsWebView");
+
     QWebPage* webPage = webView->page();
-//    QPoint webViewPos = webView->mapTo(webView->window(), QPoint(0, 0));
 
+    if (webPage){ 
 
-    QPair<QPoint,QPoint>  coords = mTraverseUtils->addGraphicsItemCoordinates(objectInfo, webView, command);
-    if(webPage) {
+        //QPoint webViewPos = webView->mapTo(webView->window(), QPoint(0, 0));
+
+        QPair<QPoint,QPoint>  coords = mTraverseUtils->addGraphicsItemCoordinates(objectInfo, webView, command);
+
         //TasLogger::logger()->debug("WebKitTaverse::traverseObject QWebPage != null");
         TasObject& pageInfo = objectInfo->addObject();
-        pageInfo.addAttribute("objectType", TYPE_GRAPHICS_VIEW);
-        //Use 0,0 get the correct from QWebPage/QWebFrame
-        traverseQWebPage(pageInfo, webPage, QPoint(0, 0) /*coords.first*/,coords.second);
+
+        //pageInfo.addAttribute("objectType", TYPE_GRAPHICS_VIEW);
+        addAttribute(pageInfo, "objectType", TYPE_GRAPHICS_VIEW);
+
+        traverseQWebPage(pageInfo, webPage, coords.first, coords.second);
     }
     
-    
-
-
-
-
-
-
-
 //     QPoint screenPos = webView->mapToGlobal(QPoint(0, 0));
 //     QGraphicsProxyWidget* proxy = TestabilityUtils::parentProxy(webView);
-//     if (proxy) {
+//     if (proxy){ 
 //         // If the webview is inside a graphics proxy, 
 //         // Take the proxy widget global position
 //         screenPos = TestabilityUtils::proxyCoordinates(proxy);
@@ -276,152 +274,423 @@ void WebKitTraverse::traverseQWebView(TasObject* objectInfo, QWebView* webView)
     objectInfo->setType("QWebView");    
 
     QWebPage* webPage = webView->page();
-    QPoint webViewPos = webView->mapTo(webView->window(), QPoint(0, 0));
 
-    QPoint screenPos = webView->mapToGlobal(QPoint(0, 0));
-    QGraphicsProxyWidget* proxy = TestabilityUtils::parentProxy(webView);
-    if (proxy) {
-        // If the webview is inside a graphics proxy, 
-        // Take the proxy widget global position
-        screenPos = TestabilityUtils::proxyCoordinates(proxy);
-        // Also move the webview pos to the proxy pos
-        webViewPos += TestabilityUtils::proxyCoordinates(proxy, false);
-    }
+    if (webPage){ 
 
+        QPoint webViewPos = webView->mapTo(webView->window(), QPoint(0, 0));
+        QPoint screenPos = webView->mapToGlobal(QPoint(0, 0));
 
-    if(webPage) {
+        QGraphicsProxyWidget* proxy = TestabilityUtils::parentProxy(webView);
+
+        if (proxy){ 
+            // If the webview is inside a graphics proxy, 
+            // Take the proxy widget global position
+            screenPos = TestabilityUtils::proxyCoordinates(proxy);
+            // Also move the webview pos to the proxy pos
+            webViewPos += TestabilityUtils::proxyCoordinates(proxy, false);
+        }
+
         //TasLogger::logger()->debug("WebKitTaverse::traverseObject QWebPage != null");
         TasObject& pageInfo = objectInfo->addObject();
-        pageInfo.addAttribute("objectType", TYPE_STANDARD_VIEW);
+
+        //pageInfo.addAttribute("objectType", TYPE_STANDARD_VIEW);
+        addAttribute(pageInfo, "objectType", TYPE_STANDARD_VIEW);
+
         traverseQWebPage(pageInfo, webPage, webViewPos,screenPos);
     }
 
 }
 
-
-void WebKitTraverse::traverseQWebPage(TasObject& pageInfo, QWebPage* webPage, 
-                                      const QPoint& webViewPos, const QPoint& screenPos) 
+void WebKitTraverse::addAttribute( TasObject& object, const QString &name, QWebPage* webPage )
 {
-    pageInfo.setId(TasCoreUtils::objectId(webPage));
-    pageInfo.setType("QWebPage");    
-    pageInfo.setName("QWebPage");
-    pageInfo.addBooleanAttribute("isModified", webPage->isModified());
-    pageInfo.addAttribute("totalBytes", QString::number(webPage->totalBytes()));
-    pageInfo.addAttribute("receivedBytes", QString::number(webPage->bytesReceived()));                        
-    pageInfo.addAttribute("selectedText", webPage->selectedText());            
-    pageInfo.addAttribute("viewPortWidth", webPage->viewportSize().width());
-    pageInfo.addAttribute("viewPortHeight", webPage->viewportSize().height());                        
-    pageInfo.addBooleanAttribute("isContentEditable", webPage->isContentEditable());
-    pageInfo.addAttribute("x_absolute", screenPos.x());                        
-    pageInfo.addAttribute("y_absolute", screenPos.y());
-    pageInfo.addAttribute("x", webViewPos.x());
-    pageInfo.addAttribute("y", webViewPos.y());
-    pageInfo.addAttribute("objectType", TYPE_QWEB);
+
+    if (!mTraverseUtils->includeAttribute(name)){
+      return;
+    }
+
+    if (name == "isModified"){
+      object.addBooleanAttribute(name, webPage->isModified());
+
+    } else if (name == "totalBytes"){
+      object.addAttribute(name, QString::number(webPage->totalBytes()));
+
+    } else if (name == "receivedBytes"){
+      object.addAttribute(name, QString::number(webPage->bytesReceived()));                        
+
+    } else if (name == "selectedText"){
+      object.addAttribute(name, webPage->selectedText());            
+
+    } else if (name == "viewPortWidth"){
+      object.addAttribute(name, webPage->viewportSize().width());
+
+    } else if (name == "viewPortHeight"){
+      object.addAttribute(name, webPage->viewportSize().height());                        
+
+    } else if (name == "isContentEditable"){
+      object.addBooleanAttribute(name, webPage->isContentEditable());
+
+    } else if (name == "width"){
+      object.addAttribute(name, webPage->viewportSize().width());
+
+    } else if (name == "height"){
+      object.addAttribute(name, webPage->viewportSize().height());
+
+    // unknown attribute
+    } else {
+      object.addAttribute( name, QString("UnknownAttributeName") );
+
+    }
+
+}
+
+void WebKitTraverse::addAttribute( TasObject& object, const QString &name, const QPoint& point )
+{
+
+    if (!mTraverseUtils->includeAttribute(name)){
+      return;
+    }
+
+    if (name == "x_absolute"){
+      object.addAttribute("x_absolute", point.x());
+
+    } else if (name == "y_absolute"){
+      object.addAttribute("y_absolute", point.y());
+
+    } else if (name == "x"){
+      object.addAttribute("x", point.x());
+
+    } else if (name == "y"){
+      object.addAttribute("y", point.y());
+
+    // unknown attribute
+    } else {
+      object.addAttribute( name, QString("UnknownAttributeName") );
+
+    }
+
+}
+
+void WebKitTraverse::addAttribute( TasObject& object, const QString& name, const QString& string )
+{
+
+    if (mTraverseUtils->includeAttribute(name)){
+
+      // add as is
+      object.addAttribute(name, string);
+
+    }
+
+}
 
 
-//         pageInfo.addAttribute("width", webView->width());                        
-//         pageInfo.addAttribute("height", webView->height());
+void WebKitTraverse::addAttribute( TasObject& object, const QString &name, QWebElement* webElement )
+{
 
-    traverseFrame(webPage->mainFrame(), pageInfo, TasCoreUtils::objectId(webPage), webViewPos, screenPos);
+    if (!mTraverseUtils->includeAttribute(name)){
+      return;
+    }
+
+    if (name == "visibility" || name == "visible"){
+      object.addBooleanAttribute(name, ( webElement->styleProperty("visibility", QWebElement::ComputedStyle).toLower() == "visible") && (webElement->styleProperty("display", QWebElement::ComputedStyle).toLower() != "none"));
+
+    } else if (name == "style"){
+      object.addAttribute( name, webElement->attribute("style"));
+
+    } else if (name == "innerText"){
+      object.addAttribute(name, webElement->toPlainText());
+
+    } else if (name == "elementText"){
+      object.addAttribute(name, parseElementText(webElement->toInnerXml()));
+
+    } else if (name == "hasFocus"){
+      object.addBooleanAttribute(name, webElement->hasFocus());
+
+    } else if (name == "value"){
+      object.addAttribute(name, webElement->evaluateJavaScript("this.value").toString() );
+
+    } else if (name == "checked"){
+      object.addAttribute(name, webElement->evaluateJavaScript("this.checked").toString());
+
+    } else if (name == "selected"){
+      object.addAttribute(name, webElement->evaluateJavaScript("this.selected").toString());
+
+    } else if (name == "id"){
+      object.addAttribute(name, webElement->evaluateJavaScript("this.id").toString());
+
+    } else if (name == "width"){
+      object.addAttribute(name, webElement->geometry().width());
+
+    } else if (name == "height"){
+      object.addAttribute(name, webElement->geometry().height());
+
+    // unknown attribute
+    } else {
+
+      object.addAttribute( name, QString("UnknownAttributeName") );
+
+    }
+
+}
+
+void WebKitTraverse::addAttribute( TasObject& object, const QString &name, int value )
+{
+
+    if (mTraverseUtils->includeAttribute(name)){
+      // add as is
+      object.addAttribute(name, value);
+    }
+
+}
+
+void WebKitTraverse::addAttribute( TasObject& object, const QString &name, bool value )
+{
+
+    if (mTraverseUtils->includeAttribute(name)){
+      // add as is
+      object.addBooleanAttribute(name, value);
+    }
+
+}
+
+
+void WebKitTraverse::addAttribute( TasObject& object, const QString &name, QWebFrame* webFrame )
+{
+
+    if (!mTraverseUtils->includeAttribute(name)){
+      return;
+    }
+
+    if (name == "url"){
+      object.addAttribute(name, webFrame->url().toString());
+
+    } else if (name == "requestedUrl"){
+      object.addAttribute(name, webFrame->requestedUrl().toString());
+
+    } else if (name == "baseUrl"){
+      object.addAttribute(name, webFrame->baseUrl().toString());
+
+    } else if (name == "horizontalScrollBarHeight"){
+      object.addAttribute(name, webFrame->scrollBarGeometry(Qt::Horizontal).height());
+
+    } else if (name == "verticalScrollBarWidth"){
+      object.addAttribute(name ,webFrame->scrollBarGeometry(Qt::Vertical).width());
+
+    } else if (name == "title"){
+      object.addAttribute(name, webFrame->title());
+
+    // unknown attribute
+    } else {
+      object.addAttribute( name, QString("UnknownAttributeName") );
+
+    }
+
+}
+
+void WebKitTraverse::traverseQWebPage(TasObject& pageInfo, QWebPage* webPage, const QPoint& webViewPos, const QPoint& screenPos) 
+{
+
+      pageInfo.setId(TasCoreUtils::objectId(webPage));
+
+      pageInfo.setType("QWebPage");
+      pageInfo.setName("QWebPage");
+
+
+/*
+      pageInfo.addAttribute("objectType", TYPE_QWEB);
+      pageInfo.addBooleanAttribute("isModified", webPage->isModified());
+      pageInfo.addAttribute("totalBytes", QString::number(webPage->totalBytes()));
+      pageInfo.addAttribute("receivedBytes", QString::number(webPage->bytesReceived()));                        
+      pageInfo.addAttribute("selectedText", webPage->selectedText());            
+      pageInfo.addAttribute("viewPortWidth", webPage->viewportSize().width());
+      pageInfo.addAttribute("viewPortHeight", webPage->viewportSize().height());                        
+      pageInfo.addBooleanAttribute("isContentEditable", webPage->isContentEditable());
+      pageInfo.addAttribute("x_absolute", screenPos.x());                        
+      pageInfo.addAttribute("y_absolute", screenPos.y());
+      pageInfo.addAttribute("x", webViewPos.x());
+      pageInfo.addAttribute("y", webViewPos.y());
+*/
+
+      addAttribute(pageInfo, "objectType", TYPE_QWEB);
+      addAttribute(pageInfo, "isModified", webPage);
+      addAttribute(pageInfo, "totalBytes", webPage);
+      addAttribute(pageInfo, "receivedBytes", webPage);                        
+      addAttribute(pageInfo, "selectedText", webPage);            
+      addAttribute(pageInfo, "viewPortWidth", webPage);
+      addAttribute(pageInfo, "viewPortHeight", webPage);                        
+      addAttribute(pageInfo, "isContentEditable", webPage);
+      
+      addAttribute(pageInfo, "x_absolute", screenPos);                        
+      addAttribute(pageInfo, "y_absolute", screenPos);
+      addAttribute(pageInfo, "x", webViewPos);
+      addAttribute(pageInfo, "y", webViewPos);
+
+      addAttribute(pageInfo, "width",  webPage);
+      addAttribute(pageInfo, "height", webPage);
+
+      traverseFrame(webPage->mainFrame(), pageInfo, TasCoreUtils::objectId(webPage), webViewPos, screenPos);
 }
 
 void WebKitTraverse::traverseFrame(QWebFrame* webFrame, TasObject& parent, QString parentId, const QPoint& parentPos, const QPoint& screenPos)
 {
-    if(webFrame) {
+    if (webFrame){ 
+
 //        TasLogger::logger()->debug("WebKitTaverse::traverseFrame webFrame != null");
         //TasLogger::logger()->debug("WebKitTaverse::traverseObject " + webFrame->renderTreeDump());    
 
         QString tasId = TasCoreUtils::objectId(webFrame);
+
         TasObject& frameInfo = parent.addObject();
-        frameInfo.setId(tasId);
-        frameInfo.setType("QWebFrame");
-        frameInfo.setParentId(parentId);        
-        frameInfo.addAttribute("title", webFrame->title());
 
         QString frameName = webFrame->frameName();
+
         frameInfo.setName(frameName);
-        frameInfo.addAttribute("url", webFrame->url().toString());
-        frameInfo.addAttribute("requestedUrl", webFrame->requestedUrl().toString());
-        frameInfo.addAttribute("baseUrl", webFrame->baseUrl().toString());
-        frameInfo.addAttribute("objectType", TYPE_WEB);
+        frameInfo.setId(tasId);
+        frameInfo.setType("QWebFrame");
+        frameInfo.setParentId(parentId);
 
-        frameInfo.addAttribute("horizontalScrollBarHeight",webFrame->scrollBarGeometry(Qt::Horizontal).height());
-        frameInfo.addAttribute("verticalScrollBarWidth",webFrame->scrollBarGeometry(Qt::Vertical).width());
+        addAttribute(frameInfo, "objectType", TYPE_WEB);
 
-        int width = webFrame->geometry().width();
-        int height = webFrame->geometry().height();
-        int x = parentPos.x() + webFrame->pos().x();
-        int y =  parentPos.y() + webFrame->pos().y();
+        addAttribute(frameInfo, "title", webFrame);
+        addAttribute(frameInfo, "url", webFrame);
+        addAttribute(frameInfo, "requestedUrl", webFrame);
+        addAttribute(frameInfo, "baseUrl", webFrame);
+        addAttribute(frameInfo, "horizontalScrollBarHeight", webFrame);
+        addAttribute(frameInfo, "verticalScrollBarWidth", webFrame);
+
+        int width = 0;
+        int height = 0;
+
+        int x = 0;
+        int y = 0;
+
+        //calculate only if needed
+        if (mTraverseUtils->includeAttribute("x") || mTraverseUtils->includeAttribute("y") || 
+            mTraverseUtils->includeAttribute("x_absolute") || mTraverseUtils->includeAttribute("y_absolute") || 
+            mTraverseUtils->includeAttribute("width") || mTraverseUtils->includeAttribute("height") ){
+
+          width  = webFrame->geometry().width();
+          height = webFrame->geometry().height(); 
+
+          x = parentPos.x() + webFrame->pos().x();
+          y = parentPos.y() + webFrame->pos().y(); 
+
+        }
 
         if (frameName.trimmed().startsWith("<!--framePath",Qt::CaseInsensitive)){
+            
             QWebFrame* parentFrame = webFrame->parentFrame();
+
             QWebElement frameSet = parentFrame->findFirstElement("frameset");
-            if(!frameSet.isNull()) {
+            
+            if (!frameSet.isNull()){
+
                 QWebElementCollection frames = frameSet.findAll("frame");
+
                 // Find frame index for this frame
                 int i = frameName.trimmed().lastIndexOf("frame") + 5;
 
                 if (i<=frameName.trimmed().length()){
+
                     QString frameNo = frameName.trimmed().at(i);
-                    if(frameNo.toInt()<frames.count()){
+
+                    if (frameNo.toInt()<frames.count()){
+
                         QWebElement selFrame = frames[frameNo.toInt()];
+
                         //TasLogger::logger()->debug("visibility:" + selFrame.styleProperty("visibility", QWebElement::ComputedStyle).toLower());
                         //TasLogger::logger()->debug("display:" + selFrame.styleProperty("display", QWebElement::ComputedStyle).toLower());
-                        frameInfo.addBooleanAttribute("visibility",
-                                (selFrame.styleProperty("visibility", QWebElement::ComputedStyle).toLower() == "visible") &&
-                                   (selFrame.styleProperty("display", QWebElement::ComputedStyle).toLower() != "none"));
-                        frameInfo.addAttribute("style",selFrame.attribute("style"));
 
-                        if(mTemporaryPointerToQGraphicsWebView) {
-                            const QPointF elPos(
-                                  selFrame.geometry().x() + parentPos.x(),
-                                  selFrame.geometry().y() + parentPos.y());
-                            const QPointF elPosRect(
-                                  selFrame.geometry().width() + elPos.x(),
-                                  selFrame.geometry().height() + elPos.y());
+                        //frameInfo.addBooleanAttribute("visibility", (selFrame.styleProperty("visibility", QWebElement::ComputedStyle).toLower() == "visible") && (selFrame.styleProperty("display", QWebElement::ComputedStyle).toLower() != "none"));
+                        //frameInfo.addAttribute("style",selFrame.attribute("style"));
 
-                            QPointF p = elPos;
-                            QPointF pRect = elPosRect;
+                        addAttribute( frameInfo, "visibility", &selFrame );
+                        addAttribute( frameInfo, "style", &selFrame );
 
-                            QPointF scenePos = mTemporaryPointerToQGraphicsWebView->mapToScene(p);
-                            QPointF scenePosH = mTemporaryPointerToQGraphicsWebView->mapToScene(pRect);
+                        if (mTemporaryPointerToQGraphicsWebView){ 
 
-                            QGraphicsScene* sc = mTemporaryPointerToQGraphicsWebView->scene();
-                            QList<QGraphicsView*> gvList = sc->views();
-                            QGraphicsView* gv = gvList[0];
+                            if (mTraverseUtils->includeAttribute("x") || mTraverseUtils->includeAttribute("y") || 
+                                mTraverseUtils->includeAttribute("x_absolute") || mTraverseUtils->includeAttribute("y_absolute") || 
+                                mTraverseUtils->includeAttribute("width") || mTraverseUtils->includeAttribute("height") ){
 
-                            QPointF gvPos = gv->mapFromScene(scenePos);
-                            QPointF gvPosRect = gv->mapFromScene(scenePosH);
-                            QPoint screenPosition = gv->mapToGlobal(gvPos.toPoint());
-                            QPoint screenPositionRect = gv->mapToGlobal(gvPosRect.toPoint());
+                              const QPointF elPos( selFrame.geometry().x() + parentPos.x(), selFrame.geometry().y() + parentPos.y());
+                              const QPointF elPosRect( selFrame.geometry().width() + elPos.x(), selFrame.geometry().height() + elPos.y());
 
-                            height = screenPositionRect.y() - screenPosition.y();
-                            width = screenPositionRect.x() - screenPosition.x();
-                            x = screenPosition.x();
-                            y = screenPosition.y();
+                              QPointF p = elPos;
+                              QPointF pRect = elPosRect;
+
+                              QPointF scenePos = mTemporaryPointerToQGraphicsWebView->mapToScene(p);
+                              QPointF scenePosH = mTemporaryPointerToQGraphicsWebView->mapToScene(pRect);
+
+                              QGraphicsScene* sc = mTemporaryPointerToQGraphicsWebView->scene();
+                              QList<QGraphicsView*> gvList = sc->views();
+                              QGraphicsView* gv = gvList[0];
+
+                              QPointF gvPos = gv->mapFromScene(scenePos);
+                              QPointF gvPosRect = gv->mapFromScene(scenePosH);
+                              QPoint screenPosition = gv->mapToGlobal(gvPos.toPoint());
+                              QPoint screenPositionRect = gv->mapToGlobal(gvPosRect.toPoint());
+
+                              height = screenPositionRect.y() - screenPosition.y();
+                              width  = screenPositionRect.x() - screenPosition.x();
+
+                              x = screenPosition.x() - screenPos.x();
+                              y = screenPosition.y() - screenPos.y();
+
+                            }
                         }
                     }
                 }
             }
         }
         else{
-             frameInfo.addBooleanAttribute("visibility", true);
+
+           //frameInfo.addBooleanAttribute("visibility", true);
+          addAttribute(frameInfo, "visibility", true);
+
         }
 
-        frameInfo.addAttribute("x", x);
-        frameInfo.addAttribute("y", y);
-        frameInfo.addAttribute("x_absolute", x);
-        frameInfo.addAttribute("y_absolute", y);
-        frameInfo.addAttribute("width", width);
-        frameInfo.addAttribute("height", height);
+        //frameInfo.addAttribute("x", x);
+        //frameInfo.addAttribute("y", y);
+        //frameInfo.addAttribute("x_absolute", x);
+        //frameInfo.addAttribute("y_absolute", y);
+        //frameInfo.addAttribute("width", width);
+        //frameInfo.addAttribute("height", height);
 
-        QWebElement docElement = webFrame->documentElement();
-        traverseWebElement(&frameInfo, parentPos+webFrame->pos()-webFrame->scrollPosition(), screenPos+webFrame->pos()-webFrame->scrollPosition(), &docElement, tasId);
+        addAttribute(frameInfo, "x", x);
+        addAttribute(frameInfo, "y", y);
+#ifdef Q_OS_SYMBIAN
+        addAttribute(frameInfo, "x_absolute", x );
+        addAttribute(frameInfo, "y_absolute", y );
+#else
+        addAttribute(frameInfo, "x_absolute", x + screenPos.x());
+        addAttribute(frameInfo, "y_absolute", y + screenPos.y());
+#endif
+        addAttribute(frameInfo, "width", width);
+        addAttribute(frameInfo, "height", height);
+
+/*
+        traverseWebElement(&frameInfo, parentPos + webFrame->pos() - webFrame->scrollPosition(), screenPos + webFrame->pos() - webFrame->scrollPosition(), &docElement, tasId);
 
         // find all direct children frames and traverse those too
         QList<QWebFrame*> frames = webFrame->childFrames();
-        for(int i = 0; i < frames.size(); i++) {
-            traverseFrame(frames[i], frameInfo, tasId, parentPos+webFrame->pos()-webFrame->scrollPosition(), screenPos+webFrame->pos()-webFrame->scrollPosition());
+
+        for(int i = 0; i < frames.size(); i++){ 
+            traverseFrame(frames[i], frameInfo, tasId, parentPos + webFrame->pos() - webFrame->scrollPosition(), screenPos + webFrame->pos() - webFrame->scrollPosition() );
+        }
+*/
+
+        QPoint _parentPos = parentPos + webFrame->pos() - webFrame->scrollPosition();
+        //QPoint _screenPos = screenPos + webFrame->pos() - webFrame->scrollPosition();
+
+        QWebElement docElement = webFrame->documentElement();
+
+        traverseWebElement(&frameInfo, _parentPos, screenPos, &docElement, tasId);
+
+        // find all direct children frames and traverse those too
+        QList<QWebFrame*> frames = webFrame->childFrames();
+
+        for(int i = 0; i < frames.size(); i++){ 
+            traverseFrame(frames[i], frameInfo, tasId, _parentPos, screenPos );
         }
    }
 }
@@ -431,7 +700,7 @@ void WebKitTraverse::traverseFrame(QWebFrame* webFrame, TasObject& parent, QStri
 */
 void WebKitTraverse::traverseWebElement(TasObject* parent, QPoint parentPos, QPoint screenPos, QWebElement* webElement, const QString& webFrameId)
 {
-    if(webElement == NULL || webElement->isNull()) {
+    if (webElement == NULL || webElement->isNull()){ 
         //TasLogger::logger()->debug("WebKitTaverse::traverseWebElement webElement is null");
         return;
     }    
@@ -439,20 +708,22 @@ void WebKitTraverse::traverseWebElement(TasObject* parent, QPoint parentPos, QPo
     // traverse this element and all children
     //TasLogger::logger()->debug("WebKitTaverse::traverseWebElement traverse this element:" + webElement->tagName());
     TasObject& childInfo = parent->addObject();
-    uint elementId = qHash(webElement->toOuterXml()+webFrameId);
-    childInfo.setId(QString::number(elementId));
 
+    uint elementId = qHash(webElement->toOuterXml() + webFrameId);
+
+    childInfo.setId(QString::number(elementId));
     childInfo.setType(webElement->tagName().toLower().replace(QString(":"), QString("_")));
     childInfo.setName(webElement->localName().toLower());
-    childInfo.addAttribute("webFrame",webFrameId);
+    
+    //childInfo.addAttribute("webFrame", webFrameId);
+    addAttribute(childInfo, "webFrame", webFrameId);
 
-    if(mTemporaryPointerToQGraphicsWebView)    {
-        const QPointF elPos(
-              webElement->geometry().x() + parentPos.x(),
-              webElement->geometry().y() + parentPos.y());
-        const QPointF elPosRect(
-              webElement->geometry().width() + elPos.x(),
-              webElement->geometry().height() + elPos.y());
+    if (mTraverseUtils->includeAttribute("x") || mTraverseUtils->includeAttribute("y") || mTraverseUtils->includeAttribute("x_absolute") || mTraverseUtils->includeAttribute("y_absolute") || mTraverseUtils->includeAttribute("width") || mTraverseUtils->includeAttribute("height") ){
+
+      if (mTemporaryPointerToQGraphicsWebView){
+
+        const QPointF elPos( webElement->geometry().x() + parentPos.x(), webElement->geometry().y() + parentPos.y());
+        const QPointF elPosRect( webElement->geometry().width() + elPos.x(), webElement->geometry().height() + elPos.y());
 
         QPointF p = elPos;
         QPointF pRect = elPosRect;
@@ -466,6 +737,7 @@ void WebKitTraverse::traverseWebElement(TasObject* parent, QPoint parentPos, QPo
 
         QPointF gvPos = gv->mapFromScene(scenePos);
         QPointF gvPosRect = gv->mapFromScene(scenePosH);
+
         QPoint screenPosition = gv->mapToGlobal(gvPos.toPoint());
         QPoint screenPositionRect = gv->mapToGlobal(gvPosRect.toPoint());
 
@@ -474,98 +746,145 @@ void WebKitTraverse::traverseWebElement(TasObject* parent, QPoint parentPos, QPo
 
         // position need to be relative to parent
         // NOTE all of these needs to be handled in webkitcommandservice.cpp
+        /*
         childInfo.addAttribute("x", screenPosition.x());
         childInfo.addAttribute("x_absolute", screenPosition.x());
         childInfo.addAttribute("y", screenPosition.y());
         childInfo.addAttribute("y_absolute", screenPosition.y());
         childInfo.addAttribute("width", width);
         childInfo.addAttribute("height", height);
-    }else {
-        QPoint childPos = QPoint(webElement->geometry().x(), webElement->geometry().y());
-        childInfo.addAttribute("x", childPos.x()+parentPos.x());
-        childInfo.addAttribute("y", childPos.y()+parentPos.y());
-        childInfo.addAttribute("x_absolute", childPos.x()+screenPos.x());
-        childInfo.addAttribute("y_absolute", childPos.y()+screenPos.y());
+        */
+
+        addAttribute(childInfo, "x", screenPosition.x() - screenPos.x()); // screenPosition
+        addAttribute(childInfo, "y", screenPosition.y() - screenPos.y()); // screenPosition
+
+#ifdef Q_OS_SYMBIAN
+        addAttribute(childInfo, "x_absolute", screenPosition.x() - screenPos.x()); // screenPosition
+        addAttribute(childInfo, "y_absolute", screenPosition.y() - screenPos.y()); // screenPosition
+#else
+        addAttribute(childInfo, "x_absolute", screenPosition);
+        addAttribute(childInfo, "y_absolute", screenPosition);
+#endif
+
+        addAttribute(childInfo, "width", width);
+        addAttribute(childInfo, "height", height);
+
+      } else {
+
+        QPoint childPos = QPoint( webElement->geometry().x(), webElement->geometry().y() );
+
+        /*
+        childInfo.addAttribute("x", childPos.x() + parentPos.x());
+        childInfo.addAttribute("y", childPos.y() + parentPos.y());
+        childInfo.addAttribute("x_absolute", childPos.x() + screenPos.x());
+        childInfo.addAttribute("y_absolute", childPos.y() + screenPos.y());
         childInfo.addAttribute("width", webElement->geometry().width());
         childInfo.addAttribute("height", webElement->geometry().height());
+        */
+
+        addAttribute(childInfo, "x", childPos.x() + parentPos.x());
+        addAttribute(childInfo, "y", childPos.y() + parentPos.y());
+
+#ifdef Q_OS_SYMBIAN
+        addAttribute(childInfo, "x_absolute", childPos.x() + parentPos.x());
+        addAttribute(childInfo, "y_absolute", childPos.y() + parentPos.y());
+#else
+        addAttribute(childInfo, "x_absolute", childPos.x() + screenPos.x());
+        addAttribute(childInfo, "y_absolute", childPos.y() + screenPos.y());
+#endif
+
+        addAttribute(childInfo, "width", webElement);
+        addAttribute(childInfo, "height", webElement);
+
+      }
+
     }
-    childInfo.addAttribute("objectType", TYPE_WEB);
-    childInfo.addBooleanAttribute("visible",
-        (webElement->styleProperty("visibility", QWebElement::ComputedStyle).toLower() == "visible") &&
-           (webElement->styleProperty("display", QWebElement::ComputedStyle).toLower() != "none"));
-    childInfo.addBooleanAttribute("hasFocus", webElement->hasFocus());
 
-    if(webElement->hasAttributes()) {
-        parseAttributes(webElement, &childInfo);
+    addAttribute(childInfo, "objectType", TYPE_WEB);
+    addAttribute(childInfo, "visible", webElement);
+    addAttribute(childInfo, "hasFocus", webElement);
+
+    if (webElement->hasAttributes()){
+        parseAttributes(webElement, childInfo);
     }
 
-    childInfo.addAttribute("innerText", webElement->toPlainText());
-
-    childInfo.addAttribute("elementText", parseElementText(webElement->toInnerXml()));
+    addAttribute(childInfo, "innerText", webElement);
+    addAttribute(childInfo, "elementText", webElement);
 
     // traverse first child
     QWebElement firstChild = webElement->firstChild();
 
-
-
-    if(firstChild.isNull()) {
+    if (firstChild.isNull()){ 
         // has no children, print out the text if any
         //TasLogger::logger()->debug("WebKitTaverse::traverseWebElement " + webElement->localName() + " has no children");
         //childInfo.addAttribute("text", webElement->toPlainText());
-    }
-    else {
+    } else {
         //TasLogger::logger()->debug("WebKitTaverse::traverseWebElement " + webElement->localName() + " traverse first child");
         traverseWebElement(&childInfo, parentPos, screenPos, &firstChild, webFrameId);
     }
 
     // check if this node has siblings and traverse them
     QWebElement sibling = webElement->nextSibling();
-    if(sibling.isNull()) {
+
+    if (sibling.isNull()){ 
         //TasLogger::logger()->debug("WebKitTaverse::traverseWebElement " + webElement->localName() + " has no siblings");
-    }
-    else {
+    } else {
         //TasLogger::logger()->debug("WebKitTaverse::traverseWebElement " + webElement->localName() + " traverse sibling");
         traverseWebElement(parent, parentPos, screenPos, &sibling, webFrameId);
     }
 }
 
-/*!
-  Parse attributes for QWebElement
-*/
-void WebKitTraverse::parseAttributes(QWebElement* webElement, TasObject* objInfo)
+void WebKitTraverse::parseAttributes(QWebElement* webElement, TasObject& objInfo)
 {
     //TasLogger::logger()->debug("WebKitTaverse::parseAttributes for tag " + webElement->localName());
 
-    if(webElement->hasAttributes()) {
-        foreach(QString attrib, webElement->attributeNames()) {
-//            TasLogger::logger()->debug("  : " + attrib + "->" + webElement->attribute(attrib));
-
+    if (webElement->hasAttributes()){ 
+        foreach(QString attrib, webElement->attributeNames()){ 
             attrib = attrib.trimmed();
-
-            if(attrib!="id" && attrib != "width" && attrib != "height") {
-                if((attrib != "value" && attrib != "checked" )
-                                      ||
-                   (webElement->localName().toLower()!="input"))
-                {
-                   objInfo->addAttribute(attrib, webElement->attribute(attrib));
+            if ( attrib != "id" && attrib != "width" && attrib != "height"){
+                if ((attrib != "value" && attrib != "checked" ) || (webElement->localName().toLower() != "input") ){ 
+                    if (mTraverseUtils->includeAttribute(attrib)){
+                        objInfo.addAttribute(attrib, webElement->attribute(attrib));
+                    }
                 }
             }
         }
     }
-    if(webElement->localName().toLower() =="input" ||
-       webElement->localName().toLower() =="select"){
-        objInfo->addAttribute("value", webElement->evaluateJavaScript("this.value").toString());
+
+/*
+    if (webElement->localName().toLower() == "input" || webElement->localName().toLower() == "select"){
+      addAttribute(objInfo, "value", webElement);
     }
-    if(webElement->attribute("type") == "radio" ||
-       webElement->attribute("type") == "checkbox") {
-        objInfo->addAttribute("checked", webElement->evaluateJavaScript("this.checked").toString());
+
+    if (webElement->attribute("type") == "radio" || webElement->attribute("type") == "checkbox"){ 
+      addAttribute(objInfo, "checked", webElement);
     }
-    if(webElement->attribute("type") == "option" ||
-       webElement->localName().toLower() =="option") {
-        objInfo->addAttribute("selected", webElement->evaluateJavaScript("this.selected").toString());
+
+    if ( webElement->attribute("type") == "option" || webElement->localName().toLower() == "option" ){ 
+      addAttribute(objInfo, "selected", webElement);
     }    
-    objInfo->addAttribute("id", webElement->evaluateJavaScript("this.id").toString());
+*/
+
+    const QString localName = webElement->localName().toLower();
+    const QString type = webElement->attribute("type");
+
+    if (localName == "input" || localName == "select"){
+      addAttribute(objInfo, "value", webElement);
+    }
+
+    if (type == "radio" || type == "checkbox"){ 
+      addAttribute(objInfo, "checked", webElement);
+    }
+
+    if (type == "option" || localName == "option" ){ 
+      addAttribute(objInfo, "selected", webElement);
+    }    
+
+    addAttribute(objInfo, "id", webElement);
+
 }
+
+
 
 /*!
   Parse element text for QWebElement
@@ -574,9 +893,9 @@ QString WebKitTraverse::parseElementText(QString innerXml)
 {
     //TasLogger::logger()->debug("WebKitTaverse::parseElementText innerXml");
     QString ret;
-    while(innerXml.size() > 0 && innerXml.contains('<')) {
+    while(innerXml.size() > 0 && innerXml.contains('<')){ 
         //add space if necessary
-        if(ret.trimmed().size() > 0) {
+        if (ret.trimmed().size() > 0){ 
             ret = ret.trimmed() + " ";
         }
 
@@ -596,16 +915,17 @@ QString WebKitTraverse::parseElementText(QString innerXml)
         QString elementName;
         elementName += innerXml.left(cut).trimmed();
         //TasLogger::logger()->debug("  ele: " + elementName);
-        innerXml.remove(0, cut_gt+1);
+        innerXml.remove(0, cut_gt + 1);
 
         //continue removing until current and all possible similar child elements are removed
         int expectedEnds = 0;
-        if(innerXml.indexOf("</" + elementName) >= 0){
+
+        if (innerXml.indexOf("</" + elementName) >= 0){
             expectedEnds ++;
         }
 
-        while(expectedEnds>0) {
-            if(expectedEnds > 20)
+        while(expectedEnds>0){ 
+            if (expectedEnds > 20)
             {
                 return QString("failed to parse, probably inconsistent (x)html");
             }
@@ -614,7 +934,7 @@ QString WebKitTraverse::parseElementText(QString innerXml)
 
             //TasLogger::logger()->debug("  net:" + QString::number(nextElementTag) + "\n  ncet:" + QString::number(nextCloseElementTag));
 
-            if(nextElementTag != -1 && nextElementTag < nextCloseElementTag) {
+            if (nextElementTag != -1 && nextElementTag < nextCloseElementTag){ 
                 //TasLogger::logger()->debug("  start tag found");
                 innerXml.remove(0, nextElementTag + 1);
                 expectedEnds++;
