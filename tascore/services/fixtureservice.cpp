@@ -51,11 +51,6 @@ FixtureService::~FixtureService()
 bool FixtureService::executeService(TasCommandModel& model, TasResponse& response)
 {    
     if(model.service() == serviceName() ){
-
-        if(!mInitialized){
-            mPluginLoader->initializeFixturePlugins();
-            mInitialized = true;
-        }
         
         if(!model.isAsynchronous()){
             QString message = "";
@@ -78,6 +73,11 @@ bool FixtureService::executeService(TasCommandModel& model, TasResponse& respons
 
 bool FixtureService::performFixture(TasCommandModel& model, QString& message)
 {
+    if(!mInitialized){
+        mPluginLoader->initializeFixturePlugins();
+        mInitialized = true;
+    }
+
     TasLogger::logger()->debug("FixtureService::performFixture");
     QListIterator<TasTarget*> i(model.targetList());
     message = PARSE_ERROR;
