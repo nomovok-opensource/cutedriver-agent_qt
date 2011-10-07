@@ -376,7 +376,7 @@ void WebKitTraverse::addAttribute( TasObject& object, const QString& name, const
     if (mTraverseUtils->includeAttribute(name)){
 
       // add as is
-      object.addAttribute(name, string);
+      object.addAttribute(name, QString(string));
 
     }
 
@@ -452,6 +452,15 @@ void WebKitTraverse::addAttribute( TasObject& object, const QString &name, bool 
 
 }
 
+void WebKitTraverse::addAttribute( TasObject& object, const QString &name, const char* const chars )
+{
+
+    if (mTraverseUtils->includeAttribute(name)){
+      // add as is
+      object.addAttribute(name, chars);
+    }
+
+}
 
 void WebKitTraverse::addAttribute( TasObject& object, const QString &name, QWebFrame* webFrame )
 {
@@ -548,7 +557,7 @@ void WebKitTraverse::traverseFrame(QWebFrame* webFrame, TasObject& parent, QStri
         frameInfo.setType("QWebFrame");
         frameInfo.setParentId(parentId);
 
-        addAttribute(frameInfo, "objectType", TYPE_WEB);
+        addAttribute(frameInfo, "objectType", QString(TYPE_WEB));
 
         addAttribute(frameInfo, "title", webFrame);
         addAttribute(frameInfo, "url", webFrame);
