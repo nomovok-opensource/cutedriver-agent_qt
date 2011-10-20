@@ -4,6 +4,12 @@ qttas (1.3.2-1) unstable; urgency=low
 
  -- Testability Driver Team <testabilitydriver@nokia.com>  Fri, 14 Oct 2011 12:30:00 +0200
  
+qttas (1.3.1-2) unstable; urgency=low
+
+    * added dependency to aegis-testing-tools
+	
+ -- Testability Driver Team <testabilitydriver@nokia.com>  Tue, 13 Sep 2011 09:00:00 +0200
+ 
 qttas (1.3.1-1) unstable; urgency=low
 
   * Fixes NB#282104 - No debug symbols provided for libqttestability.so 
@@ -12,9 +18,10 @@ qttas (1.3.1-1) unstable; urgency=low
  
 qttas (1.3.0-1) unstable; urgency=low
 
-  * Fixes NB#252123 - It is not possible to use wait_for_signal method on object that is not visible
+  * Fixes: NB#252123 - It is not possible to use wait_for_signal method on object that is not visible
+  * Fixes: NB#250975 - Wrong locale information reported for applications
 
- -- Testability Driver Team <testabilitydriver@nokia.com>  Wed, 4 Jul 2011 11:44:00 +0200
+ -- Testability Driver Team <testabilitydriver@nokia.com>  Tue, 16 Aug 2011 13:08:00 +0200
 
 qttas (1.2.2-1) unstable; urgency=low
 
