@@ -117,7 +117,7 @@ void TasQtMemLogService::sendRegisterMessage()
         mDoNotReconnect = true;
         connectionClosed();
         //no use if no connection to qttasserver
-        QCoreApplication::intance()->quit();
+        QCoreApplication::instance()->quit();
     }
 }
 
