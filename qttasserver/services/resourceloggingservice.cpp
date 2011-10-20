@@ -85,6 +85,7 @@ void MemLogServerWaiter::clientRegistered(const QString& processId)
     TasLogger::logger()->debug("MemLogServerWaiter::clientRegistered send message");
     TasMessage message(REQUEST_MSG, false, QByteArray(mCommandXml.toUtf8()), mMessageId);
     mSocket->messageAvailable(message);
+	mWaiter.stop();
     deleteLater();
 }
 
