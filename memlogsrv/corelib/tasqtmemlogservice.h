@@ -56,6 +56,7 @@ private slots:
 private:
 	QString makeReqisterMessage(QString command, QMap<QString,QString> attributes);
 	void initializeConnections();
+	void cleanConnections();
 
 private:
 #if defined(TAS_NOLOCALSOCKET)
@@ -69,6 +70,7 @@ private:
     bool mConnected;
 	QTimer mRegisterTime;
 	qint32 mMessageId;
+	bool mDoNotReconnect;
 };
 
 #endif

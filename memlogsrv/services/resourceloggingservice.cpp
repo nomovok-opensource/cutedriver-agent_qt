@@ -48,7 +48,12 @@ ResourceLoggingService::~ResourceLoggingService()
         timer = 0;
     }
     mLoggingTimers.clear();
-    delete mLoadGenerator;
+
+    if (mLoadGenerator) {
+        mLoadGenerator->stop();
+        delete mLoadGenerator;
+        mLoadGenerator = 0;
+    }
 }
 
 bool ResourceLoggingService::executeService(
