@@ -381,21 +381,21 @@ void TestabilityService::initializeServiceManager()
 
 void TestabilityService::loadStartUpParams(QString appName)
 {
-    TasLogger::logger()->error("TestabilityService::loadStartUpParams for app: " + appName);
+    TasLogger::logger()->debug("TestabilityService::loadStartUpParams for app: " + appName);
     TasDataShare dataShare;
     QString errMsg = "";
     TasSharedData* data = dataShare.loadSharedData(appName, errMsg);
     if(data){
-        TasLogger::logger()->error("TestabilityService::loadStartUpParams data");
+        TasLogger::logger()->debug("TestabilityService::loadStartUpParams data");
         QStringList eventList = data->eventsToListen();
         QStringList signalList = data->signalsToListen();
         if(mEventService && !eventList.isEmpty()){
-            TasLogger::logger()->error("TestabilityService::loadStartUpParams enable events: " + eventList.join(";"));
+            TasLogger::logger()->debug("TestabilityService::loadStartUpParams enable events: " + eventList.join(";"));
             mEventService->enableEvents(QString::number(qApp->applicationPid()), qApp, eventList);
             mEventService->addProcessStartEvent(data->creationTime());
         }
         if(mEventService && !signalList.isEmpty()){
-            TasLogger::logger()->error("TestabilityService::loadStartUpParams listen signals: " + signalList.join(";"));
+            TasLogger::logger()->debug("TestabilityService::loadStartUpParams listen signals: " + signalList.join(";"));
             for (int i = 0; i < signalList.size(); i++){
                 enableSignalTracking(signalList.at(i), data->creationTime().toString(DATE_FORMAT));
             }
@@ -403,8 +403,7 @@ void TestabilityService::loadStartUpParams(QString appName)
         delete data;
     }
     else {
-
-        TasLogger::logger()->error("TestabilityService::loadStartUpParams no data error:" + errMsg);
+        TasLogger::logger()->warning("TestabilityService::loadStartUpParams no data error:" + errMsg);
     }
 }
 
