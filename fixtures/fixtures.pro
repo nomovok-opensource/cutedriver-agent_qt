@@ -35,6 +35,8 @@ SUBDIRS += fpsfixture
 
 SUBDIRS += filefixture
 
+SUBDIRS += localefixture
+
 SUBDIRS += popupfixture
 
 !symbian: {
