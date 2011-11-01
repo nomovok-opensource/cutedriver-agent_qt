@@ -31,11 +31,8 @@ const int INTERVAL_S_TO_MS              = 1000;
 const QString RESOURCE_LOGGER           = "resourcelogger";
 const QString LOG_FILE_NAME_PREFIX      = "mem_usage_";
 const QString LOG_FILE_EXT              = ".log";
-//const QString HEAP_DUMP_NAME_PREFIX     = "heap_";
-//const QString HEAP_DUMP_EXT             = ".dump";
 #ifdef Q_OS_SYMBIAN
 const QString LOG_FILE_PATH             = "c:\\data\\";
-//const QString HEAP_DUMP_PATH            = "\\memspy_data";
 _LIT(HEAP_DUMP_PATH,                      "\\memspy_data");
 #else
 const QString LOG_FILE_PATH             = "";
