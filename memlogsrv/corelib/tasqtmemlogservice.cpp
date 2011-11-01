@@ -34,7 +34,7 @@ TasQtMemLogService::TasQtMemLogService(QObject* parent)
     : QObject(parent)
 {        
     mMessageId = 0;
-    
+    mDoNotReconnect = false;
     TasLogger::logger()->setLogFile(SRV_NAME+".log");
     TasLogger::logger()->setLevel(DEBUG);                              
     mConnected = false;
@@ -43,6 +43,7 @@ TasQtMemLogService::TasQtMemLogService(QObject* parent)
     mServiceManager->registerCommand(new ResourceLoggingService());
     initializeConnections();
     connect(QCoreApplication::instance(), SIGNAL(aboutToQuit()), this, SLOT(unReqisterServicePlugin()));
+    connect(&mRegisterTime, SIGNAL(timeout()), this, SLOT(timeout()));
   
 }
 
@@ -59,8 +60,6 @@ void TasQtMemLogService::initializeConnections()
 
     mRegisterTime.setSingleShot(true);
     mRegisterTime.start(SERVER_REGISTRATION_TIMEOUT);
-
-    connect(&mRegisterTime, SIGNAL(timeout()), this, SLOT(timeout()));
 
     connect(mServerConnection, SIGNAL(connected()), this, SLOT(sendRegisterMessage()));
 #if defined(TAS_NOLOCALSOCKET)
@@ -79,6 +78,11 @@ TasQtMemLogService::~TasQtMemLogService()
         delete mServiceManager;
         mServiceManager = 0;
     }
+    cleanConnections();
+}
+
+void TasQtMemLogService::cleanConnections()
+{
     if(mSocket){
         delete mSocket;
         mSocket = 0;
@@ -110,7 +114,10 @@ void TasQtMemLogService::sendRegisterMessage()
         TasLogger::logger()->error("TasQtMemLogService::reqisterServicePlugin registering failed"); 
         mRegisterTime.stop();
         mSocket->closeConnection();
+        mDoNotReconnect = true;
         connectionClosed();
+        //no use if no connection to qttasserver
+        QCoreApplication::instance()->quit();
     }
 }
 
@@ -122,6 +129,10 @@ void TasQtMemLogService::connectionClosed()
     TasLogger::logger()->error("TasQtMemLogService::connectionClosed was closed");
     mRegistered = false;   
     mConnected = false;
+    cleanConnections();
+    if(!QCoreApplication::closingDown() && !mDoNotReconnect){
+        initializeConnections();
+    }
 }
 
 
@@ -160,6 +171,8 @@ void TasQtMemLogService::timeout()
  */
 void TasQtMemLogService::unReqisterServicePlugin()
 {       
+    mDoNotReconnect = true;
+
     if(mRegistered){  
         TasLogger::logger()->info("TasQtMemLogService::unReqisterServicePlugin");
         QMap<QString, QString> attrs;

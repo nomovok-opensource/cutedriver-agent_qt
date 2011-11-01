@@ -117,14 +117,17 @@ int CpuLoadGenerator::start(int loadInPercentage)
 
 int CpuLoadGenerator::stop()
 {
-    TasLogger::logger()->debug("> CpuLoadGenerator::stop");
-    if (mLoadGeneratingThread.ExitType() == EExitPending) {
-        TasLogger::logger()->debug("Killing...");
-        mLoadGeneratingThread.Kill(KErrNone);
+    int status = 0;
+    if(mRunning){
+        TasLogger::logger()->debug("> CpuLoadGenerator::stop");
+        if (mLoadGeneratingThread.ExitType() == EExitPending) {
+            TasLogger::logger()->debug("Killing...");
+            mLoadGeneratingThread.Kill(KErrNone);
+        }
+        status = mLoadGeneratingThread.ExitReason();
+        TasLogger::logger()->debug("Closing...");
+        mLoadGeneratingThread.Close();
     }
-    int status = mLoadGeneratingThread.ExitReason();
-    TasLogger::logger()->debug("Closing...");
-    mLoadGeneratingThread.Close();
     mRunning = false;
     return status;
 }
