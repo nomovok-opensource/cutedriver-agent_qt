@@ -24,14 +24,19 @@
 #include <tassocket.h>
 #include <QTimer>
 #include <QCoreApplication>
+#include <memspysession.h>
 
 const int DEFAULT_LOGGING_INTERVAL_MS   = 1000;
 const int INTERVAL_S_TO_MS              = 1000;
 const QString RESOURCE_LOGGER           = "resourcelogger";
 const QString LOG_FILE_NAME_PREFIX      = "mem_usage_";
 const QString LOG_FILE_EXT              = ".log";
+//const QString HEAP_DUMP_NAME_PREFIX     = "heap_";
+//const QString HEAP_DUMP_EXT             = ".dump";
 #ifdef Q_OS_SYMBIAN
 const QString LOG_FILE_PATH             = "c:\\data\\";
+//const QString HEAP_DUMP_PATH            = "\\memspy_data";
+_LIT(HEAP_DUMP_PATH,                      "\\memspy_data");
 #else
 const QString LOG_FILE_PATH             = "";
 #endif
@@ -111,6 +116,20 @@ bool ResourceLoggingService::executeService(
             }
         }
         /*
+         * Capture thread heap dump
+         */
+        else if (commandIs(model, "ThreadHeapDump", command)) {
+            error = dumpThreadHeap(*command, responseData);
+            if (TAS_ERROR_NONE != error) {
+                TasLogger::logger()->error("  Error in dumping thread heap: " 
+                                                + responseData 
+                                                + QString::number(error));
+                response.setErrorMessage("Error in dumping thread heap: " 
+                                                + responseData 
+                                                + QString::number(error));
+            }
+        }
+        /*
          * Start device memory logging
          */
         else if (0) {
@@ -133,7 +152,6 @@ bool ResourceLoggingService::executeService(
         connect(response.requester(), SIGNAL(messageSent()), this, SLOT(requestQuit()));           
     }
     
-
     TasLogger::logger()->debug("< ResourceLoggingService::executeService");
     return status;
 }
@@ -271,6 +289,40 @@ int ResourceLoggingService::stopLoad(TasCommand& command, QString& responseData)
     }
     
     TasLogger::logger()->debug("< CpuLoadService::stopLoad");
+    return error;
+}
+
+int ResourceLoggingService::dumpThreadHeap(TasCommand& command, QString& response)
+{
+    TasLogger::logger()->debug("> ResourceLoggingService::dumpThreadHeap: " + command.name());
+    int error = TAS_ERROR_NONE;
+    
+    QString threadName = command.parameter("thread_name");
+    if (threadName.isEmpty()) {
+        return TAS_ERROR_PARAMETER;
+        response = "No thread name given: ";
+    }
+    
+    RMemSpySession memSpy;
+    error = memSpy.Connect();
+    if (KErrNone == error) {
+        TRAP(error, memSpy.SwitchOutputToFileL(HEAP_DUMP_PATH));
+        if (error) {
+            QString dumpPath = QString::fromUtf16(HEAP_DUMP_PATH().Ptr(), HEAP_DUMP_PATH().Length());
+            response = "memSpy.SwitchOutputToFileL(" + dumpPath + ") failed: ";
+        }
+        TPtrC descThreadName(threadName.utf16(), threadName.length());
+        TRAP(error, memSpy.OutputThreadHeapDataL(descThreadName));
+        if (error) {
+            response = "memSpy.OutputThreadHeapDataL(" + threadName + ") failed: ";
+        }
+        memSpy.Close();
+    }
+    else {
+        response = "memSpy.Connect() failed: ";
+    }
+    
+    TasLogger::logger()->debug("< ResourceLoggingService::dumpThreadHeap");
     return error;
 }
 

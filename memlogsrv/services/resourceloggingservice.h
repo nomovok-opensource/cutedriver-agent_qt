@@ -61,6 +61,7 @@ private:
             QString& responseData);
     int startLoad(TasCommand& command);
     int stopLoad(TasCommand& command, QString& responseData);
+    int dumpThreadHeap(TasCommand& command, QString& response);
     bool commandIs(
             TasCommandModel& commandModel, 
             const QString& commandName, 
