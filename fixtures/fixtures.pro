@@ -35,8 +35,6 @@ SUBDIRS += fpsfixture
 
 SUBDIRS += filefixture
 
-SUBDIRS += localefixture
-
 SUBDIRS += popupfixture
 
 !symbian: {
@@ -48,6 +46,7 @@ symbian: {
         SUBDIRS += launchfixture
 }
 CONFIG(maemo){
+SUBDIRS += localefixture
 #SUBDIRS += duifixture #not supported anymore
 }
 

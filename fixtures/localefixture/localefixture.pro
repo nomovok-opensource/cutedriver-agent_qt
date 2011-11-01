@@ -20,10 +20,13 @@
 TEMPLATE = lib
 TARGET = localefixture
 CONFIG += plugin
-CONFIG += meegotouch
 
+
+CONFIG(maemo){
 DEFINES += TAS_MAEMO
 DEFINES += HAVE_QAPP
+CONFIG += meegotouch
+}
 
 include(../../tasbase.pri)
 

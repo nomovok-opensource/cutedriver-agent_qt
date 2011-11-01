@@ -23,9 +23,11 @@
 #include <QMouseEvent>
 #include <QLocale>
 
+#if defined(TAS_MAEMO) && defined(HAVE_QAPP)
 #include <MApplication>
 #include <MLocale>
 #include <MCalendar>
+#endif
 
 #include "localefixture.h"
 #include "testabilityutils.h"
@@ -43,8 +45,8 @@ static const QString NUMBERVALUE = "numbervalue";
 Q_EXPORT_PLUGIN2(localefixture, LocaleFixturePlugin)
 
 /*!
-  \classLocaleFixturePlugin
-  \brief 
+  \class LocaleFixturePlugin
+  \brief give access to QLocale/MLocale values from scripts
 */
 
 LocaleFixturePlugin::LocaleFixturePlugin(QObject* parent) :QObject(parent) {}
@@ -59,6 +61,7 @@ bool LocaleFixturePlugin::execute(
     TasLogger::logger()->debug("> LocaleFixturePlugin::execute translation");
     bool result = true;
 
+#if defined(TAS_MAEMO) && defined(HAVE_QAPP)
     QLocale defaultQLocale;
     MApplication* app = MApplication::instance();
     MLocale defaultMLocale;
@@ -81,8 +84,8 @@ bool LocaleFixturePlugin::execute(
     else if (actionName == "getMonthName") {
         int month = parameters[MONTHNUMBER].toInt();
         if (month < 1 || month > 12){
-            stdOut.append("Error: month number out of range");
-            return false;
+            stdOut.append("Error: Month number out of range");
+            result = false;
         }
         if (app){
             stdOut.append(defaultMLocale.monthName(*myCalendar, month));
@@ -99,41 +102,54 @@ bool LocaleFixturePlugin::execute(
         }
         else
         {
+            // type g & max 6 decimals
             stdOut.append(defaultQLocale.toString(value, 'g', 6));
         }
     }
     else if (actionName == "getDate") {
-        //QDate tempdate = QDate::fromString("1 12 2003", "d MM yyyy");
         QDateTime tempdate = QDateTime::fromString(parameters[DATESTRING], "d'.'MM'.'yyyy");
+        if(tempdate.isValid())
+        {
 
-        if (app){
-            QString formattedDateTime;
-            myCalendar->setDateTime(tempdate);
-            formattedDateTime = defaultMLocale.formatDateTime(*myCalendar, MLocale::DateMedium, MLocale::TimeNone);
-            stdOut.append(formattedDateTime);
+            if (app){
+                QString formattedDateTime;
+                myCalendar->setDateTime(tempdate);
+                formattedDateTime = defaultMLocale.formatDateTime(*myCalendar, MLocale::DateMedium, MLocale::TimeNone);
+                stdOut.append(formattedDateTime);
+            }
+            else
+            {
+                stdOut.append(defaultQLocale.toString(tempdate, defaultQLocale.dateFormat()));
+            }
         }
         else
         {
-            stdOut.append(defaultQLocale.toString(tempdate, defaultQLocale.dateFormat()));
+            stdOut.append("Datevalue was not valid, should be d.mm.yyyy");
+            result = false;
         }
     }
 
     else if (actionName == "getTime") {
-        //QString timevalue = "12:13:14";
         QString timevalue = parameters[TIMESTRING];
-        //    QTime temptime = QTime::fromString(timevalue, "h':'m':'ss");
         QDateTime temptime = QDateTime::fromString(timevalue, "h':'m':'ss");
+        if(temptime.isValid()){
 
-        if (app){
-            QString formattedDateTime;
-            //QDateTime current = QDateTime::currentDateTime();
-            myCalendar->setDateTime(temptime);
-            formattedDateTime = defaultMLocale.formatDateTime(*myCalendar, MLocale::DateNone, MLocale::TimeMedium);
-            stdOut.append(formattedDateTime);
+            if (app){
+                QString formattedDateTime;
+                //QDateTime current = QDateTime::currentDateTime();
+                myCalendar->setDateTime(temptime);
+                formattedDateTime = defaultMLocale.formatDateTime(*myCalendar, MLocale::DateNone, MLocale::TimeMedium);
+                stdOut.append(formattedDateTime);
+            }
+            else
+            {
+                stdOut.append(defaultQLocale.toString(temptime, defaultQLocale.timeFormat()));
+            }
         }
         else
         {
-            stdOut.append(defaultQLocale.toString(temptime, defaultQLocale.timeFormat()));
+            stdOut.append("Timevalue was not valid, should be h:m:ss");
+            result = false;
         }
     }
 
@@ -141,13 +157,12 @@ bool LocaleFixturePlugin::execute(
         if (app){
             double amount = parameters[CURRENCYAMOUNT].toDouble();
             QString currency = parameters[CURRENCYTYPE];
+            //If currency is empty string, format currency returns default currency of locale. Undocumented behauviour, but works.
             stdOut.append(defaultMLocale.formatCurrency(amount, currency));
         }
         else{
             stdOut.append("currency not supported in QLocale until Qt4.8");
         }
-
-
     }
     else if (actionName == "getSeparator") {
         stdOut.append(defaultQLocale.groupSeparator());
@@ -157,9 +172,15 @@ bool LocaleFixturePlugin::execute(
     }
     else {
         stdOut.append("no fixture method found");
-        return false;
+        result = false;
     }
-
     TasLogger::logger()->debug("< LocaleFixturePlugin::execute");
     return result;
+
+#else
+    stdOut.append("LocaleFixture implemented only for Meego");
+    return false;
+#endif
+
+
 }
