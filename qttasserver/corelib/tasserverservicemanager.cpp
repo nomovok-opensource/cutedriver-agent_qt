@@ -104,6 +104,10 @@ void TasServerServiceManager::handleServiceRequest(TasCommandModel& commandModel
     if(!targetClient && (commandModel.service() == APPLICATION_STATE || commandModel.service() == SCREEN_SHOT 
                          || commandModel.service() == FIND_OBJECT_SERVICE)){
         targetClient = mClientManager->findClient(commandModel);
+        if(targetClient){
+            TasLogger::logger()->debug("TasServerServiceManager::handleServiceRequest topmost client is: " + targetClient->processId() +
+                                       "," + targetClient->applicationName());
+        }
     }
     else if (commandModel.service() == RESOURCE_LOGGING_SERVICE){
         targetClient = mClientManager->logMemClient();
@@ -112,11 +116,14 @@ void TasServerServiceManager::handleServiceRequest(TasCommandModel& commandModel
     }
 
     if(targetClient){
+        TasLogger::logger()->debug("TasServerServiceManager::handleServiceRequest client is: " + targetClient->processId() +
+                                   "," + targetClient->applicationName());
         int timeout = 10000;
         if(!commandModel.parameter("plugin_timeout").isEmpty()){
             TasLogger::logger()->debug("TasServerServiceManager::handleServiceRequest set timeout " + commandModel.parameter("plugin_timeout"));
             timeout = commandModel.parameter("plugin_timeout").toInt();
         }
+        QPointer<TasClient> safePointer(targetClient);
         ResponseWaiter* waiter = new ResponseWaiter(responseId, requester, timeout);
         bool needFragment = false;
         if(commandModel.service() == APPLICATION_STATE || commandModel.service() == FIND_OBJECT_SERVICE){
@@ -139,41 +146,54 @@ void TasServerServiceManager::handleServiceRequest(TasCommandModel& commandModel
         }
 
         if(commandModel.service() == CLOSE_APPLICATION){
-            waiter->setResponseFilter(new CloseFilter(commandModel));
+            waiter->setResponseFilter(new CloseFilter(commandModel));        
         }
 
-        connect(waiter, SIGNAL(responded(qint32)), this, SLOT(removeWaiter(qint32)));
-        mResponseQueue.insert(responseId, waiter);
-        if(needFragment){
-            commandModel.addDomAttribute("needFragment", "true");
-            targetClient->socket()->sendRequest(responseId, commandModel.sourceString(false));            
-        }
-        else{
-            targetClient->socket()->sendRequest(responseId, commandModel.sourceString());            
-        }
-
-    }
-    else{
-        //check if platform specific handlers want to handle the request
-        if(extensionHandled(commandModel, requester, responseId)){
-            return;
-        }
-        if(commandModel.service() == SCREEN_SHOT){
-            ResponseWaiter* waiter = new ResponseWaiter(responseId, requester);
+        if(!safePointer.isNull() && targetClient->socket()){
             connect(waiter, SIGNAL(responded(qint32)), this, SLOT(removeWaiter(qint32)));
             mResponseQueue.insert(responseId, waiter);
-            QStringList args;
-            args << "-i" << QString::number(responseId) << "-a" << "screenshot";
-            QProcess::startDetached("qttasutilapp", args);
+            if(needFragment){
+                commandModel.addDomAttribute("needFragment", "true");
+                targetClient->socket()->sendRequest(responseId, commandModel.sourceString(false));            
+                }
+                else{
+                    targetClient->socket()->sendRequest(responseId, commandModel.sourceString());            
+                }
         }
-        else{            
-            TasResponse response(responseId);
-            response.setRequester(requester);
-            performService(commandModel, response);
-            //start app waits for register message and performs the response
-            if( commandModel.service() != RESOURCE_LOGGING_SERVICE || response.isError()){
-                requester->sendMessage(response);
-            }
+        else{
+            TasLogger::logger()->debug("TasServerServiceManager::handleServiceRequest client was removed while processing.");
+                                       
+            //the client was removed while waiting for native stuff
+            delete waiter;
+            handleClientLess(commandModel, requester, responseId);
+        }
+    }
+    else{
+        handleClientLess(commandModel, requester, responseId);
+    }
+}
+
+void TasServerServiceManager::handleClientLess(TasCommandModel& commandModel, TasSocket* requester, qint32 responseId)
+{
+    //check if platform specific handlers want to handle the request
+    if(extensionHandled(commandModel, requester, responseId)){
+        return;
+    }
+    if(commandModel.service() == SCREEN_SHOT){
+        ResponseWaiter* waiter = new ResponseWaiter(responseId, requester);
+        connect(waiter, SIGNAL(responded(qint32)), this, SLOT(removeWaiter(qint32)));
+        mResponseQueue.insert(responseId, waiter);
+        QStringList args;
+        args << "-i" << QString::number(responseId) << "-a" << "screenshot";
+        QProcess::startDetached("qttasutilapp", args);
+    }
+    else{            
+        TasResponse response(responseId);
+        response.setRequester(requester);
+        performService(commandModel, response);
+        //start app waits for register message and performs the response
+        if( commandModel.service() != RESOURCE_LOGGING_SERVICE || response.isError()){
+            requester->sendMessage(response);
         }
     }
 }

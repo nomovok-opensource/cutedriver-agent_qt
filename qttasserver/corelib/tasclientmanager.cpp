@@ -197,15 +197,14 @@ void TasClientManager::removeClient(const QString& processId, bool kill)
 
         TasLogger::logger()->info("TasClientManager::removeClient " + app->applicationName());
         app->closeConnection();
+        delete app;
+        app = 0;
 
         if(kill){
             if(ok && pid != 0){
                 TasNativeUtils::killProcess(pid);
             }
         }
-
-        delete app;
-        app = 0;
     }
     else if(kill && ok && pid != 0){
         TasNativeUtils::killProcess(pid);

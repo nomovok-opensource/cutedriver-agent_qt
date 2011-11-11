@@ -63,7 +63,7 @@ private:
 #ifdef Q_OS_SYMBIAN   
     bool appendVkbData(TasCommandModel& commandModel, QByteArray& data);
 #endif
-
+    void handleClientLess(TasCommandModel& commandModel, TasSocket* requester, qint32 responseId);
 private:	
 	QHash<qint32, ResponseWaiter*> mResponseQueue;
 	TasClientManager* mClientManager;
