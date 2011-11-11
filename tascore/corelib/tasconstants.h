@@ -54,6 +54,7 @@ const char* const FIND_OBJECT_SERVICE        = "findObject";
 const char* const CPU_LOAD_SERVICE           = "cpuLoad";
 const char* const VERSION_SERVICE            = "versionService";
 const char* const ENABLE_TIMESTAMPS          = "enableTimestamps";
+const char* const GET_HOME_TIME              = "getHomeTime";
 
 /*
  Message flags
