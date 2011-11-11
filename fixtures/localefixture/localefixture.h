@@ -16,6 +16,29 @@
 ** of this file. 
 ** 
 ****************************************************************************/ 
+ 
 
-static QString TAS_VERSION = "1.4";
+#ifndef LocaleFixturePlugin_H
+#define LocaleFixturePlugin_H
 
+#include <QObject>
+#include <QHash>
+#include <tasqtfixtureplugininterface.h>
+
+class LocaleFixturePlugin : public QObject, public TasFixturePluginInterface
+{
+  Q_OBJECT
+  Q_INTERFACES(TasFixturePluginInterface)
+ 
+public:
+    LocaleFixturePlugin(QObject* parent=0);
+    ~LocaleFixturePlugin();
+    bool execute(
+        void* objectInstance, 
+        QString actionName, 
+        QHash<QString, QString> parameters, 
+        QString & stdOut);
+ };
+
+#endif
+ 

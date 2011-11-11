@@ -6,6 +6,7 @@ usr/lib/qt4/plugins/tasfixtures/libfilefixture.so
 usr/lib/qt4/plugins/tasfixtures/libfpsfixture.so
 usr/lib/qt4/plugins/tasfixtures/libpopupfixture.so
 usr/lib/qt4/plugins/tasfixtures/libsettingfixture.so
+usr/lib/qt4/plugins/tasfixtures/liblocalefixture.so
 # usr/lib/qt4/plugins/tasfixtures/libqtscriptfixture.so
 usr/lib/qt4/plugins/traversers/liblayouttraverse.so
 usr/lib/qt4/plugins/traversers/libqttraverse.so
