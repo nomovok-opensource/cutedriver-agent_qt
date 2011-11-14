@@ -301,8 +301,8 @@ int ResourceLoggingService::dumpThreadHeap(TasCommand& command, QString& respons
     
     QString threadName = command.parameter("thread_name");
     if (threadName.isEmpty()) {
-        return TAS_ERROR_PARAMETER;
         response = "No thread name given: ";
+        return TAS_ERROR_PARAMETER;
     }
     
     RMemSpySession memSpy;
