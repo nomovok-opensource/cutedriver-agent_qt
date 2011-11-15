@@ -57,6 +57,7 @@ public:
     void addFont(TasObject* objectInfo, QFont font);
     void addVariantValue(TasAttribute& attr, const QVariant& value);
     bool includeAttribute(const QString& attributeName);
+    bool useViewCrop();
     /*! return the 1) xy coodrinates of the item, 2) the absolute xy coordinate.
      Coordinate 0,0 is returned if data not available. */
     QPair<QPoint,QPoint> addGraphicsItemCoordinates(TasObject* objectInfo, QGraphicsItem* graphicsItem, 
@@ -79,12 +80,14 @@ public:
 
   bool filterPlugin(const QString& pluginName);
   bool includeAttribute(const QString& attributeName);
+  bool useViewCrop();
   bool filterProperties();
 
 private:	
   QStringList mAttributeWhiteList;
   QStringList mAttributeBlackList;
   bool mExcludeProperties;
+  bool mUseViewCrop;
 
 };
 

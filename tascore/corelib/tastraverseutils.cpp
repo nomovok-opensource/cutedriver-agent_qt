@@ -278,6 +278,10 @@ bool TasTraverseUtils::includeAttribute(const QString& attributeName)
     }
     return true;
 }
+bool TasTraverseUtils::useViewCrop()
+{
+    return mTraverseFilter && mTraverseFilter->useViewCrop();
+}
 
 QPair<QPoint,QPoint> TasTraverseUtils::addGraphicsItemCoordinates(TasObject* objectInfo, 
                                                                  QGraphicsItem* graphicsItem, 
@@ -426,6 +430,7 @@ void TasDataFilter::initialize(TasCommand* command)
     if(command->apiParameter("filterProperties") =="true"){
         mExcludeProperties = true;
     }
+    mUseViewCrop = command->apiParameter("useViewCrop") == "true" || command->parameter("useViewCrop") == "true";
 }
 
 void TasDataFilter::clear()
@@ -454,6 +459,11 @@ bool TasDataFilter::includeAttribute(const QString& attributeName)
         include = true;
     }
     return include;
+}
+
+bool TasDataFilter::useViewCrop()
+{
+    return mUseViewCrop;
 }
 
 

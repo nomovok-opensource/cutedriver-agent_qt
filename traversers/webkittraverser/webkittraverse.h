@@ -83,6 +83,7 @@ private:
 
 private:
 	 TasTraverseUtils* mTraverseUtils;
+         QRect mCropRect;
     
  };
 
