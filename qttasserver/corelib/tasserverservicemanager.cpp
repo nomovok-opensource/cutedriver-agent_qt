@@ -104,10 +104,6 @@ void TasServerServiceManager::handleServiceRequest(TasCommandModel& commandModel
     if(!targetClient && (commandModel.service() == APPLICATION_STATE || commandModel.service() == SCREEN_SHOT 
                          || commandModel.service() == FIND_OBJECT_SERVICE)){
         targetClient = mClientManager->findClient(commandModel);
-        if(targetClient){
-            TasLogger::logger()->debug("TasServerServiceManager::handleServiceRequest topmost client is: " + targetClient->processId() +
-                                       "," + targetClient->applicationName());
-        }
     }
     else if (commandModel.service() == RESOURCE_LOGGING_SERVICE){
         targetClient = mClientManager->logMemClient();
