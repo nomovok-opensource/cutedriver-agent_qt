@@ -1,21 +1,21 @@
 /***************************************************************************
-**
-** Copyright (C) 2010 Nokia Corporation and/or its subsidiary(-ies).
-** All rights reserved.
-** Contact: Nokia Corporation (testabilitydriver@nokia.com)
-**
-** This file is part of Testability Driver Qt Agent
-**
-** If you have questions regarding the use of this file, please contact
-** Nokia at testabilitydriver@nokia.com .
-**
-** This library is free software; you can redistribute it and/or
-** modify it under the terms of the GNU Lesser General Public
-** License version 2.1 as published by the Free Software Foundation
-** and appearing in the file LICENSE.LGPL included in the packaging
-** of this file.
-**
-****************************************************************************/
+ **
+ ** Copyright (C) 2010 Nokia Corporation and/or its subsidiary(-ies).
+ ** All rights reserved.
+ ** Contact: Nokia Corporation (testabilitydriver@nokia.com)
+ **
+ ** This file is part of Testability Driver Qt Agent
+ **
+ ** If you have questions regarding the use of this file, please contact
+ ** Nokia at testabilitydriver@nokia.com .
+ **
+ ** This library is free software; you can redistribute it and/or
+ ** modify it under the terms of the GNU Lesser General Public
+ ** License version 2.1 as published by the Free Software Foundation
+ ** and appearing in the file LICENSE.LGPL included in the packaging
+ ** of this file.
+ **
+ ****************************************************************************/
 
 #include <QDebug>
 #include <QProcess>
@@ -29,6 +29,7 @@
 
 #include "tasdeviceutils.h"
 #include "tasclientmanager.h"
+#include "tasnativeutils.h"
 
 #include "startappservice.h"
 
@@ -80,7 +81,7 @@ bool StartAppService::executeService(TasCommandModel& model, TasResponse& respon
 
 /*!
   Attempts to start a process using the application path send in the command model.
- */
+*/
 void StartAppService::startApplication(TasCommand& command, TasResponse& response)
 {
     QString applicationPath = command.parameter("application_path");
@@ -120,10 +121,16 @@ void StartAppService::startApplication(TasCommand& command, TasResponse& respons
             if (!responseData.isEmpty()) response.setData(responseData);
             if (!responseErrorMessage.isEmpty()) response.setErrorMessage(responseErrorMessage);
         }
-
+        
         //add pids to startedapp pid list
         if(!response.isError() && !response.dataAsString().isEmpty() ){
             TasClientManager::instance()->addStartedPid(response.dataAsString());
+        }
+        //try to set to foreground
+        bool ok;
+        quint64 startedPid = response.dataAsString().toULongLong(&ok);  
+        if(ok){
+            TasNativeUtils::bringAppToForeground(startedPid);
         }
     }
 }
@@ -304,16 +311,16 @@ void StartAppService::launchDetached(const QString &applicationPath, const QStri
 
     // Start the child process.
     if( CreateProcess( NULL,   // No module name (use command line)
-        (WCHAR *) argv.utf16(),           // Command line
-        NULL,           // Process handle not inheritable
-        NULL,           // Thread handle not inheritable
-        FALSE,          // Set handle inheritance to FALSE
-        CREATE_UNICODE_ENVIRONMENT,              // 0 for no creation flags
-        (LPVOID) envp,           // Use parent's environment block
-        lpCurrentDirectory ,        // Working directory
-        &si,            // Pointer to STARTUPINFO structure
-        &pi )           // Pointer to PROCESS_INFORMATION structure
-    )
+                       (WCHAR *) argv.utf16(),           // Command line
+                       NULL,           // Process handle not inheritable
+                       NULL,           // Thread handle not inheritable
+                       FALSE,          // Set handle inheritance to FALSE
+                       CREATE_UNICODE_ENVIRONMENT,              // 0 for no creation flags
+                       (LPVOID) envp,           // Use parent's environment block
+                       lpCurrentDirectory ,        // Working directory
+                       &si,            // Pointer to STARTUPINFO structure
+                       &pi )           // Pointer to PROCESS_INFORMATION structure
+        )
     {
         QString pid = QString::number(pi.dwProcessId);
         CloseHandle( pi.hProcess );
@@ -420,7 +427,7 @@ void StartAppService::launchDetached(const QString &applicationPath, const QStri
                 if (!workingDirectory.isEmpty()) {
                     if (chdir(workingDirectory.toLocal8Bit().constData()) == -1) {
                         TasLogger::logger()->error( QString("TasServer::launchDetached: chdir(\"%1\") error: %2")
-                                                   .arg(workingDirectory).arg(strerror(errno)) );
+                                                    .arg(workingDirectory).arg(strerror(errno)) );
                     }
                 }
 
@@ -540,7 +547,7 @@ void StartAppService::launchDetached(const QString &applicationPath, const QStri
     qint64 pid;
     if(QProcess::startDetached(applicationPath, arguments, ".", &pid)){
 
-            TasClientManager::instance()->addStartedApp(applicationPath, QDateTime::currentDateTime().toString("yyyyMMddhhmmsszzz"));
+        TasClientManager::instance()->addStartedApp(applicationPath, QDateTime::currentDateTime().toString("yyyyMMddhhmmsszzz"));
         responseData = QString::number(pid);
     }
 #endif
@@ -558,7 +565,7 @@ void StartAppService::launchDetached(const QString &applicationPath, const QStri
         responseErrorMessage = "Could not start the application " + applicationPath + additionalMessage;
     }
 #if (defined(Q_OS_WIN32) || defined(Q_OS_WINCE))
-        free(envp);
+    free(envp);
 #endif
 }
 

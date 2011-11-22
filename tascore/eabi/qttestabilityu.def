@@ -270,4 +270,5 @@ EXPORTS
 	_ZTV15SerializeFilter @ 269 NONAME
 	_ZTV15TasClientSocket @ 270 NONAME
 	_ZTV15TasServerSocket @ 271 NONAME
+	_ZN16TasTraverseUtils11useViewCropEv @ 272 NONAME
 
