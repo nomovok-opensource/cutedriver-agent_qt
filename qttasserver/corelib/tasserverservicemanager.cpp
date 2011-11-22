@@ -1,21 +1,21 @@
 /*************************************************************************** 
-**  
-** Copyright (C) 2010 Nokia Corporation and/or its subsidiary(-ies). 
-** All rights reserved. 
-** Contact: Nokia Corporation (testabilitydriver@nokia.com) 
-** 
-** This file is part of Testability Driver Qt Agent
-** 
-** If you have questions regarding the use of this file, please contact 
-** Nokia at testabilitydriver@nokia.com . 
-** 
-** This library is free software; you can redistribute it and/or 
-** modify it under the terms of the GNU Lesser General Public 
-** License version 2.1 as published by the Free Software Foundation 
-** and appearing in the file LICENSE.LGPL included in the packaging 
-** of this file. 
-** 
-****************************************************************************/ 
+ **  
+ ** Copyright (C) 2010 Nokia Corporation and/or its subsidiary(-ies). 
+ ** All rights reserved. 
+ ** Contact: Nokia Corporation (testabilitydriver@nokia.com) 
+ ** 
+ ** This file is part of Testability Driver Qt Agent
+ ** 
+ ** If you have questions regarding the use of this file, please contact 
+ ** Nokia at testabilitydriver@nokia.com . 
+ ** 
+ ** This library is free software; you can redistribute it and/or 
+ ** modify it under the terms of the GNU Lesser General Public 
+ ** License version 2.1 as published by the Free Software Foundation 
+ ** and appearing in the file LICENSE.LGPL included in the packaging 
+ ** of this file. 
+ ** 
+ ****************************************************************************/ 
  
 
                       
@@ -119,56 +119,54 @@ void TasServerServiceManager::handleServiceRequest(TasCommandModel& commandModel
             TasLogger::logger()->debug("TasServerServiceManager::handleServiceRequest set timeout " + commandModel.parameter("plugin_timeout"));
             timeout = commandModel.parameter("plugin_timeout").toInt();
         }
-        QPointer<TasClient> safePointer(targetClient);
+
         ResponseWaiter* waiter = new ResponseWaiter(responseId, requester, timeout);
-        bool needFragment = false;
-        if(commandModel.service() == APPLICATION_STATE || commandModel.service() == FIND_OBJECT_SERVICE){
-            foreach(TasExtensionInterface* traverser, mExtensions){
-                QByteArray data = traverser->traverseApplication(commandModel);
-                if(!data.isNull()){
-                    waiter->appendPlatformData(data);
-                    needFragment = true;
-                }
-            }
-
-#ifdef Q_OS_SYMBIAN   
-            QByteArray vkbData; 
-            if(appendVkbData(commandModel, vkbData)){
-                waiter->appendPlatformData(vkbData);
-                needFragment = true;
-            }
-#endif
-
-        }
-
         if(commandModel.service() == CLOSE_APPLICATION){
             waiter->setResponseFilter(new CloseFilter(commandModel));        
         }
-
-        if(!safePointer.isNull() && targetClient->socket()){
-            connect(waiter, SIGNAL(responded(qint32)), this, SLOT(removeWaiter(qint32)));
-            mResponseQueue.insert(responseId, waiter);
-            if(needFragment){
-                commandModel.addDomAttribute("needFragment", "true");
-                targetClient->socket()->sendRequest(responseId, commandModel.sourceString(false));            
-                }
-                else{
-                    targetClient->socket()->sendRequest(responseId, commandModel.sourceString());            
-                }
+        connect(waiter, SIGNAL(responded(qint32)), this, SLOT(removeWaiter(qint32)));
+        mResponseQueue.insert(responseId, waiter);
+        if(commandModel.service() == APPLICATION_STATE || commandModel.service() == FIND_OBJECT_SERVICE){
+            commandModel.addDomAttribute("needFragment", "true");
+            //send request for qt uistate to client
+            QPointer<ResponseWaiter> rWaiter(waiter);
+            targetClient->socket()->sendRequest(responseId, commandModel.sourceString(false));                        
+            //in the meantime process native
+            getNativeUiState(rWaiter, commandModel);
         }
         else{
-            TasLogger::logger()->debug("TasServerServiceManager::handleServiceRequest client was removed while processing.");
-                                       
-            //the client was removed while waiting for native stuff
-            delete waiter;
-            handleClientLess(commandModel, requester, responseId);
+            //can respond as soon as response from qt side
+            waiter->okToRespond();
+            targetClient->socket()->sendRequest(responseId, commandModel.sourceString());            
         }
-    }
+    }        
     else{
         handleClientLess(commandModel, requester, responseId);
     }
 }
 
+void TasServerServiceManager::getNativeUiState(QPointer<ResponseWaiter> waiter, TasCommandModel& commandModel)
+{
+    foreach(TasExtensionInterface* traverser, mExtensions){
+        QByteArray data = traverser->traverseApplication(commandModel);
+        if(!data.isNull()){
+            if(waiter){
+                waiter->appendPlatformData(data);
+            }
+         }
+    }
+#ifdef Q_OS_SYMBIAN   
+    QByteArray vkbData; 
+    if(appendVkbData(commandModel, vkbData)){
+        if(waiter){
+            waiter->appendPlatformData(vkbData);
+        }
+     }
+#endif
+    if(waiter){
+        waiter->okToRespond();
+    }
+}
 void TasServerServiceManager::handleClientLess(TasCommandModel& commandModel, TasSocket* requester, qint32 responseId)
 {
     //check if platform specific handlers want to handle the request
@@ -292,7 +290,7 @@ void TasServerServiceManager::loadExtensions()
 
 /*!
   Try to load a plugin from the given path. Returns null if no plugin loaded.
- */
+*/
 void TasServerServiceManager::loadExtension(const QString& filePath)
 {
     TasExtensionInterface* interface = 0; 
@@ -344,6 +342,8 @@ ResponseWaiter::ResponseWaiter(qint32 responseId, TasSocket* relayTarget, int ti
 {
     mPlatformData = 0;
     mFilter = 0;
+    mPluginResponded = false;
+    mCanRespond = false;
     mSocket = relayTarget;
     mResponseId = responseId;
     mWaiter.setSingleShot(true);    
@@ -359,6 +359,15 @@ ResponseWaiter::~ResponseWaiter()
         delete mFilter;
     }
     mPlatformData.clear();
+}
+
+void ResponseWaiter::okToRespond()
+{
+    mCanRespond = true;
+    if(mPluginResponded){
+        sendMessage();
+    }
+    
 }
 
 void ResponseWaiter::cleanup()
@@ -389,21 +398,29 @@ void ResponseWaiter::setResponseFilter(ResponseFilter* filter)
 void ResponseWaiter::sendResponse(TasMessage& response)
 {
     TasLogger::logger()->debug("ResponseWaiter::sendResponse");
+    mPluginResponded = true;
     mWaiter.stop();
+    mMessageToSend = response;
+    //native stuff not ready
+    if(!mCanRespond) return;
+    sendMessage();
+}
+
+void ResponseWaiter::sendMessage(){
     if(mFilter){
-        mFilter->filterResponse(response);
+        mFilter->filterResponse(mMessageToSend);
     }
     if(!mPlatformData.isEmpty()){
         TasLogger::logger()->debug("ResponseWaiter::sendResponse add plat stuf");
-        response.uncompressData();
-        mPlatformData.append(response.data().data());
+        mMessageToSend.uncompressData();
+        mPlatformData.append(mMessageToSend.data().data());
         mPlatformData.append(QString("</tasInfo></tasMessage>").toUtf8());
-        response.setData(mPlatformData);
+        mMessageToSend.setData(mPlatformData);
         //ownership transferred to response
         mPlatformData = 0;
     }
     //TasLogger::logger()->debug(response.dataAsString());
-    if(!mSocket->sendMessage(response)){
+    if(!mSocket->sendMessage(mMessageToSend)){
         TasLogger::logger()->error("ResponseWaiter::sendResponse socket not writable!");
     }
     emit responded(mResponseId);

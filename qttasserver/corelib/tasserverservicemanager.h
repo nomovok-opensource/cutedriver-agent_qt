@@ -22,6 +22,7 @@
 #define TASSERVERSERVICEMANAGER_H
 
 #include <QObject>
+#include <QPointer>
 #include <QList>
 #include <QHash>
 #include <QTimer>
@@ -64,6 +65,7 @@ private:
     bool appendVkbData(TasCommandModel& commandModel, QByteArray& data);
 #endif
     void handleClientLess(TasCommandModel& commandModel, TasSocket* requester, qint32 responseId);
+    void getNativeUiState(QPointer<ResponseWaiter> waiter, TasCommandModel& commandModel);
 private:	
 	QHash<qint32, ResponseWaiter*> mResponseQueue;
 	TasClientManager* mClientManager;
@@ -83,6 +85,7 @@ public:
 	void sendResponse(TasMessage& response);
 
 	void appendPlatformData(QByteArray data);
+    void okToRespond();
 
 signals:
 	void responded(qint32 responseId);
@@ -93,6 +96,7 @@ private slots:
 
 private:
 	void cleanup();
+    void sendMessage();
 
 private:
 	qint32 mResponseId;
@@ -100,6 +104,9 @@ private:
 	TasSocket *mSocket;
 	ResponseFilter* mFilter;
 	QByteArray mPlatformData;
+    bool mCanRespond;
+    bool mPluginResponded;
+    TasMessage mMessageToSend;
 };
 
 class CloseFilter : public ResponseFilter
