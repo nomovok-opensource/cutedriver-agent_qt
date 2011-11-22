@@ -29,6 +29,7 @@
 
 #include "tasdeviceutils.h"
 #include "tasclientmanager.h"
+#include "tasnativeutils.h"
 
 #include "startappservice.h"
 
