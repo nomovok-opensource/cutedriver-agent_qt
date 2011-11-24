@@ -26,6 +26,7 @@
 #include <QDir>
 #include <QPluginLoader>
 #include <QProcess>
+#include <QCoreApplication>
 
 #include "tasserverservicemanager.h"
 
@@ -34,6 +35,14 @@
 #include "taslogger.h"
 #include "version.h"
 #include "tasnativeutils.h"
+
+const char* const RESPONSE_HEADER = "<tasMessage version=\"%1\"><tasInfo id=\"%2\" name=\"%3\" type=\"sut\">";
+const char* const RESPONSE_FOOTER = "</tasInfo></tasMessage>";
+#ifdef Q_OS_SYMBIAN   
+const char* const ENV_NAME = "symbian";
+#else
+const char* const ENV_NAME = "qt";
+#endif    
 
 /*!
   \class TasServerServiceManager
@@ -72,6 +81,7 @@ TasServerServiceManager::~TasServerServiceManager()
     mCommands.clear();
     mExtensions.clear();
     mResponseQueue.clear();
+    mHeader.clear();
 }
 
 /*!
@@ -125,14 +135,17 @@ void TasServerServiceManager::handleServiceRequest(TasCommandModel& commandModel
             waiter->setResponseFilter(new CloseFilter(commandModel));        
         }
         connect(waiter, SIGNAL(responded(qint32)), this, SLOT(removeWaiter(qint32)));
+        mMutex.lock();
         mResponseQueue.insert(responseId, waiter);
+        mMutex.unlock();
         if(commandModel.service() == APPLICATION_STATE || commandModel.service() == FIND_OBJECT_SERVICE){
             commandModel.addDomAttribute("needFragment", "true");
             //send request for qt uistate to client
-            QPointer<ResponseWaiter> rWaiter(waiter);
+            QWeakPointer<ResponseWaiter> rWaiter(waiter);
             targetClient->socket()->sendRequest(responseId, commandModel.sourceString(false));                        
             //in the meantime process native
-            getNativeUiState(rWaiter, commandModel);
+            getNativeUiState(waiter, commandModel);
+            rWaiter.clear();
         }
         else{
             //can respond as soon as response from qt side
@@ -143,28 +156,34 @@ void TasServerServiceManager::handleServiceRequest(TasCommandModel& commandModel
     else{
         handleClientLess(commandModel, requester, responseId);
     }
+    //https://bugreports.qt.nokia.com/browse/QTBUG-21928
+    QCoreApplication::instance()->processEvents(QEventLoop::DeferredDeletion);
+    TasLogger::logger()->debug("TasServerServiceManager::handleServiceRequest: done " + commandModel.service());
 }
 
-void TasServerServiceManager::getNativeUiState(QPointer<ResponseWaiter> waiter, TasCommandModel& commandModel)
+void TasServerServiceManager::getNativeUiState(QWeakPointer<ResponseWaiter> waiter, TasCommandModel& commandModel)
 {
     foreach(TasExtensionInterface* traverser, mExtensions){
         QByteArray data = traverser->traverseApplication(commandModel);
         if(!data.isNull()){
-            if(waiter){
-                waiter->appendPlatformData(data);
+            if(!waiter.isNull()){
+                waiter.data()->appendPlatformData(data);
             }
-         }
+            data.clear();
+        }
+        
     }
 #ifdef Q_OS_SYMBIAN   
     QByteArray vkbData; 
     if(appendVkbData(commandModel, vkbData)){
-        if(waiter){
-            waiter->appendPlatformData(vkbData);
+        if(!waiter.isNull()){
+            waiter.data()->appendPlatformData(vkbData);
+            vkbData.clear();
         }
-     }
+    }
 #endif
-    if(waiter){
-        waiter->okToRespond();
+    if(!waiter.isNull()){
+        waiter.data()->okToRespond();
     }
 }
 void TasServerServiceManager::handleClientLess(TasCommandModel& commandModel, TasSocket* requester, qint32 responseId)
@@ -181,13 +200,17 @@ void TasServerServiceManager::handleClientLess(TasCommandModel& commandModel, Ta
         args << "-i" << QString::number(responseId) << "-a" << "screenshot";
         QProcess::startDetached("qttasutilapp", args);
     }
-    else{            
+    else{
+        //try to detect pc side connection breaks
+        QWeakPointer<TasSocket> socketSafe = QWeakPointer<TasSocket>(requester);
         TasResponse response(responseId);
         response.setRequester(requester);
         performService(commandModel, response);
-        //start app waits for register message and performs the response
-        if( commandModel.service() != RESOURCE_LOGGING_SERVICE || response.isError()){
+        if(!socketSafe.isNull() && (commandModel.service() != RESOURCE_LOGGING_SERVICE || response.isError())){
             requester->sendMessage(response);
+        }
+        else{
+            TasLogger::logger()->warning("TasServerServiceManager::handleClientLess connection was broken!");
         }
     }
 }
@@ -208,9 +231,9 @@ bool TasServerServiceManager::extensionHandled(TasCommandModel& commandModel, Ta
                 appendVkbData(commandModel,uiState);
 #endif
             }
-            data = QByteArray(TasServerServiceManager::responseHeader());
+            data = QString(RESPONSE_HEADER).arg(TAS_VERSION).arg(qVersion()).arg(ENV_NAME).toUtf8();
             data.append(uiState);
-            data.append(QString("</tasInfo></tasMessage>").toUtf8());
+            data.append(QString(RESPONSE_FOOTER).toUtf8());
         }        
         else {
             handled = extension->performCommand(commandModel, data);
@@ -219,7 +242,10 @@ bool TasServerServiceManager::extensionHandled(TasCommandModel& commandModel, Ta
             TasLogger::logger()->debug("TasServerServiceManager::handleServiceRequest platform handler completed request.");
             //make sure the pid is removed from the started apps list
             if(commandModel.service() == CLOSE_APPLICATION){
-                TasClientManager::instance()->removeStartedPid(commandModel.id());
+                bool ok;
+                quint64 pid = commandModel.id().toULongLong(&ok);  
+                if(ok) TasClientManager::instance()->removeStartedPid(pid);
+                    
             }
             TasResponse response(responseId, data);
             requester->sendMessage(response);
@@ -311,6 +337,7 @@ void TasServerServiceManager::loadExtension(const QString& filePath)
 
 void TasServerServiceManager::serviceResponse(TasMessage& response)
 {
+    QMutexLocker locker(&mMutex);
     if(mResponseQueue.contains(response.messageId())){
         mResponseQueue.value(response.messageId())->sendResponse(response);
     }
@@ -321,34 +348,22 @@ void TasServerServiceManager::serviceResponse(TasMessage& response)
 
 void TasServerServiceManager::removeWaiter(qint32 responseId)
 {
+    QMutexLocker locker(&mMutex);
     TasLogger::logger()->debug("TasServerServiceManager::removeWaiter remove " + QString::number(responseId));
     mResponseQueue.remove(responseId);
     TasLogger::logger()->debug("TasServerServiceManager::removeWaiter response count " + QString::number(mResponseQueue.count()));
 }
 
-QByteArray TasServerServiceManager::responseHeader()
-{
-    QString name = "qt";
-#ifdef Q_OS_SYMBIAN   
-    name = "symbian";
-#endif
-    
-    QString header = "<tasMessage version=\""+TAS_VERSION+"\"><tasInfo id=\""+qVersion()+"\" name=\""+name+"\" type=\"sut\">";
-    return header.toUtf8();
-    
-}
-
 ResponseWaiter::ResponseWaiter(qint32 responseId, TasSocket* relayTarget, int timeout)
 {
-    mPlatformData = 0;
     mFilter = 0;
     mPluginResponded = false;
     mCanRespond = false;
-    mSocket = relayTarget;
+    mSocket = QWeakPointer<TasSocket>(relayTarget);
     mResponseId = responseId;
     mWaiter.setSingleShot(true);    
     connect(&mWaiter, SIGNAL(timeout()), this, SLOT(timeout()));
-    connect(mSocket, SIGNAL(socketClosed()), this, SLOT(socketClosed()));
+    connect(mSocket.data(), SIGNAL(socketClosed()), this, SLOT(socketClosed()));
     mWaiter.start(timeout);
 }
 
@@ -358,7 +373,7 @@ ResponseWaiter::~ResponseWaiter()
     if(mFilter){
         delete mFilter;
     }
-    mPlatformData.clear();
+    if(!mPlatformData.isEmpty()) mPlatformData.clear();
 }
 
 void ResponseWaiter::okToRespond()
@@ -366,22 +381,21 @@ void ResponseWaiter::okToRespond()
     mCanRespond = true;
     if(mPluginResponded){
         sendMessage();
-    }
-    
+    }   
 }
 
 void ResponseWaiter::cleanup()
 {
     disconnect(&mWaiter, 0, this, 0);
-    disconnect(mSocket, 0, this, 0);
+    disconnect(mSocket.data(), 0, this, 0);    
 }
 
-void ResponseWaiter::appendPlatformData(QByteArray data)
+void ResponseWaiter::appendPlatformData(const QByteArray& data)
 {
     if(mPlatformData.isEmpty()){
-        TasLogger::logger()->debug("ResponseWaiter::appendPlatformData make data container and add root");
+        //TasLogger::logger()->debug("ResponseWaiter::appendPlatformData make data container and add root");
         //make header for the document made from fragments
-        mPlatformData = QByteArray(TasServerServiceManager::responseHeader());
+        mPlatformData = QString(RESPONSE_HEADER).arg(TAS_VERSION).arg(qVersion()).arg(ENV_NAME).toUtf8();
     }
     mPlatformData.append(data);
 }
@@ -397,7 +411,7 @@ void ResponseWaiter::setResponseFilter(ResponseFilter* filter)
 
 void ResponseWaiter::sendResponse(TasMessage& response)
 {
-    TasLogger::logger()->debug("ResponseWaiter::sendResponse");
+    //TasLogger::logger()->debug("ResponseWaiter::sendResponse");
     mPluginResponded = true;
     mWaiter.stop();
     mMessageToSend = response;
@@ -411,17 +425,19 @@ void ResponseWaiter::sendMessage(){
         mFilter->filterResponse(mMessageToSend);
     }
     if(!mPlatformData.isEmpty()){
-        TasLogger::logger()->debug("ResponseWaiter::sendResponse add plat stuf");
+        //TasLogger::logger()->debug("ResponseWaiter::sendResponse add plat stuf");
         mMessageToSend.uncompressData();
         mPlatformData.append(mMessageToSend.data().data());
-        mPlatformData.append(QString("</tasInfo></tasMessage>").toUtf8());
+        mPlatformData.append(QString(RESPONSE_FOOTER).toUtf8());
         mMessageToSend.setData(mPlatformData);
-        //ownership transferred to response
-        mPlatformData = 0;
     }
-    //TasLogger::logger()->debug(response.dataAsString());
-    if(!mSocket->sendMessage(mMessageToSend)){
-        TasLogger::logger()->error("ResponseWaiter::sendResponse socket not writable!");
+    if(mSocket.isNull()){
+        TasLogger::logger()->error("ResponseWaiter::sendResponse socket no longer available!");
+    }
+    else{
+        if(!mSocket.data()->sendMessage(mMessageToSend)){
+            TasLogger::logger()->error("ResponseWaiter::sendResponse socket not writable!");
+        }
     }
     emit responded(mResponseId);
     cleanup();
@@ -436,8 +452,13 @@ void ResponseWaiter::timeout()
     if(mFilter){
         mFilter->filterResponse(response);
     }
-    if(!mSocket->sendMessage(response)){
-        TasLogger::logger()->error("ResponseWaiter::timeout socket not writable!");
+    if(mSocket.isNull()){
+        TasLogger::logger()->error("ResponseWaiter::timeout socket no longer available!");
+    }
+    else{
+        if(!mSocket.data()->sendMessage(response)){
+            TasLogger::logger()->error("ResponseWaiter::timeout socket not writable!");
+        }
     }
     emit responded(mResponseId);
     cleanup();

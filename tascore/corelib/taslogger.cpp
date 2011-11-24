@@ -56,6 +56,7 @@ void debugOutput(QtMsgType type, const char *msg)
 }
 
 TasLogger* TasLogger::mInstance = 0;
+QMutex* TasLogger::mInstanceMutex = 0;
 
 TasLogger::TasLogger()
 {
@@ -80,18 +81,27 @@ TasLogger::TasLogger()
 }
 
 /*!
+  Returns the only instance of the logger.
+ */
+TasLogger* TasLogger::logger()
+{
+    if(!mInstance){
+        mInstanceMutex = new QMutex();
+        mInstance = new TasLogger();        
+    }    
+	QMutexLocker locker(mInstanceMutex);
+    return mInstance;    
+}
+
+
+/*!
   Configures the logger based on the command data. 
   Logger will not check the sanity of the settings.
  */
 void TasLogger::configureLogger(TasCommand& command)
 {
-    bool wasLogging = mEnabled;
-
-    if(mEnabled) disableLogger();
-
-    if(command.parameter(CLEAR_LOG) == "true"){
-        clearLogFile();
-    }
+    //lock the instance 
+	QMutexLocker locker(mInstanceMutex);
 
     if(command.parameter(LOG_LEVEL) == "FATAL"){
         setLevel(FATAL);
@@ -115,11 +125,6 @@ void TasLogger::configureLogger(TasCommand& command)
     else if(command.parameter(LOG_TO_QDEBUG) == "false"){
         mUseQDebug = false;
     }
-    
-    if(!command.parameter(LOG_FOLDER).isEmpty()){
-        mLogPath = command.parameter(LOG_FOLDER);
-        QDir().mkpath(mLogPath);
-    }
 
     if(command.parameter(LOG_QDEBUG) == "true"){
         setOutputter(true);
@@ -132,10 +137,32 @@ void TasLogger::configureLogger(TasCommand& command)
         mLogSize = command.parameter(LOG_FILE_SIZE).toInt();
     }
 
-    //enable the logger unless instructed not to or if it was not on to begin with   
-    if( ( (wasLogging && command.parameter(LOG_ENABLE) != "false") || command.parameter(LOG_ENABLE) == "true") && !mUseQDebug){
-        enableLogger();        
-        debug("TasLogger::configureLogger configuration done and logging enabled.");
+    if(command.parameter(CLEAR_LOG) == "true" || !command.parameter(LOG_FOLDER).isEmpty()){
+        //need to disable to alter location
+        bool wasLogging = mEnabled;
+        if(mEnabled) disableLogger();
+
+        if(command.parameter(CLEAR_LOG) == "true"){
+            clearLogFile();
+        }
+        
+        if(!command.parameter(LOG_FOLDER).isEmpty()){
+            mLogPath = command.parameter(LOG_FOLDER);
+            QDir().mkpath(mLogPath);
+        }
+
+        //enable the logger unless instructed not to or if it was not on to begin with   
+        if( ( (wasLogging && command.parameter(LOG_ENABLE) != "false") || command.parameter(LOG_ENABLE) == "true") && !mUseQDebug){
+            enableLogger();        
+            debug("TasLogger::configureLogger configuration done and logging enabled.");
+        }
+    }
+    else{
+        //enable the logger unless instructed not to or if it was not on to begin with   
+        if(command.parameter(LOG_ENABLE) == "true"){
+            enableLogger();        
+            debug("TasLogger::configureLogger configuration done and logging enabled.");
+        }        
     }
 }
 
@@ -209,17 +236,6 @@ void TasLogger::clearLogFile()
         QString fileName = mLogPath+"/"+mLogFileName;
         QFile::remove(fileName);
     }
-}
-
-/*!
-  Returns the only instance of the logger.
- */
-TasLogger* TasLogger::logger()
-{
-    if(!mInstance){
-        mInstance = new TasLogger();        
-    }    
-    return mInstance;    
 }
 
 void TasLogger::removeLogger()

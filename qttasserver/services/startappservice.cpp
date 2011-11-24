@@ -115,22 +115,22 @@ void StartAppService::startApplication(TasCommand& command, TasResponse& respons
         arguments.removeAll(DETACH_MODE);
         arguments.removeAll(NO_WAIT);
 
-        {
-            QString responseData, responseErrorMessage;
-            launchDetached(applicationPath, arguments, environmentVars, dir, responseData, responseErrorMessage);
-            if (!responseData.isEmpty()) response.setData(responseData);
-            if (!responseErrorMessage.isEmpty()) response.setErrorMessage(responseErrorMessage);
-        }
+        
+        QString responseData, responseErrorMessage;
+        launchDetached(applicationPath, arguments, environmentVars, dir, responseData, responseErrorMessage);
+        if (!responseData.isEmpty()) response.setData(responseData);
+        if (!responseErrorMessage.isEmpty()) response.setErrorMessage(responseErrorMessage);
+        
         
         //add pids to startedapp pid list
         if(!response.isError() && !response.dataAsString().isEmpty() ){
-            TasClientManager::instance()->addStartedPid(response.dataAsString());
-        }
-        //try to set to foreground
-        bool ok;
-        quint64 startedPid = response.dataAsString().toULongLong(&ok);  
-        if(ok){
-            TasNativeUtils::bringAppToForeground(startedPid);
+            //try to set to foreground
+            bool ok;
+            quint64 startedPid = response.dataAsString().toULongLong(&ok);  
+            if(ok){
+                TasClientManager::instance()->addStartedPid(startedPid);        
+                TasNativeUtils::bringAppToForeground(startedPid);
+            }
         }
     }
 }
@@ -266,7 +266,7 @@ void StartAppService::launchDetached(const QString &applicationPath, const QStri
         process.Resume();
         pid = process.Id().Id();
         process.Close();
-        TasClientManager::instance()->addStartedApp(applicationPath, QDateTime::currentDateTime().toString("yyyyMMddhhmmsszzz"));
+        TasClientManager::instance()->addStartedApp(applicationPath, QDateTime::currentMSecsSinceEpoch());
         responseData = QString::number(pid);
     }
 #elif (defined(Q_OS_WIN32) || defined(Q_OS_WINCE))
@@ -547,7 +547,7 @@ void StartAppService::launchDetached(const QString &applicationPath, const QStri
     qint64 pid;
     if(QProcess::startDetached(applicationPath, arguments, ".", &pid)){
 
-        TasClientManager::instance()->addStartedApp(applicationPath, QDateTime::currentDateTime().toString("yyyyMMddhhmmsszzz"));
+        TasClientManager::instance()->addStartedApp(applicationPath, QDateTime::currentMSecsSinceEpoch());
         responseData = QString::number(pid);
     }
 #endif

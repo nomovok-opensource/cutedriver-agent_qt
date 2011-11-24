@@ -64,7 +64,8 @@ public:
   TasClient* addClient(const QString& processId, const QString& processName=QString());
   TasClient* addRegisteredClient(const QString& processId, const QString& processName, TasSocket* socket,
                                                                  const QString& type=TAS_PLUGIN, QString applicationUid=QString());
-  void addStartedApp(const QString& processName, const QString& timestamp);
+
+  void addStartedApp(const QString& processName, qint64 epochString);
 
   void removeClient(const QString& processId, bool kill=false);
   void removeAllClients(bool kill=true);
@@ -84,8 +85,8 @@ public:
   TasClient* logMemClient();
   void removeMe(const TasClient& client);
 
-  void removeStartedPid(const QString& pid);
-  void addStartedPid(const QString& pid);
+  void removeStartedPid(quint64 pid);
+  void addStartedPid(quint64 pid);
 
 private:
   TasClient* latestClient();
@@ -95,12 +96,12 @@ private:
 
 private:
   QHash<QString, TasClient*> mClients;
-  QHash<QString, QString> mStartedApps;
+  QHash<QString, qint64> mStartedApps;
   static TasClientManager* mInstance;
   TasDataShare* mDataShare;
   QMutex mMutex;
   qint32 mMessageCounter;
-  QStringList mStartedPids;
+  QList<quint64> mStartedPids;
 };
 
 class TasClient : public QObject
@@ -112,6 +113,8 @@ protected:
 
 public:
   const QString& processId() const;
+
+  const quint64& pid() const;
 
   void setSocket(TasSocket* socket);
   TasSocket* socket();
@@ -146,5 +149,6 @@ private:
   QTime mCreationTime;
   QString mApplicationUid;
   QString mPluginType;
+  quint64 mPid;
 };
 #endif

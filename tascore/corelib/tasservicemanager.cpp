@@ -18,6 +18,7 @@
 ****************************************************************************/ 
             
 #include <QMutableListIterator>
+#include <QCoreApplication>
 
 #include "tasservicemanager.h"
 
@@ -96,6 +97,8 @@ void TasServiceManager::handleServiceRequest(TasCommandModel& commandModel, TasS
     response.setRequester(requester);
     performService(commandModel, response);
     requester->sendMessage(response);
+    //https://bugreports.qt.nokia.com/browse/QTBUG-21928
+    QCoreApplication::instance()->processEvents(QEventLoop::DeferredDeletion);
 }
 
 void TasServiceManager::performService(TasCommandModel& commandModel, TasResponse& response)

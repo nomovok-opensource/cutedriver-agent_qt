@@ -64,27 +64,32 @@ void RegisterService::registerPlugin(TasCommand& command, TasResponse& response)
     client.applicationUid = command.parameter(APP_UID);
 #endif
     client.pluginType = command.parameter(PLUGIN_TYPE);
-    client.socket = response.requester();
+    client.socket = QWeakPointer<TasSocket>(response.requester());
     mClientQueue.enqueue(client);
 }
 
 void RegisterService::registerQueuedClients()
 {
+    TasLogger::logger()->debug("RegisterService::registerPlugin");
     disconnect(sender(), 0, this, 0);
     while (!mClientQueue.isEmpty()){
         ClientDetails client = mClientQueue.dequeue();
-        TasLogger::logger()->info("RegisterService::registerPlugin: register plugin with processId: "
-                                  + client.processId + " name: " + client.processName +", type: "+
-                                  client.pluginType);
-
+        if(client.socket.isNull()){
+            TasLogger::logger()->warning("RegisterService::registerPlugin client "+ client.processName +" socket died before register was completed!");
+            client.socket.clear();
+        }        
+        else{
+            TasLogger::logger()->info("RegisterService::registerPlugin: register plugin with processId: "
+                                      + client.processId + " name: " + client.processName +", type: "+
+                                      client.pluginType);
 
 #ifdef Q_OS_SYMBIAN
-        TasClientManager::instance()->addRegisteredClient(client.processId, client.processName,
-                                                          client.socket, client.pluginType, client.applicationUid);
+            TasClientManager::instance()->addRegisteredClient(client.processId, client.processName,
+                                                              client.socket.data(), client.pluginType, client.applicationUid);
 #else
-        TasClientManager::instance()->addRegisteredClient(client.processId, client.processName, client.socket, client.pluginType);
+            TasClientManager::instance()->addRegisteredClient(client.processId, client.processName, client.socket.data(), client.pluginType);
 #endif
-
+        }
         TasClientManager::instance()->detachFromStartupData(client.processName);
     }
 

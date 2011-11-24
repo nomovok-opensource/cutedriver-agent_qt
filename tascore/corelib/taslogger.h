@@ -86,6 +86,7 @@ private:
 	QTime mLastLogRollCheck;
 	int mLogSize;
     QMutex mMutex;
+    static QMutex* mInstanceMutex;
 };
 
 /* Helpers

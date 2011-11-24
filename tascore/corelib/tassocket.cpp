@@ -22,6 +22,7 @@
 #include <QDebug>    
 #include <QStack>    
 #include <QObject>
+#include <QWeakPointer>
 
 #include "tascoreutils.h"
 #include "tassocket.h"
@@ -275,7 +276,9 @@ bool TasSocket::sendError(const qint32& messageId, const QByteArray& message, bo
 bool TasSocket::sendMessage(TasMessage& message)
 {
     bool ok =  mWriter->writeMessage(message);
+    TasLogger::logger()->debug("TasSocket::sendMessage done emit");
     emit messageSent();
+    TasLogger::logger()->debug("TasSocket::sendMessage done return");
     return ok;
 }
 
@@ -401,6 +404,9 @@ TasSocketReader::~TasSocketReader()
 */
 void TasSocketReader::readMessageData()
 {   
+    TasLogger::logger()->debug("TasSocketReader::readMessageData start.");
+    QWeakPointer<QIODevice> dev = QWeakPointer<QIODevice>(&mDevice);
+
     //wait for header data to be available, start process only after 
     //enough data available
     if(mDevice.bytesAvailable() < HEADER_LENGTH){
@@ -410,17 +416,24 @@ void TasSocketReader::readMessageData()
 
     disconnect(&mDevice, SIGNAL(readyRead()), this, SLOT(readMessageData()));
 
-    TasMessage message;
-    if(readOneMessage(message)){
-        emit messageRead(message);   
-    }
 
-    connect(&mDevice, SIGNAL(readyRead()), this, SLOT(readMessageData()));    
-
-    //maybe there was a new message coming when the old one was still being processed.
-    if(mDevice.bytesAvailable() > 0){
-        readMessageData();   
+    if(!dev.isNull()){
+        TasMessage message;
+        if(readOneMessage(message)){
+            emit messageRead(message);   
+        }
+        TasLogger::logger()->debug("TasSocketReader::readMessageData message handled.");
+        if(!dev.isNull()){
+            TasLogger::logger()->debug("TasSocketReader::readMessageData dev still valid reconnect.");
+            connect(&mDevice, SIGNAL(readyRead()), this, SLOT(readMessageData()));    
+            //maybe there was a new message coming when the old one was still being processed.
+            if(mDevice.bytesAvailable() > 0){
+                readMessageData();   
+            }
+            dev.clear();
+        }
     }
+    TasLogger::logger()->debug("TasSocketReader::readMessageData done.");
 }
 
 /*!
@@ -447,11 +460,16 @@ bool TasSocketReader::readOneMessage(TasMessage& message)
 
     bool ok = true;
 
-    //read body
+    //read body, use weakpointer to try to detect sudden disconnections 
+    QWeakPointer<QIODevice> dev = QWeakPointer<QIODevice>(&mDevice);
     QByteArray rawBytes;
     
     int totalBytes = 0;
     forever{
+        if(dev.isNull()){
+            ok = false;
+            break;
+        }
         if(mDevice.bytesAvailable() == 0){
             if(!mDevice.waitForReadyRead(READ_TIME_OUT)){
                 TasLogger::logger()->error("TasSocket::readData error when waiting for more data. " + mDevice.errorString());

@@ -22,7 +22,7 @@
 #define TASSERVERSERVICEMANAGER_H
 
 #include <QObject>
-#include <QPointer>
+#include <QWeakPointer>
 #include <QList>
 #include <QHash>
 #include <QTimer>
@@ -48,7 +48,7 @@ public:
 
 	void serviceResponse(TasMessage& response);
 
-	static QByteArray responseHeader();
+	QByteArray& responseHeader() const;
 
 protected:
 	void handleServiceRequest(TasCommandModel& commandModel, TasSocket* requester, qint32 responseId);
@@ -65,12 +65,14 @@ private:
     bool appendVkbData(TasCommandModel& commandModel, QByteArray& data);
 #endif
     void handleClientLess(TasCommandModel& commandModel, TasSocket* requester, qint32 responseId);
-    void getNativeUiState(QPointer<ResponseWaiter> waiter, TasCommandModel& commandModel);
+    void getNativeUiState(QWeakPointer<ResponseWaiter> waiter, TasCommandModel& commandModel);
 private:	
 	QHash<qint32, ResponseWaiter*> mResponseQueue;
 	TasClientManager* mClientManager;
 	QList<TasExtensionInterface*> mExtensions;
     TasPluginLoader mPluginLoader;    
+    QByteArray mHeader;
+    QMutex mMutex;
 };
 
 class ResponseWaiter : public QObject
@@ -84,7 +86,7 @@ public:
 	void setResponseFilter(ResponseFilter* filter);
 	void sendResponse(TasMessage& response);
 
-	void appendPlatformData(QByteArray data);
+	void appendPlatformData(const QByteArray& data);
     void okToRespond();
 
 signals:
@@ -101,7 +103,7 @@ private:
 private:
 	qint32 mResponseId;
 	QTimer mWaiter;
-	TasSocket *mSocket;
+	QWeakPointer<TasSocket> mSocket;
 	ResponseFilter* mFilter;
 	QByteArray mPlatformData;
     bool mCanRespond;

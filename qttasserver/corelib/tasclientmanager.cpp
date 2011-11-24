@@ -168,10 +168,10 @@ TasClient* TasClientManager::addRegisteredClient(const QString& processId, const
 /*!
   Adds a new app to the list of started apps. If the app already exists it will be replaced.
  */
-void TasClientManager::addStartedApp(const QString& processName, const QString& timestamp)
+void TasClientManager::addStartedApp(const QString& processName, qint64 timestamp)
 {
     QMutexLocker locker(&mMutex);
-    TasLogger::logger()->info("TasClientManager::addStartedApp " + processName + " " + timestamp);
+    //TasLogger::logger()->info("TasClientManager::addStartedApp " + processName + " " + QString::number(timestamp));
     mStartedApps[processName] = timestamp;
 }
 
@@ -216,7 +216,7 @@ void TasClientManager::removeMe(const TasClient &client)
 {
     QMutexLocker locker(&mMutex);
     mClients.remove(client.processId());
-    mStartedPids.removeAll(client.processId());
+    mStartedPids.removeAll(client.pid());
 }
 
 
@@ -395,26 +395,22 @@ void TasClientManager::removeAllClients(bool kill)
     QMutexLocker locker(&mMutex);
     foreach (TasClient* app, mClients){
         app->closeConnection();
-        if(kill && mStartedPids.contains(app->processId())){
-            bool ok;
-            quint64 pid = app->processId().toULongLong(&ok, 10);
-            if(ok && pid != 0){
-                TasNativeUtils::killProcess(pid);
-            }
+        if(kill && mStartedPids.contains(app->pid())){            
+            TasNativeUtils::killProcess(app->pid());
         }
-        mStartedPids.removeAll(app->processId());
+        mStartedPids.removeAll(app->pid());
         delete app;
     }
     mClients.clear();
 }
 
 
-void TasClientManager::addStartedPid(const QString& pid)
+void TasClientManager::addStartedPid(quint64 pid)
 {
-    mStartedPids << pid;
+    mStartedPids.append(pid);
 }
 
-void TasClientManager::removeStartedPid(const QString& pid)
+void TasClientManager::removeStartedPid(quint64 pid)
 {
     mStartedPids.removeAll(pid);
 }
@@ -431,7 +427,7 @@ TasClient* TasClientManager::removeByProcessId(const QString& processId)
     TasClient* app = 0;
     if(mClients.contains(processId)){
         app = mClients.take(processId);
-        mStartedPids.removeAll(processId);
+        mStartedPids.removeAll(app->pid());
     }
     return app;
 }
@@ -499,7 +495,7 @@ void TasClientManager::startedApplicationsList(TasObject& parent)
             appObj.setId(QString::number(i++));
             appObj.setType(QString("application"));
             appObj.setName(app);
-            appObj.addAttribute("startTime", mStartedApps[app]);
+            appObj.addAttribute("startTime", QDateTime::fromMSecsSinceEpoch(mStartedApps[app]).toString("yyyyMMddhhmmsszzz"));
         }
     }
 }
@@ -519,6 +515,9 @@ TasClient::TasClient(const QString& processId)
     mProcessId = processId;
     mSocket = 0;
     mCreationTime.start();
+    bool ok;
+    mPid = mProcessId.toULongLong(&ok);  
+
 }
 
 TasClient::~TasClient()
@@ -534,6 +533,11 @@ const QString& TasClient::processId() const
     return mProcessId;
 }
 
+const quint64& TasClient::pid() const
+{
+    return mPid;
+}
+        
 /*!
   Returns the application name associated with the client.
  */
