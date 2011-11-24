@@ -39,8 +39,15 @@ bool RegisterService::executeService(TasCommandModel& model, TasResponse& respon
     if(model.service() == serviceName() ){
         TasCommand* command = getCommandParameters(model, COMMAND_REGISTER);
         if(command){
-            registerPlugin(*command, response);
-            connect(response.requester(), SIGNAL(messageSent()), this, SLOT(registerQueuedClients()));
+            ClientDetails client;
+            client.processId = command->parameter(PLUGIN_ID);
+            client.processName = command->parameter(PLUGIN_NAME);
+#ifdef Q_OS_SYMBIAN
+            client.applicationUid = command->parameter(APP_UID);
+#endif
+            client.pluginType = command->parameter(PLUGIN_TYPE);
+            client.socket = response.requester();
+            registerPlugin(client);
         }
         else{
             command = getCommandParameters(model, COMMAND_UNREGISTER);
@@ -55,44 +62,20 @@ bool RegisterService::executeService(TasCommandModel& model, TasResponse& respon
     }
 }
 
-void RegisterService::registerPlugin(TasCommand& command, TasResponse& response)
+void RegisterService::registerPlugin(ClientDetails& client)
 {
-    ClientDetails client;
-    client.processId = command.parameter(PLUGIN_ID);
-    client.processName = command.parameter(PLUGIN_NAME);
-#ifdef Q_OS_SYMBIAN
-    client.applicationUid = command.parameter(APP_UID);
-#endif
-    client.pluginType = command.parameter(PLUGIN_TYPE);
-    client.socket = QWeakPointer<TasSocket>(response.requester());
-    mClientQueue.enqueue(client);
-}
 
-void RegisterService::registerQueuedClients()
-{
-    TasLogger::logger()->debug("RegisterService::registerPlugin");
-    disconnect(sender(), 0, this, 0);
-    while (!mClientQueue.isEmpty()){
-        ClientDetails client = mClientQueue.dequeue();
-        if(client.socket.isNull()){
-            TasLogger::logger()->warning("RegisterService::registerPlugin client "+ client.processName +" socket died before register was completed!");
-            client.socket.clear();
-        }        
-        else{
-            TasLogger::logger()->info("RegisterService::registerPlugin: register plugin with processId: "
-                                      + client.processId + " name: " + client.processName +", type: "+
-                                      client.pluginType);
+    TasLogger::logger()->info("RegisterService::registerPlugin: register plugin with processId: "
+                              + client.processId + " name: " + client.processName +", type: "+
+                              client.pluginType);
 
 #ifdef Q_OS_SYMBIAN
-            TasClientManager::instance()->addRegisteredClient(client.processId, client.processName,
-                                                              client.socket.data(), client.pluginType, client.applicationUid);
+    TasClientManager::instance()->addRegisteredClient(client.processId, client.processName,
+                                                      client.socket.data(), client.pluginType, client.applicationUid);
 #else
-            TasClientManager::instance()->addRegisteredClient(client.processId, client.processName, client.socket.data(), client.pluginType);
+    TasClientManager::instance()->addRegisteredClient(client.processId, client.processName, client.socket.data(), client.pluginType);
 #endif
-        }
-        TasClientManager::instance()->detachFromStartupData(client.processName);
-    }
-
+    TasClientManager::instance()->detachFromStartupData(client.processName);
 }
 
 void RegisterService::unRegisterPlugin(TasCommand& command)

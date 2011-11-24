@@ -23,7 +23,7 @@
 
 #include <QObject>
 #include <QQueue>
-#include <QWeakPointer>
+//#include <QWeakPointer>
 
 #include <taspluginloader.h>
 #include <tasconstants.h>
@@ -56,11 +56,8 @@ public:
 	bool executeService(TasCommandModel& model, TasResponse& response);
 	QString serviceName() const { return REGISTER; }
 
-private slots:
-	void registerQueuedClients();
-
 private:
-	void registerPlugin(TasCommand& command, TasResponse& response);
+    void registerPlugin(ClientDetails& client);
 	void unRegisterPlugin(TasCommand& command);
 
 private:

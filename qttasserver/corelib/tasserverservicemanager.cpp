@@ -135,9 +135,7 @@ void TasServerServiceManager::handleServiceRequest(TasCommandModel& commandModel
             waiter->setResponseFilter(new CloseFilter(commandModel));        
         }
         connect(waiter, SIGNAL(responded(qint32)), this, SLOT(removeWaiter(qint32)));
-        mMutex.lock();
         mResponseQueue.insert(responseId, waiter);
-        mMutex.unlock();
         if(commandModel.service() == APPLICATION_STATE || commandModel.service() == FIND_OBJECT_SERVICE){
             commandModel.addDomAttribute("needFragment", "true");
             //send request for qt uistate to client
@@ -337,7 +335,6 @@ void TasServerServiceManager::loadExtension(const QString& filePath)
 
 void TasServerServiceManager::serviceResponse(TasMessage& response)
 {
-    QMutexLocker locker(&mMutex);
     if(mResponseQueue.contains(response.messageId())){
         mResponseQueue.value(response.messageId())->sendResponse(response);
     }
@@ -348,7 +345,6 @@ void TasServerServiceManager::serviceResponse(TasMessage& response)
 
 void TasServerServiceManager::removeWaiter(qint32 responseId)
 {
-    QMutexLocker locker(&mMutex);
     TasLogger::logger()->debug("TasServerServiceManager::removeWaiter remove " + QString::number(responseId));
     mResponseQueue.remove(responseId);
     TasLogger::logger()->debug("TasServerServiceManager::removeWaiter response count " + QString::number(mResponseQueue.count()));

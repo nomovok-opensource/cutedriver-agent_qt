@@ -72,7 +72,6 @@ private:
 	QList<TasExtensionInterface*> mExtensions;
     TasPluginLoader mPluginLoader;    
     QByteArray mHeader;
-    QMutex mMutex;
 };
 
 class ResponseWaiter : public QObject
