@@ -118,8 +118,8 @@ void StartAppService::startApplication(TasCommand& command, TasResponse& respons
         {
             QString responseData, responseErrorMessage;
             launchDetached(applicationPath, arguments, environmentVars, dir, responseData, responseErrorMessage);
-            if (!responseData.isEmpty()) response.setData(responseData);
             if (!responseErrorMessage.isEmpty()) response.setErrorMessage(responseErrorMessage);
+            if (!responseData.isEmpty()) response.setData(responseData);
         }
         
         //add pids to startedapp pid list
@@ -244,7 +244,7 @@ static void qt_create_symbian_commandline(
 
 void StartAppService::launchDetached(const QString &applicationPath, const QStringList &arguments,
                                      const QStringList &environmentVars, const QString &workingDirectory,
-                                     QString &responseData, QString responseErrorMessage)
+                                     QString &responseData, QString& responseErrorMessage)
 {
     QString additionalMessage;
 #ifdef Q_OS_SYMBIAN
