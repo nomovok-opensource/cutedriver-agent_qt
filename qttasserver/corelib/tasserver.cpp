@@ -350,7 +350,7 @@ void TasTcpServer::incomingConnection ( int socketDescriptor )
                                    + " for server " + QString::number(mPort));
         TasServerSocket *socket = new TasServerSocket(*tcpSocket, this);
         socket->setIdentification(QString::number(mPort));
-        connect(tcpSocket, SIGNAL(disconnected()), socket, SLOT(disconnected()));
+        //connect(tcpSocket, SIGNAL(disconnected()), socket, SLOT(disconnected()));
         connect(tcpSocket, SIGNAL(disconnected()), tcpSocket, SLOT(deleteLater()));
 
         socket->setRequestHandler(&mServiceManager);
@@ -445,7 +445,7 @@ void TasLocalServer::incomingConnection ( quintptr socketDescriptor )
     else{
         TasLogger::logger()->debug("TasLocalServer::incomingConnection number " + QString::number(mConnectionCount));
         TasServerSocket *socket = new TasServerSocket(*localSocket, this);
-        connect(localSocket, SIGNAL(disconnected()), socket, SLOT(disconnected()));
+        //connect(localSocket, SIGNAL(disconnected()), socket, SLOT(disconnected()));
         connect(localSocket, SIGNAL(disconnected()), localSocket, SLOT(deleteLater()));
 
         socket->setRequestHandler(&mServiceManager);

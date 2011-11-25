@@ -77,6 +77,8 @@ void TasServiceManager::registerCommand(TasServiceCommand* command)
 */
 void TasServiceManager::serviceRequest(TasMessage& request, TasSocket* requester)
 {
+    //https://bugreports.qt.nokia.com/browse/QTBUG-21928
+    QCoreApplication::instance()->processEvents(QEventLoop::DeferredDeletion);
     QString errorMessage;
     TasCommandModel* commandModel = parseMessageString(request.dataAsString(), errorMessage);
     if(commandModel){
@@ -97,8 +99,6 @@ void TasServiceManager::handleServiceRequest(TasCommandModel& commandModel, TasS
     response.setRequester(requester);
     performService(commandModel, response);
     requester->sendMessage(response);
-    //https://bugreports.qt.nokia.com/browse/QTBUG-21928
-    QCoreApplication::instance()->processEvents(QEventLoop::DeferredDeletion);
 }
 
 void TasServiceManager::performService(TasCommandModel& commandModel, TasResponse& response)
