@@ -154,10 +154,6 @@ void TasServerServiceManager::handleServiceRequest(TasCommandModel& commandModel
     else{
         handleClientLess(commandModel, requester, responseId);
     }
-    TasLogger::logger()->debug("TasServerServiceManager::handleServiceRequest: call process events!");
-    //https://bugreports.qt.nokia.com/browse/QTBUG-21928
-    //QCoreApplication::instance()->processEvents(QEventLoop::DeferredDeletion);
-    TasLogger::logger()->debug("TasServerServiceManager::handleServiceRequest: done " + commandModel.service());
 }
 
 void TasServerServiceManager::getNativeUiState(QWeakPointer<ResponseWaiter> waiter, TasCommandModel& commandModel)

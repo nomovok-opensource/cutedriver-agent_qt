@@ -127,13 +127,10 @@ TasSocket::~TasSocket()
 
 void TasSocket::closeDevice()
 {
-    TasLogger::logger()->debug("TasSocket::closeDevice");
     if(!mDevice.isNull()){
-        TasLogger::logger()->debug("TasSocket::closeDevice needs closing");
         mDevice.data()->close();
     }
     mDevice.clear();
-    TasLogger::logger()->debug("TasSocket::closeDevice done");
 }
 
 /*!
@@ -292,10 +289,8 @@ bool TasSocket::sendError(const qint32& messageId, const QByteArray& message, bo
 
 bool TasSocket::sendMessage(TasMessage& message)
 {
-    bool ok =  mWriter->writeMessage(message);
-    TasLogger::logger()->debug("TasSocket::sendMessage done emit " + QString::number(message.messageId()));
-    emit messageSent();
-    TasLogger::logger()->debug("TasSocket::sendMessage done return" + QString::number(message.messageId()));
+    bool ok =  mWriter->writeMessage(message);   
+    emit messageSent();   
     return ok;
 }
 
@@ -448,12 +443,9 @@ void TasSocketReader::readMessageData()
     if(!mDevice.isNull()){
         TasMessage message;        
         if(readOneMessage(message)){
-            TasLogger::logger()->debug("TasSocketReader::readMessageData message read process. "  + QString::number(message.messageId()));      
             emit messageRead(message);   
-            TasLogger::logger()->debug("TasSocketReader::readMessageData message handled. "  + QString::number(message.messageId()));        
         }
         if(!mDevice.isNull()){
-            TasLogger::logger()->debug("TasSocketReader::readMessageData dev still valid reconnect.");
             connect(mDevice.data(), SIGNAL(readyRead()), this, SLOT(readMessageData()));    
             //maybe there was a new message coming when the old one was still being processed.
             if(mDevice.data()->bytesAvailable() > 0){
@@ -461,7 +453,6 @@ void TasSocketReader::readMessageData()
             }
         }
     }
-    TasLogger::logger()->debug("TasSocketReader::readMessageData done.");
 }
 
 /*!
