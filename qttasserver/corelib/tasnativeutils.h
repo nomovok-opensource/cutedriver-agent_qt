@@ -34,7 +34,7 @@ public:
     /*! Pid of the active window, only ids registered to qttas are taken
      * into account.
      */
-    static int pidOfActiveWindow(const QHash<QString, TasClient*> clients);
+    static int pidOfActiveWindow(const QHash<quint64, TasClient*> clients);
     static int bringAppToForeground(quint64 pid);
     static void changeOrientation(QString);
 	static bool killProcess(quint64 pid);

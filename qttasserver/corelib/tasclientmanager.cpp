@@ -85,7 +85,7 @@ void TasClientManager::deleteInstance()
   Add a new client with QProcess handle.
 */
 
-TasClient* TasClientManager::addClient(const QString& processId, const QString& processName)
+TasClient* TasClientManager::addClient(quint64 processId, const QString& processName)
 {
     QMutexLocker locker(&mMutex);
     TasLogger::logger()->info("TasClientManager::addClient " + processName);
@@ -121,7 +121,7 @@ TasClient* TasClientManager::addClient(const QString& processId, const QString& 
   Adds a new client to the pluginmanager's internal list. If a client with the process id
   already exists only the data will be updated.
  */
-TasClient* TasClientManager::addRegisteredClient(const QString& processId, const QString& processName, TasSocket* socket,
+TasClient* TasClientManager::addRegisteredClient(quint64 processId, const QString& processName, TasSocket* socket,
                                                  const QString& type, QString applicationUid)
 {
     QMutexLocker locker(&mMutex);
@@ -185,12 +185,9 @@ void TasClientManager::addStartedApp(const QString& processName, qint64 timestam
   Will wait for the process to finish for the time given.
   Returns false if app doed not close. Only applicable if process owned.
 */
-void TasClientManager::removeClient(const QString& processId, bool kill)
+void TasClientManager::removeClient(quint64 processId, bool kill)
 {
     QMutexLocker locker(&mMutex);   
-
-    bool ok;
-    quint64 pid = processId.toULongLong(&ok, 10);       
 
     TasClient* app = removeByProcessId(processId);
     if(app){
@@ -199,15 +196,9 @@ void TasClientManager::removeClient(const QString& processId, bool kill)
         app->closeConnection();
         delete app;
         app = 0;
-
-        if(kill){
-            if(ok && pid != 0){
-                TasNativeUtils::killProcess(pid);
-            }
-        }
     }
-    else if(kill && ok && pid != 0){
-        TasNativeUtils::killProcess(pid);
+    if(kill){
+        TasNativeUtils::killProcess(processId);
     }
     TasLogger::logger()->info("TasClientManager::removeClient client count" + QString::number(mClients.size()));
 }
@@ -215,7 +206,7 @@ void TasClientManager::removeClient(const QString& processId, bool kill)
 void TasClientManager::removeMe(const TasClient &client)
 {
     QMutexLocker locker(&mMutex);
-    mClients.remove(client.processId());
+    mClients.remove(client.pid());
     mStartedPids.removeAll(client.pid());
 }
 
@@ -227,7 +218,9 @@ TasClient* TasClientManager::findClient(TasCommandModel& request)
 {
     //look for the client
     TasClient* client = 0;
-    client = findByProcessId(request.id());
+    bool ok;
+    quint64 startedPid = request.id().toULongLong(&ok);  
+    client = findByProcessId(startedPid);
 #ifdef Q_OS_SYMBIAN
     if(client == 0){
         client = findByApplicationUid(request.uid());
@@ -249,9 +242,9 @@ TasClient* TasClientManager::findClient(TasCommandModel& request)
   Searches for a client with the given process id. Returns null if no match
   found.
  */
-TasClient* TasClientManager::findByProcessId(const QString& processId)
+TasClient* TasClientManager::findByProcessId(quint64 processId)
 {
-    if(processId.isNull() || processId.isEmpty()){
+    if(processId == 0){
         return 0;
     }
     TasClient* match = 0;
@@ -329,10 +322,9 @@ TasClient* TasClientManager::latestClient()
 {
     //    int pid = TasNativeUtils::pidOfActiveWindow(mClients.keys());
     int pid = TasNativeUtils::pidOfActiveWindow(mClients);
-    if (pid != -1) {
-        QString processId = QString::number(pid);
-        if(mClients.contains(processId)){
-            TasClient* app = mClients.value(processId);
+    if (pid != -1) {        
+        if(mClients.contains(pid)){
+            TasClient* app = mClients.value(pid);
             if(app->socket()){
                 return app;
             }
@@ -419,9 +411,9 @@ void TasClientManager::removeStartedPid(quint64 pid)
   Searches for a client with the given process id and removes it from the list.
   Returns null if no match found.
  */
-TasClient* TasClientManager::removeByProcessId(const QString& processId)
+TasClient* TasClientManager::removeByProcessId(quint64 processId)
 {
-    if(processId.isNull() || processId.isEmpty()) {
+    if(processId == 0){
         return 0;
     }
     TasClient* app = 0;
@@ -439,7 +431,7 @@ TasClient* TasClientManager::logMemClient()
         foreach (TasClient* app, mClients){
             if(app->pluginType() == LOG_MEM_SRV){
                 if(!app->socket()){
-                    removeByProcessId(app->processId());
+                    removeByProcessId(app->pid());
                     break;
                 }
                 match = app;
@@ -510,13 +502,11 @@ void TasClientManager::startedApplicationsList(TasObject& parent)
 
 */
 
-TasClient::TasClient(const QString& processId)
+TasClient::TasClient(quint64 processId)
 {
-    mProcessId = processId;
     mSocket = 0;
-    mCreationTime.start();
-    bool ok;
-    mPid = mProcessId.toULongLong(&ok);  
+    mCreationTime = QDateTime::currentMSecsSinceEpoch();
+    mPid = processId;
 
 }
 
@@ -528,9 +518,9 @@ TasClient::~TasClient()
 /*!
   Returns the process id associated with the client.
  */
-const QString& TasClient::processId() const
+QString TasClient::processId()
 {
-    return mProcessId;
+    return QString::number(mPid);
 }
 
 const quint64& TasClient::pid() const
@@ -605,18 +595,18 @@ void TasClient::setSocket(TasSocket* socket)
 
 int TasClient::upTime()
 {
-    return mCreationTime.elapsed();
+    return QDateTime::currentMSecsSinceEpoch() - mCreationTime;
 }
 
 
 bool TasClient::operator ==(const TasClient &client) const
 {
-    return processId() == client.processId();
+    return pid() == client.pid();
 }
 
 void TasClient::setRegistered()
 {
-    emit registered(mProcessId);
+    emit registered(mPid);
 }
 
 /*!

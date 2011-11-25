@@ -44,9 +44,11 @@ bool CloseAppService::executeService(TasCommandModel& model, TasResponse& respon
         else{
             command = getCommandParameters(model, "Kill");
             if(command){
-                QString applicationId = command->parameter("uid");    
-                TasLogger::logger()->debug("CloseAppService::executeService kill " + applicationId);
-                TasClientManager::instance()->removeClient(applicationId, true);   
+                bool ok;
+                //this should not really ever fail (app pid used to generate in client side)
+                quint64 clientPid = command->parameter("uid").toULongLong(&ok); ;    
+                TasLogger::logger()->debug("CloseAppService::executeService kill " + QString::number(clientPid));
+                TasClientManager::instance()->removeClient(clientPid, true);   
                 command = 0;
             }
             else{

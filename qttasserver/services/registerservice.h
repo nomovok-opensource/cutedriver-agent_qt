@@ -35,7 +35,7 @@
 struct ClientDetails
 {
   QString processName;
-  QString processId;
+  quint64 processId;
 #ifdef Q_OS_SYMBIAN
   QString applicationUid;
 #endif

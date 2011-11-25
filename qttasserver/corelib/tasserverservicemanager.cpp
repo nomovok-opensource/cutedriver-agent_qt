@@ -81,7 +81,6 @@ TasServerServiceManager::~TasServerServiceManager()
     mCommands.clear();
     mExtensions.clear();
     mResponseQueue.clear();
-    mHeader.clear();
 }
 
 /*!
@@ -92,8 +91,10 @@ void TasServerServiceManager::handleServiceRequest(TasCommandModel& commandModel
 {
     TasLogger::logger()->debug("TasServerServiceManager::handleServiceRequest: " + commandModel.service() + ": " + commandModel.id());
     TasClient* targetClient = 0;
-    if (!commandModel.id().isEmpty() && commandModel.id() != "1"){        
-        targetClient = mClientManager->findByProcessId(commandModel.id());
+    if (!commandModel.id().isEmpty() && commandModel.id() != "1"){
+        bool ok;
+        quint64 clientPid = commandModel.id().toULongLong(&ok);  
+        targetClient = mClientManager->findByProcessId(clientPid);
 
         //no registered client check for platform specific handles for the process id
         if(!targetClient && extensionHandled(commandModel, requester, responseId)){            
@@ -524,7 +525,7 @@ void CloseFilter::filterResponse(TasMessage& response)
     }
     TasLogger::logger()->debug("CloseFilter::filterResponse exit code: " + QString::number(errorCode));
     //make sure the client is removed
-    TasClientManager::instance()->removeClient(QString::number(mPid), false);
+    TasClientManager::instance()->removeClient(mPid, false);
 
     if(!didNotCloseInTime && errorCode != 0){
         errorMessage = "Application exited with code " + QString::number(errorCode);

@@ -71,7 +71,6 @@ private:
 	TasClientManager* mClientManager;
 	QList<TasExtensionInterface*> mExtensions;
     TasPluginLoader mPluginLoader;    
-    QByteArray mHeader;
 };
 
 class ResponseWaiter : public QObject

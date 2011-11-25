@@ -26,7 +26,7 @@
 #include <psapi.h>
 
 
-int TasNativeUtils::pidOfActiveWindow(const QHash<QString, TasClient*> clients)
+int TasNativeUtils::pidOfActiveWindow(const QHash<quint64, TasClient*> clients)
 {
     Q_UNUSED(clients);
     return -1;

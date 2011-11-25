@@ -45,7 +45,7 @@ bool ResourceLoggingService::executeService(TasCommandModel& model, TasResponse&
         //the server is not running so we need to start it (must be in path to work)
         qint64 pid;
         if(QProcess::startDetached(SERVER_NAME, QStringList(), ".", &pid)){       
-            new MemLogServerWaiter(response.requester(), TasClientManager::instance()->addClient(QString::number(pid)), 
+            new MemLogServerWaiter(response.requester(), TasClientManager::instance()->addClient(pid), 
                                    model.sourceString(), response.messageId());
         }
         else{

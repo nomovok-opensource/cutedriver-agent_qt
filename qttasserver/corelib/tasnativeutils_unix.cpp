@@ -141,7 +141,7 @@ long getstate(Display* display, Window window)
     return -1;
 }
 
-Window queryStack(Display* dpy, Window root, const QList<QString>& pids)
+Window queryStack(Display* dpy, Window root, const QList<quint64>& pids)
 {
     Atom STACK = XInternAtom(dpy, "_NET_CLIENT_LIST_STACKING", False);
     unsigned long nitems, after;
@@ -159,7 +159,7 @@ Window queryStack(Display* dpy, Window root, const QList<QString>& pids)
         for (i = (nitems-1); i >= 0; --i) {
             child = ((Window*)data)[i];
             if (!dockWindow(dpy, child) && getstate(dpy, child) == 1 && 
-                pids.contains(QString::number(pidOfXWindow(dpy, child)))) {
+                pids.contains(pidOfXWindow(dpy, child))) {
 
                 if (data) XFree(data);
                 return child;
@@ -257,9 +257,9 @@ int pidOfMeegoWindow(Display* display, Window root)
 }
 
 
-int TasNativeUtils::pidOfActiveWindow(const QHash<QString, TasClient*> clients)
+int TasNativeUtils::pidOfActiveWindow(const QHash<quint64, TasClient*> clients)
 {
-    const QList<QString>& pids = clients.keys();
+    const QList<quint64>& pids = clients.keys();
     TasLogger::logger()->debug("TasNativeUtils::pidOfActiveWindow Querying for active window");
     int pid = -1;
     Display* display = 0;

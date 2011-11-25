@@ -27,7 +27,7 @@
 #include <QList>
 #include <QListIterator>
 #include <QMutex>
-#include <QTime>
+#include <QDateTime>
 #include <tassocket.h>
 #include <tasdatashare.h>
 #include <tasqtdatamodel.h>
@@ -61,13 +61,13 @@ public:
   static TasClientManager* instance();
   static void deleteInstance();
 
-  TasClient* addClient(const QString& processId, const QString& processName=QString());
-  TasClient* addRegisteredClient(const QString& processId, const QString& processName, TasSocket* socket,
-                                                                 const QString& type=TAS_PLUGIN, QString applicationUid=QString());
+  TasClient* addClient(quint64 processId, const QString& processName=QString());
+  TasClient* addRegisteredClient(quint64 processId, const QString& processName, TasSocket* socket,
+                                 const QString& type=TAS_PLUGIN, QString applicationUid=QString());
 
   void addStartedApp(const QString& processName, qint64 epochString);
 
-  void removeClient(const QString& processId, bool kill=false);
+  void removeClient(quint64 processId, bool kill=false);
   void removeAllClients(bool kill=true);
 
   void applicationList(TasObject& parent);
@@ -77,7 +77,7 @@ public:
   bool detachFromStartupData(const QString& identifier);
 
   TasClient* findClient(TasCommandModel& request);
-  TasClient* findByProcessId(const QString& processId);
+  TasClient* findByProcessId(quint64 processId);
   TasClient* findByApplicationName(const QString& applicationName);
 #ifdef Q_OS_SYMBIAN
   TasClient* findByApplicationUid(const QString applicationUid);
@@ -90,12 +90,12 @@ public:
 
 private:
   TasClient* latestClient();
-  TasClient* removeByProcessId(const QString& processId);  
+  TasClient* removeByProcessId(quint64 processId);  
 
   bool verifyClient(TasClient* client);
 
 private:
-  QHash<QString, TasClient*> mClients;
+  QHash<quint64, TasClient*> mClients;
   QHash<QString, qint64> mStartedApps;
   static TasClientManager* mInstance;
   TasDataShare* mDataShare;
@@ -108,11 +108,11 @@ class TasClient : public QObject
 {
   Q_OBJECT
 protected:
-  TasClient(const QString& processId);
+  TasClient(quint64 processId);
   ~TasClient();
 
 public:
-  const QString& processId() const;
+  QString processId();
 
   const quint64& pid() const;
 
@@ -135,7 +135,7 @@ public:
                    const QString &pluginName, const QString &actionName, QHash<QString, QString> parameters);
 
 signals:
-  void registered(const QString& ProcessId);
+  void registered(qint64);
 
 private slots:
   void disconnected();
@@ -143,10 +143,9 @@ private slots:
 
 private:
   TasSocket* mSocket;
-  QString mApplicationName;
-  QString mProcessId;
+  QString mApplicationName;  
   friend class TasClientManager;
-  QTime mCreationTime;
+  qint64 mCreationTime;
   QString mApplicationUid;
   QString mPluginType;
   quint64 mPid;
