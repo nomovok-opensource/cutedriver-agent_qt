@@ -4,4 +4,10 @@
       <credential name="CAP::setgid" />
       <for path="/etc/init/test/qttasserver.conf" />
     </request>
+   <request>
+      <credential name="mce::DeviceModeControl" />
+      <credential name="mce::TKLockControl" />
+      <for path="/usr/lib/libqttestability.so.1.0.0" />
+      <for path="/usr/lib/qt4/plugins/testability/libtestability.so" />
+   </request>
 </aegis>

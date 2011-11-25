@@ -43,7 +43,7 @@ public:
     // static utility methods
     static void launchDetached(const QString& applicationPath, const QStringList& arguments,
                                const QStringList& environmentVars, const QString &workingDirectory,
-                               QString &responseData, QString responseErrorMessage);
+                               QString &responseData, QString& responseErrorMessage);
     static QString searchForApp(const QString& appName, const QString& rootPath);
 
     static QHash<QString, QString> parseEnvironmentVariables(const QString& env);

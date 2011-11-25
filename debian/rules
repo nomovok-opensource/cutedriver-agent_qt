@@ -96,7 +96,7 @@ binary-arch: build install
 	dh_md5sums
 	dh_builddeb --destdir=$(DEBDIR)
 	aegis-deb-add -control debian/qttas-server/DEBIAN/control .. debian/qttas-server.aegis=_aegis
-
+#	aegis-deb-add -control debian/qttas-plugins/DEBIAN/control .. debian/qttas-plugins.aegis=_aegis
 
 binary: binary-indep binary-arch
 .PHONY: build clean binary-indep binary-arch binary install configure

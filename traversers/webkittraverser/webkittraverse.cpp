@@ -872,7 +872,7 @@ void WebKitTraverse::parseAttributes(QWebElement* webElement, TasObject& objInfo
     const QString localName = webElement->localName().toLower();
     const QString type = webElement->attribute("type");
 
-    if (localName == "input" || localName == "select"){
+    if (localName == "input" || localName == "select" || localName == "textarea"){
       addAttribute(objInfo, "value", webElement);
     }
 
