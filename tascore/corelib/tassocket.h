@@ -29,6 +29,7 @@
 #include <QByteArray>
 #include <QLocalSocket>
 #include <QAbstractSocket>
+#include <QWeakPointer>
 
 #include "tasconstants.h"
 #include "tascommand.h"
@@ -102,7 +103,7 @@ protected:
 private:
     TasSocketReader* mReader;
     TasSocketWriter* mWriter;
-	QIODevice& mDevice;
+	QWeakPointer<QIODevice> mDevice;
 	ResponseHandler* mResponseHandler;
 	RequestHandler* mRequestHandler;
 };
@@ -124,7 +125,7 @@ private:
 	void flush();
 
 private:
-	QIODevice& mDevice;
+	QWeakPointer<QIODevice> mDevice;
 	QAbstractSocket* mTcpSocket;
 	QLocalSocket* mLocalSocket;
 };
@@ -146,7 +147,7 @@ private slots:
 	void readMessageData();
 
 private:
-	QIODevice& mDevice;
+	QWeakPointer<QIODevice> mDevice;
 	bool mStop;
 };
 
