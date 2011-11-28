@@ -33,10 +33,13 @@ static const QString SRV_NAME = "qttasmemlog_srv";
 TasQtMemLogService::TasQtMemLogService(QObject* parent)
     : QObject(parent)
 {        
+    mSocket = 0;
+    mServerConnection = 0;
     mMessageId = 0;
     mDoNotReconnect = false;
     TasLogger::logger()->setLogFile(SRV_NAME+".log");
     TasLogger::logger()->setLevel(DEBUG);                              
+    TasLogger::logger()->debug("TasQtMemLogService::TasQtMemLogService start");
     mConnected = false;
     mRegistered = false;   
     mServiceManager = new TasServiceManager();    
@@ -44,7 +47,7 @@ TasQtMemLogService::TasQtMemLogService(QObject* parent)
     initializeConnections();
     connect(QCoreApplication::instance(), SIGNAL(aboutToQuit()), this, SLOT(unReqisterServicePlugin()));
     connect(&mRegisterTime, SIGNAL(timeout()), this, SLOT(timeout()));
-  
+    
 }
 
 void TasQtMemLogService::initializeConnections()
@@ -84,10 +87,12 @@ TasQtMemLogService::~TasQtMemLogService()
 void TasQtMemLogService::cleanConnections()
 {
     if(mSocket){
+        disconnect(mSocket, 0, this, 0);
         delete mSocket;
         mSocket = 0;
     }
     if(mServerConnection){
+        disconnect(mServerConnection, 0, this, 0);
         delete mServerConnection;    
         mServerConnection = 0;
     }
@@ -155,8 +160,9 @@ void TasQtMemLogService::serviceResponse(TasMessage& response)
 void TasQtMemLogService::timeout()
 {
     TasLogger::logger()->error("TasQtMemLogService::timeout registering failed");        
+    mDoNotReconnect = true;    
     mSocket->closeConnection();
-    connectionClosed();
+    cleanConnections();
     QCoreApplication::instance()->quit();
 }
 
@@ -173,7 +179,7 @@ void TasQtMemLogService::unReqisterServicePlugin()
 {       
     mDoNotReconnect = true;
 
-    if(mRegistered){  
+    if(mRegistered && mSocket){  
         TasLogger::logger()->info("TasQtMemLogService::unReqisterServicePlugin");
         QMap<QString, QString> attrs;
         attrs[PLUGIN_ID] = QString::number(QCoreApplication::instance()->applicationPid());

@@ -45,7 +45,7 @@ public:
     ~MemLogServerWaiter();
 
 private slots:
-	void clientRegistered(const QString& processId);
+	void clientRegistered(quint64 processId);
     void timeout();
 	void socketClosed();
 	void crashed();

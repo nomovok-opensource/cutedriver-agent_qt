@@ -205,7 +205,7 @@ void TasServerServiceManager::handleClientLess(TasCommandModel& commandModel, Ta
         if(!socketSafe.isNull() && (commandModel.service() != RESOURCE_LOGGING_SERVICE || response.isError())){
             requester->sendMessage(response);
         }
-        else{
+        else if(socketSafe.isNull()){
             TasLogger::logger()->warning("TasServerServiceManager::handleClientLess connection was broken!");
         }
     }

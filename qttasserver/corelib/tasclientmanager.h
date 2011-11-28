@@ -135,7 +135,7 @@ public:
                    const QString &pluginName, const QString &actionName, QHash<QString, QString> parameters);
 
 signals:
-  void registered(qint64);
+  void registered(quint64);
 
 private slots:
   void disconnected();

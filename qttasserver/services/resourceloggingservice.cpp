@@ -63,23 +63,23 @@ MemLogServerWaiter::MemLogServerWaiter(TasSocket* requester, TasClient *target, 
     mTarget = target;
     mMessageId = messageId;
     mCommandXml = commandXml;
-    connect(mTarget, SIGNAL(registered(const QString&)), this, SLOT(clientRegistered(const QString&)));       
+    connect(mTarget, SIGNAL(registered(quint64)), this, SLOT(clientRegistered(quint64)));       
     connect(mTarget, SIGNAL(crashed()), this, SLOT(crashed()));
     mWaiter.setSingleShot(true);
-    mWaiter.start(20000);
+    mWaiter.start(10000);
 
     connect(&mWaiter, SIGNAL(timeout()), this, SLOT(timeout()));
     connect(mSocket, SIGNAL(socketClosed()), this, SLOT(socketClosed()));
 
     if(mTarget->socket()){
-        clientRegistered("");
+        clientRegistered(0);
     }
 }
 
 MemLogServerWaiter::~MemLogServerWaiter()
 {}
 
-void MemLogServerWaiter::clientRegistered(const QString& processId)
+void MemLogServerWaiter::clientRegistered(quint64 processId)
 {
     Q_UNUSED(processId)
     mWaiter.stop();
