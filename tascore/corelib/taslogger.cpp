@@ -163,6 +163,9 @@ void TasLogger::configureLogger(TasCommand& command)
             enableLogger();        
             debug("TasLogger::configureLogger configuration done and logging enabled.");
         }        
+        if(command.parameter(LOG_ENABLE) == "false"){
+            disableLogger();
+        }
     }
 }
 
