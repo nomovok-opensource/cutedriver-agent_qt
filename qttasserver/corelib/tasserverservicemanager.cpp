@@ -159,6 +159,7 @@ void TasServerServiceManager::handleServiceRequest(TasCommandModel& commandModel
 
 void TasServerServiceManager::getNativeUiState(QWeakPointer<ResponseWaiter> waiter, TasCommandModel& commandModel)
 {
+    waiter.data()->appendPlatformData(QByteArray());
     foreach(TasExtensionInterface* traverser, mExtensions){
         QByteArray data = traverser->traverseApplication(commandModel);
         if(!data.isNull()){
