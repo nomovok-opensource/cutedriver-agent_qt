@@ -76,7 +76,7 @@ symbian: {
 #endif
 
     for(PUBLIC_HEADER, PUBLIC_HEADERS) {
-        contains(QMAKE_HOST.os, Windows):PUBLIC_HEADER = $$section(PUBLIC_HEADER, ":", 1)
+        PUBLIC_HEADER = $$section(PUBLIC_HEADER, ":", 1)
         EXPORT_PATH = $$sprintf($$EXPORT_DIR, $$basename(PUBLIC_HEADER))
 		BLD_INF_RULES.prj_exports *= "$$PUBLIC_HEADER $$EXPORT_PATH"
 	}
