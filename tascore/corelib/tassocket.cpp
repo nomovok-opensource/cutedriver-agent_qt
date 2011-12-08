@@ -58,7 +58,7 @@
 static const int CHUNK_SIZE = 1024;
 static const int SLEEP_TIME = 5;
 
-TasServerSocket::TasServerSocket(QIODevice& device, QObject *parent)
+TasServerSocket::TasServerSocket(QIODevice* device, QObject *parent)
     :TasSocket(device, parent)
 {
     clearHandlers();
@@ -83,7 +83,7 @@ void TasServerSocket::setIdentification(const QString& identification)
 }
 
 
-TasClientSocket::TasClientSocket(QIODevice& device, QObject *parent)
+TasClientSocket::TasClientSocket(QIODevice* device, QObject *parent)
     :TasSocket(device, parent)
 {
 }
@@ -104,16 +104,17 @@ void TasClientSocket::disconnected()
 /*!
     Construct a new TasSocket.
 */
-TasSocket::TasSocket(QIODevice& device, QObject *parent)
+TasSocket::TasSocket(QIODevice* device, QObject *parent)
     :QObject(parent)
 {  
+    mDevice = device;
     clearHandlers();
-    mDevice = QWeakPointer<QIODevice>(&device);
     mReader = new TasSocketReader(device, this);
     mWriter = new TasSocketWriter(device, this);
     //    connect(&device, SIGNAL(readyRead()), this, SLOT(dataAvailable()));    
-    connect(&device, SIGNAL(disconnected()), this, SLOT(disconnected()));
+    connect(mDevice, SIGNAL(disconnected()), this, SLOT(disconnected()));
     connect(mReader, SIGNAL(messageRead(TasMessage&)), this, SLOT(messageAvailable(TasMessage&)));
+    connect(mDevice, SIGNAL(destroyed(QObject*)), this, SLOT(cleanUp(QObject*)));
 }                           
 
 /*!
@@ -121,16 +122,21 @@ TasSocket::TasSocket(QIODevice& device, QObject *parent)
 */
 TasSocket::~TasSocket()
 {    
+    cleanUp();
     delete mReader;
     delete mWriter;
 }
 
 void TasSocket::closeDevice()
 {
-    if(!mDevice.isNull()){
-        mDevice.data()->close();
-    }
-    mDevice.clear();
+    mDevice->close(); 
+}
+
+void TasSocket::cleanUp(QObject*)
+{
+    mReader->close();
+    mWriter->close();
+    mDevice = 0;
 }
 
 /*!
@@ -179,31 +185,22 @@ bool TasSocket::syncRequest(const qint32& messageId, const QString& requestMessa
  */
 bool TasSocket::syncRequest(const qint32& messageId, const QByteArray& requestMessage, TasMessage &reply)
 {
-    if(mDevice.isNull()){
-        return false;
-    }
     //disconnect response reader
-    disconnect(mDevice.data(), SIGNAL(readyRead()), mReader, SLOT(readMessageData()));
+    disconnect(mDevice, SIGNAL(readyRead()), mReader, SLOT(readMessageData()));
 
     //send request as normal
     bool success = sendRequest(messageId, requestMessage);
 
     //read response directly
     while (success) {
-        if(!mDevice.isNull()){
-            if(!mDevice.data()->waitForReadyRead ( READ_TIME_OUT )){
-                TasLogger::logger()->error("TasSocket::syncRequest timeout when waiting for the response");
-                //return empty data
-                success = false;
-            }
-            else if(mDevice.data()->bytesAvailable() >= HEADER_LENGTH){
-                // got header, exit loop with success==true
-                break;
-            }
-        }
-        else{
-            TasLogger::logger()->error("TasSocket::syncRequest io device gone.");
+        if(!mDevice->waitForReadyRead ( READ_TIME_OUT )){
+            TasLogger::logger()->error("TasSocket::syncRequest timeout when waiting for the response");
+            //return empty data
             success = false;
+        }
+        else if(mDevice->bytesAvailable() >= HEADER_LENGTH){
+            // got header, exit loop with success==true
+            break;
         }
     }
 
@@ -226,10 +223,8 @@ bool TasSocket::syncRequest(const qint32& messageId, const QByteArray& requestMe
             success = false;
         }
     }
-    if(!mDevice.isNull()){
-        //reconnect response reader
-        connect(mDevice.data(), SIGNAL(readyRead()), mReader, SLOT(readMessageData()));    
-    }
+    //reconnect response reader
+    connect(mDevice, SIGNAL(readyRead()), mReader, SLOT(readMessageData()));    
     return success;
 }
 
@@ -313,19 +308,19 @@ void TasSocket::messageAvailable(TasMessage& message)
     }
 }
 
-TasSocketWriter::TasSocketWriter(QIODevice& device, QObject* parent)
-    :QObject(parent) 
+TasSocketWriter::TasSocketWriter(QIODevice* device, QObject* parent)
+    :QObject(parent)
 {
-    mDevice = QWeakPointer<QIODevice>(&device);
+    mDevice = device;
     mTcpSocket = 0;
     mLocalSocket = 0;
 
-    QAbstractSocket* tcpSocket = qobject_cast<QAbstractSocket*>(mDevice.data());
+    QAbstractSocket* tcpSocket = qobject_cast<QAbstractSocket*>(mDevice);
     if(tcpSocket){
         mTcpSocket = tcpSocket;
     }
     else{
-        QLocalSocket* socket = qobject_cast<QLocalSocket*>(mDevice.data());
+        QLocalSocket* socket = qobject_cast<QLocalSocket*>(mDevice);
         if(socket){
             mLocalSocket = socket;
         }
@@ -333,16 +328,18 @@ TasSocketWriter::TasSocketWriter(QIODevice& device, QObject* parent)
 }
 
 TasSocketWriter::~TasSocketWriter()
-{}
+{
+    close();
+}
 
 bool TasSocketWriter::writeMessage(TasMessage& message)
 {
-    if(mDevice.isNull() || !mDevice.data()->isWritable()){
-        TasLogger::logger()->error("TasSocket::writeMessage socket not writable, cannot send message!" + QString::number(message.messageId()));        
+    if(!mDevice || !mDevice->isWritable()){
+        TasLogger::logger()->error("TasSocket::writeMessage socket not writable, cannot send message!" + QString::number(message.messageId()));
         return false;
     }
     QByteArray header = makeHeader(message);
-    mDevice.data()->write(header.data(), header.size());
+    mDevice->write(header.data(), header.size());
     writeBytes(message.dataCompressed());
     return true;
 }
@@ -355,28 +352,24 @@ void TasSocketWriter::writeBytes(const QByteArray& msgBytes)
     int chunksWritten = 0;
     forever{
         if(bytesLeft > 0){
-            if(!mDevice.isNull()){
-                bytesLeft -= mDevice.data()->write(msgBytes.mid(chunksWritten*CHUNK_SIZE).data(), qMin(CHUNK_SIZE,bytesLeft));
-                flush();
-                TasCoreUtils::wait(SLEEP_TIME);
-            }
-            else{
-                break;    
-            }
+            bytesLeft -= mDevice->write(msgBytes.mid(chunksWritten*CHUNK_SIZE).data(), qMin(CHUNK_SIZE,bytesLeft));
+            flush();
+            TasCoreUtils::wait(SLEEP_TIME);
         }
         else{
-            break;
+            break;    
         }
         chunksWritten++;
     }
 #else
-    if(!mDevice.isNull()){
-        mDevice.data()->write(msgBytes.data(), msgBytes.size());
-    }
+    mDevice->write(msgBytes.data(), msgBytes.size());
 #endif
-    if(!mDevice.isNull()){
-        mDevice.data()->waitForBytesWritten(READ_TIME_OUT);
-    }
+    mDevice->waitForBytesWritten(READ_TIME_OUT);
+}
+
+void TasSocketWriter::close()
+{
+    mDevice = 0;
 }
 
 /*!
@@ -407,15 +400,22 @@ QByteArray TasSocketWriter::makeHeader(TasMessage& message)
     return block;
 }
 
-TasSocketReader::TasSocketReader(QIODevice& device, QObject* parent)
+TasSocketReader::TasSocketReader(QIODevice* device, QObject* parent)
     :QObject(parent)
 {
-    mDevice = QWeakPointer<QIODevice>(&device);
-    connect(mDevice.data(), SIGNAL(readyRead()), this, SLOT(readMessageData()));
+    mDevice = device;
+    connect(mDevice, SIGNAL(readyRead()), this, SLOT(readMessageData()));
 }
 
 TasSocketReader::~TasSocketReader()
-{
+{    
+    close();
+}
+
+void TasSocketReader::close()
+{   
+    disconnect(mDevice, SIGNAL(readyRead()), this, SLOT(readMessageData()));
+    mDevice = 0;
 }
 
 /*!
@@ -428,29 +428,27 @@ TasSocketReader::~TasSocketReader()
 void TasSocketReader::readMessageData()
 {   
     TasLogger::logger()->debug("TasSocketReader::readMessageData start.");
-    if(mDevice.isNull()){
-        return;
+    if(!mDevice){
+        TasLogger::logger()->error("TasSocketReader::readMessageData reading device not available.");
     }
     //wait for header data to be available, start process only after 
     //enough data available
-    if(mDevice.data()->bytesAvailable() < HEADER_LENGTH){
+    if(mDevice->bytesAvailable() < HEADER_LENGTH){
         return;
     }
 
-    disconnect(mDevice.data(), SIGNAL(readyRead()), this, SLOT(readMessageData()));
+    disconnect(mDevice, SIGNAL(readyRead()), this, SLOT(readMessageData()));
 
 
-    if(!mDevice.isNull()){
-        TasMessage message;        
-        if(readOneMessage(message)){
-            emit messageRead(message);   
-        }
-        if(!mDevice.isNull()){
-            connect(mDevice.data(), SIGNAL(readyRead()), this, SLOT(readMessageData()));    
-            //maybe there was a new message coming when the old one was still being processed.
-            if(mDevice.data()->bytesAvailable() > 0){
-                readMessageData();   
-            }
+    TasMessage message;        
+    if(readOneMessage(message)){
+        emit messageRead(message);   
+    }
+    if(mDevice){
+        connect(mDevice, SIGNAL(readyRead()), this, SLOT(readMessageData()));    
+        //maybe there was a new message coming when the old one was still being processed.
+        if(mDevice->bytesAvailable() > 0){
+            readMessageData();   
         }
     }
 }
@@ -465,7 +463,7 @@ bool TasSocketReader::readOneMessage(TasMessage& message)
     quint16 crc = 0;
     quint8 flag = 0;
     qint32 messageId = 0;
-    QDataStream in(mDevice.data());       
+    QDataStream in(mDevice);       
     in.setVersion(QDataStream::Qt_4_0);
     in.setByteOrder(QDataStream::LittleEndian);   
     //read header
@@ -483,13 +481,9 @@ bool TasSocketReader::readOneMessage(TasMessage& message)
     
     int totalBytes = 0;
     forever{
-        if(mDevice.isNull()){
-            ok = false;
-            break;
-        }
-        if(mDevice.data()->bytesAvailable() == 0){            
-            if(!mDevice.data()->waitForReadyRead(READ_TIME_OUT)){
-                TasLogger::logger()->error("TasSocket::readData error when waiting for more data. " + mDevice.data()->errorString());
+        if(mDevice->bytesAvailable() == 0){            
+            if(!mDevice->waitForReadyRead(READ_TIME_OUT)){
+                TasLogger::logger()->error("TasSocket::readData error when waiting for more data. " + mDevice->errorString());
                 TasLogger::logger()->error("TasSocket::readData bytes read: "+QString::number(totalBytes)
                                            + " bytes exptected: "+ QString::number(bodySize));
                 ok = false;
@@ -497,13 +491,13 @@ bool TasSocketReader::readOneMessage(TasMessage& message)
             }
         }
         
-        if(mDevice.isNull() || mDevice.data()->bytesAvailable() < 0){
+        if(mDevice->bytesAvailable() < 0){
             TasLogger::logger()->error("TasSocket::readData error in reading data. ");
             ok = false;
             break;
         }
 
-        int available = mDevice.data()->bytesAvailable();
+        int available = mDevice->bytesAvailable();
         if( (totalBytes + available) > bodySize ){
             available = bodySize - totalBytes;
         }

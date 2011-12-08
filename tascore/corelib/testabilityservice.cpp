@@ -157,7 +157,7 @@ void TestabilityService::initializeConnections()
 #else
     mServerConnection = new QLocalSocket(this);
 #endif
-    mSocket = new TasClientSocket(*mServerConnection, this);               
+    mSocket = new TasClientSocket(mServerConnection, this);               
     connect(mSocket, SIGNAL(socketClosed()), this, SLOT(connectionClosed()));
     mSocket->setRequestHandler(mServiceManager);
 
@@ -215,11 +215,6 @@ void TestabilityService::registerPlugin()
     //remove paint tracking, paint tracking only on startup after this rely on the watchdog
     qApp->removeEventFilter(this);
 
-    if(!mServerConnection->isWritable() && !mRegisterTime.isActive()){
-        TasLogger::logger()->info("TestabilityService::registerPlugin connection device not writable maybe connection not initialized."); 
-        connectionClosed();
-    }
-
     if(!mRegistered && !mRegisterTime.isActive()){
         TasLogger::logger()->info("TestabilityService::registerPlugin not registered begin register process..."); 
         mRegisterWatchDog.stop();
@@ -269,11 +264,13 @@ void TestabilityService::connectionClosed()
     mConnected = false;
     mRegisterTime.stop();
 
+    mSocket->closeConnection();
+
     //Proper fix needed at some point:
     //for some reason we need to reuse the old connections in symbian (seems to crash or freeze if not)
     //but in windows the old connections will not work at all and we need to recreate them     
 #ifdef Q_OS_SYMBIAN
-    mSocket->closeConnection();
+    //for now do nothing
 #else
     // make new connections, deleting current once later. Deleting the current object inside the slot 
     // caused random crashes.
@@ -305,7 +302,6 @@ void TestabilityService::serviceResponse(TasMessage& response)
 void TestabilityService::timeout()
 {
     TasLogger::logger()->error("TestabilityService::timeout registering failed");        
-    mSocket->closeConnection();
     connectionClosed();
 }
 

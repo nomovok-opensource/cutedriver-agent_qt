@@ -57,7 +57,7 @@ void TasQtMemLogService::initializeConnections()
 #else
     mServerConnection = new QLocalSocket(this);
 #endif
-    mSocket = new TasClientSocket(*mServerConnection, this);               
+    mSocket = new TasClientSocket(mServerConnection, this);               
     connect(mSocket, SIGNAL(socketClosed()), this, SLOT(connectionClosed()));
     mSocket->setRequestHandler(mServiceManager);
 

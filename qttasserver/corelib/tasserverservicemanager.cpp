@@ -143,7 +143,7 @@ void TasServerServiceManager::handleServiceRequest(TasCommandModel& commandModel
             QWeakPointer<ResponseWaiter> rWaiter(waiter);
             targetClient->socket()->sendRequest(responseId, commandModel.sourceString(false));                        
             //in the meantime process native
-            getNativeUiState(waiter, commandModel);
+            getNativeUiState(rWaiter, commandModel);
             rWaiter.clear();
         }
         else{

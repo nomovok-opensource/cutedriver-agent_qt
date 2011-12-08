@@ -51,7 +51,7 @@ void TasUtilityApp::sendData(const QByteArray& data, uint id)
 #else
     QLocalSocket serverConnection;
 #endif
-    TasClientSocket socket(serverConnection);
+    TasClientSocket socket(&serverConnection);
 #if defined(TAS_NOLOCALSOCKET)
     serverConnection.connectToHost(QT_SERVER_NAME, QT_SERVER_PORT);
 #else

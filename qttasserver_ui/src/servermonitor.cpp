@@ -384,6 +384,11 @@ TasClient::TasClient()
     mTimer.setSingleShot(true);
     mConnected = false;
     TasLogger::logger()->debug("TasClient::TasClient make socket");
+    #if defined(TAS_NOLOCALSOCKET)
+    mServerConnection = new QTcpSocket(this);
+#else
+    mServerConnection = new QLocalSocket(this);
+#endif
     mSocket = new TasClientSocket(mServerConnection);
 	connect(mSocket, SIGNAL(socketClosed()), this, SLOT(connectionClosed()));
     TasLogger::logger()->debug("TasClient::TasClient set responsehandler");
@@ -396,7 +401,8 @@ TasClient::TasClient()
 
 TasClient::~TasClient()
 {
-    delete mSocket;
+    mSocket->deleteLater();
+    mServerConnection->deleteLater();
 }
 
 void TasClient::connectionClosed()
@@ -411,11 +417,11 @@ void TasClient::connectionClosed()
 bool TasClient::connectToServer()
 {
 #if defined(TAS_NOLOCALSOCKET)
-    mServerConnection.connectToHost(QT_SERVER_NAME, QT_SERVER_PORT);
+    mServerConnection->connectToHost(QT_SERVER_NAME, QT_SERVER_PORT);
 #else
-    mServerConnection.connectToServer(LOCAL_SERVER_NAME);
+    mServerConnection->connectToServer(LOCAL_SERVER_NAME);
 #endif   
-    mConnected = mServerConnection.waitForConnected(3000);
+    mConnected = mServerConnection->waitForConnected(3000);
     return mConnected;
 }
 
@@ -447,7 +453,7 @@ void TasClient::sendData(const QString& message)
     if(!mSocket->sendRequest(mMessageId, message)){
         mTimer.stop();
         mConnected = false;
-        mServerConnection.close();      
+        mServerConnection->close();      
         emit error("Socket not writable!");
     }
     TasLogger::logger()->debug("TasClient::sendData done");
@@ -467,7 +473,7 @@ void TasClient::serviceResponse(TasMessage& response)
 
 void TasClient::connectionTimeout()
 {
-    mServerConnection.close();
+    mServerConnection->close();
     mConnected = false;
     emit error("Server did not respond in time.");
 }

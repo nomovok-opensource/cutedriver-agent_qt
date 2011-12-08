@@ -120,9 +120,9 @@ private:
 	QTimer mTimer;
 	TasSocket *mSocket;
 #if defined(TAS_NOLOCALSOCKET)
-    QTcpSocket mServerConnection;
+    QTcpSocket* mServerConnection;
 #else
-    QLocalSocket mServerConnection;
+    QLocalSocket* mServerConnection;
 #endif
 	int mMessageId;
 	bool mSending;

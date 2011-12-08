@@ -67,7 +67,7 @@ class TasSocket : public QObject
     
 public:
 
-    TasSocket(QIODevice& device, QObject *parent = 0 );       
+    TasSocket(QIODevice* device, QObject *parent = 0 );       
     ~TasSocket();
 
 	virtual void closeConnection() = 0;
@@ -96,6 +96,7 @@ signals:
 public slots:
 	virtual void disconnected() = 0;
 	void messageAvailable(TasMessage& message);
+    void cleanUp(QObject* obj = 0);
 
 protected:
 	void closeDevice();
@@ -103,7 +104,7 @@ protected:
 private:
     TasSocketReader* mReader;
     TasSocketWriter* mWriter;
-	QWeakPointer<QIODevice> mDevice;
+	QIODevice* mDevice;
 	ResponseHandler* mResponseHandler;
 	RequestHandler* mRequestHandler;
 };
@@ -113,11 +114,12 @@ class TasSocketWriter : public QObject
     Q_OBJECT
 
 public:
-   TasSocketWriter(QIODevice& device, QObject* parent=0);
+   TasSocketWriter(QIODevice* device, QObject* parent=0);
 	~TasSocketWriter();
 	bool isWritable();
 	bool writeMessage(TasMessage& message);
 	bool writeData(const qint32& messageId, const QByteArray& message, QString& errorMessage, int timeout);
+    void close();
 
 private:
 	void writeBytes(const QByteArray& msgBytes);
@@ -125,7 +127,7 @@ private:
 	void flush();
 
 private:
-	QWeakPointer<QIODevice> mDevice;
+	QIODevice* mDevice;
 	QAbstractSocket* mTcpSocket;
 	QLocalSocket* mLocalSocket;
 };
@@ -135,10 +137,11 @@ class TasSocketReader : public QObject
 {
     Q_OBJECT
 public:
-    TasSocketReader(QIODevice& device, QObject* parent=0);
+    TasSocketReader(QIODevice* device, QObject* parent=0);
 	~TasSocketReader();
 
     bool readOneMessage(TasMessage& message);
+    void close();
 
 signals:
 	void messageRead(TasMessage& message);
@@ -147,8 +150,7 @@ private slots:
 	void readMessageData();
 
 private:
-	QWeakPointer<QIODevice> mDevice;
-	bool mStop;
+	QIODevice* mDevice;
 };
 
 
@@ -156,7 +158,7 @@ class TAS_EXPORT TasServerSocket : public TasSocket
 {
     Q_OBJECT
 public:
-    TasServerSocket(QIODevice& device, QObject *parent = 0 );       
+    TasServerSocket(QIODevice* device, QObject *parent = 0 );       
 
     void closeConnection();
 	
@@ -173,7 +175,7 @@ class TAS_EXPORT TasClientSocket : public TasSocket
 {
     Q_OBJECT
 public:
-  TasClientSocket(QIODevice& device, QObject *parent = 0 );       
+  TasClientSocket(QIODevice* device, QObject *parent = 0 );       
   void closeConnection();
 
 public slots:

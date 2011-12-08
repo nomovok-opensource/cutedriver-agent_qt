@@ -94,8 +94,8 @@ EXPORTS
 	_ZN15TasClientSocket18qt_static_metacallEP7QObjectN11QMetaObject4CallEiPPv @ 93 NONAME
 	_ZN15TasClientSocket19getStaticMetaObjectEv @ 94 NONAME
 	_ZN15TasClientSocket25staticMetaObjectExtraDataE @ 95 NONAME DATA 8
-	_ZN15TasClientSocketC1ER9QIODeviceP7QObject @ 96 NONAME
-	_ZN15TasClientSocketC2ER9QIODeviceP7QObject @ 97 NONAME
+	_ZN15TasClientSocketC1EP9QIODeviceP7QObject @ 96 NONAME
+	_ZN15TasClientSocketC2EP9QIODeviceP7QObject @ 97 NONAME
 	_ZN15TasCommandModel10findTargetERK7QString @ 98 NONAME
 	_ZN15TasCommandModel10targetListEv @ 99 NONAME
 	_ZN15TasCommandModel11createModelEv @ 100 NONAME
@@ -127,8 +127,8 @@ EXPORTS
 	_ZN15TasServerSocket18qt_static_metacallEP7QObjectN11QMetaObject4CallEiPPv @ 126 NONAME
 	_ZN15TasServerSocket19getStaticMetaObjectEv @ 127 NONAME
 	_ZN15TasServerSocket25staticMetaObjectExtraDataE @ 128 NONAME DATA 8
-	_ZN15TasServerSocketC1ER9QIODeviceP7QObject @ 129 NONAME
-	_ZN15TasServerSocketC2ER9QIODeviceP7QObject @ 130 NONAME
+	_ZN15TasServerSocketC1EP9QIODeviceP7QObject @ 129 NONAME
+	_ZN15TasServerSocketC2EP9QIODeviceP7QObject @ 130 NONAME
 	_ZN15TasTargetObjectC1E11QDomElement @ 131 NONAME
 	_ZN15TasTargetObjectC2E11QDomElement @ 132 NONAME
 	_ZN15TasTargetObjectD1Ev @ 133 NONAME
