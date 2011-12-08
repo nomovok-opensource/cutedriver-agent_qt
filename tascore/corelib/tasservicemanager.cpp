@@ -78,7 +78,9 @@ void TasServiceManager::registerCommand(TasServiceCommand* command)
 void TasServiceManager::serviceRequest(TasMessage& request, TasSocket* requester)
 {
     //https://bugreports.qt.nokia.com/browse/QTBUG-21928
+#if QT_VERSION >= 0x040800
     QCoreApplication::instance()->processEvents(QEventLoop::DeferredDeletion);
+#endif
     QString errorMessage;
     TasCommandModel* commandModel = parseMessageString(request.dataAsString(), errorMessage);
     if(commandModel){

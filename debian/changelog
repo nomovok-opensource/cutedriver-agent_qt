@@ -1,3 +1,9 @@
+qttas (1.4.1-2) unstable; urgency=low
+
+  * Fixes: NB#293488 - Crashing regression in 1.4.1 release
+
+ -- Testability Driver Team <testabilitydriver@nokia.com>  Wed, 8 Dec 2011 09:30:00 +0200
+
 qttas (1.4.1-1) unstable; urgency=low
 
   * Fixes: NB#292642 - Qttas trying to attach to a process id "OK" ? 

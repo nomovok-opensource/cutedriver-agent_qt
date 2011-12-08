@@ -198,16 +198,12 @@ void TasServerServiceManager::handleClientLess(TasCommandModel& commandModel, Ta
         QProcess::startDetached("qttasutilapp", args);
     }
     else{
-        //try to detect pc side connection breaks
-        QWeakPointer<TasSocket> socketSafe = QWeakPointer<TasSocket>(requester);
+        //try to detect pc side connection breaks        
         TasResponse response(responseId);
         response.setRequester(requester);
         performService(commandModel, response);
-        if(!socketSafe.isNull() && (commandModel.service() != RESOURCE_LOGGING_SERVICE || response.isError())){
+        if(commandModel.service() != RESOURCE_LOGGING_SERVICE || response.isError()){
             requester->sendMessage(response);
-        }
-        else if(socketSafe.isNull()){
-            TasLogger::logger()->warning("TasServerServiceManager::handleClientLess connection was broken!");
         }
     }
 }
