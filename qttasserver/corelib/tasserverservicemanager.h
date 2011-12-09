@@ -22,7 +22,6 @@
 #define TASSERVERSERVICEMANAGER_H
 
 #include <QObject>
-#include <QWeakPointer>
 #include <QList>
 #include <QHash>
 #include <QTimer>
@@ -65,7 +64,7 @@ private:
     bool appendVkbData(TasCommandModel& commandModel, QByteArray& data);
 #endif
     void handleClientLess(TasCommandModel& commandModel, TasSocket* requester, qint32 responseId);
-    void getNativeUiState(QWeakPointer<ResponseWaiter> waiter, TasCommandModel& commandModel);
+    void getNativeUiState(ResponseWaiter* waiter, TasCommandModel& commandModel);
 private:	
 	QHash<qint32, ResponseWaiter*> mResponseQueue;
 	TasClientManager* mClientManager;

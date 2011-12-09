@@ -514,7 +514,7 @@ bool TasSocketReader::readOneMessage(TasMessage& message)
 
     bool messageRead = false;
 
-    if(ok){
+    if(ok && !rawBytes.isEmpty()){
         //check crc
         quint16 checkSum = qChecksum( rawBytes.data(), bodySize );
         if ( checkSum != crc){

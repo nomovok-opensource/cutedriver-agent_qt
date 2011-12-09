@@ -140,11 +140,9 @@ void TasServerServiceManager::handleServiceRequest(TasCommandModel& commandModel
         if(commandModel.service() == APPLICATION_STATE || commandModel.service() == FIND_OBJECT_SERVICE){
             commandModel.addDomAttribute("needFragment", "true");
             //send request for qt uistate to client
-            QWeakPointer<ResponseWaiter> rWaiter(waiter);
             targetClient->socket()->sendRequest(responseId, commandModel.sourceString(false));                        
             //in the meantime process native
-            getNativeUiState(rWaiter, commandModel);
-            rWaiter.clear();
+            getNativeUiState(waiter, commandModel);
         }
         else{
             //can respond as soon as response from qt side
@@ -157,31 +155,23 @@ void TasServerServiceManager::handleServiceRequest(TasCommandModel& commandModel
     }
 }
 
-void TasServerServiceManager::getNativeUiState(QWeakPointer<ResponseWaiter> waiter, TasCommandModel& commandModel)
+void TasServerServiceManager::getNativeUiState(ResponseWaiter* waiter, TasCommandModel& commandModel)
 {
-    waiter.data()->appendPlatformData(QByteArray());
+    waiter->appendPlatformData(QByteArray());
     foreach(TasExtensionInterface* traverser, mExtensions){
         QByteArray data = traverser->traverseApplication(commandModel);
         if(!data.isNull()){
-            if(!waiter.isNull()){
-                waiter.data()->appendPlatformData(data);
-            }
+            waiter->appendPlatformData(data);
             data.clear();
-        }
-        
+        }        
     }
 #ifdef Q_OS_SYMBIAN   
     QByteArray vkbData; 
     if(appendVkbData(commandModel, vkbData)){
-        if(!waiter.isNull()){
-            waiter.data()->appendPlatformData(vkbData);
-            vkbData.clear();
-        }
+        waiter->appendPlatformData(vkbData);
     }
 #endif
-    if(!waiter.isNull()){
-        waiter.data()->okToRespond();
-    }
+    waiter->okToRespond();
 }
 void TasServerServiceManager::handleClientLess(TasCommandModel& commandModel, TasSocket* requester, qint32 responseId)
 {
