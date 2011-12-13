@@ -279,6 +279,9 @@ int PointsTasGesture::getDuration()
             duration += mIntervals.at(i);
         }
     }
+    if (duration < FRAME_RANGE_DIV) {
+        return FRAME_RANGE_DIV;
+    }
     return duration;
 }
 
