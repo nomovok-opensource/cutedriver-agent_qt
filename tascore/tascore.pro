@@ -77,7 +77,8 @@ symbian: {
 
     for(PUBLIC_HEADER, PUBLIC_HEADERS) {
         DRIVE_LETTER = $$split(PUBLIC_HEADER, ":")
-        PUBLIC_HEADER = $$last(DRIVE_LETTER)
+        #PUBLIC_HEADER = $$last(DRIVE_LETTER)
+        PUBLIC_HEADER = $$replace(PUBLIC_HEADER, $$PWD, ".")
         EXPORT_PATH = $$sprintf($$EXPORT_DIR, $$basename(PUBLIC_HEADER))
         BLD_INF_RULES.prj_exports *= "$$PUBLIC_HEADER $$EXPORT_PATH"
     }
