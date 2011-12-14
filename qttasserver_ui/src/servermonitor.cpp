@@ -190,7 +190,10 @@ void ServerMonitor::serverResponse(const QString& message)
                     for(int j = 0; j < attrs.count(); j++){
                         QDomElement attribute = attrs.item(j).toElement();
                         if(attribute.attribute("name") == "startTime"){
-                            emit serverDebug(attribute.attribute("startTime"));        
+                            emit serverDebug("Server started: " + attribute.text());        
+                        }
+                        if(attribute.attribute("name") == "upTime"){
+                            emit serverDebug(attribute.text());        
                         }
                     }
                 }

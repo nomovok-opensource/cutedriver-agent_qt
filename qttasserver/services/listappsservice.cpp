@@ -66,7 +66,7 @@ void ListAppsService::listApplications(TasCommand& command, TasResponse& respons
     TasDataModel* model = new TasDataModel();
     QString qtVersion = "Qt" + QString(qVersion());
     TasObjectContainer& container = model->addNewObjectContainer(1, qtVersion, "qt");
-    TasObject apps = container.addNewObject("0", "QApplications", "applications");
+    TasObject& apps = container.addNewObject("0", "QApplications", "applications");
 
     TasClientManager::instance()->applicationList(apps);
 
@@ -74,14 +74,26 @@ void ListAppsService::listApplications(TasCommand& command, TasResponse& respons
     TasServer* tasServer = (TasServer*) response.requester()->parent()->parent();
     QString address = tasServer->getServerAddress();
     QString port = QString::number(tasServer->getServerPort());
-    TasObject hostAddress = container.addNewObject("1", "QHostAddress", "hostAddresses");
+    TasObject& hostAddress = container.addNewObject("1", "QHostAddress", "hostAddresses");
     hostAddress.addNewObject(0, address, "HostAddress");
     hostAddress.addNewObject(0, port, "HostPort");
 
     //add uptime also
     QDateTime started = QDateTime::fromMSecsSinceEpoch(mStartTime);
-    TasObject starTime = container.addNewObject("2", "startTime", "QDateTime");
-    starTime.addAttribute("startTime", started.toString("dd.MM.yyyy hh:mm:ss"));
+    QDateTime current = QDateTime::currentDateTime();
+    int days = current.daysTo(current);
+    if(days < 0){ started = started.addDays(days);}
+    int hours = started.secsTo(current)/3600;
+    if(hours > 0){ started = started.addSecs(hours*3600); }
+    int minutes = started.secsTo(current)/60;
+    if(minutes > 0){ started = started.addSecs(minutes*60); }
+    QString upTime = QString("Running: %1 days %2 hours %3 minutes %4 secs").arg(days).arg(hours).arg(minutes).arg(started.secsTo(current));
+    
+    TasObject& starTime = container.addNewObject("2", "startTime", "QDateTime");
+    starTime.addAttribute("startTime", QDateTime::fromMSecsSinceEpoch(mStartTime).toString("dd.MM.yyyy hh:mm:ss"));
+    starTime.addAttribute("upTime", upTime);
+    
+
 
     QByteArray xml;
     model->serializeModel(xml);    
