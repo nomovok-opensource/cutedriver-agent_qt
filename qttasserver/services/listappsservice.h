@@ -41,6 +41,9 @@ private:
 	void listApplications(TasCommand& command, TasResponse& response);
 	void listRunninProcesses(TasResponse& response);
 
+private:
+    qint64 mStartTime;
+
 };
 
 #endif

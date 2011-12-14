@@ -176,16 +176,23 @@ void ServerMonitor::serverResponse(const QString& message)
                 if(target.attribute("type") == "application"){
                     emit serverDebug(target.attribute("name"));        
                 }
-            }
-            // Get server host address and port binds
-            for (int i = 0; i < count; i++){
-                QDomElement target = targets.item(i).toElement();
+                // Get server host address and port binds
                 if(target.attribute("type") == "HostAddress"){
                     BINDING_ADDRESS = target.attribute("name");
                     emit enableReBinding(BINDING_ADDRESS);
                 }
                 if(target.attribute("type") == "HostPort"){
                     BINDING_PORT = target.attribute("name");
+                }
+                //get uptime
+                if(target.attribute("name") == "startTime"){
+                    QDomNodeList attrs = target.elementsByTagName (QString("attr"));
+                    for(int j = 0; j < attrs.count(); j++){
+                        QDomElement attribute = attrs.item(j).toElement();
+                        if(attribute.attribute("name") == "startTime"){
+                            emit serverDebug(attribute.attribute("startTime"));        
+                        }
+                    }
                 }
             }
             if (!BINDING_ADDRESS.isEmpty() && !BINDING_PORT.isEmpty()){

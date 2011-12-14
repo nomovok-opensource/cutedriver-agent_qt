@@ -22,12 +22,15 @@
 #include <tasqtdatamodel.h>
 #include <taslogger.h>
 #include <tasserver.h>
+#include <QDateTime>
 
 #include "listappsservice.h"
 #include "tasnativeutils.h"
 
 ListAppsService::ListAppsService()
-{}
+{
+    mStartTime = QDateTime::currentMSecsSinceEpoch();
+}
 
 ListAppsService::~ListAppsService()
 {}
@@ -63,17 +66,22 @@ void ListAppsService::listApplications(TasCommand& command, TasResponse& respons
     TasDataModel* model = new TasDataModel();
     QString qtVersion = "Qt" + QString(qVersion());
     TasObjectContainer& container = model->addNewObjectContainer(1, qtVersion, "qt");
-    TasObject* apps = &container.addNewObject(0, "QApplications", "applications");
+    TasObject apps = container.addNewObject("0", "QApplications", "applications");
 
-    TasClientManager::instance()->applicationList(*apps);
+    TasClientManager::instance()->applicationList(apps);
 
     // Add HostAddress and HostPort on the Apps List message too.
     TasServer* tasServer = (TasServer*) response.requester()->parent()->parent();
     QString address = tasServer->getServerAddress();
     QString port = QString::number(tasServer->getServerPort());
-    TasObject* hostAddress = &container.addNewObject(0, "QHostAddress", "hostAddresses");
-    hostAddress->addNewObject(0, address, "HostAddress");
-    hostAddress->addNewObject(0, port, "HostPort");
+    TasObject hostAddress = container.addNewObject("1", "QHostAddress", "hostAddresses");
+    hostAddress.addNewObject(0, address, "HostAddress");
+    hostAddress.addNewObject(0, port, "HostPort");
+
+    //add uptime also
+    QDateTime started = QDateTime::fromMSecsSinceEpoch(mStartTime);
+    TasObject starTime = container.addNewObject("2", "startTime", "QDateTime");
+    starTime.addAttribute("startTime", started.toString("dd.MM.yyyy hh:mm:ss"));
 
     QByteArray xml;
     model->serializeModel(xml);    
