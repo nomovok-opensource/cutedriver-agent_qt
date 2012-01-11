@@ -1,4 +1,10 @@
-qttas (1.4.3-1) unstable; urgency=low
+qttas (1.4.4-1) unstable; urgency=low
+
+    * new release version
+
+ -- Testability Driver Team <testabilitydriver@nokia.com>  Wed, 11 Jan 2012 11:01:55 +0200
+    
+ qttas (1.4.3-1) unstable; urgency=low
 
     * new release version
 
