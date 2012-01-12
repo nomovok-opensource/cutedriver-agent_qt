@@ -765,8 +765,9 @@ void WebKitTraverse::traverseWebElement(TasObject* parent, QPoint parentPos, QPo
 
 
     //if use_crop enabled, check if intercsected by view and if not do not traverse this item
-    if(mTraverseUtils->useViewCrop() && !mCropRect.intersects(QRect(x,y,width,height)))
+    if(mTraverseUtils->useViewCrop() && !mCropRect.intersects(QRect(x,y,width,height)) || height == 0)
     {
+        // TasLogger::logger()->debug("discarding element " + webElement->tagName());
 //        TasLogger::logger()->debug("discarding element " + webElement->tagName() + "\n" +
 //                                   "rect1 x(" + QString::number(mCropRect.x()) + ") y(" + QString::number(mCropRect.y()) +
 //                                   ") w(" + QString::number(mCropRect.width()) + ") h(" + QString::number(mCropRect.height()) + ")\n" +
@@ -778,7 +779,7 @@ void WebKitTraverse::traverseWebElement(TasObject* parent, QPoint parentPos, QPo
     }
     else
     {
-        TasObject& childInfo = parent->addObject();
+        TasObject& childInfo = parent->addObject();        
 
         uint elementId = qHash(webElement->toOuterXml() + webFrameId);
 
