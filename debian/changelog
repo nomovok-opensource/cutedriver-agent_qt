@@ -1,3 +1,9 @@
+qttas (1.4.1-3) unstable; urgency=low
+
+  * Fixes: NB#296907 - qttasserver requires X credentials
+
+ -- Testability Driver Team <testabilitydriver@nokia.com>  Thu, 19 Jan 2012 09:30:00 +0200
+
 qttas (1.4.1-2) unstable; urgency=low
 
   * Fixes: NB#293488 - Crashing regression in 1.4.1 release
