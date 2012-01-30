@@ -147,13 +147,18 @@ QStringList TasPluginLoader::listPlugins(QString pluginDir)
 TasFixturePluginInterface* TasPluginLoader::tryToLoadFixture(QString filePath, QString id)
 {
     TasFixturePluginInterface* fixture = 0; 
-    QObject *plugin = loadPlugin(filePath);
-    if(plugin){
-        fixture = qobject_cast<TasFixturePluginInterface *>(plugin);        
-        if (fixture && !mFixturePlugins.contains(id)){
-            mFixturePlugins.insert(id, fixture);            
-        }
-    }    
+    if(mFixturePlugins.contains(id)){
+        fixture = mFixturePlugins.value(id);
+    }
+    else{
+        QObject *plugin = loadPlugin(filePath);
+        if(plugin){
+            fixture = qobject_cast<TasFixturePluginInterface *>(plugin);        
+            if (fixture){
+                mFixturePlugins.insert(id, fixture);            
+            }
+        }    
+    }
     return fixture;
 }
 

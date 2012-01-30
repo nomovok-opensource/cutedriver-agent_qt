@@ -41,6 +41,8 @@ public:
 
 private:
      QContactManager * connectContactManager(QHash<QString, QString> parameters, QString& stdOut);
+     bool addContacts(QContactManager& manager, QHash<QString, QString> parameters, QString & stdOut);
+     bool removeContacts(QContactManager& manager, QHash<QString, QString> parameters, QString & stdOut);
 
      void addContact(QHash<QString, QString> parameters, QString& stdOut);
      void removeContact(QHash<QString, QString> parameters, QString& stdOut);
