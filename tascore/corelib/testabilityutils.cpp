@@ -482,6 +482,7 @@ ItemLocationDetails TestabilityUtils::getItemLocationDetails(QGraphicsItem* grap
         if(true /*isVisible*/){
             //add coordinates also
             QRectF sceneRect = graphicsItem->sceneBoundingRect();
+#if QT_VERSION >= 0x040800
             if( view->testAttribute(Qt::WA_SymbianNoSystemRotation)){
                 //this a bit problematic, lets look for the top most item in the hierachy 
                 //with rotation transformation
@@ -492,6 +493,9 @@ ItemLocationDetails TestabilityUtils::getItemLocationDetails(QGraphicsItem* grap
                 }
             }
             else if(!view->viewportTransform().isIdentity()){
+#else
+            if(!view->viewportTransform().isIdentity()){
+#endif
                 QTransform transform = view->viewportTransform();
                 sceneRect = transform.mapRect(sceneRect);
             }
