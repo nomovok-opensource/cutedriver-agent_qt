@@ -66,6 +66,7 @@ protected:
 	QGraphicsItem* findGraphicsItem(const QString& id);
 	QGraphicsItem* lookForMatch(QList<QGraphicsItem*> itemList, const QString& targetId);
 	bool verifyGraphicsItemMatch(const QString& targetId, QGraphicsItem* source);
+    static QGraphicsItem* findTopMostRotated(QGraphicsItem *item);
 
 private:
 

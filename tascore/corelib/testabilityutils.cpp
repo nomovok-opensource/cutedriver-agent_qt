@@ -449,6 +449,20 @@ QPoint TestabilityUtils::proxyCoordinates(QGraphicsItem* item, bool absolute)
     }
 }
 
+QGraphicsItem* TestabilityUtils::findTopMostRotated(QGraphicsItem *item)
+{
+    QGraphicsItem* target = 0;
+    if(item->parentItem()){
+        target = findTopMostRotated(item->parentItem());
+    }
+    if(!target){
+        if(item->rotation() != 0){
+            target = item;
+        }
+    }
+    return target;
+}
+
 ItemLocationDetails TestabilityUtils::getItemLocationDetails(QGraphicsItem* graphicsItem, TasCommand* command)
 {
     bool isVisible = false;
@@ -468,7 +482,16 @@ ItemLocationDetails TestabilityUtils::getItemLocationDetails(QGraphicsItem* grap
         if(true /*isVisible*/){
             //add coordinates also
             QRectF sceneRect = graphicsItem->sceneBoundingRect();
-            if(!view->viewportTransform().isIdentity()){
+            if( view->testAttribute(Qt::WA_SymbianNoSystemRotation)){
+                //this a bit problematic, lets look for the top most item in the hierachy 
+                //with rotation transformation
+                QGraphicsItem* rotator = findTopMostRotated(graphicsItem);
+                if(rotator){
+                    QTransform transform = rotator->sceneTransform().inverted();
+                    sceneRect = transform.mapRect(sceneRect);
+                }
+            }
+            else if(!view->viewportTransform().isIdentity()){
                 QTransform transform = view->viewportTransform();
                 sceneRect = transform.mapRect(sceneRect);
             }

@@ -217,6 +217,10 @@ const char* const VISIBILITY_BLACKLIST = "visibility_blacklist";
 const char* const PENINPUT_SERVER = "peninputserver";
 const char* const VKB_IDENTIFIER = "vkb_app";
 
+const char* const APP_ROTATION = "native_rotation";
+
+
+
 #ifdef TDTASSERVER
  #define TAS_EXPORT
 #else

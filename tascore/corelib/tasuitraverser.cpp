@@ -255,6 +255,17 @@ void TasUiTraverser::addApplicationDetails(TasObject& application, TasCommand* c
 #ifdef Q_OS_SYMBIAN
     quintptr uid = CEikonEnv::Static()->EikAppUi()->Application()->AppDllUid().iUid;
     application.addAttribute("applicationUid", QString::number(uid));    
+    
+    CWsScreenDevice* sws = new ( ELeave ) CWsScreenDevice( CEikonEnv::Static()->WsSession() );
+    CleanupStack::PushL( sws );
+    if( sws->Construct() == KErrNone) 
+    {
+        TPixelsAndRotation sizeAndRotation;    
+        sws->GetDefaultScreenSizeAndRotation( sizeAndRotation );
+        qApp->setProperty(APP_ROTATION, QVariant(sizeAndRotation.iRotation));   
+        application.addAttribute(APP_ROTATION, sizeAndRotation.iRotation);
+    }
+    CleanupStack::PopAndDestroy( sws );
 #endif    
 
     application.addAttribute("arguments", qApp->arguments().join(" ").toLatin1().data());
