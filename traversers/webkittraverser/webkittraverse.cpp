@@ -704,9 +704,9 @@ void WebKitTraverse::traverseWebElement(TasObject* parent, QPoint parentPos, QPo
     //TasLogger::logger()->debug("WebKitTaverse::traverseWebElement traverse this element:" + webElement->tagName());
     int x=0,y=0,x_absolute=0, y_absolute=0, width=0, height=0;
 
-
+/* TUUKKA: taken out as blocks children from being traversed
     if (mTraverseUtils->includeAttribute("x") || mTraverseUtils->includeAttribute("y") || mTraverseUtils->includeAttribute("x_absolute") || mTraverseUtils->includeAttribute("y_absolute") || mTraverseUtils->includeAttribute("width") || mTraverseUtils->includeAttribute("height") ){
-
+*/
       if (mTemporaryPointerToQGraphicsWebView){
 
         const QPointF elPos( webElement->geometry().x() + parentPos.x(), webElement->geometry().y() + parentPos.y());
@@ -761,7 +761,7 @@ void WebKitTraverse::traverseWebElement(TasObject* parent, QPoint parentPos, QPo
           y_absolute = childPos.y() + screenPos.y();
 #endif
       }
-    }
+      //  }
 
 
     //if use_crop enabled, check if intercsected by view and if not do not traverse this item
