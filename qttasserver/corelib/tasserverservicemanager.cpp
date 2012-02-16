@@ -142,7 +142,7 @@ void TasServerServiceManager::handleServiceRequest(TasCommandModel& commandModel
             //send request for qt uistate to client
             targetClient->socket()->sendRequest(responseId, commandModel.sourceString(false));                        
             //in the meantime process native
-            getNativeUiState(waiter, commandModel);
+            getNativeUiState(responseId, commandModel);
         }
         else{
             //can respond as soon as response from qt side
@@ -155,23 +155,33 @@ void TasServerServiceManager::handleServiceRequest(TasCommandModel& commandModel
     }
 }
 
-void TasServerServiceManager::getNativeUiState(ResponseWaiter* waiter, TasCommandModel& commandModel)
+void TasServerServiceManager::getNativeUiState(qint32 responseId, TasCommandModel& commandModel)
 {
-    waiter->appendPlatformData(QByteArray());
-    foreach(TasExtensionInterface* traverser, mExtensions){
-        QByteArray data = traverser->traverseApplication(commandModel);
-        if(!data.isNull()){
-            waiter->appendPlatformData(data);
-            data.clear();
-        }        
-    }
+    if(mResponseQueue.contains(responseId)){
+        mResponseQueue.value(responseId)->appendPlatformData(QByteArray());
+        foreach(TasExtensionInterface* traverser, mExtensions){
+            QByteArray data = traverser->traverseApplication(commandModel);
+            if(!data.isNull()){
+                if(mResponseQueue.contains(responseId)){
+                    mResponseQueue.value(responseId)->appendPlatformData(data);
+                }
+                else{
+                    return;
+                }
+            }        
+        }
 #ifdef Q_OS_SYMBIAN   
-    QByteArray vkbData; 
-    if(appendVkbData(commandModel, vkbData)){
-        waiter->appendPlatformData(vkbData);
-    }
+        QByteArray vkbData; 
+        if(appendVkbData(commandModel, vkbData)){
+            if(mResponseQueue.contains(responseId)){
+                mResponseQueue.value(responseId)->appendPlatformData(vkbData);
+            }
+        }
 #endif
-    waiter->okToRespond();
+        if(mResponseQueue.contains(responseId)){
+            mResponseQueue.value(responseId)->okToRespond();
+        }
+    }
 }
 void TasServerServiceManager::handleClientLess(TasCommandModel& commandModel, TasSocket* requester, qint32 responseId)
 {
