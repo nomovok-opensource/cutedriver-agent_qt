@@ -82,8 +82,11 @@ public:
 
 	static bool isServerRunning();
 
-  static int getOrientation();
+    static int getOrientation();
 
+#ifdef Q_OS_SYMBIAN
+    static bool flipOrigo;
+#endif
 
 private:
 	GpuMemDetailsInterface* gpuDetailsHandler;

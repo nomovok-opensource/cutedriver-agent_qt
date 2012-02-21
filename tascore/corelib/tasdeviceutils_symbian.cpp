@@ -48,6 +48,8 @@ QTM_USE_NAMESPACE
 
 _LIT( KQTasServerName, "qttasserver" );
 
+bool TasDeviceUtils::flipOrigo = true;
+
 TasDeviceUtils::TasDeviceUtils()
 {
     gpuDetailsHandler = 0;
@@ -186,19 +188,21 @@ void TasDeviceUtils::sendMouseEvent(int x, int y, Qt::MouseButton /*button*/, QE
 
     TPoint pos(x,y);
 
-    CWsScreenDevice* sws = new ( ELeave ) CWsScreenDevice( CEikonEnv::Static()->WsSession() );
-    if( sws->Construct() == KErrNone) 
+    //not the nicest solution but will have to do for now
+    if(flipOrigo){
+        CWsScreenDevice* sws = new ( ELeave ) CWsScreenDevice( CEikonEnv::Static()->WsSession() );
+        if( sws->Construct() == KErrNone) 
         {
-        TPixelsAndRotation sizeAndRotation;    
-        sws->GetDefaultScreenSizeAndRotation( sizeAndRotation );
-        //origo is actually the bottom left corner so adjust y
-        if ( sizeAndRotation.iRotation == 1 || sizeAndRotation.iRotation == 2)
+            TPixelsAndRotation sizeAndRotation;    
+            sws->GetDefaultScreenSizeAndRotation( sizeAndRotation );
+            //origo is actually the bottom left corner so adjust y
+            if ( sizeAndRotation.iRotation == 1 || sizeAndRotation.iRotation == 3)
             {
-            pos.SetXY((sizeAndRotation.iPixelSize.iHeight - y), x);
+                pos.SetXY((sizeAndRotation.iPixelSize.iHeight - y), x);                
             }
         }
-    delete sws;  
-   
+        delete sws;  
+    }
     TasLogger::logger()->debug(QString(__FUNCTION__) + " Pos: " + QString::number(pos.iX) + "," + QString::number(pos.iY));
 
     bool down = type == QEvent::MouseButtonPress ||

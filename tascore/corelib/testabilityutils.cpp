@@ -24,6 +24,7 @@
 #include "testabilitysettings.h"
 #include "tasqtcommandmodel.h"
 #include "taspointercache.h"
+#include "tasdeviceutils.h"
 
 #if QT_VERSION >= 0x040700
 #include <QDeclarativeItem>
@@ -484,6 +485,7 @@ ItemLocationDetails TestabilityUtils::getItemLocationDetails(QGraphicsItem* grap
             QRectF sceneRect = graphicsItem->sceneBoundingRect();
 #if QT_VERSION >= 0x040704
             if( view->testAttribute(Qt::WA_SymbianNoSystemRotation)){
+                TasDeviceUtils::flipOrigo = false;
                 //this a bit problematic, lets look for the top most item in the hierachy 
                 //with rotation transformation
                 QGraphicsItem* rotator = findTopMostRotated(graphicsItem);
@@ -498,6 +500,7 @@ ItemLocationDetails TestabilityUtils::getItemLocationDetails(QGraphicsItem* grap
 #endif
                 QTransform transform = view->viewportTransform();
                 sceneRect = transform.mapRect(sceneRect);
+                TasDeviceUtils::flipOrigo = true;
             }
             QPoint point = sceneRect.topLeft().toPoint();
             QPoint screenPoint = view->viewport()->mapToGlobal(point);
