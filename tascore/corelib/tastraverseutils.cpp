@@ -167,6 +167,8 @@ void TasTraverseUtils::addVariantValue(TasAttribute& attr, const QVariant& value
 */
 void TasTraverseUtils::printProperties(TasObject* objectInfo, QObject* object)
 {            
+    if (object->inherits("QDeclarativeLoader")) return;
+	
     const QMetaObject *metaobject = object->metaObject();
     int count = metaobject->propertyCount();
     for (int i=0; i<count; i++){        
