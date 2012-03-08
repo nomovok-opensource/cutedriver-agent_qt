@@ -1,6 +1,9 @@
 qttas (1.5.0-1) unstable; urgency=low
 
     * new release version
+  * Fixes: NB#296907 - qttasserver requires X credentials
+  * Fixes: NB#299268 - qttasserver crash for some loaded webpage
+  * Fixes: NB#294675 - Crash happens in qt_testability during using gesture_points
 
  -- Testability Driver Team <testabilitydriver@nokia.com>  Tue, 07 Feb 2012 11:11:09 +0200
     
@@ -23,8 +26,6 @@ qttas (1.5.0-1) unstable; urgency=low
  -- Testability Driver Team <testabilitydriver@nokia.com>  Mon, 19 Dec 2011 13:50:00 +0200
 
 qttas (1.4.1-3) unstable; urgency=low
-
-  * Fixes: NB#294675 - Crash happens in qt_testability during using gesture_points
 
  -- Testability Driver Team <testabilitydriver@nokia.com>  Tue, 13 Dec 2011 09:30:00 +0200
 
