@@ -4,8 +4,10 @@ qttas (1.5.0-1) unstable; urgency=low
   * Fixes: NB#296907 - qttasserver requires X credentials
   * Fixes: NB#299268 - qttasserver crash for some loaded webpage
   * Fixes: NB#294675 - Crash happens in qt_testability during using gesture_points
+  * MeeGo version changes security.conf file in /etc/X11/xorg.conf.d/ directory 
+    owned by xserver-security policy package, setting security policy credentials to allow testing
 
- -- Testability Driver Team <testabilitydriver@nokia.com>  Tue, 07 Feb 2012 11:11:09 +0200
+ -- Testability Driver Team <testabilitydriver@nokia.com>  Wed, 14 Mar 2012 11:11:09 +0200
     
  qttas (1.4.4-1) unstable; urgency=low
 
