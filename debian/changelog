@@ -1,3 +1,9 @@
+qttas (1.5.0-2) unstable; urgency=low
+
+  * fixed xserver-security-policy dependency in control file, only needed for armel version
+
+ -- Testability Driver Team <testabilitydriver@nokia.com>  Thu, 15 Mar 2012 14:11:09 +0200
+
 qttas (1.5.0-1) unstable; urgency=low
 
     * new release version
