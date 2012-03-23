@@ -10,4 +10,8 @@
       <for path="/usr/lib/libqttestability.so.1.0.0" />
       <for path="/usr/lib/qt4/plugins/testability/libtestability.so" />
    </request>
+   <request>
+     <credential match="xserver-security-policy::playback-input" />
+     <for path="/usr/bin/qttasserver" />
+   </request>
 </aegis>

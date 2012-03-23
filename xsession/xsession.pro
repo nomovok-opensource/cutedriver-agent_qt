@@ -25,5 +25,8 @@ TEMPLATE = subdirs
 upstart.files = qttasserver.conf qttas-testing.conf
 upstart.path = /etc/init/test
 
-INSTALLS += upstart
+up2start.files = security.conf
+up2start.path = /etc/X11/xorg.conf.d
+
+INSTALLS += upstart up2start
 

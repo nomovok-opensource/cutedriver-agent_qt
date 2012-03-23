@@ -4,3 +4,4 @@ usr/lib/libqttestability.*
 etc/init/test/qttasserver.conf
 etc/init/test/qttas-testing.conf
 etc/qt_testability/qt_testability.ini
+etc/X11/xorg.conf.d/security.conf
