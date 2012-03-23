@@ -10,7 +10,13 @@ qttas (1.5.2-1) unstable; urgency=low
 
  -- Testability Driver Team <testabilitydriver@nokia.com>  Thu, 08 Mar 2012 09:47:24 +0200
     
- qttas (1.5.0-1) unstable; urgency=low
+qttas (1.5.0-2) unstable; urgency=low
+
+  * fixed xserver-security-policy dependency in control file, only needed for armel version
+
+ -- Testability Driver Team <testabilitydriver@nokia.com>  Thu, 15 Mar 2012 14:11:09 +0200
+
+qttas (1.5.0-1) unstable; urgency=low
 
     * new release version
   * Fixes: NB#296907 - qttasserver requires X credentials
