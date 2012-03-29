@@ -151,7 +151,7 @@ void TasTraverseUtils::addVariantValue(TasAttribute& attr, const QVariant& value
         attr.addValue(value.toByteArray().toBase64());
         break;
     default:
-        attr.addValue(value.toString());        
+        attr.addValue(value.toString());
         break;
     }
 
@@ -191,12 +191,21 @@ void TasTraverseUtils::printProperties(TasObject* objectInfo, QObject* object)
                 if(ok){
                     attr.addValue(enumeration.valueToKey(enumValue));
                 }
-                else{
+                else{                    
                     attr.addValue(value.toString());
                 }
             }
             else{
-                addVariantValue(attr, value);
+                //Workaround for qsTrId lengthvariant handling
+                if (QString(name) == "text")
+                {
+                  const int BinaryTextVariantSeparator = 0x9c;
+                  attr.addValue(value.toString().left(value.toString().indexOf(QChar(BinaryTextVariantSeparator))));
+                }
+                else
+                {
+                  addVariantValue(attr, value);
+                }
             }
 
             if(mTraverseFilter == 0 || !mTraverseFilter->filterProperties()){
