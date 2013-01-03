@@ -64,8 +64,7 @@ void TasGestureRunner::startGesture()
 #else
         if(!mGesture->getUseTapScreen()){
             if(mGesture->pointerType() == MouseHandler::TypeTouch || mGesture->pointerType() == MouseHandler::TypeBoth){
-                bool sendPrimary = (mGesture->pointerType() == MouseHandler::TypeBoth);
-                mTouchGen.doTouchBegin(mGesture->getTarget(), mGesture->startPoints(), sendPrimary, mGesture->touchPointIdKey());
+                mTouchGen.doTouchBegin(mGesture->getTarget(), mGesture->startPoints(), mGesture->touchPointIdKey());
             }            
             if(mGesture->pointerType() == MouseHandler::TypeMouse || mGesture->pointerType() == MouseHandler::TypeBoth){
                 mMouseGen.doMousePress(mGesture->getTarget(), mGesture->getMouseButton(), mGesture->startPoints().first().screenPoint);
@@ -121,8 +120,7 @@ void TasGestureRunner::releaseMouse()
 #else
     if(!mGesture->getUseTapScreen()){
         if(mGesture->pointerType() == MouseHandler::TypeTouch || mGesture->pointerType() == MouseHandler::TypeBoth){
-            bool sendPrimary = (mGesture->pointerType() == MouseHandler::TypeBoth);
-            mTouchGen.doTouchEnd(mGesture->getTarget(), mGesture->endPoints(), sendPrimary, mGesture->touchPointIdKey());       
+            mTouchGen.doTouchEnd(mGesture->getTarget(), mGesture->endPoints(), mGesture->touchPointIdKey());
         }   
         if(mGesture->pointerType() == MouseHandler::TypeMouse || mGesture->pointerType() == MouseHandler::TypeBoth){
             mMouseGen.doMouseRelease(mGesture->getTarget(), mGesture->getMouseButton(), mGesture->endPoints().first().screenPoint);
@@ -162,8 +160,7 @@ void TasGestureRunner::move(QList<TasTouchPoints> points, bool force)
 #else
     if(!mGesture->getUseTapScreen()){        
         if(mGesture->pointerType() == MouseHandler::TypeTouch || mGesture->pointerType() == MouseHandler::TypeBoth){
-            bool sendPrimary = (mGesture->pointerType() == MouseHandler::TypeBoth);
-            mTouchGen.doTouchUpdate(mGesture->getTarget(), points, sendPrimary, mGesture->touchPointIdKey());       
+            mTouchGen.doTouchUpdate(mGesture->getTarget(), points, mGesture->touchPointIdKey());
         }
         if(mGesture->pointerType() == MouseHandler::TypeMouse || mGesture->pointerType() == MouseHandler::TypeBoth){
             mMouseGen.doMouseMove(mGesture->getTarget(), points.first().screenPoint, mGesture->getMouseButton());

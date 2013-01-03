@@ -138,7 +138,7 @@ void RecorderService::start()
             eventObj.addAttribute("y", mouseEvent->y());
             eventObj.addAttribute("globalX", mouseEvent->globalX());
             eventObj.addAttribute("globalY", mouseEvent->globalY());
-            eventObj.addAttribute("button", mouseEvent->button());
+            eventObj.addAttribute("button", (int)mouseEvent->button());
 
             QPoint position = mouseEvent->pos();
             QWidget* widget = qobject_cast<QWidget*>(target);            
@@ -153,11 +153,12 @@ void RecorderService::start()
                 QGraphicsView* view = qobject_cast<QGraphicsView*>(parentWidget);
                 if(view->viewport() == widget && view->scene()){
                     //take the item at the point
-                    QGraphicsScene* scene = view->scene();                
-                    QGraphicsItem* graphicsItem = scene->itemAt(view->mapToScene(position));
+                    QGraphicsScene* scene = view->scene();
+                    QPointF pos = view->mapToScene(position);
+                    QGraphicsItem* graphicsItem = scene->itemAt(pos, QTransform());
                     if(graphicsItem){                        
                         if (graphicsItem->isWindow() || graphicsItem->isWidget()) {
-                            QObject * objectAt = TestabilityUtils::castToGraphicsWidget(graphicsItem);
+                            QObject * objectAt = (QObject*)TestabilityUtils::castToGraphicsWidget(graphicsItem);
                             printTargetDetails(objectAt, targetObj);
                         }
                         else{

@@ -64,7 +64,7 @@ void TasMultiGestureRunner::startGesture()
     foreach(TasGesture* gesture, mGestures.keys()){
         if(gesture->isPress()){
             touchPoints.append(mTouchGen.convertToTouchPoints(gesture->getTarget(), Qt::TouchPointPressed, 
-                                                              gesture->startPoints(), false, gesture->touchPointIdKey()));
+                                                              gesture->startPoints(), gesture->touchPointIdKey()));
         }
         mPreviousPoints.insert(gesture, gesture->startPoints());
     }
@@ -74,9 +74,12 @@ void TasMultiGestureRunner::startGesture()
 
     //use qt touch event or send mouse event (native)
     if(!mUseTapScreen) {
-        QTouchEvent* touchPress = new QTouchEvent(QEvent::TouchBegin, QTouchEvent::TouchScreen, Qt::NoModifier,
+        // TODO [hhinrich] delete touchDevice?
+        QTouchDevice* touchDevice = new QTouchDevice();
+        touchDevice->setType(QTouchDevice::TouchScreen);
+        QTouchEvent* touchPress = new QTouchEvent(QEvent::TouchBegin, touchDevice, Qt::NoModifier,
                                                   Qt::TouchPointPressed, touchPoints);
-        touchPress->setWidget(target);
+        touchPress->setTarget(target);
         mTouchGen.sendTouchEvent(target, touchPress);
     } else {
         //using 'n' as a pointer number
@@ -102,12 +105,12 @@ void TasMultiGestureRunner::timerEvent(qreal value)
             if(gesture->isRelease()){
                 states |= Qt::TouchPointReleased;
                 touchPoints.append(mTouchGen.convertToTouchPoints(gesture->getTarget(), Qt::TouchPointReleased, 
-                                                                  gesture->endPoints(), false, gesture->touchPointIdKey()));            
+                                                                  gesture->endPoints(), gesture->touchPointIdKey()));
             }            
         }
         else if(!mTouchGen.areIdentical(gesture->pointsAt(correctedValue), mPreviousPoints.value(gesture))){
             touchPoints.append(mTouchGen.convertToTouchPoints(gesture->getTarget(), Qt::TouchPointMoved,
-                                                              gesture->pointsAt(correctedValue), false, gesture->touchPointIdKey()));
+                                                              gesture->pointsAt(correctedValue), gesture->touchPointIdKey()));
         }
         mPreviousPoints.insert(gesture, gesture->pointsAt(correctedValue));
     }
@@ -117,9 +120,12 @@ void TasMultiGestureRunner::timerEvent(qreal value)
 
     //use qt touch event or send mouse event (native)
     if(!mUseTapScreen) {
-        QTouchEvent* touchEvent = new QTouchEvent(QEvent::TouchUpdate, QTouchEvent::TouchScreen, Qt::NoModifier,
+        // TODO [hhinrich] delete touchDevice?
+        QTouchDevice* touchDevice = new QTouchDevice();
+        touchDevice->setType(QTouchDevice::TouchScreen);
+        QTouchEvent* touchEvent = new QTouchEvent(QEvent::TouchUpdate, touchDevice, Qt::NoModifier,
                                                   states, touchPoints);
-        touchEvent->setWidget(target);
+        touchEvent->setTarget(target);
         mTouchGen.sendTouchEvent(target, touchEvent);
     } else {
         //using 'n' as a pointer number
@@ -145,11 +151,11 @@ void TasMultiGestureRunner::finished()
     foreach(TasGesture* gesture, mGestures.keys()){
         if(!mTouchGen.areIdentical(gesture->endPoints(), mPreviousPoints.value(gesture))){
             touchPoints.append(mTouchGen.convertToTouchPoints(gesture->getTarget(), Qt::TouchPointMoved, 
-                                                              gesture->endPoints(), false, gesture->touchPointIdKey()));
+                                                              gesture->endPoints(), gesture->touchPointIdKey()));
         }
         if(gesture->isRelease()){
             touchReleasePoints.append(mTouchGen.convertToTouchPoints(gesture->getTarget(), Qt::TouchPointReleased, 
-                                                                     gesture->endPoints(), false, gesture->touchPointIdKey()));
+                                                                     gesture->endPoints(), gesture->touchPointIdKey()));
         }
     }
 
@@ -158,15 +164,18 @@ void TasMultiGestureRunner::finished()
 
     //use qt touch event or send mouse event (native)
     if(!mUseTapScreen) {
-        QTouchEvent* touchEvent = new QTouchEvent(QEvent::TouchUpdate, QTouchEvent::TouchScreen, Qt::NoModifier,
+        // TODO [hhinrich] delete touchDevice?
+        QTouchDevice* touchDevice = new QTouchDevice();
+        touchDevice->setType(QTouchDevice::TouchScreen);
+        QTouchEvent* touchEvent = new QTouchEvent(QEvent::TouchUpdate, touchDevice, Qt::NoModifier,
                                                   Qt::TouchPointMoved, touchPoints);
-        touchEvent->setWidget(target);
+        touchEvent->setTarget(target);
         mTouchGen.sendTouchEvent(target, touchEvent);
 
         //2. Send releases when needed
-        QTouchEvent* releaseEvent = new QTouchEvent(QEvent::TouchEnd, QTouchEvent::TouchScreen, Qt::NoModifier,
+        QTouchEvent* releaseEvent = new QTouchEvent(QEvent::TouchEnd, touchDevice, Qt::NoModifier,
                                                   Qt::TouchPointReleased, touchReleasePoints);
-        releaseEvent->setWidget(target);
+        releaseEvent->setTarget(target);
         mTouchGen.sendTouchEvent(target, releaseEvent);
     } else {
         //using 'n' as a pointer number

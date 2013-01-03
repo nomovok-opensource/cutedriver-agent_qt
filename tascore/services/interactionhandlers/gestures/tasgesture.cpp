@@ -157,7 +157,6 @@ TasTouchPoints TasGesture::makeTouchPoint(QPoint pos, QPoint lastPos, QPoint sta
     touchPoint.screenPoint = pos;
     touchPoint.lastScreenPoint = lastPos;
     touchPoint.startScreenPoint = startPos;
-    touchPoint.isPrimary = false;
     return touchPoint;
 }
 
@@ -294,14 +293,14 @@ void PointsTasGesture::calculateAnimation()
 {
     int duration = getDuration();
     if(duration > 0){
-        int frames = qRound(duration/FRAME_RANGE_DIV);
-        int avgFrameTime = qRound(duration/frames);
+        int frames = qRound((qreal)(duration/FRAME_RANGE_DIV));
+        int avgFrameTime = qRound((qreal)(duration/frames));
         QList<QPoint> timedPoints;
         //go through each point and check the interval
         for(int i = 0 ; i < mPoints.size(); i++){
             QPoint point = mPoints.at(i);
             int interval = mIntervals.at(i);
-            int multiplier = qRound(interval/avgFrameTime);
+            int multiplier = qRound((qreal)(interval/avgFrameTime));
             timedPoints.append(point); // all points are added once (at least)
             multiplier--;
             for(int j = 0 ; j < multiplier; j++){

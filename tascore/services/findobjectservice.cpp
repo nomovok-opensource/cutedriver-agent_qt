@@ -18,6 +18,7 @@
 ****************************************************************************/ 
 
 
+#include <QApplication>
 #include <QObject>
 
 #if QT_VERSION >= 0x040700
@@ -170,7 +171,7 @@ bool FindObjectService::addObjectDetails(TasObject& parent, TasTargetObject *tar
 QList<QObject*> FindObjectService::searchForObject(TasTargetObject *targetObj)
 {
     QList<QObject*> targetObjects;
-    foreach(QWidget* widget, qApp->allWidgets()){
+    foreach(QWidget* widget, QApplication::allWidgets()){
         if(targetObjects.contains(widget) || !widget->isVisible()){
             continue;
         }
@@ -257,7 +258,7 @@ bool FindObjectService::propertiesMatch(QHash<QString,QString> props, QObject* o
     QHashIterator<QString,QString> i(props);
     while(i.hasNext()){
         i.next();
-        QVariant property = object->property(i.key().toAscii());
+        QVariant property = object->property(i.key().toLatin1());
         if(!property.isValid() || property.toString() != i.value()){
             match = false;
             break;

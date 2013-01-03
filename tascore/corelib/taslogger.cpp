@@ -33,9 +33,8 @@ const char* const LOG_PATH = "/logs/testability/";
 #endif
 const int LOG_SIZE = 100000;
 
-void debugOutput(QtMsgType type, const char *msg)
-{     
-    QString message(msg);
+void debugOutput(QtMsgType type, const QMessageLogContext &, const QString &message)
+{
     if (message.length() <= 0)
       return;
     switch (type) 
@@ -318,7 +317,7 @@ void TasLogger::writeLogLine(LogType type, const QString& message)
         QTextStream out(&line);
 
         out << "<";
-        out << QTime::currentTime().toString("hh:mm:ss.zzz").toAscii();
+        out << QTime::currentTime().toString("hh:mm:ss.zzz").toLatin1();
         out << ">";
         switch (type) {
         case FATAL:
@@ -350,7 +349,7 @@ void TasLogger::outPut(const QString& line)
     else{
         QMutexLocker locker(&mMutex);
         if(mOut){
-            mOut->write(line.toAscii());
+            mOut->write(line.toLatin1());
             mOut->write("\n");
             mOut->flush();
         }
@@ -380,10 +379,10 @@ void TasLogger::useQDebug(bool use)
 void TasLogger::setOutputter(bool intercept)
 {
     if(intercept){
-        qInstallMsgHandler(debugOutput);
+        qInstallMessageHandler(debugOutput);
     }
     else{
-        qInstallMsgHandler(0);
+        qInstallMessageHandler(0);
     }
 }
 

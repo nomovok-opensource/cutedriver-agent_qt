@@ -17,7 +17,9 @@
 **
 ****************************************************************************/
 
+#include <QGraphicsWidget>
 #include <QGraphicsObject>
+#include <QApplication>
 
 #include "testabilityutils.h"
 #include "taslogger.h"
@@ -50,7 +52,7 @@ QWidget* TestabilityUtils::findWidget(const QString& id)
             return widget;
         }
     }
-    QWidgetList widgetList = qApp->allWidgets();
+    QWidgetList widgetList = QApplication::allWidgets();
     if (!widgetList.empty()){
         QWidgetList::iterator i;
         for (i = widgetList.begin(); i != widgetList.end(); ++i){
@@ -483,7 +485,7 @@ ItemLocationDetails TestabilityUtils::getItemLocationDetails(QGraphicsItem* grap
         if(true /*isVisible*/){
             //add coordinates also
             QRectF sceneRect = graphicsItem->sceneBoundingRect();
-#if QT_VERSION >= 0x040704
+#if QT_VERSION >= 0x040704 && QT_VERSION < 0x050000
             if( view->testAttribute(Qt::WA_SymbianNoSystemRotation)){
 #ifdef Q_OS_SYMBIAN
                 TasDeviceUtils::flipOrigo = false;

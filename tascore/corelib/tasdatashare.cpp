@@ -80,7 +80,7 @@ TasSharedData* TasDataShare::loadSharedData(const QString& identifier, QString& 
     errMsg = " key:" + storage.key();
     storage.lock();
     QByteArray array((char*)storage.constData(), storage.size());
-    TasSharedData* sharedData = new TasSharedData(QString::fromAscii((array.data())));
+    TasSharedData* sharedData = new TasSharedData(QString::fromLatin1((array.data())));
     storage.unlock();
     storage.detach();
     return sharedData;
@@ -121,7 +121,7 @@ TasSharedData::~TasSharedData()
 QByteArray TasSharedData::asArray() const
 {
     QString data = mCreationTime.toString(DATE_FORMAT) + ";" + mEvents.join(",") + ";" + mSignals.join(",");
-    return data.toAscii();
+    return data.toLatin1();
 }
 
 QStringList TasSharedData::eventsToListen()

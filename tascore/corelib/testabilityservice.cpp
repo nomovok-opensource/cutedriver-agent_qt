@@ -1,4 +1,4 @@
-/*************************************************************************** 
+/***************************************************************************
 ** 
 ** Copyright (C) 2010 Nokia Corporation and/or its subsidiary(-ies). 
 ** All rights reserved. 
@@ -58,9 +58,13 @@ const int PAINT_EVENT_LIMIT = 10;
 */
 extern "C" TAS_EXPORT void qt_testability_init()
 {
+    QGuiApplication* guiApp = qobject_cast<QGuiApplication*>(qApp);
+
     // Ignore command line applications and the special launcher daemon in meego booster apps
-    if(qApp->type() == QApplication::Tty || TestabilityUtils::getApplicationName() == "applauncherd.bin" || TestabilityUtils::getApplicationName() == "applifed.x" || 
-       TestabilityUtils::getApplicationName() == "applifed") {
+    if (    !guiApp ||
+            TestabilityUtils::getApplicationName() == "applauncherd.bin" ||
+            TestabilityUtils::getApplicationName() == "applifed.x" ||
+            TestabilityUtils::getApplicationName() == "applifed") {
         return;
     }
 

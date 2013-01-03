@@ -22,6 +22,7 @@
 #include <QApplication>
 #include <QGraphicsItem>
 #include <QGraphicsWidget>
+#include <QGraphicsProxyWidget>
 #include <QWidget>
 #include <QGraphicsView>
 #include <QLocale>

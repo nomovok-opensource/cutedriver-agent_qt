@@ -250,9 +250,7 @@ MouseHandler::TapDetails MouseHandler::makeDetails(TargetData data)
 void MouseHandler::press(TapDetails details)
 {
     if(details.pointerType == TypeTouch || details.pointerType == TypeBoth){
-        //set primary only when mouse events are sent
-        bool primary  = (details.pointerType == TypeBoth);
-        mTouchGen.doTouchBegin(details.target, details.point, primary, details.identifier);
+        mTouchGen.doTouchBegin(details.target, details.point, details.identifier);
     }
     if(details.pointerType == TypeMouse || details.pointerType == TypeBoth){
         mMouseGen.doMousePress(details.target, details.button, details.point);
@@ -262,8 +260,7 @@ void MouseHandler::press(TapDetails details)
 void MouseHandler::move(TapDetails details)
 {
     if(details.pointerType == TypeTouch || details.pointerType == TypeBoth){
-        bool primary  = (details.pointerType == TypeBoth);
-        mTouchGen.doTouchUpdate(details.target, details.point, primary, details.identifier);
+        mTouchGen.doTouchUpdate(details.target, details.point, details.identifier);
     }
     if(details.pointerType == TypeMouse || details.pointerType == TypeBoth){
         mMouseGen.doMouseMove(details.target, details.point, details.button);
@@ -272,8 +269,7 @@ void MouseHandler::move(TapDetails details)
 void MouseHandler::release(TapDetails details)
 {
     if(details.pointerType == TypeTouch || details.pointerType == TypeBoth){
-        bool primary  = (details.pointerType == TypeBoth);
-        mTouchGen.doTouchEnd(details.target, details.point, primary, details.identifier);
+        mTouchGen.doTouchEnd(details.target, details.point, details.identifier);
     }
     if(details.pointerType == TypeMouse || details.pointerType == TypeBoth){
         mMouseGen.doMouseRelease(details.target, details.button, details.point);

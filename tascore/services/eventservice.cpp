@@ -150,7 +150,7 @@ TasEventFilter* EventService::getFilterForTarget(TasTarget* commandTarget, bool 
         QObject* target = 0;
         if(targetType == TYPE_GRAPHICS_VIEW){
             QGraphicsItem* item = findGraphicsItem(targetId); 
-            target = TestabilityUtils::castToGraphicsWidget(item);
+            target = (QObject*)TestabilityUtils::castToGraphicsWidget(item);
         }
         else if(targetType == TYPE_STANDARD_VIEW){
             target = findWidget(targetId);
@@ -280,7 +280,7 @@ void TasEventFilter::addMouseEventDetails(QEvent *event, TasObject& eventObj)
         eventObj.addAttribute("globalY", mouseEvent->globalY()).setType("int");
         eventObj.addAttribute("x", mouseEvent->x()).setType("int");
         eventObj.addAttribute("y", mouseEvent->y()).setType("int");
-        eventObj.addAttribute("button", mouseEvent->button()).setType("Qt::MouseButton");
+        eventObj.addAttribute("button", (int)mouseEvent->button()).setType("Qt::MouseButton");
     }
     else if(type == QEvent::GraphicsSceneMouseDoubleClick || type == QEvent::GraphicsSceneMouseMove || 
             type == QEvent::GraphicsSceneMousePress || type == QEvent::GraphicsSceneMouseRelease ){
@@ -291,7 +291,7 @@ void TasEventFilter::addMouseEventDetails(QEvent *event, TasObject& eventObj)
         eventObj.addAttribute("lastPosition", mouseEvent->lastPos()).setType("QPointF");
         eventObj.addAttribute("lastScenePosition", mouseEvent->lastScenePos()).setType("QPointF");
         eventObj.addAttribute("lastScreenPosition", mouseEvent->lastScreenPos()).setType("QPoint");
-        eventObj.addAttribute("button", mouseEvent->button()).setType("Qt::MouseButton");
+        eventObj.addAttribute("button", (int)mouseEvent->button()).setType("Qt::MouseButton");
         if(mouseEvent->button() != Qt::NoButton){
             eventObj.addAttribute("buttonDownPos", mouseEvent->buttonDownPos(mouseEvent->button())).setType("QPointF");
             eventObj.addAttribute("buttonDownScenePos", mouseEvent->buttonDownScenePos(mouseEvent->button())).setType("QPointF");

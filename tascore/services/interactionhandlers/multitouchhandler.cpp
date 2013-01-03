@@ -61,16 +61,6 @@ bool MultitouchHandler::executeInteraction(TargetData /*data*/)
 bool MultitouchHandler::executeMultitouchInteraction(QList<TargetData> dataList)
 {
     TasLogger::logger()->debug("MultitouchHandler::executeMultitouchInteraction");
-    //check eventtype, must be the same with all so use first one
-    bool sendPrimary = false;
-    if(!dataList.isEmpty()){
-        if(!dataList.first().command->parameter(POINTER_TYPE).isEmpty()){
-            if(MouseHandler::TypeBoth == static_cast<MouseHandler::PointerType>(dataList.first().command->parameter(POINTER_TYPE).toInt())){
-                sendPrimary = true;       
-                TasLogger::logger()->debug("MultitouchHandler::executeMultitouchInteraction primary on " + dataList.first().command->parameter(POINTER_TYPE));
-            }
-        }
-    }
 
     bool consumed = false;
     if(!dataList.isEmpty()){
@@ -84,6 +74,9 @@ bool MultitouchHandler::executeMultitouchInteraction(QList<TargetData> dataList)
         QHash<QString, QList<TasTouchPoints>* > itemPressPoints;
         QHash<QString, QList<TasTouchPoints>* > itemReleasePoints;
 
+        QTouchDevice *device = new QTouchDevice();
+        device->setType(QTouchDevice::TouchScreen);
+
         QList<TasGesture*> gestures;
         TargetData targetData;
         foreach(targetData, dataList){
@@ -92,14 +85,14 @@ bool MultitouchHandler::executeMultitouchInteraction(QList<TargetData> dataList)
                 if(!itemPressPoints.contains(identifier)){
                     itemPressPoints.insert(identifier, new QList<TasTouchPoints>());
                 }
-                itemPressPoints.value(identifier)->append(mTouchGen.toTouchPoint(targetData.targetPoint, false));
+                itemPressPoints.value(identifier)->append(mTouchGen.toTouchPoint(targetData.targetPoint));
             }
             if(mReleaseCommands.contains(targetData.command->name())){
                 QString identifier = idAndCoordinates(targetData);
                 if(!itemReleasePoints.contains(identifier)){
                     itemReleasePoints.insert(identifier, new QList<TasTouchPoints>());
                 }
-                itemReleasePoints.value(identifier)->append(mTouchGen.toTouchPoint(targetData.targetPoint, false));
+                itemReleasePoints.value(identifier)->append(mTouchGen.toTouchPoint(targetData.targetPoint));
             }            
             TasGesture* gesture = mFactory->makeGesture(targetData);
             if(gesture){
@@ -112,63 +105,51 @@ bool MultitouchHandler::executeMultitouchInteraction(QList<TargetData> dataList)
 
         //make touch points from the collected points per graphicsitem
         QMutableHashIterator<QString, QList<TasTouchPoints>* > presses(itemPressPoints);
-        bool primaryOn = sendPrimary;
         QPoint mousePressPoint;
         while (presses.hasNext()) {
             presses.next();
-            touchPoints.append(mTouchGen.convertToTouchPoints(target, Qt::TouchPointPressed, *presses.value(), sendPrimary, presses.key()));
-            if(primaryOn){
-                mousePressPoint = presses.value()->first().screenPoint;
-            }
-            primaryOn = false;//only one can be primary
+            touchPoints.append(mTouchGen.convertToTouchPoints(target, Qt::TouchPointPressed, *presses.value(), presses.key()));
+            mousePressPoint = presses.value()->first().screenPoint;
         }
-        //check the that 
-        
-        primaryOn = sendPrimary;
+        //check the that
         QPoint mouseReleasePoint;
         QMutableHashIterator<QString, QList<TasTouchPoints>* > releases(itemReleasePoints);
         while (releases.hasNext()) {
             releases.next();
-            bool primaryRelease = false;
-            if(primaryOn){
-                //look for primary point
-                QList<TasTouchPoints>* pointList = releases.value();
-                for(int i = 0 ; i < pointList->size(); i++){
-                    TasTouchPoints tasPoint = pointList->at(i);
-                    if(tasPoint.screenPoint == mousePressPoint){
-                        TasLogger::logger()->debug("MultitouchHandler::executeMultitouchInteraction primary to release point. ");
-                        mouseReleasePoint = tasPoint.screenPoint;
-                        primaryRelease = true; 
-                        pointList->move(i, 0);
-                        break;
-                    }                    
+
+            //look for primary point
+            QList<TasTouchPoints>* pointList = releases.value();
+            for(int i = 0 ; i < pointList->size(); i++){
+                TasTouchPoints tasPoint = pointList->at(i);
+                if(tasPoint.screenPoint == mousePressPoint){
+                    TasLogger::logger()->debug("MultitouchHandler::executeMultitouchInteraction primary to release point. ");
+                    mouseReleasePoint = tasPoint.screenPoint;
+                    pointList->move(i, 0);
+                    break;
                 }
             }
-            touchReleasePoints.append(mTouchGen.convertToTouchPoints(target, Qt::TouchPointReleased, *releases.value(), primaryRelease, releases.key()));
-            if(primaryRelease){
-                primaryOn = false;//only one can be primary
-            }
+
+            touchReleasePoints.append(mTouchGen.convertToTouchPoints(target, Qt::TouchPointReleased, *releases.value(), releases.key()));
         }
 
         //send begin event
         if(!touchPoints.isEmpty()){
-            QTouchEvent* touchPress = new QTouchEvent(QEvent::TouchBegin, QTouchEvent::TouchScreen, Qt::NoModifier, 
+            QTouchEvent* touchPress = new QTouchEvent(QEvent::TouchBegin, device, Qt::NoModifier,
                                                       Qt::TouchPointPressed, touchPoints);
-            touchPress->setWidget(target);
+            touchPress->setTarget(target);
             mTouchGen.sendTouchEvent(target, touchPress);
-            if(sendPrimary){
-                TasLogger::logger()->debug("MultitouchHandler::executeMultitouchInteraction send mouse event press.");
-                mMouseGen.doMousePress(target, Qt::LeftButton, mousePressPoint);
-            } 
+
+            TasLogger::logger()->debug("MultitouchHandler::executeMultitouchInteraction send mouse event press.");
+            mMouseGen.doMousePress(target, Qt::LeftButton, mousePressPoint);
         }
 
         if(!touchReleasePoints.isEmpty()){
             //send end event
-            QTouchEvent *touchRelease = new QTouchEvent(QEvent::TouchEnd, QTouchEvent::TouchScreen, Qt::NoModifier, 
+            QTouchEvent *touchRelease = new QTouchEvent(QEvent::TouchEnd, device, Qt::NoModifier,
                                                         Qt::TouchPointReleased, touchReleasePoints);
-            touchRelease->setWidget(target);
+            touchRelease->setTarget(target);
             mTouchGen.sendTouchEvent(target, touchRelease);            
-            if(sendPrimary && mouseReleasePoint == mousePressPoint){
+            if(mouseReleasePoint == mousePressPoint){
                 TasLogger::logger()->debug("MultitouchHandler::executeMultitouchInteraction send mouse event release.");
                 mMouseGen.doMouseRelease(target, Qt::LeftButton, mouseReleasePoint);
             }
@@ -184,7 +165,7 @@ bool MultitouchHandler::executeMultitouchInteraction(QList<TargetData> dataList)
         itemPressPoints.clear();
         qDeleteAll(itemReleasePoints);
         itemReleasePoints.clear();
-
+        delete device;
     }
     return consumed;
 }

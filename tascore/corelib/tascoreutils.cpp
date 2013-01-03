@@ -92,12 +92,6 @@ QString TasCoreUtils::eventType(QEvent* event)
     {
         case QEvent::None: // 0 Not an event. 
             return QString("Unkown");
-        case QEvent::AccessibilityDescription: // 130 Used to query accessibility description texts (QAccessibleEvent). 
-            return QString("AccessibilityDescription");
-        case QEvent::AccessibilityHelp: // 119 Used to query accessibility help texts (QAccessibleEvent). 
-            return QString("AccessibilityHelp");
-        case QEvent::AccessibilityPrepare: // 86 Accessibility information is requested. 
-            return QString("AccessibilityPrepare");
         case QEvent::ActionAdded: // 114 A new action has been added (QActionEvent). 
             return QString("AccessibilityPrepare");
         case QEvent::ActionChanged: // 113 An action has been changed (QActionEvent). 
@@ -236,8 +230,6 @@ QString TasCoreUtils::eventType(QEvent* event)
             return QString("NonClientAreaMouseMove");
         case QEvent::MacSizeChange: // 177 The user changed his widget sizes (Mac OS X only). 
             return QString("MacSizeChange");
-        case QEvent::MenubarUpdated: // 153 The window's menu bar has been updated. 
-            return QString("MenubarUpdated");
         case QEvent::MetaCall: // 43 An asynchronous method invocation via QMetaObject::invokeMethod(). 
             return QString("MetaCall");
         case QEvent::ModifiedChange: // 102 Widgets modification state has been changed. 

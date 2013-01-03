@@ -19,7 +19,10 @@
 
 
 
+#include <QGraphicsItem>
 #include <QApplication>
+#include <QDesktopWidget>
+#include <QWidget>
 #include <QPoint>
 #include <QRect>
 
@@ -46,7 +49,8 @@ bool ScreenshotService::executeService(TasCommandModel& model, TasResponse& resp
 {
     if(model.service() == serviceName() ){
         TasLogger::logger()->debug("ScreenshotService::executeService in");
-        if(qApp->type() != QApplication::Tty){
+        QGuiApplication *app = qobject_cast<QGuiApplication*>(qApp);
+        if(app){
             getScreenshot(model, response);
         }
         else{
@@ -174,7 +178,7 @@ void ScreenshotService::getScreenshot(TasCommandModel& model, TasResponse& respo
         QByteArray bytes;
         QBuffer buffer(&bytes);
         buffer.open(QIODevice::WriteOnly);
-        screenshot.save(&buffer, pictureFormat.toAscii());
+        screenshot.save(&buffer, pictureFormat.toLatin1());
         response.setData(bytes);
     }
     else{

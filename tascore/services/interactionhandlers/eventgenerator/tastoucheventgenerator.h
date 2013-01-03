@@ -34,7 +34,6 @@ struct TasTouchPoints
     QPoint screenPoint;
     QPoint lastScreenPoint;
     QPoint startScreenPoint;
-    bool isPrimary;
 };
 
 
@@ -45,25 +44,25 @@ public:
     TasTouchEventGenerator(QObject* parent=0);
     ~TasTouchEventGenerator();
 
-	void doTouchBegin(QWidget* target, QPoint point, bool primary, QString identifier);
-	void doTouchUpdate(QWidget* target, QPoint point, bool primary, QString identifier);
-	void doTouchEnd(QWidget* target, QPoint point, bool primary, QString identifier);
+    void doTouchBegin(QWidget* target, QPoint point, QString identifier);
+    void doTouchUpdate(QWidget* target, QPoint point, QString identifier);
+    void doTouchEnd(QWidget* target, QPoint point, QString identifier);
 
 	QList<QTouchEvent::TouchPoint> convertToTouchPoints(TargetData targetData, Qt::TouchPointState state);
 
     QList<QTouchEvent::TouchPoint> convertToTouchPoints(QWidget* target, Qt::TouchPointState state,
-                                                        QList<TasTouchPoints> points, bool sendPrimary, QString identifier=QString());
+                                                        QList<TasTouchPoints> points, QString identifier=QString());
     QTouchEvent::TouchPoint makeTouchPoint(QWidget* target, TasTouchPoints points, Qt::TouchPointState state, int id);
 
-	QList<TasTouchPoints> toTouchPoints(QPoint point, bool primary);
-	TasTouchPoints toTouchPoint(QPoint point, bool primary);
+    QList<TasTouchPoints> toTouchPoints(QPoint point);
+    TasTouchPoints toTouchPoint(QPoint point);
     void sendTouchEvent(QWidget* target, QTouchEvent* event);
 	bool areIdentical(QList<TasTouchPoints> points1, QList<TasTouchPoints> points2);
 
 public slots:
-    void doTouchBegin(QWidget* target, QList<TasTouchPoints> points, bool sendPrimary, QString identifier=QString());
-    void doTouchUpdate(QWidget* target, QList<TasTouchPoints> points, bool sendPrimary, QString identifier=QString());
-    void doTouchEnd(QWidget* target, QList<TasTouchPoints> points, bool sendPrimary, QString identifier=QString());
+    void doTouchBegin(QWidget* target, QList<TasTouchPoints> points, QString identifier=QString());
+    void doTouchUpdate(QWidget* target, QList<TasTouchPoints> points, QString identifier=QString());
+    void doTouchEnd(QWidget* target, QList<TasTouchPoints> points, QString identifier=QString());
 
 private:
     static int mTouchPointCounter;

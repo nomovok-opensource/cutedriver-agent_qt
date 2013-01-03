@@ -19,9 +19,10 @@
 
 
 
-#include <QApplication>
 #include <QListIterator>
 #include <QMetaProperty>
+#include <QGraphicsItem>
+#include <QApplication>
 #include <QVariant>
 #include <QDateTime>
 
@@ -174,7 +175,7 @@ QString ObjectService::doCallMethod(TasCommand* command, QObject* target, QStrin
     QString methodName = command->parameter("method_name");
     TasLogger::logger()->debug("name: " + methodName);
     int methodId = target->metaObject()->indexOfMethod(
-                QMetaObject::normalizedSignature(methodName.toAscii()).constData());
+                QMetaObject::normalizedSignature(methodName.toLatin1()).constData());
     if (methodId == -1){
         errorString.append(methodName + " method not found on object. ");
         TasLogger::logger()->debug("...method not found on object");
@@ -244,7 +245,7 @@ void ObjectService::doSetAttribute(TasCommand* command, QObject* target, QString
 
     QString attrType = command->parameter("attribute_type");
     QVariant attrValue;
-    QVariant::Type variantType = QVariant::nameToType(attrType.toAscii().data());
+    QVariant::Type variantType = QVariant::nameToType(attrType.toLatin1().data());
     if (attrType == "bool"){
         if (command->parameter("attribute_value") == "true"){
             attrValue = QVariant(true);

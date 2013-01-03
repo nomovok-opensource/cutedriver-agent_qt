@@ -18,10 +18,14 @@
 ****************************************************************************/
 
 
-#include <QApplication>
 #include <QListIterator>
-#include <QtWebKit/QtWebKit>
+#include <QApplication>
+
+#include <QGraphicsProxyWidget>
+
 #include <QGraphicsWebView>
+#include <QtWebKit>
+#include <QWebView>
 
 #include "tascoreutils.h"
 #include "tascommandparser.h"

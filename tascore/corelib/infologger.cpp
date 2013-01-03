@@ -461,7 +461,7 @@ QByteArray TasInfoLoggerUtil::loadLoggedData(QFile* file, const QString& name, Q
 void TasInfoLoggerUtil::writeLine(const QString& line, QFile* file)
 {
     if(file && file->isWritable()){
-        file->write(line.toAscii());
+        file->write(line.toLatin1());
         file->write("\n");
         file->flush();        
     }
