@@ -88,7 +88,7 @@ symbian: {
 QT += network xml testlib gui
 
 !CONFIG(no_webkit) {
-QT += webkit 
+QT += webkitwidgets
 }
 
 contains(QT_VERSION, ^4\\.[0-6]\\..*) {
