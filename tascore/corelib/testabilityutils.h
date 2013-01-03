@@ -26,6 +26,7 @@
 #include <QtGui>
 #include <QWidget>
 #include <QAction>
+#include <QGraphicsView>
 
 #include "tascoreutils.h"
 
