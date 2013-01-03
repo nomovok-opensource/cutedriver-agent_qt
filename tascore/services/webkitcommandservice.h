@@ -26,7 +26,7 @@
 #include <QTimer>
 #include <QQueue>
 #include <QList>
-#include <QtWebKit/QWebFrame>
+#include <QWebFrame>
 
 #include "tasservicebase.h"
 #include "testabilityutils.h"
