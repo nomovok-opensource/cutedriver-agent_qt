@@ -49,7 +49,7 @@ bool RegisterService::executeService(TasCommandModel& model, TasResponse& respon
             client.applicationUid = command->parameter(APP_UID);
 #endif
             client.pluginType = command->parameter(PLUGIN_TYPE);
-            client.socket = response.requester();
+            client.socket.reset(response.requester());
             registerPlugin(client);
         }
         else{

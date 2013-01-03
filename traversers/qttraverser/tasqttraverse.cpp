@@ -17,8 +17,8 @@
 ** 
 ****************************************************************************/ 
  
-
-
+#include <QGraphicsProxyWidget>
+#include <QGraphicsWidget>
 #include <QtPlugin>
 #include <QDebug>
 
@@ -27,7 +27,7 @@
 #include "tasqttraverse.h"
 
 
-Q_EXPORT_PLUGIN2(qttraverse, TasQtTraverse)
+Q_PLUGIN_METADATA(TasQtTraverse)
 
 /*!
     \class TasQtTraverse

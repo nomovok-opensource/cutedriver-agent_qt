@@ -47,7 +47,7 @@ INCLUDEPATH += . ../../tascore/corelib
 HEADERS += tasqttraverse.h 
 SOURCES += tasqttraverse.cpp 
 
-QT += xml 
+QT += xml widgets
 
 DESTDIR = lib
 

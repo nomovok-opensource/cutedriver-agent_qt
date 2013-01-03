@@ -22,7 +22,7 @@
 TEMPLATE = lib
 TARGET = tassignal
 CONFIG += plugin
-QT += testlib xml
+QT += testlib xml widgets
 
 include(../../tasbase.pri)
 

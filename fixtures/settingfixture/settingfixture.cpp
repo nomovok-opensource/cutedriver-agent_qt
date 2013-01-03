@@ -36,7 +36,7 @@ const char* const READ_ALL_ACTION = "readAll";
 const char* const SET_ACTION = "set";
 const char* const REMOVE_ACTION = "remove";
 
-Q_EXPORT_PLUGIN2(settingfixture, SettingFixture)
+Q_PLUGIN_METADATA(SettingFixture)
 
 /*!
   \class SettingFixture

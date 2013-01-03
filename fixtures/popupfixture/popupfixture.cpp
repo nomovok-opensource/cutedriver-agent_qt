@@ -35,7 +35,7 @@ static const QString CLASS_NAME = "className";
 static const QString INTERVAL = "interval";
 
 
-Q_EXPORT_PLUGIN2(popupfixture, PopupFixture)
+Q_PLUGIN_METADATA(PopupFixture)
 
 
 /*!
@@ -132,7 +132,7 @@ bool PopupFixture::eventFilter(QObject *target, QEvent *event)
         while (i.hasNext()) {
             i.next();
             QString className = i.key();            
-            if(target->inherits(className.toAscii()) || QString(target->metaObject()->className()).contains(className)){
+            if(target->inherits(className.toLatin1()) || QString(target->metaObject()->className()).contains(className)){
                 PopupTimer* timer = new PopupTimer(className, mClassNames.value(className));
                 connect(timer, SIGNAL(traverseState(const QString&)), this, SLOT(traverse(const QString&)));
                 mClassNames.remove(className);

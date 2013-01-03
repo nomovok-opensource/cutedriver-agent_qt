@@ -26,6 +26,7 @@
 #include <QDir>
 #include <QPluginLoader>
 #include <QProcess>
+#include <QWeakPointer>
 #include <QCoreApplication>
 
 #include "tasserverservicemanager.h"
@@ -33,6 +34,7 @@
 #include "tascommandparser.h"
 #include "tasconstants.h"
 #include "taslogger.h"
+#include "tassocket.h"
 #include "version.h"
 #include "tasnativeutils.h"
 
@@ -350,7 +352,7 @@ ResponseWaiter::ResponseWaiter(qint32 responseId, TasSocket* relayTarget, int ti
     mFilter = 0;
     mPluginResponded = false;
     mCanRespond = false;
-    mSocket = QWeakPointer<TasSocket>(relayTarget);
+    mSocket.reset(relayTarget);
     mResponseId = responseId;
     mWaiter.setSingleShot(true);    
     connect(&mWaiter, SIGNAL(timeout()), this, SLOT(timeout()));

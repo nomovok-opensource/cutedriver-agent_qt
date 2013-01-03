@@ -51,7 +51,7 @@ SOURCES += taspropertylogger.cpp
 
 DESTDIR = lib
 
-QT += xml
+QT += xml widgets
 
 INSTALLS += target
 

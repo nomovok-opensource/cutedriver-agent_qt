@@ -85,7 +85,7 @@ symbian: {
 }
 
 
-QT += network xml testlib gui
+QT += network xml testlib gui widgets
 
 !CONFIG(no_webkit) {
 QT += webkitwidgets

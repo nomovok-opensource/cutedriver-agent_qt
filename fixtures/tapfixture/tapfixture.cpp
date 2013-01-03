@@ -25,7 +25,7 @@
 #include "testabilityutils.h"
 #include "taslogger.h"
 
-Q_EXPORT_PLUGIN2(tapfixture, TapFixturePlugin)
+Q_PLUGIN_METADATA(TapFixturePlugin)
 
 /*!
   \class TapFixturePlugin

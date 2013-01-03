@@ -23,10 +23,10 @@
 
 #if QT_VERSION >= 0x040600
 
-#include <QtWebKit/QWebView>
-#include <QtWebKit/QGraphicsWebView>
-#include <QtWebKit/QWebPage>
-#include <QtWebKit/QWebFrame>
+#include <QWebView>
+#include <QGraphicsWebView>
+#include <QWebPage>
+#include <QWebFrame>
 
 
 #endif
@@ -39,7 +39,7 @@
 #include "tastraverseutils.h"
 #include <testabilityutils.h>
 
-Q_EXPORT_PLUGIN2(webkittraverse, WebKitTraverse)
+Q_PLUGIN_METADATA(WebKitTraverse)
 
 /*!
     \class WebKitTraverse
@@ -286,9 +286,9 @@ void WebKitTraverse::traverseQWebView(TasObject* objectInfo, QWebView* webView)
         if (proxy){
             // If the webview is inside a graphics proxy,
             // Take the proxy widget global position
-            screenPos = TestabilityUtils::proxyCoordinates(proxy);
+            screenPos = TestabilityUtils::proxyCoordinates((QGraphicsItem*)proxy);
             // Also move the webview pos to the proxy pos
-            webViewPos += TestabilityUtils::proxyCoordinates(proxy, false);
+            webViewPos += TestabilityUtils::proxyCoordinates((QGraphicsItem*)proxy, false);
         }
 
         //TasLogger::logger()->debug("WebKitTaverse::traverseObject QWebPage != null");
@@ -297,7 +297,7 @@ void WebKitTraverse::traverseQWebView(TasObject* objectInfo, QWebView* webView)
         //pageInfo.addAttribute("objectType", TYPE_STANDARD_VIEW);
         addAttribute(pageInfo, "objectType", TYPE_STANDARD_VIEW);
 
-        traverseQWebPage(pageInfo, webPage, webViewPos,screenPos);
+        traverseQWebPage(pageInfo, webPage, webViewPos, screenPos);
     }
 
 }

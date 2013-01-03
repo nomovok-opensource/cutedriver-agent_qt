@@ -36,35 +36,36 @@
   is not available, or the window can not be found.
 */
 
-int TasNativeUtils::pidOfActiveWindow(const QHash<QString, TasClient*> clients)
+int TasNativeUtils::pidOfActiveWindow(const QHash<quint64, TasClient*>)
 {
     return -1;
 }
 
-int TasNativeUtils::bringAppToForeground(quint64 pid)
+int TasNativeUtils::bringAppToForeground(quint64)
 {
     return -1;
 }
 
-void TasNativeUtils::changeOrientation(QString direction)
-{}
+void TasNativeUtils::changeOrientation(QString)
+{
+}
 
-bool TasNativeUtils::killProcess(quint64 pid)
+bool TasNativeUtils::killProcess(quint64)
 {
     return false;
 }
 
-bool TasNativeUtils::verifyProcess(quint64 pid)
+bool TasNativeUtils::verifyProcess(quint64)
 {
     //true as default since false will cause testing to stop
     return true;
 }
 
-bool TasNativeUtils::processExitStatus(quint64 pid, int &status)
+bool TasNativeUtils::processExitStatus(quint64, int &)
 {
     return true;
 }
 
-void TasNativeUtils::runningProcesses(TasObject& applist)
+void TasNativeUtils::runningProcesses(TasObject&)
 {
 }

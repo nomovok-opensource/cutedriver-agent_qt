@@ -23,7 +23,7 @@
 
 #include "testability.h"
 
-Q_EXPORT_PLUGIN2(testability, TestabilityPlugin);
+Q_PLUGIN_METADATA(TestabilityPlugin);
 
 
 /*!

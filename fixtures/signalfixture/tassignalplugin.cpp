@@ -49,7 +49,7 @@ static QString CHILD_SIGNAL = "child_signal";
 static QString CHILD_CLASS  = "child_class";
 static QString TRAVERSE_SENDER = "traverse_sender";
 
-Q_EXPORT_PLUGIN2(tassignalplugin, TasSignalPlugin)
+Q_PLUGIN_METADATA(TasSignalPlugin)
 
 /*!
   \class TasFixturePlugin
@@ -167,7 +167,7 @@ bool TasSignalPlugin::listSignals(void* objectInstance, QString ptrType, QString
 
         for(int i = 0; i < target->metaObject()->methodCount(); ++i) {
             if (target->metaObject()->method(i).methodType() == QMetaMethod::Signal)
-                container.addNewObject(QString::number(i), QString::fromLatin1(target->metaObject()->method(i).signature()), "QtSignal");
+                container.addNewObject(QString::number(i), QString::fromLatin1(target->metaObject()->method(i).methodSignature()), "QtSignal");
         }
         QByteArray xml;
         model->serializeModel(xml);    
@@ -200,7 +200,7 @@ bool TasSignalPlugin::enableSignal(void *objectInstance, QHash<QString, QString>
         if(target){
             int signalId = target->metaObject()->indexOfMethod(signalName.toLatin1().data());
             if(signalId != -1){
-                const char* signature = target->metaObject()->method(signalId).signature();
+                QByteArray signature = target->metaObject()->method(signalId).methodSignature();
                 QString hashIdentificator = TasCoreUtils::objectId(target);
                 TasObjectContainer* container = mOccuredSignals->findObjectContainer(CONTAINER_ID);
                 if(!container){
@@ -215,7 +215,7 @@ bool TasSignalPlugin::enableSignal(void *objectInstance, QHash<QString, QString>
                 if(parameters[TRAVERSE_SENDER] == "true"){
                     traverseSender = true;
                 }
-                TasSignalSpy *tasSpy = new TasSignalSpy(target, (QString::number(QSIGNAL_CODE)+signature).toAscii().data(), 
+                TasSignalSpy *tasSpy = new TasSignalSpy(target, (QString::number(QSIGNAL_CODE)+signature).toLatin1().data(),
                                                         *container, traverseSender);
                 tasSpy->setTarget(owner);
                 spyContainerHash.insert(QString(hashIdentificator + signature), tasSpy);                

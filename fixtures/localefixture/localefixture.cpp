@@ -42,7 +42,7 @@ static const QString CURRENCYTYPE = "currencytype";
 static const QString NUMBERVALUE = "numbervalue";
 
 
-Q_EXPORT_PLUGIN2(localefixture, LocaleFixturePlugin)
+Q_PLUGIN_METADATA(LocaleFixturePlugin)
 
 /*!
   \class LocaleFixturePlugin

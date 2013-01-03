@@ -31,8 +31,7 @@
 #include "testability.h"
 
 
-Q_EXPORT_PLUGIN2(testability, TestabilityPlugin);
-
+Q_PLUGIN_METADATA(TestabilityPlugin);
 
 // Copied directly from tascoreutils. Do not want to link the lib 
 // to the plugin.

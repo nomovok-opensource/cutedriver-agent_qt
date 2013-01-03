@@ -62,7 +62,7 @@ void TasPropertyLogger::timerEvent()
             line.append(ATTR_DELIM);
             line.append(property);
             line.append(VALUE_DELIM);
-            line.append(object->property(property.toAscii()).toString());
+            line.append(object->property(property.toLatin1()).toString());
             mLoggerUtil.writeLine(line, fileMap.value(property));
         }
     }
@@ -79,7 +79,7 @@ bool TasPropertyLogger::startPropertyLog(QObject* object, QHash<QString, QString
     }
     
     QString property = params.value(PROPERTY);
-    if(!object->property(property.toAscii()).isValid()){
+    if(!object->property(property.toLatin1()).isValid()){
         errorMsg = "Target object does not have a property "+property+".";
         return false;
     }

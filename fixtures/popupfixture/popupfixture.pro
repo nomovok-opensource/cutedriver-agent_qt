@@ -55,4 +55,4 @@ INSTALLS += target
 
 LIBS += -L../../tascore/lib/ -lqttestability
 
-QT += xml
+QT += xml widgets

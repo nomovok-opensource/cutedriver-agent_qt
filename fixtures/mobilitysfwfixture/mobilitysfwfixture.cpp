@@ -38,7 +38,7 @@
 QTM_USE_NAMESPACE
 
 
-        Q_EXPORT_PLUGIN2(mobilitysfwfixture, MobilitySfwFixture)
+        Q_PLUGIN_METADATA(MobilitySfwFixture)
 
         /*!
         \class MobilitySfwFixture

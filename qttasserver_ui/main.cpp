@@ -24,6 +24,7 @@
 #include <QPushButton>
 #include <QDialogButtonBox>
 #include <QGridLayout>
+#include <QApplication>
 
 #include "serverwindow.h"
 

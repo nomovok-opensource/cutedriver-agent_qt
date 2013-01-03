@@ -64,11 +64,9 @@ SOURCES += utilityapp.cpp
 include(../tascore/corelib/corelib.pri)
 HEADERS += $$PUBLIC_HEADERS
 
-QT += network xml 
+QT += network xml widgets
 INSTALLS += target
 
 unix:!symbian:!macx:!CONFIG(no_x) {
   LIBS += -lX11 -lXtst 
 }
-
-

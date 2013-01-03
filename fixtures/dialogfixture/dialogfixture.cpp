@@ -37,7 +37,7 @@ static const QString CLASS_NAME = "className";
 static const QString INTERVAL = "interval";
 
 
-Q_EXPORT_PLUGIN2(dialogfixture, DialogFixture)
+Q_PLUGIN_METADATA(DialogFixture)
 
 
 /*!

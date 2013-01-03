@@ -31,7 +31,7 @@
 
 
 
-Q_EXPORT_PLUGIN2(filefixture, FileFixture)
+Q_PLUGIN_METADATA(FileFixture)
 
 /*!
   \class FileFixture

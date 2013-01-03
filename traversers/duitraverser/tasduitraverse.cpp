@@ -31,7 +31,7 @@
 #include "testabilityutils.h"
 #include "tasduitraverse.h"
 
-Q_EXPORT_PLUGIN2(duitraverse, TasDuiTraverse)
+Q_PLUGIN_METADATA(TasDuiTraverse)
 
 /*!
     \class TasDuiTraverse

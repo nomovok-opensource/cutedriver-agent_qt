@@ -50,5 +50,6 @@ SOURCES += testability.cpp
 
 INSTALLS += target
 
+QT += widgets
 
 

@@ -21,6 +21,7 @@
 #include <QtPlugin>
 #include <QDebug>
 #include <QHash>
+#include <QGraphicsItem>
 #include <QMessageBox>
 #include <QContextMenuEvent>
 #include <QtTest/qtestspontaneevent.h>
@@ -29,7 +30,7 @@
 #include "testabilityutils.h"
 #include "taslogger.h"
 
-Q_EXPORT_PLUGIN2(tasfixtureplugin, TasFixturePlugin)
+Q_PLUGIN_METADATA(TasFixturePlugin)
 
 /*!
   \class TasFixturePlugin

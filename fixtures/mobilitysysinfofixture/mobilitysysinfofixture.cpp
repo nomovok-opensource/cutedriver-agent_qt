@@ -32,7 +32,7 @@
 static const QString ACTION_GET_IMEI = "imei";
 static const QString ACTION_GET_IMSI = "imsi";
 
-Q_EXPORT_PLUGIN2(mobilitysysinfofixture, MobilitySysInfoFixture)
+Q_PLUGIN_METADATA(MobilitySysInfoFixture)
 
 /*!
 \class MobilitySysInfoFixture

@@ -31,7 +31,7 @@
 
 
 
-Q_EXPORT_PLUGIN2(fpsfixture, FpsFixture)
+Q_PLUGIN_METADATA(FpsFixture)
 
 /*!
   \class FpsFixture

@@ -40,7 +40,7 @@ struct ClientDetails
   QString applicationUid;
 #endif
   QString pluginType;
-  QWeakPointer<TasSocket> socket;
+  QSharedPointer<TasSocket> socket;
 };
 
 class RegisterService : public QObject, public TasServerCommand

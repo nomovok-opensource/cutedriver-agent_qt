@@ -58,17 +58,18 @@ INCLUDEPATH += ../tascore/corelib
 DEPENDPATH += . src
 
 # Input
-HEADERS += servermonitor.h
-HEADERS += serverwindow.h
+HEADERS += src/servermonitor.h
+HEADERS += src/serverwindow.h
+
 SOURCES += main.cpp
-SOURCES += servermonitor.cpp
-SOURCES += serverwindow.cpp
+SOURCES += src/servermonitor.cpp
+SOURCES += src/serverwindow.cpp
 
 include(../tascore/corelib/corelib.pri)
 HEADERS += $$PUBLIC_HEADERS
 
 
-QT += network xml 
+QT += network xml widgets
 INSTALLS += target
 
 unix:!symbian:!macx:!CONFIG(no_x) {

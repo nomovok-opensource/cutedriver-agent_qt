@@ -34,7 +34,7 @@
 #include <e32base.h>
 #include <apgcli.h>
 
-Q_EXPORT_PLUGIN2(LaunchFixture, LaunchFixture)
+Q_PLUGIN_METADATA(LaunchFixture)
 
 /*!
 \class LaunchFixture

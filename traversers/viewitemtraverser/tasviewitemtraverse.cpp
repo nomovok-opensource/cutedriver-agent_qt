@@ -27,7 +27,7 @@
 
 #include "tasviewitemtraverse.h"
 
-Q_EXPORT_PLUGIN2(viewitemtraverse, TasViewItemTraverse)
+Q_PLUGIN_METADATA(TasViewItemTraverse)
 
 /*!
     \class TasViewItemTraverse
@@ -115,8 +115,8 @@ void TasViewItemTraverse::traverseObject(TasObject* objectInfo, QObject* object,
 
 void TasViewItemTraverse::traverseHeaderView(QHeaderView* headerView, TasObject* objectInfo)    
 {
-    objectInfo->addBooleanAttribute("clickable", headerView->isClickable());
-    objectInfo->addBooleanAttribute("movable", headerView->isMovable());
+    objectInfo->addBooleanAttribute("clickable", headerView->sectionsClickable());
+    objectInfo->addBooleanAttribute("movable", headerView->sectionsMovable());
     objectInfo->addAttribute("offset", headerView->offset());
 
     if(headerView->orientation() == Qt::Horizontal){             
@@ -371,7 +371,7 @@ bool TasViewItemTraverse::addItemLocationDetails(TasObject& objectInfo, QRect re
         if (proxy) {
             // If the webview is inside a graphics proxy, 
             // Take the proxy widget global position
-            proxyPos = TestabilityUtils::proxyCoordinates(proxy);
+            proxyPos = TestabilityUtils::proxyCoordinates((QGraphicsItem*)proxy);
             objectInfo.addAttribute("objectType", "Web");
         } else {
             objectInfo.addAttribute("objectType","ViewItem");                        
