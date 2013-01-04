@@ -50,7 +50,7 @@ void Sleeper::sleep(int ms)
 QString TasCoreUtils::getApplicationName()
 {
 
-#if defined(Q_OS_UNIX) && !defined(Q_OS_SYMBIAN)
+#if defined(Q_OS_UNIX) && !defined(Q_OS_SYMBIAN) && !defined(Q_OS_MAC)
     QString name = "unk";
     unsigned bytes = -1;
     char buf[50];
