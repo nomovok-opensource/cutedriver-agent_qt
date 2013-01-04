@@ -26,7 +26,7 @@
 
 TestabilitySettings *TestabilitySettings::mInstance = 0;
 
-#if defined(Q_OS_LINUX) || defined(Q_WS_MAC) 
+#if defined(Q_OS_LINUX) || defined(Q_OS_MAC)
 static QString basePath = "/etc/qt_testability";
 static QString fileName = "/etc/qt_testability/qt_testability.ini";
 #elif defined(Q_OS_SYMBIAN)

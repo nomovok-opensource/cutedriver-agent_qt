@@ -37,7 +37,7 @@
 #if (defined(Q_OS_WIN32) || defined(Q_OS_WINCE))
 #include <windows.h>
 
-#elif (defined(Q_OS_UNIX) || defined(Q_OS_WS_MAC))
+#elif (defined(Q_OS_UNIX) || defined(Q_OS_MAC))
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -329,7 +329,7 @@ void StartAppService::launchDetached(const QString &applicationPath, const QStri
 
     }
 
-#elif (defined(Q_OS_UNIX) || defined(Q_OS_WS_MAC))
+#elif (defined(Q_OS_UNIX) || defined(Q_OS_MAC))
 
     pid_t pid, sid, grandpid;
 
@@ -550,7 +550,7 @@ void StartAppService::launchDetached(const QString &applicationPath, const QStri
     }
 #endif
     else{
-#if (defined(Q_OS_UNIX) || defined(Q_OS_WS_MAC)) && !defined(Q_OS_SYMBIAN)
+#if (defined(Q_OS_UNIX) || defined(Q_OS_MAC)) && !defined(Q_OS_SYMBIAN)
         // if parent fork fails, clear mem and send error
         while (mem.isAttached())
         {

@@ -45,7 +45,7 @@ QHash<QString, TasTraverseInterface*> TasTraverserLoader::loadTraversers()
             if(plugin){
                 TasTraverseInterface* traverser = qobject_cast<TasTraverseInterface*>(plugin);        
                 if (traverser){
-#if defined(Q_OS_LINUX) || defined(Q_WS_MAC)                                  
+#if defined(Q_OS_LINUX) || defined(Q_OS_MAC)
                     QString name = fileName.left(fileName.indexOf(".")).mid(3);
 #else
                     QString name = fileName.left(fileName.indexOf("."));

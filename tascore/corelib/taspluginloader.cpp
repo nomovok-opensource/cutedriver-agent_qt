@@ -97,7 +97,7 @@ void TasPluginLoader::initializeFixturePlugins()
         if(QLibrary::isLibrary(filePath)){
             QStringList plainName = fileName.split(".");
 
-#if defined(Q_OS_LINUX) || defined(Q_WS_MAC) 
+#if defined(Q_OS_LINUX) || defined(Q_OS_MAC)
             tryToLoadFixture(filePath, plainName[0].mid(3));
 #else
             tryToLoadFixture(filePath, plainName[0]);
