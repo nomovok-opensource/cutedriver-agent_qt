@@ -43,8 +43,6 @@ static const QString CONTACT_LANDLINEHOMENUMBER = "landline_home_number";
 static const QString CONTACT_LANDLINEWORKNUMBER = "landline_work_number";
 
 
-Q_PLUGIN_METADATA(ContactFixture)
-
 /*!
 \class ContactFixture
 \brief Manages contact on device

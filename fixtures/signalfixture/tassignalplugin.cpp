@@ -49,7 +49,6 @@ static QString CHILD_SIGNAL = "child_signal";
 static QString CHILD_CLASS  = "child_class";
 static QString TRAVERSE_SENDER = "traverse_sender";
 
-Q_PLUGIN_METADATA(TasSignalPlugin)
 
 /*!
   \class TasFixturePlugin

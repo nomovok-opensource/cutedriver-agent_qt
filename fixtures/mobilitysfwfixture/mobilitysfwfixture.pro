@@ -45,6 +45,7 @@ INCLUDEPATH += . ../../tascore/corelib
 # Input
 HEADERS += mobilitysfwfixture.h
 SOURCES += mobilitysfwfixture.cpp
+OTHER_FILES += mobilitysfwfixture.json
 
 DESTDIR = lib
 

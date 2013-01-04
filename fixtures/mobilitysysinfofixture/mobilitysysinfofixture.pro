@@ -50,6 +50,7 @@ INCLUDEPATH += . ../../tascore/corelib
 # Input
 HEADERS += mobilitysysinfofixture.h
 SOURCES += mobilitysysinfofixture.cpp
+OTHER_FILES += mobilitysysinfofixture.json
 
 DESTDIR = lib
 

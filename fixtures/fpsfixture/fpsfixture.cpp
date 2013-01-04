@@ -30,9 +30,6 @@
 #include "fpsfixture.h"
 
 
-
-Q_PLUGIN_METADATA(FpsFixture)
-
 /*!
   \class FpsFixture
   \brief Collects frames per second data from widgets.

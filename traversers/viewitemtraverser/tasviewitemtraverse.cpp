@@ -27,7 +27,6 @@
 
 #include "tasviewitemtraverse.h"
 
-Q_PLUGIN_METADATA(TasViewItemTraverse)
 
 /*!
     \class TasViewItemTraverse

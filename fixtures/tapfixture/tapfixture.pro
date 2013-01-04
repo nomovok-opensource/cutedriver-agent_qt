@@ -40,6 +40,7 @@ INCLUDEPATH += . ../../tascore/corelib
 
 HEADERS += tapfixture.h
 SOURCES += tapfixture.cpp
+OTHER_FILES += tapfixture.json
 
 DESTDIR = lib
 

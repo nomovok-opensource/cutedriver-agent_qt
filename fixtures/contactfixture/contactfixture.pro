@@ -54,6 +54,7 @@ INCLUDEPATH += . ../../tascore/corelib
 # Input
 HEADERS += contactfixture.h
 SOURCES += contactfixture.cpp
+OTHER_FILES += contactfixture.json
 
 DESTDIR = lib
 

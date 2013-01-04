@@ -27,8 +27,9 @@
 
 class LocaleFixturePlugin : public QObject, public TasFixturePluginInterface
 {
-  Q_OBJECT
-  Q_INTERFACES(TasFixturePluginInterface)
+    Q_OBJECT
+    Q_PLUGIN_METADATA(IID "com.nokia.testability.LocaleFixture" FILE "localefixture.json")
+    Q_INTERFACES(TasFixturePluginInterface)
  
 public:
     LocaleFixturePlugin(QObject* parent=0);

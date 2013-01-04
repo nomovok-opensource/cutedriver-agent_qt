@@ -31,8 +31,6 @@
 #include "testabilityutils.h"
 #include "tasduitraverse.h"
 
-Q_PLUGIN_METADATA(TasDuiTraverse)
-
 /*!
     \class TasDuiTraverse
     \brief TasDuiTraverse traverse DUI components for adding custom details to them

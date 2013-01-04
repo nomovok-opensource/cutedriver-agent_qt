@@ -35,7 +35,6 @@ static const QString CLASS_NAME = "className";
 static const QString INTERVAL = "interval";
 
 
-Q_PLUGIN_METADATA(PopupFixture)
 
 
 /*!

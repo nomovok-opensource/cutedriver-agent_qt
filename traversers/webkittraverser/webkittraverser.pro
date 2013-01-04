@@ -45,6 +45,7 @@ INCLUDEPATH += . ../../tascore/corelib
 # Input
 HEADERS += webkittraverse.h 
 SOURCES += webkittraverse.cpp 
+OTHER_FILES += webkittraverse.json
 
 QT += xml webkitwidgets
 

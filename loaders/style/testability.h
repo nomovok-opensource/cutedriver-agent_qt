@@ -31,7 +31,8 @@ class QStyle;
 
 class TestabilityPlugin : public QStylePlugin
 {
-    Q_OBJECT      
+    Q_OBJECT
+    Q_PLUGIN_METADATA(IID "com.nokia.testability.TestabilityStyle" FILE "testabilitystyle.json")
 
 public:
     TestabilityPlugin(QObject * parent = 0);

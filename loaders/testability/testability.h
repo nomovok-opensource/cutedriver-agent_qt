@@ -29,7 +29,8 @@
 class TestabilityPlugin : public QObject, public TestabilityInterface
 {
     Q_OBJECT      
-	Q_INTERFACES(TestabilityInterface)   
+    Q_PLUGIN_METADATA(IID "com.nokia.testability.Testability" FILE "testability.json")
+    Q_INTERFACES(TestabilityInterface)
 
 public:
     TestabilityPlugin(QObject *parent = 0);    

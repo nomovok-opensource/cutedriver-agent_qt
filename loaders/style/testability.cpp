@@ -23,7 +23,6 @@
 
 #include "testability.h"
 
-Q_PLUGIN_METADATA(TestabilityPlugin);
 
 
 /*!

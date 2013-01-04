@@ -35,6 +35,7 @@ class QRegExp;
 class DialogFixture : public QObject, public TasFixturePluginInterface
 {
     Q_OBJECT
+    Q_PLUGIN_METADATA(IID "com.nokia.testability.DialogFixture" FILE "dialogfixture.json")
     Q_INTERFACES(TasFixturePluginInterface)
 
 public:

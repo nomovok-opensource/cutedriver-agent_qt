@@ -30,6 +30,7 @@
 class MobilitySfwFixture : public QObject, public TasFixturePluginInterface
 {
     Q_OBJECT
+    Q_PLUGIN_METADATA(IID "com.nokia.testability.MobilitySfwFixture" FILE "mobilitysfwfixture.json")
     Q_INTERFACES(TasFixturePluginInterface)
  
 public:

@@ -30,7 +30,6 @@
 
 #include "taslayouttraverse.h"
 
-Q_PLUGIN_METADATA(TasLayoutTraverse)
 
 /*!
     \class TasLayoutTraverse

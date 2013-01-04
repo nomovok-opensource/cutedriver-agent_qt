@@ -31,8 +31,6 @@
 #include "testability.h"
 
 
-Q_PLUGIN_METADATA(TestabilityPlugin);
-
 // Copied directly from tascoreutils. Do not want to link the lib 
 // to the plugin.
 QString TestabilityPlugin::parseExecutable(QString completePath)

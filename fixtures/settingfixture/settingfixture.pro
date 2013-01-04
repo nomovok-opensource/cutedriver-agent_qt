@@ -47,6 +47,7 @@ DEPENDPATH += .
 # Input
 HEADERS += settingfixture.h
 SOURCES += settingfixture.cpp
+OTHER_FILES += settingfixture.json
 
 DESTDIR = lib
 

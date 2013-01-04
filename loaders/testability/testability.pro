@@ -45,8 +45,8 @@ DEPENDPATH += .
 INCLUDEPATH += . ../../tascore/corelib
 
 HEADERS += testability.h  
-
 SOURCES += testability.cpp
+OTHER_FILES += testability.json
 
 INSTALLS += target
 

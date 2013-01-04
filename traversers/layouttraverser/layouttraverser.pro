@@ -45,6 +45,7 @@ INCLUDEPATH += . ../../tascore/corelib
 # Input
 HEADERS += taslayouttraverse.h 
 SOURCES += taslayouttraverse.cpp 
+OTHER_FILES += taslayouttraverse.json
 
 QT += xml widgets
 

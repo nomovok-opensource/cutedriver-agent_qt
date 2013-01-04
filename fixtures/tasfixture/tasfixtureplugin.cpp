@@ -30,7 +30,6 @@
 #include "testabilityutils.h"
 #include "taslogger.h"
 
-Q_PLUGIN_METADATA(TasFixturePlugin)
 
 /*!
   \class TasFixturePlugin

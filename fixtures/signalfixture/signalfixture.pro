@@ -48,6 +48,7 @@ HEADERS += tassignalplugin.h
 HEADERS += tassignalspy.h
 SOURCES += tassignalplugin.cpp
 SOURCES += tassignalspy.cpp
+OTHER_FILES += tassignal.json
 
 DESTDIR = lib
 

@@ -32,8 +32,9 @@
 
 class TasSignalPlugin : public QObject, public TasFixturePluginInterface
 {
-  Q_OBJECT
-  Q_INTERFACES(TasFixturePluginInterface)
+    Q_OBJECT
+    Q_PLUGIN_METADATA(IID "com.nokia.testability.TasSignal" FILE "tassignal.json")
+    Q_INTERFACES(TasFixturePluginInterface)
  
 public:
      TasSignalPlugin(QObject* parent=0);

@@ -48,6 +48,7 @@ INCLUDEPATH += . ../../tascore/corelib
 # Input
 HEADERS += launchfixture.h
 SOURCES += launchfixture.cpp
+OTHER_FILES += launchfixture.json
 
 DESTDIR = lib
 

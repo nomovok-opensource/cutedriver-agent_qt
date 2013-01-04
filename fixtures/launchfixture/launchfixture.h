@@ -28,7 +28,8 @@
 
 class LaunchFixture : public QObject, public TasFixturePluginInterface
 {
-    Q_OBJECT
+    Q_OBJECT    
+    Q_PLUGIN_METADATA(IID "com.nokia.testability.LaunchFixture" FILE "launchfixture.json")
     Q_INTERFACES(TasFixturePluginInterface)
 public:
      LaunchFixture(QObject* parent=0);

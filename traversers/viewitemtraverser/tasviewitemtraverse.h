@@ -16,7 +16,7 @@
 ** of this file. 
 ** 
 ****************************************************************************/ 
- 
+
 
 
 #ifndef TASVIEWITEMTRAVERSE_H
@@ -39,39 +39,40 @@
 #include "tastraverseinterface.h"
 
 class TasViewItemTraverse :  public QObject, public TasTraverseInterface
- {
- Q_OBJECT
- Q_INTERFACES(TasTraverseInterface)
- 
- public:
-     TasViewItemTraverse(QObject* parent=0);
-     ~TasViewItemTraverse();
+{
+    Q_OBJECT
+    Q_PLUGIN_METADATA(IID "com.nokia.testability.TasViewItemTraverse" FILE "tasviewitemtraverse.json")
+    Q_INTERFACES(TasTraverseInterface)
 
-     void traverseObject(TasObject* objectInfo, QObject* object, TasCommand* command = 0);
-     void traverseGraphicsItem(TasObject* objectInfo, QGraphicsItem* graphicsItem, TasCommand* command = 0);     
-	 void beginTraverse(TasCommand* command);
-	 void endTraverse();
-     
+public:
+    TasViewItemTraverse(QObject* parent=0);
+    ~TasViewItemTraverse();
+
+    void traverseObject(TasObject* objectInfo, QObject* object, TasCommand* command = 0);
+    void traverseGraphicsItem(TasObject* objectInfo, QGraphicsItem* graphicsItem, TasCommand* command = 0);
+    void beginTraverse(TasCommand* command);
+    void endTraverse();
+
 private:
 
-	 void traverseAbstractItemView(QAbstractItemView* view, TasObject* objectInfo);
-	 void traverseTreeWidget(QTreeWidget* treeWidget, TasObject* objectInfo);	 
-	 void traverseTableWidget(QTableWidget* tableWidget, TasObject* objectInfo);	 
-	 void traverseListWidget(QListWidget* listWidget, TasObject* objectInfo);	 
-	 void traverseHeaderView(QHeaderView* headerView, TasObject* objectInfo);	 
+    void traverseAbstractItemView(QAbstractItemView* view, TasObject* objectInfo);
+    void traverseTreeWidget(QTreeWidget* treeWidget, TasObject* objectInfo);
+    void traverseTableWidget(QTableWidget* tableWidget, TasObject* objectInfo);
+    void traverseListWidget(QListWidget* listWidget, TasObject* objectInfo);
+    void traverseHeaderView(QHeaderView* headerView, TasObject* objectInfo);
 
-	 void traverseTreeWidgetItem(QTreeWidgetItem* item, TasObject& objectInfo, QTreeWidget *treeWidget);
-	 void traverseTableWidgetItem(QTableWidgetItem* item, TasObject& objectInfo, QTableWidget *tableWidget);
+    void traverseTreeWidgetItem(QTreeWidgetItem* item, TasObject& objectInfo, QTreeWidget *treeWidget);
+    void traverseTableWidgetItem(QTableWidgetItem* item, TasObject& objectInfo, QTableWidget *tableWidget);
 
-	 void traverseIndexLevel(QAbstractItemView* view, QAbstractItemModel *model, int role, QModelIndex parent, TasObject* objectInfo);   
-	 void fillTraverseData(QAbstractItemView* view, QVariant data, TasObject* objectInfo, QModelIndex index);
-	 bool isItemVisible(QRect rect, QAbstractItemView* view);
-	 bool addItemLocationDetails(TasObject& objectInfo, QRect rect, QAbstractItemView* view);
-     
+    void traverseIndexLevel(QAbstractItemView* view, QAbstractItemModel *model, int role, QModelIndex parent, TasObject* objectInfo);
+    void fillTraverseData(QAbstractItemView* view, QVariant data, TasObject* objectInfo, QModelIndex index);
+    bool isItemVisible(QRect rect, QAbstractItemView* view);
+    bool addItemLocationDetails(TasObject& objectInfo, QRect rect, QAbstractItemView* view);
+
 private:
-	 TasTraverseUtils* mTraverseUtils;
-	 QList<QModelIndex> mTraversed;
- };
+    TasTraverseUtils* mTraverseUtils;
+    QList<QModelIndex> mTraversed;
+};
 
 #endif
- 
+

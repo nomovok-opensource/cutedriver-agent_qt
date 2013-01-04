@@ -46,6 +46,7 @@ INCLUDEPATH += . ../../tascore/corelib
 # Input
 HEADERS += filefixture.h
 SOURCES += filefixture.cpp
+OTHER_FILES += filefixture.json
 
 DESTDIR = lib
 

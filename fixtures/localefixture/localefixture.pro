@@ -37,6 +37,7 @@ INCLUDEPATH += . ../../tascore/corelib
 
 HEADERS += localefixture.h 
 SOURCES += localefixture.cpp
+OTHER_FILES += localefixture.json
 
 DESTDIR = lib
 

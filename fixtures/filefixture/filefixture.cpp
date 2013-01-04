@@ -31,8 +31,6 @@
 
 
 
-Q_PLUGIN_METADATA(FileFixture)
-
 /*!
   \class FileFixture
   \brief Provides native file access.

@@ -16,8 +16,8 @@
 ** of this file. 
 ** 
 ****************************************************************************/ 
- 
- 
+
+
 
 #ifndef WEBKITTRAVERSE_H
 #define WEBKITTRAVERSE_H
@@ -41,18 +41,19 @@ class TasCommand;
 class QGraphicsWebView;
 
 class WebKitTraverse :  public QObject, public TasTraverseInterface
- {
- Q_OBJECT
- Q_INTERFACES(TasTraverseInterface)
- 
-public:
-     WebKitTraverse(QObject* parent=0);
-     ~WebKitTraverse();
+{
+    Q_OBJECT
+    Q_PLUGIN_METADATA(IID "com.nokia.testability.WebKitTraverse" FILE "webkittraverse.json")
+    Q_INTERFACES(TasTraverseInterface)
 
-     void traverseObject(TasObject* objectInfo, QObject* object, TasCommand* command);
-     void traverseGraphicsItem(TasObject* objectInfo, QGraphicsItem* graphicsItem, TasCommand* command);     
-     void beginTraverse(TasCommand* command);
-     void endTraverse();
+public:
+    WebKitTraverse(QObject* parent=0);
+    ~WebKitTraverse();
+
+    void traverseObject(TasObject* objectInfo, QObject* object, TasCommand* command);
+    void traverseGraphicsItem(TasObject* objectInfo, QGraphicsItem* graphicsItem, TasCommand* command);
+    void beginTraverse(TasCommand* command);
+    void endTraverse();
     
 private:
 
@@ -82,9 +83,9 @@ private:
 #endif
 
 private:
-	 TasTraverseUtils* mTraverseUtils;
-         QRect mCropRect;
+    TasTraverseUtils* mTraverseUtils;
+    QRect mCropRect;
     
- };
+};
 
 #endif

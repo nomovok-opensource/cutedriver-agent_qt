@@ -35,6 +35,7 @@
 class TasLayoutTraverse :  public QObject, public TasTraverseInterface
 {
     Q_OBJECT
+    Q_PLUGIN_METADATA(IID "com.nokia.testability.TasLayoutTraverse" FILE "taslayouttraverse.json")
     Q_INTERFACES(TasTraverseInterface)
 
 public:

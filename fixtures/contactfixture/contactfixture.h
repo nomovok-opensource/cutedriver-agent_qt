@@ -32,6 +32,7 @@ QTM_USE_NAMESPACE
 class ContactFixture : public QObject, public TasFixturePluginInterface
 {
     Q_OBJECT
+    Q_PLUGIN_METADATA(IID "com.nokia.testability.ContactFixture" FILE "contactfixture.json")
     Q_INTERFACES(TasFixturePluginInterface)
  
 public:

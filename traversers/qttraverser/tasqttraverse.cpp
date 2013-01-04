@@ -27,7 +27,6 @@
 #include "tasqttraverse.h"
 
 
-Q_PLUGIN_METADATA(TasQtTraverse)
 
 /*!
     \class TasQtTraverse

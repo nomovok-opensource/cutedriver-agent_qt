@@ -48,6 +48,7 @@ HEADERS += tasfixtureplugin.h
 HEADERS += taspropertylogger.h
 SOURCES += tasfixtureplugin.cpp
 SOURCES += taspropertylogger.cpp
+OTHER_FILES += taspropertylogger.json
 
 DESTDIR = lib
 

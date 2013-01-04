@@ -34,6 +34,7 @@ INCLUDEPATH += . ../../tascore/corelib
 # Input
 HEADERS += tasduitraverse.h 
 SOURCES += tasduitraverse.cpp
+OTHER_FILES += tasduitraverse.json
 
 DESTDIR = lib
 

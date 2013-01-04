@@ -28,18 +28,17 @@
 #include <tastraverseinterface.h>
 
 class TasDuiTraverse :  public QObject, public TasTraverseInterface
- {
- Q_OBJECT
- Q_INTERFACES(TasTraverseInterface)
- 
- public:
-     TasDuiTraverse(QObject* parent=0);
-     ~TasDuiTraverse();
+{
+    Q_OBJECT
+    Q_PLUGIN_METADATA(IID "com.nokia.testability.TasDuiTraverse" FILE "tasduitraverse.json")
+    Q_INTERFACES(TasTraverseInterface)
 
-     void traverseObject(TasObject* objectInfo, QObject* object, TasCommand*);
-	 
-     void traverseGraphicsItem(TasObject* objectInfo, QGraphicsItem* graphicsItem, TasCommand*);     
-   
+ public:
+    TasDuiTraverse(QObject* parent=0);
+    ~TasDuiTraverse();
+
+    void traverseObject(TasObject* objectInfo, QObject* object, TasCommand*);
+    void traverseGraphicsItem(TasObject* objectInfo, QGraphicsItem* graphicsItem, TasCommand*);
 };
 
 #endif

@@ -48,6 +48,7 @@ INCLUDEPATH += . ../../tascore/corelib
 
 HEADERS += popupfixture.h
 SOURCES += popupfixture.cpp
+OTHER_FILES += popupfixture.json
 
 DESTDIR = lib
 

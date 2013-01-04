@@ -33,6 +33,7 @@
 class PopupFixture : public QObject, public TasFixturePluginInterface
 {
     Q_OBJECT
+    Q_PLUGIN_METADATA(IID "com.nokia.testability.PopupFixture" FILE "popupfixture.json")
     Q_INTERFACES(TasFixturePluginInterface)
  
 public:

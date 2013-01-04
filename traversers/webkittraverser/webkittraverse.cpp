@@ -39,7 +39,6 @@
 #include "tastraverseutils.h"
 #include <testabilityutils.h>
 
-Q_PLUGIN_METADATA(WebKitTraverse)
 
 /*!
     \class WebKitTraverse

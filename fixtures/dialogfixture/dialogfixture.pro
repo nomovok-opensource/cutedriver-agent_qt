@@ -35,6 +35,7 @@ INCLUDEPATH += . \
     ../../tascore/corelib
 HEADERS += dialogfixture.h
 SOURCES += dialogfixture.cpp
+OTHER_FILES += dialogfixture.json
 
 symbian:SOURCES += dialogfixture_symbian.cpp
 else {

@@ -47,6 +47,7 @@ INCLUDEPATH += . ../../tascore/corelib
 # Input
 HEADERS += fpsfixture.h
 SOURCES += fpsfixture.cpp
+OTHER_FILES += fpsfixture.json
 
 DESTDIR = lib
 

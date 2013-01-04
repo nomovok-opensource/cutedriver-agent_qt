@@ -34,7 +34,6 @@
 #include <e32base.h>
 #include <apgcli.h>
 
-Q_PLUGIN_METADATA(LaunchFixture)
 
 /*!
 \class LaunchFixture
