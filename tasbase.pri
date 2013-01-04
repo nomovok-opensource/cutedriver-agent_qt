@@ -18,7 +18,7 @@
 ############################################################################
 
 
-TAS_VERSION=0.0.0
+TAS_VERSION=2.0.0
 
 #CONFIG += silent
 # QMAKE_CXXFLAGS += -Wall -Werror
