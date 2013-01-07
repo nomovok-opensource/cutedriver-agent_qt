@@ -165,7 +165,8 @@ TasResponse::TasResponse(qint32 messageId, const QByteArray& data, bool isError,
 }
 
 TasResponse::~TasResponse()
-{}
+{
+}
 
 void TasResponse::setRequester(TasSocket* socket)
 {
@@ -174,5 +175,5 @@ void TasResponse::setRequester(TasSocket* socket)
 
 TasSocket* TasResponse::requester()
 {
-    return mSocket;
+    return mSocket.data();
 }

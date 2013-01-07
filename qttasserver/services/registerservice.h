@@ -23,7 +23,7 @@
 
 #include <QObject>
 #include <QQueue>
-//#include <QWeakPointer>
+#include <QPointer>
 
 #include <taspluginloader.h>
 #include <tasconstants.h>
@@ -40,7 +40,7 @@ struct ClientDetails
   QString applicationUid;
 #endif
   QString pluginType;
-  QSharedPointer<TasSocket> socket;
+  QPointer<TasSocket> socket;
 };
 
 class RegisterService : public QObject, public TasServerCommand

@@ -38,19 +38,19 @@
 
 
     Messages are parsed and generated acording to the small protocol defined between tas modules.
-    The protocol is very simple it consists of a header and body. 
-    Message Header    
+    The protocol is very simple it consists of a header and body.
+    Message Header
     Flag: 1 byte
     Body size: 4 bytes
     Crc of the body: 2 bytes
-    Comressed: 1 byte 
+    Comressed: 1 byte
     Body: Body size bytes.
     
     The messages will be formatted in little endian byte order.
     
-    All communication is done synchronously so that the messaging will be 
+    All communication is done synchronously so that the messaging will be
     expected to fail incase the given timeout value is exceeded. The default
-    value is one second so operation expected to take longer must use 
+    value is one second so operation expected to take longer must use
     larger values.
     
  */
@@ -70,7 +70,7 @@ void TasServerSocket::closeConnection()
     closeDevice();
 }
 
-void TasServerSocket::disconnected()
+void TasServerSocket::deviceDisconnected()
 {     
     closeDevice();
     emit socketClosed();
@@ -94,7 +94,7 @@ void TasClientSocket::closeConnection()
     closeDevice();
 }
 
-void TasClientSocket::disconnected()
+void TasClientSocket::deviceDisconnected()
 {
     closeDevice();
     emit socketClosed();
@@ -111,8 +111,8 @@ TasSocket::TasSocket(QIODevice* device, QObject *parent)
     clearHandlers();
     mReader = new TasSocketReader(device, this);
     mWriter = new TasSocketWriter(device, this);
-    //    connect(&device, SIGNAL(readyRead()), this, SLOT(dataAvailable()));    
-    connect(mDevice, SIGNAL(disconnected()), this, SLOT(disconnected()));
+    //    connect(&device, SIGNAL(readyRead()), this, SLOT(dataAvailable()));
+    connect(mDevice, SIGNAL(aboutToClose()), this, SLOT(deviceDisconnected()));
     connect(mReader, SIGNAL(messageRead(TasMessage&)), this, SLOT(messageAvailable(TasMessage&)));
     connect(mDevice, SIGNAL(destroyed(QObject*)), this, SLOT(cleanUp(QObject*)));
 }                           
@@ -129,7 +129,7 @@ TasSocket::~TasSocket()
 
 void TasSocket::closeDevice()
 {
-    mDevice->close(); 
+    mDevice->close();
 }
 
 void TasSocket::cleanUp(QObject*)
@@ -140,11 +140,11 @@ void TasSocket::cleanUp(QObject*)
 }
 
 /*!
-  Set the request handler for the socket. The incoming message is passed to 
-  the handler and the resulting response is sent back to the socket 
+  Set the request handler for the socket. The incoming message is passed to
+  the handler and the resulting response is sent back to the socket
   as the response to the request.
-  The socket does not assume ownership of the handler so make sure you do not 
-  remove the handler when the socket is still alive. 
+  The socket does not assume ownership of the handler so make sure you do not
+  remove the handler when the socket is still alive.
   Use clearHandlers to remove handlers from the socket. You can also
   reset this handler only passing 0 as argument(e.g. setRequestHandler(0))
  */
@@ -154,12 +154,12 @@ void TasSocket::setRequestHandler(RequestHandler* handler)
 }
 
 /*!
-  Set the response handler for the socket. The incoming message is passed to 
+  Set the response handler for the socket. The incoming message is passed to
   the handler.
-  The socket does not assume ownership of the handler so make sure you do not 
+  The socket does not assume ownership of the handler so make sure you do not
   remove the handler when the socket is still alive.
   Use clearHandlers to remove handlers from the socket. You can also
-  reset this handler only passing 0 as argument(e.g. setResponseHandler(0)) 
+  reset this handler only passing 0 as argument(e.g. setResponseHandler(0))
  */
 void TasSocket::setResponseHandler(ResponseHandler* handler)
 {
@@ -224,13 +224,13 @@ bool TasSocket::syncRequest(const qint32& messageId, const QByteArray& requestMe
         }
     }
     //reconnect response reader
-    connect(mDevice, SIGNAL(readyRead()), mReader, SLOT(readMessageData()));    
+    connect(mDevice, SIGNAL(readyRead()), mReader, SLOT(readMessageData()));
     return success;
 }
 
 
 /*!
-  Send a message over the connection represented by this socket. Returns false if the connection 
+  Send a message over the connection represented by this socket. Returns false if the connection
   is not writable.
 */
 bool TasSocket::sendRequest(const qint32& messageId, const QString& message)
@@ -240,7 +240,7 @@ bool TasSocket::sendRequest(const qint32& messageId, const QString& message)
 
 
 /*!
-  Send a message over the connection represented by this socket. Returns false if the connection 
+  Send a message over the connection represented by this socket. Returns false if the connection
   is not writable. Message will be deleted once message is sent.
 */
 bool TasSocket::sendRequest(const qint32& messageId, const QByteArray& message)
@@ -250,12 +250,12 @@ bool TasSocket::sendRequest(const qint32& messageId, const QByteArray& message)
 }
 
 /*!
-    Send a response type mesage over the socket. Response are to be send only 
+    Send a response type mesage over the socket. Response are to be send only
     as response to requests. This function will not wait for a response
-    and will return true once the message bytes are written. False returned 
+    and will return true once the message bytes are written. False returned
     only if there is no connection.
     If the compressed flag is set to true then it is assumed that the message data
-    is compressed already. This means that the protocol will indicate that the 
+    is compressed already. This means that the protocol will indicate that the
     message is compressed but this function will not perform the compression.
 */
 bool TasSocket::sendResponse(const qint32& messageId, const QByteArray& message, bool compressed)
@@ -266,7 +266,7 @@ bool TasSocket::sendResponse(const qint32& messageId, const QByteArray& message,
 
 bool TasSocket::sendResponse(const qint32& messageId, const QString& message, bool compressed)
 {
-    return sendResponse(messageId, QByteArray(message.toUtf8()), compressed);   
+    return sendResponse(messageId, QByteArray(message.toUtf8()), compressed);
 }
 
 
@@ -284,13 +284,13 @@ bool TasSocket::sendError(const qint32& messageId, const QByteArray& message, bo
 
 bool TasSocket::sendMessage(TasMessage& message)
 {
-    bool ok =  mWriter->writeMessage(message);   
-    emit messageSent();   
+    bool ok = mWriter->writeMessage(message);
+    emit messageSent();
     return ok;
 }
 
 /*!
-    When the socket is not in the process of sending or reading messages 
+    When the socket is not in the process of sending or reading messages
     this slot listens to incoming messages by listening to the readyRead
     signal.
 */
@@ -298,10 +298,10 @@ bool TasSocket::sendMessage(TasMessage& message)
 void TasSocket::messageAvailable(TasMessage& message)
 { 
     if(message.isRequest() && mRequestHandler){
-        mRequestHandler->serviceRequest(message, this);        
+        mRequestHandler->serviceRequest(message, this);
     }
     else if(message.isResponse() && mResponseHandler){
-        mResponseHandler->serviceResponse(message);        
+        mResponseHandler->serviceResponse(message);
     }
     else{
         TasLogger::logger()->warning("TasSocket::dataAvailable Received a message: " + QString::number(message.flag()) + " but no handlers.");
@@ -324,7 +324,7 @@ TasSocketWriter::TasSocketWriter(QIODevice* device, QObject* parent)
         if(socket){
             mLocalSocket = socket;
         }
-    }    
+    }
 }
 
 TasSocketWriter::~TasSocketWriter()
@@ -357,7 +357,7 @@ void TasSocketWriter::writeBytes(const QByteArray& msgBytes)
             TasCoreUtils::wait(SLEEP_TIME);
         }
         else{
-            break;    
+            break;
         }
         chunksWritten++;
     }
@@ -381,7 +381,7 @@ void TasSocketWriter::flush()
         mLocalSocket->flush();
     }
     else if(mTcpSocket){
-        mTcpSocket->flush();   
+        mTcpSocket->flush();
     }
 }
 
@@ -393,9 +393,9 @@ QByteArray TasSocketWriter::makeHeader(TasMessage& message)
     QByteArray block;
     QDataStream out(&block, QIODevice::WriteOnly);
     out.setByteOrder(QDataStream::LittleEndian);
-    out.setVersion(QDataStream::Qt_4_0);
+    out.setVersion(QDataStream::Qt_5_0);
     QByteArray payload = message.dataCompressed();
-    quint16 bodyCrc =  qChecksum(payload.data(), payload.size());    
+    quint16 bodyCrc =  qChecksum(payload.data(), payload.size());
     out << message.flag() << payload.size() << bodyCrc << COMPRESSION_ON << message.messageId();
     return block;
 }
@@ -422,8 +422,8 @@ void TasSocketReader::close()
     Reads a message from the socket and places it in the response QByteArray. Will return false
     if reading the message fails.
     The returnRaw flag means that the message body will not be touched if it is compressed.
-    The returnRaw flag is to be used with caution since passing the message on without knowledge of the 
-    compression may cause problems.    
+    The returnRaw flag is to be used with caution since passing the message on without knowledge of the
+    compression may cause problems.
 */
 void TasSocketReader::readMessageData()
 {   
@@ -431,7 +431,7 @@ void TasSocketReader::readMessageData()
     if(!mDevice){
         TasLogger::logger()->error("TasSocketReader::readMessageData reading device not available.");
     }
-    //wait for header data to be available, start process only after 
+    //wait for header data to be available, start process only after
     //enough data available
     if(mDevice->bytesAvailable() < HEADER_LENGTH){
         return;
@@ -439,16 +439,17 @@ void TasSocketReader::readMessageData()
 
     disconnect(mDevice, SIGNAL(readyRead()), this, SLOT(readMessageData()));
 
+    TasMessage message;
 
-    TasMessage message;        
     if(readOneMessage(message)){
-        emit messageRead(message);   
+        emit messageRead(message);
     }
+
     if(mDevice){
-        connect(mDevice, SIGNAL(readyRead()), this, SLOT(readMessageData()));    
+        connect(mDevice, SIGNAL(readyRead()), this, SLOT(readMessageData()));
         //maybe there was a new message coming when the old one was still being processed.
         if(mDevice->bytesAvailable() > 0){
-            readMessageData();   
+            readMessageData();
         }
     }
 }
@@ -463,9 +464,9 @@ bool TasSocketReader::readOneMessage(TasMessage& message)
     quint16 crc = 0;
     quint8 flag = 0;
     qint32 messageId = 0;
-    QDataStream in(mDevice);       
-    in.setVersion(QDataStream::Qt_4_0);
-    in.setByteOrder(QDataStream::LittleEndian);   
+    QDataStream in(mDevice);
+    in.setVersion(QDataStream::Qt_5_0);
+    in.setByteOrder(QDataStream::LittleEndian);
     //read header
     in >> flag >> bodySize >> crc >> compressed >> messageId;
     
@@ -476,12 +477,12 @@ bool TasSocketReader::readOneMessage(TasMessage& message)
 
     bool ok = true;
 
-    //read body, use weakpointer to try to detect sudden disconnections 
+    //read body, use weakpointer to try to detect sudden disconnections
     QByteArray rawBytes;
     
     int totalBytes = 0;
     forever{
-        if(mDevice->bytesAvailable() == 0){            
+        if(mDevice->bytesAvailable() == 0){
             if(!mDevice->waitForReadyRead(READ_TIME_OUT)){
                 TasLogger::logger()->error("TasSocket::readData error when waiting for more data. " + mDevice->errorString());
                 TasLogger::logger()->error("TasSocket::readData bytes read: "+QString::number(totalBytes)
@@ -501,16 +502,16 @@ bool TasSocketReader::readOneMessage(TasMessage& message)
         if( (totalBytes + available) > bodySize ){
             available = bodySize - totalBytes;
         }
-        char* buffer = (char*)malloc(available);    
+        char* buffer = (char*)malloc(available);
         int bytesRead = in.readRawData(buffer, available);
         rawBytes.append(buffer, bytesRead);
-        free(buffer);            
+        free(buffer);
         totalBytes += bytesRead;
         if(totalBytes >= bodySize){
             break;
         }
 
-    }    
+    }
 
     bool messageRead = false;
 
@@ -518,8 +519,8 @@ bool TasSocketReader::readOneMessage(TasMessage& message)
         //check crc
         quint16 checkSum = qChecksum( rawBytes.data(), bodySize );
         if ( checkSum != crc){
-            TasLogger::logger()->error("TasSocket::readMessageData CRC error " + QString::number(checkSum) + " read: " 
-                                       + QString::number(crc));                            
+            TasLogger::logger()->error("TasSocket::readMessageData CRC error " + QString::number(checkSum) + " read: "
+                                       + QString::number(crc));
         }
         else{
             message.setMessageId(messageId);

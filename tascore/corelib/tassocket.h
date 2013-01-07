@@ -94,7 +94,7 @@ signals:
 	void messageSent();
 
 public slots:
-	virtual void disconnected() = 0;
+    virtual void deviceDisconnected() = 0;
 	void messageAvailable(TasMessage& message);
     void cleanUp(QObject* obj = 0);
 
@@ -165,7 +165,7 @@ public:
 	void setIdentification(const QString& identification);
 	
 public slots:
-    void disconnected();
+    void deviceDisconnected();
 
 private:
 	QString mIdentification;
@@ -179,7 +179,7 @@ public:
   void closeConnection();
 
 public slots:
-  void disconnected();
+  void deviceDisconnected();
 
 };
 

@@ -24,6 +24,7 @@
 
 #include "tasconstants.h"
 
+#include <QPointer>
 #include <QByteArray>
 
 class TasSocket;
@@ -74,13 +75,13 @@ public:
 
 
 private:
-	TasSocket* mSocket;
+    QPointer<TasSocket> mSocket;
 };
 
 class ResponseFilter
 {
 public:
-    virtual ~ResponseFilter(){};
+    virtual ~ResponseFilter() {}
 	virtual void filterResponse(TasMessage& response) = 0;
 };
 

@@ -49,7 +49,7 @@ bool RegisterService::executeService(TasCommandModel& model, TasResponse& respon
             client.applicationUid = command->parameter(APP_UID);
 #endif
             client.pluginType = command->parameter(PLUGIN_TYPE);
-            client.socket.reset(response.requester());
+            client.socket = response.requester();
             registerPlugin(client);
         }
         else{
@@ -76,7 +76,7 @@ void RegisterService::registerPlugin(ClientDetails& client)
     TasClientManager::instance()->addRegisteredClient(client.processId, client.processName,
                                                       client.socket.data(), client.pluginType, client.applicationUid);
 #else
-    TasClientManager::instance()->addRegisteredClient(client.processId, client.processName, client.socket.data(), client.pluginType);
+    TasClientManager::instance()->addRegisteredClient(client.processId, client.processName, client.socket, client.pluginType);
 #endif
     TasClientManager::instance()->detachFromStartupData(client.processName);
 }
