@@ -60,32 +60,32 @@ public:
 
     int getServerPort();
     QString getServerAddress();
-        const QString& getServerVersion();
+    const QString& getServerVersion();
 
 public slots:
-        void shutdown();
+    void shutdown();
     void closeServer();
     void killAllStartedProcesses();
 
 private:
-        void createServers();
+    void createServers();
 
 public:
     QHostAddress mHostBinding;
 
 private:
-        TasTcpServer* mTcpServer;
+    TasTcpServer* mTcpServer;
 #if defined(TAS_USELOCALSOCKET)
-        TasLocalServer* mLocalServer;
+    TasLocalServer* mLocalServer;
 #else
-        TasTcpServer* mInternalTcpServer;
+    TasTcpServer* mInternalTcpServer;
 #endif
-        TasClientManager* mClientManager;
-        TasServerServiceManager* mServiceManager;
-        QString errorMessage;
+    TasClientManager* mClientManager;
+    TasServerServiceManager* mServiceManager;
+    QString errorMessage;
 
 #if defined(TAS_USE_CUCUMBER_WIRE_PROTOCOL)
-        CucumberWireprotocolServer *mCucumberServer;
+    CucumberWireprotocolServer *mCucumberServer;
 #endif
 
 };
@@ -97,21 +97,21 @@ class TasTcpServer : public QTcpServer
 
 public:
     TasTcpServer(int port, TasServerServiceManager& serviceManager, QObject * parent = 0);
-        ~TasTcpServer();
+    ~TasTcpServer();
 
-        bool start();
+    bool start();
 
 public slots:
-        void restartServer();
-        void socketError(QAbstractSocket::SocketError socketError);
+    void restartServer();
+    void socketError(QAbstractSocket::SocketError socketError);
 
 protected:
-        void incomingConnection ( int socketDescriptor );
+    void incomingConnection(qintptr socketDescriptor);
 
 private:
-        int mPort;
-        int mConnectionCount;
-        TasServerServiceManager& mServiceManager;
+    int mPort;
+    int mConnectionCount;
+    TasServerServiceManager& mServiceManager;
 };
 
 #if defined(TAS_USELOCALSOCKET)
@@ -121,18 +121,18 @@ class TasLocalServer : public QLocalServer
 
 public:
     TasLocalServer(const QString& name, TasServerServiceManager& serviceManager, QObject * parent = 0);
-        ~TasLocalServer();
+    ~TasLocalServer();
 
-        bool start();
+    bool start();
 
 protected:
 
-        void incomingConnection ( quintptr socketDescriptor );
+    void incomingConnection ( quintptr socketDescriptor );
 
 private:
-        QString mName;
-        int mConnectionCount;
-        TasServerServiceManager& mServiceManager;
+    QString mName;
+    int mConnectionCount;
+    TasServerServiceManager& mServiceManager;
 };
 #endif
 

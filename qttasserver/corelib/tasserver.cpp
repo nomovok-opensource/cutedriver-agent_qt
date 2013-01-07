@@ -336,7 +336,7 @@ TasTcpServer::~TasTcpServer()
 {
 }
 
-void TasTcpServer::incomingConnection ( int socketDescriptor )
+void TasTcpServer::incomingConnection (qintptr socketDescriptor )
 {
     TasLogger::logger()->debug("TasTcpServer::incomingConnection");
     mConnectionCount++;
@@ -344,8 +344,7 @@ void TasTcpServer::incomingConnection ( int socketDescriptor )
     if (!tcpSocket->setSocketDescriptor(socketDescriptor)) {
         TasLogger::logger()->error("TasTcpServer::incomingConnection" + tcpSocket->errorString());
         delete tcpSocket;
-    }
-    else{
+    } else {
         TasLogger::logger()->info("TasTcpServer::incomingConnection number " +QString::number(mConnectionCount)
                                    + " for server " + QString::number(mPort));
         TasServerSocket *socket = new TasServerSocket(tcpSocket, this);
@@ -360,30 +359,25 @@ void TasTcpServer::incomingConnection ( int socketDescriptor )
 bool TasTcpServer::start()
 {
     bool started = false;
-    for(int i = 0; i < 5; i++){
 
-//#ifdef Q_OS_SYMBIAN
-//        if(listen(QHostAddress::LocalHost, mPort)){
-//#else
-//        if(listen(QHostAddress::Any, mPort)){
-
-//#endif
-
+    for (int i = 0; i < 5; i++) {
         TasServer* tasServer = (TasServer*) this->parent();
 
-
-        if(listen(tasServer->mHostBinding, mPort)){
+        if (listen(tasServer->mHostBinding, mPort)) {
             started = true;
             break;
         }
+
         TasCoreUtils::wait(500);
     }
-    if(!started){
-        TasLogger::logger()->error("TasTcpServer::start failed to listen to port: "+QString::number(mPort)+". Reason: " + errorString());
-    }
-    else{
+
+    if (!started) {
+        TasLogger::logger()->error("TasTcpServer::start failed to listen to port: " +
+                                   QString::number(mPort) + ". Reason: " + errorString());
+    } else {
         TasLogger::logger()->info("TasTcpServer::start listening port: " + QString::number(mPort));
     }
+
     return started;
 }
 

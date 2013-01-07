@@ -71,8 +71,7 @@ void TasServerSocket::closeConnection()
 }
 
 void TasServerSocket::deviceDisconnected()
-{     
-    closeDevice();
+{
     emit socketClosed();
     deleteLater();
 }
@@ -96,10 +95,8 @@ void TasClientSocket::closeConnection()
 
 void TasClientSocket::deviceDisconnected()
 {
-    closeDevice();
     emit socketClosed();
 }
-
 
 /*!
     Construct a new TasSocket.
@@ -109,9 +106,10 @@ TasSocket::TasSocket(QIODevice* device, QObject *parent)
 {  
     mDevice = device;
     clearHandlers();
+
     mReader = new TasSocketReader(device, this);
     mWriter = new TasSocketWriter(device, this);
-    //    connect(&device, SIGNAL(readyRead()), this, SLOT(dataAvailable()));
+
     connect(mDevice, SIGNAL(aboutToClose()), this, SLOT(deviceDisconnected()));
     connect(mReader, SIGNAL(messageRead(TasMessage&)), this, SLOT(messageAvailable(TasMessage&)));
     connect(mDevice, SIGNAL(destroyed(QObject*)), this, SLOT(cleanUp(QObject*)));
@@ -129,7 +127,9 @@ TasSocket::~TasSocket()
 
 void TasSocket::closeDevice()
 {
-    mDevice->close();
+    if (mDevice->isOpen()) {
+        mDevice->close();
+    }
 }
 
 void TasSocket::cleanUp(QObject*)
@@ -428,7 +428,7 @@ void TasSocketReader::close()
 void TasSocketReader::readMessageData()
 {   
     TasLogger::logger()->debug("TasSocketReader::readMessageData start.");
-    if(!mDevice){
+    if (!mDevice) {
         TasLogger::logger()->error("TasSocketReader::readMessageData reading device not available.");
     }
     //wait for header data to be available, start process only after
