@@ -50,14 +50,14 @@ class TasSocketReader;
 class RequestHandler
 {
 public:
-  virtual ~RequestHandler(){};
+  virtual ~RequestHandler() {}
   virtual void serviceRequest(TasMessage& request, TasSocket* requester) = 0;
 };
 
 class ResponseHandler
 {
 public:
-  virtual ~ResponseHandler(){};
+  virtual ~ResponseHandler() {}
   virtual void serviceResponse(TasMessage& response) = 0;
 };
 

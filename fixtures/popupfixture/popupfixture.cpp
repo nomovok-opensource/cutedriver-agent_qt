@@ -105,7 +105,7 @@ bool PopupFixture::execute(void * objectInstance, QString actionName, QHash<QStr
 
     }
     else{
-        stdOut = "Uknown action for PopupFixture. Make sure action name is correct or that you are using the correct fixture.";
+        stdOut = "Unknown action for PopupFixture. Make sure action name is correct or that you are using the correct fixture.";
         result = false;
     }
 

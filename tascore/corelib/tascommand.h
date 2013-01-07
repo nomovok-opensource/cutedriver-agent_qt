@@ -28,7 +28,7 @@ class TasSocket;
 class TasServiceCommand
 {
  public:
-    virtual ~TasServiceCommand(){};
+    virtual ~TasServiceCommand() {}
 
     /*!
 	  Command execution. Return false if the command is consumed

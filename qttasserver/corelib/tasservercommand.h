@@ -27,7 +27,7 @@
 class TasServerCommand : public TasServiceCommand
 {
 public:
-    virtual ~TasServerCommand(){};
+    virtual ~TasServerCommand() {}
 
 	/*!
 	  From ServiceInterface

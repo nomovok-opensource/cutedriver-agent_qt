@@ -85,7 +85,7 @@ TasGesture* TasGestureFactory::makeGesture(TargetData data)
             return gesture;
         }
     }
-    mErrorMessage = "TasGestureFactory::makeGesture: Uknown gesture type " + gestureType + ".";
+    mErrorMessage = "TasGestureFactory::makeGesture: Unknown gesture type " + gestureType + ".";
     return 0;
 }
 
