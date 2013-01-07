@@ -91,7 +91,7 @@ QString TasCoreUtils::eventType(QEvent* event)
     switch(event->type())
     {
         case QEvent::None: // 0 Not an event. 
-            return QString("Unkown");
+            return QString("Unknown");
         case QEvent::ActionAdded: // 114 A new action has been added (QActionEvent). 
             return QString("AccessibilityPrepare");
         case QEvent::ActionChanged: // 113 An action has been changed (QActionEvent). 

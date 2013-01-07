@@ -97,12 +97,12 @@ bool FpsFixture::execute(void * objectInstance, QString actionName, QHash<QStrin
         }
         else{
             result = false;
-            stdOut = "Unkown action for fpsFixture.!";
+            stdOut = "Unknown action for fpsFixture.!";
         }
     }
     else{
         result = false;
-        stdOut = "Unkown target!";
+        stdOut = "Unknown target!";
     }
 
     return result;
