@@ -49,7 +49,7 @@ bool ListAppsService::executeService(TasCommandModel& model, TasResponse& respon
         consumed = true;
     }
     if(model.service() == "listRunningProcesses"){
-        listRunninProcesses(response);   
+        listRunningProcesses(response);
         consumed = true;
     }
     return consumed;
@@ -100,7 +100,7 @@ void ListAppsService::listApplications(TasCommand& command, TasResponse& respons
     delete model;
     response.setData(xml);
 }
-void ListAppsService::listRunninProcesses(TasResponse& response)
+void ListAppsService::listRunningProcesses(TasResponse& response)
 {
     TasDataModel* model = new TasDataModel();
     QString qtVersion = "Qt" + QString(qVersion());
