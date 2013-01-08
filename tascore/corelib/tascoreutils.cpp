@@ -354,11 +354,12 @@ void TasCoreUtils::wait(int millis)
 
 QString TasCoreUtils::objectId(QObject* object)
 {
-    if(object){
+    if (object) {
         QString id = QString::number((quintptr)object);
         TasPointerCache::instance()->storePointer(id, object);
         return id;
     }
+
     return "";
 }
 

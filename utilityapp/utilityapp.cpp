@@ -30,6 +30,7 @@
 
 TasUtilityApp::TasUtilityApp()
 {}
+
 TasUtilityApp::~TasUtilityApp()
 {}
 
@@ -42,7 +43,6 @@ void TasUtilityApp::sendScreenShot(uint id)
     screenshot.save(&buffer, "PNG");
     sendData(bytes, id);
 }
-
 
 void TasUtilityApp::sendData(const QByteArray& data, uint id)
 {
