@@ -298,10 +298,8 @@ bool TasSocket::sendMessage(TasMessage& message)
 void TasSocket::messageAvailable(TasMessage& message)
 { 
     if (message.isRequest() && mRequestHandler) {
-        qDebug() << mRequestHandler << message.dataAsString();
         mRequestHandler->serviceRequest(message, this);
     } else if (message.isResponse() && mResponseHandler) {
-        qDebug() << mResponseHandler << message.dataAsString();
         mResponseHandler->serviceResponse(message);
     } else {
         TasLogger::logger()->warning("TasSocket::dataAvailable Received a message: "
