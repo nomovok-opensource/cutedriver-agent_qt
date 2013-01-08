@@ -352,11 +352,11 @@ ResponseWaiter::ResponseWaiter(qint32 responseId, TasSocket* relayTarget, int ti
     mFilter = 0;
     mPluginResponded = false;
     mCanRespond = false;
-    mSocket.reset(relayTarget);
+    mSocket = relayTarget;
     mResponseId = responseId;
     mWaiter.setSingleShot(true);    
     connect(&mWaiter, SIGNAL(timeout()), this, SLOT(timeout()));
-    connect(mSocket.data(), SIGNAL(socketClosed()), this, SLOT(socketClosed()));
+    connect(mSocket, SIGNAL(socketClosed()), this, SLOT(socketClosed()));
     mWaiter.start(timeout);
 }
 

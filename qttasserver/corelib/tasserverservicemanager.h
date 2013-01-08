@@ -100,7 +100,7 @@ private:
 private:
 	qint32 mResponseId;
 	QTimer mWaiter;
-    QSharedPointer<TasSocket> mSocket;
+    QPointer<TasSocket> mSocket;
 	ResponseFilter* mFilter;
 	QByteArray mPlatformData;
     bool mCanRespond;
