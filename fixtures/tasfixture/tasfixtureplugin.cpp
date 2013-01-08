@@ -63,15 +63,22 @@ bool TasFixturePlugin::execute(void * objectInstance, QString actionName, QHash<
     bool result = true;
 
     if(actionName.toLower() == "change_orientation"){
-        QWidget* appWindow = TestabilityUtils::getApplicationWindow();
-        if(appWindow){
+        QWindow* appWindow = TestabilityUtils::getApplicationWindow();
+        if (appWindow) {
             QSize newSize(appWindow->height(), appWindow->width());
             appWindow->resize(newSize);    
             result =  true;
-        }
-        else{
-            stdOut = "Could not find application window.";
-            result =  false;
+        } else {
+            QWidget* appWidget = TestabilityUtils::getApplicationWidget();
+
+            if (appWidget) {
+                QSize newSize(appWidget->height(), appWidget->width());
+                appWidget->resize(newSize);
+                result =  true;
+            } else {
+                stdOut = "Could not find application window.";
+                result =  false;
+            }
         }
     }
     // set the stdOut if you wish to pass information back to Testtability Driver

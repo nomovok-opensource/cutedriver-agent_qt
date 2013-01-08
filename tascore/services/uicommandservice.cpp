@@ -197,9 +197,15 @@ TargetData UiCommandService::makeInteractionData(TasTarget* commandTarget)
         }
     }
     else if (targetType == TYPE_APPLICATION_VIEW){
-        target = getApplicationWindow();
-        if(target){
-            point = target->mapToGlobal(target->rect().center());
+        QWindow * window = getApplicationWindow();
+        if (window){
+            point = window->mapToGlobal(window->geometry().center());
+        } else {
+            QWidget * widget = getApplicationWidget();
+
+            if (widget){
+                point = widget->mapToGlobal(window->geometry().center());
+            }
         }
     }
     else{

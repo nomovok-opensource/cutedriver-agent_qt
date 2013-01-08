@@ -79,10 +79,10 @@ QGraphicsItem* TestabilityUtils::findGraphicsItem(const QString& id)
     QGraphicsItem* item = NULL;
     QObject* o = TasPointerCache::instance()->getObject(id);
     if(o != 0){
-        TasLogger::logger()->debug("TestabilityUtils::findGraphicsItem Object found from cache try casting");    
+        TasLogger::logger()->debug("TestabilityUtils::findGraphicsItem Object found from cache try casting");
         QGraphicsObject* go = qobject_cast<QGraphicsObject*>(o);
         if(go){
-            TasLogger::logger()->debug("TestabilityUtils::findGraphicsItem object ok returning it.");    
+            TasLogger::logger()->debug("TestabilityUtils::findGraphicsItem object ok returning it.");
             return go;
         }
     }
@@ -99,7 +99,7 @@ QGraphicsItem* TestabilityUtils::findGraphicsItem(const QString& id)
         }
     }
     else {
-            qDebug("TasCommander::getGraphicsItem the list of top level widgets is empty!");
+        qDebug("TasCommander::getGraphicsItem the list of top level widgets is empty!");
     }
     return item;
 }
@@ -330,10 +330,9 @@ bool TestabilityUtils::isItemInView(QGraphicsView* view, QGraphicsItem* graphics
     }
 }
 
-
-QWidget* TestabilityUtils::getApplicationWindow()
+QWidget* TestabilityUtils::getApplicationWidget()
 {
-    //attemp to find a window type widget
+    // attempt to find a window type widget
     QWidget* target = qApp->activePopupWidget();
 
     if (!target) {
@@ -341,12 +340,11 @@ QWidget* TestabilityUtils::getApplicationWindow()
         target = qApp->activeModalWidget();
 
         if (!target) {
-
             target = qApp->activeWindow();
 
             if(!target || !target->isWindow() || target->graphicsProxyWidget()){
 
-                TasLogger::logger()->debug("TestabilityUtils::getApplicationWindow no active window - look for suitable");
+                TasLogger::logger()->debug("TestabilityUtils::getApplicationWidget no active window - look for suitable");
 
                 //no active, take first from list and use it
                 QListIterator<QWidget*> iter(qApp->topLevelWidgets());
@@ -365,6 +363,30 @@ QWidget* TestabilityUtils::getApplicationWindow()
             }
         }
     }
+
+    return target;
+}
+
+
+QWindow* TestabilityUtils::getApplicationWindow()
+{
+    //attemp to find a window
+    QWindow* target = QApplication::focusWindow();
+
+    if (!target) {
+        target = QApplication::modalWindow();
+
+        if (!target) {
+            TasLogger::logger()->debug("TestabilityUtils::getApplicationWindow no active window - look for suitable");
+
+            target = QApplication::topLevelWindows().first();
+
+            if (!target) {
+                target = QApplication::allWindows().first();
+            }
+        }
+    }
+
     return target;
 }
 
@@ -391,7 +413,7 @@ bool TestabilityUtils::isVisibilityCheckOn()
     if(value.isValid() && value.canConvert<QString>()){
         QString onOff = value.toString();
         if(onOff.toLower() == "on"){
-                return true;
+            return true;
         }
     }
     return false;
@@ -402,7 +424,7 @@ bool TestabilityUtils::isItemBlackListed(QString objectName, QString className)
     //black list will most likely contain names without dynamic qml extension
     if(className.contains("_QML")){
         QStringList stringList = className.split("_QML");
-        className = stringList.takeFirst();        
+        className = stringList.takeFirst();
     }
 
     QVariant value = TestabilitySettings::settings()->getValue(VISIBILITY_BLACKLIST);
@@ -490,7 +512,7 @@ ItemLocationDetails TestabilityUtils::getItemLocationDetails(QGraphicsItem* grap
 #ifdef Q_OS_SYMBIAN
                 TasDeviceUtils::flipOrigo = false;
 #endif
-                //this a bit problematic, lets look for the top most item in the hierachy 
+                //this a bit problematic, lets look for the top most item in the hierachy
                 //with rotation transformation
                 QGraphicsItem* rotator = findTopMostRotated(graphicsItem);
                 if(rotator){
@@ -515,7 +537,7 @@ ItemLocationDetails TestabilityUtils::getItemLocationDetails(QGraphicsItem* grap
             // for webkit
             // If the window is embedded into a another app, wee need to figure out if the widget is visible
             if (command && command->parameter("x_parent_absolute") != "" &&
-                command->parameter("y_parent_absolute") != "") {
+                    command->parameter("y_parent_absolute") != "") {
                 QPoint p(command->parameter("x_parent_absolute").toInt(),
                          command->parameter("y_parent_absolute").toInt());
                 screenPoint += p;
@@ -531,7 +553,7 @@ ItemLocationDetails TestabilityUtils::getItemLocationDetails(QGraphicsItem* grap
             if (windowSize != QPoint(0,0)) {
                 // Windows with top left corner off screen are always off screen
                 if (screenPoint.x() > windowSize.x() ||
-                    screenPoint.y() > windowSize.y()) {
+                        screenPoint.y() > windowSize.y()) {
                     isVisible = false;
                 } else {
                     // Window starts off-screen

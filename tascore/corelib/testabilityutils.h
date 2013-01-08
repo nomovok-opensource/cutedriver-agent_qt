@@ -46,7 +46,8 @@ struct ItemLocationDetails
 class TAS_EXPORT TestabilityUtils : public TasCoreUtils
 {
 public:
-    virtual ~TestabilityUtils(){};
+    virtual ~TestabilityUtils() {}
+
 	static QGraphicsView* getViewForItem(QGraphicsItem* graphicsItem);
 	static bool isItemInView(QGraphicsView* view, QGraphicsItem* graphicsItem);
 	static QWidget* viewPortAndPosition(QGraphicsItem* graphicsItem, QPoint& point);
@@ -59,7 +60,9 @@ public:
 	static QGraphicsWidget* castToGraphicsWidget(QGraphicsItem* graphicsItem);
     static bool isVisibilityCheckOn();
     static bool isItemBlackListed(QString objectName, QString className);
-	static QWidget* getApplicationWindow();
+
+    static QWindow* getApplicationWindow();
+    static QWidget* getApplicationWidget();
 
 protected:
 	QWidget* findWidget(const QString& id);
