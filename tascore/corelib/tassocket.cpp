@@ -297,14 +297,15 @@ bool TasSocket::sendMessage(TasMessage& message)
 //void TasSocket::dataAvailable()
 void TasSocket::messageAvailable(TasMessage& message)
 { 
-    if(message.isRequest() && mRequestHandler){
+    if (message.isRequest() && mRequestHandler) {
+        qDebug() << mRequestHandler << message.dataAsString();
         mRequestHandler->serviceRequest(message, this);
-    }
-    else if(message.isResponse() && mResponseHandler){
+    } else if (message.isResponse() && mResponseHandler) {
+        qDebug() << mResponseHandler << message.dataAsString();
         mResponseHandler->serviceResponse(message);
-    }
-    else{
-        TasLogger::logger()->warning("TasSocket::dataAvailable Received a message: " + QString::number(message.flag()) + " but no handlers.");
+    } else {
+        TasLogger::logger()->warning("TasSocket::dataAvailable Received a message: "
+                                     + QString::number(message.flag()) + " but no handlers.");
     }
 }
 
@@ -316,12 +317,11 @@ TasSocketWriter::TasSocketWriter(QIODevice* device, QObject* parent)
     mLocalSocket = 0;
 
     QAbstractSocket* tcpSocket = qobject_cast<QAbstractSocket*>(mDevice);
-    if(tcpSocket){
+    if (tcpSocket) {
         mTcpSocket = tcpSocket;
-    }
-    else{
+    } else {
         QLocalSocket* socket = qobject_cast<QLocalSocket*>(mDevice);
-        if(socket){
+        if (socket) {
             mLocalSocket = socket;
         }
     }
@@ -408,13 +408,15 @@ TasSocketReader::TasSocketReader(QIODevice* device, QObject* parent)
 }
 
 TasSocketReader::~TasSocketReader()
-{    
-    close();
+{
+    if (mDevice) {
+        close();
+    }
 }
 
 void TasSocketReader::close()
-{   
-    disconnect(mDevice, SIGNAL(readyRead()), this, SLOT(readMessageData()));
+{       
+    mDevice->disconnect(this);
     mDevice = 0;
 }
 
@@ -433,22 +435,21 @@ void TasSocketReader::readMessageData()
     }
     //wait for header data to be available, start process only after
     //enough data available
-    if(mDevice->bytesAvailable() < HEADER_LENGTH){
+    if (mDevice->bytesAvailable() < HEADER_LENGTH) {
         return;
     }
 
     disconnect(mDevice, SIGNAL(readyRead()), this, SLOT(readMessageData()));
 
     TasMessage message;
-
-    if(readOneMessage(message)){
+    if (readOneMessage(message)) {
         emit messageRead(message);
     }
 
-    if(mDevice){
+    if (mDevice) {
         connect(mDevice, SIGNAL(readyRead()), this, SLOT(readMessageData()));
         //maybe there was a new message coming when the old one was still being processed.
-        if(mDevice->bytesAvailable() > 0){
+        if (mDevice->bytesAvailable() > 0) {
             readMessageData();
         }
     }
@@ -467,11 +468,12 @@ bool TasSocketReader::readOneMessage(TasMessage& message)
     QDataStream in(mDevice);
     in.setVersion(QDataStream::Qt_5_0);
     in.setByteOrder(QDataStream::LittleEndian);
+
     //read header
     in >> flag >> bodySize >> crc >> compressed >> messageId;
     
     bool compression = false;
-    if(compressed == COMPRESSION_ON ){
+    if (compressed == COMPRESSION_ON) {
         compression = true;
     }
 
