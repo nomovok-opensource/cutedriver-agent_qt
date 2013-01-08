@@ -43,7 +43,7 @@
     Flag: 1 byte
     Body size: 4 bytes
     Crc of the body: 2 bytes
-    Comressed: 1 byte
+    Compressed: 1 byte
     Body: Body size bytes.
     
     The messages will be formatted in little endian byte order.
