@@ -85,7 +85,7 @@ private:
 	QFile* openFile(const QString& fileName, TasCommand* command);
 
 private slots:	
-	void timerEvent();
+    void infoTimerEvent();
 
 private:
 	QTimer mTimer;

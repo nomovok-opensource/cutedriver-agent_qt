@@ -34,7 +34,7 @@ public:
     bool eventFilter(QObject *target, QEvent *event);
 
 protected slots:
-    void timerEvent(qreal);
+    void gestureTimerEvent(qreal);
 	void finished();
 	void releaseMouse();
 

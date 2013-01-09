@@ -26,7 +26,7 @@ TasGestureRunner::TasGestureRunner(TasGesture* gesture, QObject* parent)
     :QObject(parent)
 {
     mGesture = gesture;
-    connect(&mTimeLine, SIGNAL(valueChanged(qreal)), this, SLOT(timerEvent(qreal)));
+    connect(&mTimeLine, SIGNAL(valueChanged(qreal)), this, SLOT(gestureTimerEvent(qreal)));
     connect(&mTimeLine, SIGNAL(finished()), this, SLOT(finished()));
     qApp->installEventFilter(this);
 #ifdef TAS_MAEMO
@@ -81,7 +81,7 @@ void TasGestureRunner::startGesture()
     mTimeLine.start();
 }
 
-void TasGestureRunner::timerEvent(qreal value)
+void TasGestureRunner::gestureTimerEvent(qreal value)
 {
     move(mGesture->pointsAt(value));
     mPreviousPoints = mGesture->pointsAt(value);

@@ -25,7 +25,7 @@
 TasMultiGestureRunner::TasMultiGestureRunner(QList<TasGesture*> gestures, QObject* parent)
   :QObject(parent), mUseTapScreen(false)
 {    
-    connect(&mTimeLine, SIGNAL(valueChanged(qreal)), this, SLOT(timerEvent(qreal)));
+    connect(&mTimeLine, SIGNAL(valueChanged(qreal)), this, SLOT(gestureTimerEvent(qreal)));
     connect(&mTimeLine, SIGNAL(finished()), this, SLOT(finished()));
     //calculate duration multipliers
     int maxDuration = 0;
@@ -92,7 +92,7 @@ void TasMultiGestureRunner::startGesture()
     mTimeLine.start();
 }
 
-void TasMultiGestureRunner::timerEvent(qreal value)
+void TasMultiGestureRunner::gestureTimerEvent(qreal value)
 {
     QList<TasGesture*> finished;
     Qt::TouchPointStates states = Qt::TouchPointMoved;

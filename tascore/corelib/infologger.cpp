@@ -47,7 +47,7 @@ InfoLogger::InfoLogger()
     mState = 0;
     mDeviceUtils = new TasDeviceUtils();
     mTimer.setInterval(1000);
-    connect(&mTimer, SIGNAL(timeout()), this, SLOT(timerEvent()));
+    connect(&mTimer, SIGNAL(timeout()), this, SLOT(infoTimerEvent()));
 }
 
 InfoLogger::~InfoLogger()
@@ -306,7 +306,7 @@ void InfoLogger::checkLoggerState()
 }
 
 
-void InfoLogger::timerEvent()
+void InfoLogger::infoTimerEvent()
 {
     if( (mState & CpuLogging) != 0){
         logCpu();

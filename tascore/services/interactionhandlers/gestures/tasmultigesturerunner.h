@@ -35,7 +35,7 @@ public:
     ~TasMultiGestureRunner();
 
 protected slots:
-    void timerEvent(qreal);
+    void gestureTimerEvent(qreal);
 	void finished();
 
 private:

@@ -40,7 +40,7 @@ public:
   void stopLogger(QObject* object, QHash<QString, QString> params);
 
 private slots:
-  void timerEvent();
+  void logTimerEvent();
 
 private:
   bool validateParams(QHash<QString, QString> params, QString& errorMsg) ;

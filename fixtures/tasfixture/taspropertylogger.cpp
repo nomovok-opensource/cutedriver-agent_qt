@@ -37,7 +37,7 @@ const char* const INTERVAL = "interval";
 TasPropertyLogger::TasPropertyLogger()
 {
     mInterval = 1000;
-    connect(&mTimer, SIGNAL(timeout()), this, SLOT(timerEvent()));    
+    connect(&mTimer, SIGNAL(timeout()), this, SLOT(logTimerEvent()));
 }
 TasPropertyLogger::~TasPropertyLogger()
 {
@@ -52,7 +52,7 @@ TasPropertyLogger::~TasPropertyLogger()
 /*!
   Collect the property values
  */
-void TasPropertyLogger::timerEvent()
+void TasPropertyLogger::logTimerEvent()
 {
     foreach( QObject* object, mTargets.keys()){
         QHash<QString,QFile*> fileMap = mTargets.value(object);
