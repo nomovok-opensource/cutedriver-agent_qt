@@ -42,40 +42,40 @@ void TasMouseEventGenerator::setUseTapScreen(bool use)
     mUseTapScreen = use;
 }
 
-void TasMouseEventGenerator::doMousePress(QWidget* target, Qt::MouseButton button, QPoint point, uint pointerNumber)
+void TasMouseEventGenerator::doMousePress(const TasEventTarget& target, Qt::MouseButton button, QPoint point, uint pointerNumber)
 {
-    QMouseEvent* eventPress = new QMouseEvent(QEvent::MouseButtonPress, target->mapFromGlobal(point), point, button, button, 0);    
+    QMouseEvent* eventPress = new QMouseEvent(QEvent::MouseButtonPress, target.mapFromGlobal(point), point, button, button, 0);
     sendMouseEvent(target, eventPress, pointerNumber);
 }
-void TasMouseEventGenerator::doMouseRelease(QWidget* target, Qt::MouseButton button, QPoint point, uint pointerNumber)
+void TasMouseEventGenerator::doMouseRelease(const TasEventTarget& target, Qt::MouseButton button, QPoint point, uint pointerNumber)
 {
-    QMouseEvent* eventRelease = new QMouseEvent(QEvent::MouseButtonRelease, target->mapFromGlobal(point), point, button, Qt::NoButton, 0);
+    QMouseEvent* eventRelease = new QMouseEvent(QEvent::MouseButtonRelease, target.mapFromGlobal(point), point, button, Qt::NoButton, 0);
     sendMouseEvent(target, eventRelease, pointerNumber);
 }
-void TasMouseEventGenerator::doMouseMove(QWidget* target, QPoint point, Qt::MouseButton button, uint pointerNumber )
+void TasMouseEventGenerator::doMouseMove(const TasEventTarget& target, QPoint point, Qt::MouseButton button, uint pointerNumber )
 {
     moveCursor(point);
-    QMouseEvent* eventMove = new QMouseEvent(QEvent::MouseMove, target->mapFromGlobal(point), point, button, button, 0);
+    QMouseEvent* eventMove = new QMouseEvent(QEvent::MouseMove, target.mapFromGlobal(point), point, button, button, 0);
     sendMouseEvent(target, eventMove, pointerNumber);
 }
-void TasMouseEventGenerator::doScroll(QWidget* target, QPoint& point, int delta, Qt::MouseButton button,  Qt::Orientation orient)
+void TasMouseEventGenerator::doScroll(const TasEventTarget& target, QPoint& point, int delta, Qt::MouseButton button,  Qt::Orientation orient)
 {
-    QWheelEvent* event = new QWheelEvent(point, target->mapToGlobal(point), delta, button, 0, orient);
-    qApp->postEvent(target, event);
+    QWheelEvent* event = new QWheelEvent(point, target.mapToGlobal(point), delta, button, 0, orient);
+    qApp->postEvent(target.receiver(), event);
 }
 
-void TasMouseEventGenerator::doMouseDblClick(QWidget* target, Qt::MouseButton button, QPoint point)
+void TasMouseEventGenerator::doMouseDblClick(const TasEventTarget& target, Qt::MouseButton button, QPoint point)
 {
-    QMouseEvent* eventDblClick = new QMouseEvent(QEvent::MouseButtonDblClick, target->mapFromGlobal(point), point, button, Qt::NoButton, 0);    
+    QMouseEvent* eventDblClick = new QMouseEvent(QEvent::MouseButtonDblClick, target.mapFromGlobal(point), point, button, Qt::NoButton, 0);
     sendMouseEvent(target, eventDblClick);
 }
-void TasMouseEventGenerator::sendMouseEvent(QWidget* target, QMouseEvent* event, uint pointerNumber)
+void TasMouseEventGenerator::sendMouseEvent(const TasEventTarget& target, QMouseEvent* event, uint pointerNumber)
 {
     if(mUseTapScreen){
 #if defined(Q_OS_WIN32)
-        if( GetForegroundWindow() != target->window()->winId()){
+        if( GetForegroundWindow() != target.window()->winId()){
             TasLogger::logger()->debug("TasMouseEventGenerator::sendMouseEvent set foreground");
-            SetForegroundWindow(target->window()->winId());
+            SetForegroundWindow(target.window()->winId());
         }
         if(event->type() == QEvent::MouseButtonPress || event->type() == QEvent::GraphicsSceneMousePress){
             TasDeviceUtils::sendMouseEvent(event->globalX(), event->globalY(), event->button(), QEvent::MouseMove, pointerNumber);
@@ -86,7 +86,7 @@ void TasMouseEventGenerator::sendMouseEvent(QWidget* target, QMouseEvent* event,
         TasLogger::logger()->debug("TasMouseEventGenerator::sendMouseEvent done");
     } else {
         QSpontaneKeyEvent::setSpontaneous(event);
-        qApp->postEvent(target, event);
+        qApp->postEvent(target.receiver(), event);
         qApp->processEvents();
     }
 }

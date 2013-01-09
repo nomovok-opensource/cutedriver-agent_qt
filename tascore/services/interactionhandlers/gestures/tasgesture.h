@@ -44,6 +44,7 @@ public:
 	MouseHandler::PointerType pointerType();
 	void setPointerType(MouseHandler::PointerType type);
 	QWidget* getTarget();
+    QWindow *getTargetWindow();
 	QGraphicsItem* getTargetItem();	
 	Qt::MouseButton getMouseButton();
 	int getDuration(){return mDuration;}
@@ -53,6 +54,7 @@ public:
 	QString touchPointIdKey(){return mTouchPointIdKey;}
 	void setUseTapScreen(bool useTapScreen) { mUseTapScreen=useTapScreen; }
 	bool getUseTapScreen() { return mUseTapScreen; }
+
 
 protected:
 	TasTouchPoints makeTouchPoint(QPoint pos, QPoint lastPos=QPoint(), QPoint startPos=QPoint());
@@ -66,6 +68,7 @@ protected:
 	int mDuration;
 	QWidget* mTarget;
 	QGraphicsItem* mTargetItem;
+    QWindow* mTargetWindow;
 	QString mTouchPointIdKey;
 	QPoint mStartPoint;
 	QPoint mLastPoint; 

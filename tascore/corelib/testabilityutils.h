@@ -31,6 +31,7 @@
 #include "tascoreutils.h"
 
 class TasCommand;
+class QQuickItem;
 
 struct ItemLocationDetails
 {
@@ -63,6 +64,9 @@ public:
 
     static QWindow* getApplicationWindow();
     static QWidget* getApplicationWidget();
+
+    static QQuickItem* findQuickItem(const QString& id);
+    static QQuickItem* findQuickItem(const QString& id, QQuickItem* current);
 
 protected:
 	QWidget* findWidget(const QString& id);

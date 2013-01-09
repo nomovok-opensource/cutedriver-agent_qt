@@ -26,6 +26,7 @@
 #include <QPoint>
 #include <QRect>
 #include <QQuickWindow>
+#include <QQuickItem>
 
 #include "screenshotservice.h"
 #include "taslogger.h"
@@ -146,6 +147,14 @@ void ScreenshotService::getScreenshot(TasCommandModel& model, TasResponse& respo
             } else {
                 TasLogger::logger()->debug("ScreenshotService::executeService application has no visible ui!");
                 errorMsg = "Application has no visible ui!";
+            }
+        } else if (targetType == TYPE_QSCENEGRAPH) {
+            QQuickItem* item = TestabilityUtils::findQuickItem(targetId);
+
+            if (item) {
+                QPointF offset = item->mapToScene(QPointF(0,0));
+                rect = QRect(-offset.x(), -offset.y(), item->width(), item->height());
+                qtQuickWindow = item->window();
             }
         } else {
             //TasLogger::logger()->debug("TYPE_APPLICATION_VIEW about to find application window Target id:" + targetId);

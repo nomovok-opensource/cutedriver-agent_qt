@@ -20,6 +20,9 @@
 #include <QtTest/qtestspontaneevent.h>
 #include <QDesktopWidget>
 
+#include <QWindow>
+#include <QScreen>
+
 #include "tascoreutils.h"
 #include "tastoucheventgenerator.h"
 #include "taslogger.h"
@@ -36,60 +39,60 @@ TasTouchEventGenerator::~TasTouchEventGenerator()
 {
 }
 
-void TasTouchEventGenerator::doTouchBegin(QWidget* target, QPoint point, QString identifier)
+void TasTouchEventGenerator::doTouchBegin(const TasEventTarget& target, QPoint point, QString identifier)
 {
     doTouchBegin(target, toTouchPoints(point), identifier);
 }
 
-void TasTouchEventGenerator::doTouchUpdate(QWidget* target, QPoint point, QString identifier)
+void TasTouchEventGenerator::doTouchUpdate(const TasEventTarget& target, QPoint point, QString identifier)
 {
     doTouchUpdate(target, toTouchPoints(point), identifier);
 }
 
-void TasTouchEventGenerator::doTouchEnd(QWidget* target, QPoint point, QString identifier)
+void TasTouchEventGenerator::doTouchEnd(const TasEventTarget& target, QPoint point, QString identifier)
 {
     doTouchEnd(target, toTouchPoints(point), identifier);
 }
 
 
-void TasTouchEventGenerator::doTouchBegin(QWidget* target, QList<TasTouchPoints> points, QString identifier)
+void TasTouchEventGenerator::doTouchBegin(const TasEventTarget& target, QList<TasTouchPoints> points, QString identifier)
 {
     QList<QTouchEvent::TouchPoint> touchPoints = convertToTouchPoints(target, Qt::TouchPointPressed, points, identifier);
     // TODO [hhinrich] delete touchDevice?
     QTouchDevice* touchDevice = new QTouchDevice();
     touchDevice->setType(QTouchDevice::TouchScreen);
     QTouchEvent* touchPress = new QTouchEvent(QEvent::TouchBegin, touchDevice, Qt::NoModifier, Qt::TouchPointPressed, touchPoints);
-    touchPress->setTarget(target);
+    touchPress->setTarget(target.receiver());
     sendTouchEvent(target, touchPress);
 }
 
-void TasTouchEventGenerator::doTouchUpdate(QWidget* target, QList<TasTouchPoints> points, QString identifier)
+void TasTouchEventGenerator::doTouchUpdate(const TasEventTarget& target, QList<TasTouchPoints> points, QString identifier)
 {
     QList<QTouchEvent::TouchPoint> touchPoints = convertToTouchPoints(target, Qt::TouchPointMoved, points, identifier);
     // TODO [hhinrich] delete touchDevice?
     QTouchDevice* touchDevice = new QTouchDevice();
     touchDevice->setType(QTouchDevice::TouchScreen);
     QTouchEvent* touchMove = new QTouchEvent(QEvent::TouchUpdate, touchDevice, Qt::NoModifier, Qt::TouchPointMoved, touchPoints);
-    touchMove->setTarget(target);
+    touchMove->setTarget(target.receiver());
     sendTouchEvent(target, touchMove);
 }
 
-void TasTouchEventGenerator::doTouchEnd(QWidget* target, QList<TasTouchPoints> points, QString identifier)
+void TasTouchEventGenerator::doTouchEnd(const TasEventTarget& target, QList<TasTouchPoints> points, QString identifier)
 {
     QList<QTouchEvent::TouchPoint> touchPoints = convertToTouchPoints(target, Qt::TouchPointReleased, points, identifier);
     // TODO [hhinrich] delete touchDevice?
     QTouchDevice* touchDevice = new QTouchDevice();
     touchDevice->setType(QTouchDevice::TouchScreen);
     QTouchEvent *touchRelease = new QTouchEvent(QEvent::TouchEnd, touchDevice, Qt::NoModifier, Qt::TouchPointReleased, touchPoints);
-    touchRelease->setTarget(target);
+    touchRelease->setTarget(target.receiver());
     sendTouchEvent(target, touchRelease);
 }
 
 
-void TasTouchEventGenerator::sendTouchEvent(QWidget* target, QTouchEvent* event)
+void TasTouchEventGenerator::sendTouchEvent(const TasEventTarget& target, QTouchEvent* event)
 {
     QSpontaneKeyEvent::setSpontaneous(event);
-    qApp->postEvent(target, event);   
+    qApp->postEvent(target.receiver(), event);
     qApp->processEvents();
 }
 
@@ -99,7 +102,7 @@ QList<QTouchEvent::TouchPoint> TasTouchEventGenerator::convertToTouchPoints(Targ
                                 TasCoreUtils::pointerId(targetData.targetItem));
 }
 
-QList<QTouchEvent::TouchPoint> TasTouchEventGenerator::convertToTouchPoints(QWidget* target, Qt::TouchPointState state,
+QList<QTouchEvent::TouchPoint> TasTouchEventGenerator::convertToTouchPoints(const TasEventTarget& target, Qt::TouchPointState state,
                                                                             QList<TasTouchPoints> points,
                                                                             QString identifier)
 {
@@ -135,7 +138,7 @@ QList<QTouchEvent::TouchPoint> TasTouchEventGenerator::convertToTouchPoints(QWid
     return touchPoints;
 }
 
-QTouchEvent::TouchPoint TasTouchEventGenerator::makeTouchPoint(QWidget* target, TasTouchPoints points,
+QTouchEvent::TouchPoint TasTouchEventGenerator::makeTouchPoint(const TasEventTarget& target, TasTouchPoints points,
                                                                Qt::TouchPointState state, int id)
 {
     TasLogger::logger()->debug("TasTouchEventGenerator:: generating point with id: " + 
@@ -144,9 +147,9 @@ QTouchEvent::TouchPoint TasTouchEventGenerator::makeTouchPoint(QWidget* target, 
     Qt::TouchPointStates states = state;
     touchPoint.setPressure(1.0);
     touchPoint.setState(states);
-    touchPoint.setPos(target->mapFromGlobal(points.screenPoint));    
+    touchPoint.setPos(target.mapFromGlobal(points.screenPoint));
 
-    QWidget* parentWidget = target->parentWidget();
+    QWidget* parentWidget = target.parentWidget();
     if(parentWidget && parentWidget->inherits("QGraphicsView")){
         QGraphicsView* view = qobject_cast<QGraphicsView*>(parentWidget);
         if (view) {
@@ -156,26 +159,17 @@ QTouchEvent::TouchPoint TasTouchEventGenerator::makeTouchPoint(QWidget* target, 
         touchPoint.setScenePos(points.screenPoint);
     }
 
-
-
-    touchPoint.setScreenPos(points.screenPoint);    
-    QRect screenGeometry = QApplication::desktop()->screenGeometry(points.screenPoint);
-    touchPoint.setNormalizedPos(QPointF(points.screenPoint.x() / screenGeometry.width(),
-                                        points.screenPoint.y() / screenGeometry.height()));
+    touchPoint.setScreenPos(points.screenPoint);
 
     //in addition to the position we also need to set last and start positions as 
     //some gesture may depend on them
     if(!points.lastScreenPoint.isNull()){
-        touchPoint.setLastPos(target->mapFromGlobal(points.lastScreenPoint));    
-        touchPoint.setLastScreenPos(points.lastScreenPoint);    
-        touchPoint.setLastNormalizedPos(QPointF(points.lastScreenPoint.x() / screenGeometry.width(),
-                                                points.lastScreenPoint.y() / screenGeometry.height()));
+        touchPoint.setLastPos(target.mapFromGlobal(points.lastScreenPoint));
+        touchPoint.setLastScreenPos(points.lastScreenPoint);
     }
     if(!points.startScreenPoint.isNull()){
-        touchPoint.setStartPos(target->mapFromGlobal(points.startScreenPoint));    
-        touchPoint.setStartScreenPos(points.startScreenPoint);    
-        touchPoint.setStartNormalizedPos(QPointF(points.startScreenPoint.x() / screenGeometry.width(),
-                                                points.startScreenPoint.y() / screenGeometry.height()));
+        touchPoint.setStartPos(target.mapFromGlobal(points.startScreenPoint));
+        touchPoint.setStartScreenPos(points.startScreenPoint);
     }
     return touchPoint;
 }

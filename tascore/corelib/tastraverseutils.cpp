@@ -20,13 +20,8 @@
 
 #include <QFontMetricsF>
 #include <QTextCodec>
-
-#if QT_VERSION >= 0x040700
-#include <QDeclarativeItem>
-#ifdef QML_ID
-#include <QDeclarativeContext>
-#endif
-#endif
+#include <QGraphicsItem>
+#include <QGraphicsWidget>
 
 #include "testabilityutils.h"
 #include "tastraverseutils.h"
@@ -74,21 +69,6 @@ void TasTraverseUtils::addObjectDetails(TasObject* objectInfo, QObject* object)
     if(objectInfo->getType().isEmpty()){
         QString objectType = object->metaObject()->className();
         objectType.replace(QString(":"), QString("_"));
-#if QT_VERSION >= 0x040700
-        //strip dynamic qml strings from the class name and add id string if existing
-        if(qobject_cast<QDeclarativeItem*>(object)){
-            QStringList stringList = objectType.split("_QML");
-            QString strippedType = stringList.takeFirst();
-            objectInfo->addAttribute("QML_TYPE_EXTENSION",  objectType.remove(strippedType));    
-            objectType = strippedType;
-#ifdef QML_ID
-            QDeclarativeContext *context = qmlContext(object);
-            if (context) {
-                objectInfo->addAttribute("QML_ID", context->getStringId(object));
-            }
-#endif
-        }
-#endif
         objectInfo->setType(objectType);    
     }
     if(includeAttribute("parent")){
@@ -166,9 +146,7 @@ void TasTraverseUtils::addVariantValue(TasAttribute& attr, const QVariant& value
   Print metadata details to the model.
 */
 void TasTraverseUtils::printProperties(TasObject* objectInfo, QObject* object)
-{            
-    if (object->inherits("QDeclarativeLoader")) return;
-	
+{
     const QMetaObject *metaobject = object->metaObject();
     int count = metaobject->propertyCount();
     for (int i=0; i<count; i++){        

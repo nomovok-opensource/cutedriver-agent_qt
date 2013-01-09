@@ -16,7 +16,10 @@
 ** of this file. 
 ** 
 ****************************************************************************/ 
- 
+
+#ifndef TASTOUCHEVENTGENERATOR_H
+#define TASTOUCHEVENTGENERATOR_H
+
 #include <QApplication>
 #include <QWidget>
 #include <QGraphicsItem>
@@ -25,9 +28,7 @@
 #include <QHash>
 
 #include "uicommandservice.h"
-
-#ifndef TASTOUCHEVENTGENERATOR_H
-#define TASTOUCHEVENTGENERATOR_H
+#include "taseventtarget.h"
 
 struct TasTouchPoints
 {
@@ -36,7 +37,6 @@ struct TasTouchPoints
     QPoint startScreenPoint;
 };
 
-
 class TasTouchEventGenerator : public QObject
 {
     Q_OBJECT
@@ -44,25 +44,25 @@ public:
     TasTouchEventGenerator(QObject* parent=0);
     ~TasTouchEventGenerator();
 
-    void doTouchBegin(QWidget* target, QPoint point, QString identifier);
-    void doTouchUpdate(QWidget* target, QPoint point, QString identifier);
-    void doTouchEnd(QWidget* target, QPoint point, QString identifier);
+    void doTouchBegin(const TasEventTarget& target, QPoint point, QString identifier);
+    void doTouchUpdate(const TasEventTarget& target, QPoint point, QString identifier);
+    void doTouchEnd(const TasEventTarget& target, QPoint point, QString identifier);
 
 	QList<QTouchEvent::TouchPoint> convertToTouchPoints(TargetData targetData, Qt::TouchPointState state);
 
-    QList<QTouchEvent::TouchPoint> convertToTouchPoints(QWidget* target, Qt::TouchPointState state,
+    QList<QTouchEvent::TouchPoint> convertToTouchPoints(const TasEventTarget& target, Qt::TouchPointState state,
                                                         QList<TasTouchPoints> points, QString identifier=QString());
-    QTouchEvent::TouchPoint makeTouchPoint(QWidget* target, TasTouchPoints points, Qt::TouchPointState state, int id);
+    QTouchEvent::TouchPoint makeTouchPoint(const TasEventTarget& target, TasTouchPoints points, Qt::TouchPointState state, int id);
 
     QList<TasTouchPoints> toTouchPoints(QPoint point);
     TasTouchPoints toTouchPoint(QPoint point);
-    void sendTouchEvent(QWidget* target, QTouchEvent* event);
+    void sendTouchEvent(const TasEventTarget& target, QTouchEvent* event);
 	bool areIdentical(QList<TasTouchPoints> points1, QList<TasTouchPoints> points2);
 
 public slots:
-    void doTouchBegin(QWidget* target, QList<TasTouchPoints> points, QString identifier=QString());
-    void doTouchUpdate(QWidget* target, QList<TasTouchPoints> points, QString identifier=QString());
-    void doTouchEnd(QWidget* target, QList<TasTouchPoints> points, QString identifier=QString());
+    void doTouchBegin(const TasEventTarget& target, QList<TasTouchPoints> points, QString identifier=QString());
+    void doTouchUpdate(const TasEventTarget& target, QList<TasTouchPoints> points, QString identifier=QString());
+    void doTouchEnd(const TasEventTarget& target, QList<TasTouchPoints> points, QString identifier=QString());
 
 private:
     static int mTouchPointCounter;

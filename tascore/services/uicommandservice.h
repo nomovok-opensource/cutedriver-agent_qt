@@ -30,22 +30,25 @@
 #include "tasservicebase.h"
 #include "testabilityutils.h"
 
+class QQuickWindow;
+
 struct TargetData
 {
   TasCommand* command;
   QWidget* target;
   QPoint targetPoint;
+  QWindow* targetWindow;
   QGraphicsItem* targetItem;
 };
 
 class InteractionHandler : public TestabilityUtils
 {
 public:
-  virtual ~InteractionHandler(){};
+  virtual ~InteractionHandler() {}
 
   virtual QString handlerName() = 0;
   virtual bool executeInteraction(TargetData) = 0;
-  virtual bool executeMultitouchInteraction(QList<TargetData>){return false;}
+  virtual bool executeMultitouchInteraction(QList<TargetData>) {return false;}
 };
 
 

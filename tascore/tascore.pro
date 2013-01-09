@@ -85,16 +85,10 @@ symbian: {
 }
 
 
-QT += network xml testlib gui widgets
+QT += network xml testlib gui widgets quick
 
 !CONFIG(no_webkit) {
-QT += webkitwidgets
-}
-
-contains(QT_VERSION, ^4\\.[0-6]\\..*) {
-	 message(Component declarative excluded from build due to old Qt version)
-} else {
-	QT += declarative
+    QT += webkitwidgets
 }
 
 

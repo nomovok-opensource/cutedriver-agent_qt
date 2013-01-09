@@ -28,6 +28,8 @@
 #include <QMouseEvent>
 #include <QCursor>
 
+#include "taseventtarget.h"
+
 class TasMouseEventGenerator : public QObject
 {
    Q_OBJECT
@@ -38,15 +40,15 @@ public:
     void setUseTapScreen(bool use);
 
 public slots:	
-    void doMousePress(QWidget* target, Qt::MouseButton button, QPoint point, uint pointerNumber=0);
-    void doMouseRelease(QWidget* target, Qt::MouseButton button, QPoint point, uint pointerNumber=0);
-    void doMouseMove(QWidget* target, QPoint point, Qt::MouseButton button=Qt::NoButton, uint pointerNumber=0);
-    void doScroll(QWidget* target, QPoint& point, int delta, Qt::MouseButton button,  Qt::Orientation orient);
-    void doMouseDblClick(QWidget* target, Qt::MouseButton button, QPoint point);
+    void doMousePress(const TasEventTarget& target, Qt::MouseButton button, QPoint point, uint pointerNumber=0);
+    void doMouseRelease(const TasEventTarget& target, Qt::MouseButton button, QPoint point, uint pointerNumber=0);
+    void doMouseMove(const TasEventTarget& target, QPoint point, Qt::MouseButton button=Qt::NoButton, uint pointerNumber=0);
+    void doScroll(const TasEventTarget& target, QPoint& point, int delta, Qt::MouseButton button,  Qt::Orientation orient);
+    void doMouseDblClick(const TasEventTarget& target, Qt::MouseButton button, QPoint point);
     void moveCursor(QPoint point, uint pointerNumber=0);
 
 private:
-    void sendMouseEvent(QWidget* target, QMouseEvent* event, uint pointerNumber=0);
+    void sendMouseEvent(const TasEventTarget& target, QMouseEvent* event, uint pointerNumber=0);
 
 
 private:

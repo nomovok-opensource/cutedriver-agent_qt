@@ -22,6 +22,9 @@
 #include <QApplication>
 #include <QListIterator>
 
+#include <QQuickWindow>
+#include <QQuickItem>
+
 #include "tascommandparser.h"
 #include "taslogger.h"
 #include "uicommandservice.h"
@@ -110,7 +113,7 @@ void UiCommandService::executeNextCommand()
             TasCommand* command = 0;
             foreach(command, target->commandList()){
                 TargetData data = makeInteractionData(target);
-                if(data.target){
+                if(data.target || data.targetWindow){
                     data.command = command;
                     dataList.append(data);
                 }
@@ -124,7 +127,7 @@ void UiCommandService::executeNextCommand()
         //2. normal
         TasTarget* target = mCommandQueue.dequeue();
         TargetData data = makeInteractionData(target);
-        if(data.target){
+        if (data.target || data.targetWindow) {
             TasCommand* command = 0;
             foreach(command, target->commandList()){
                 data.command = command;
@@ -150,6 +153,7 @@ TargetData UiCommandService::makeInteractionData(TasTarget* commandTarget)
     QString id = commandTarget->id();
     QWidget* target = 0;
     QGraphicsItem* item = 0;
+    QWindow* targetWindow = 0;
     QPoint point;
     if(targetType == TYPE_GRAPHICS_VIEW){
         item = findGraphicsItem(id);
@@ -208,12 +212,33 @@ TargetData UiCommandService::makeInteractionData(TasTarget* commandTarget)
             }
         }
     }
+    else if (targetType == TYPE_QSCENEGRAPH){
+        QQuickWindow *window;
+        foreach (QWindow* w, QApplication::topLevelWindows()) {
+            window = qobject_cast<QQuickWindow*>(w);
+            if (window) {
+                targetWindow = window;
+                break;
+            }
+        }
+
+        if (window) {
+            QQuickItem* quickItem = TestabilityUtils::findQuickItem(id);
+            if (quickItem) {
+                QPointF offset = quickItem->mapToScene(QPointF(0,0));
+                point = window->mapToGlobal(QPoint(offset.x() + (quickItem->width()/2),
+                                                   offset.y() + (quickItem->height()/2)));
+            }
+        }
+    }
     else{
         TasLogger::logger()->warning("UiCommandService::performUiCommands unknown type");
     }
+
     TargetData data;
     data.target = target;
     data.targetItem = item;
+    data.targetWindow = targetWindow;
     data.targetPoint = point;
     return data;
 }

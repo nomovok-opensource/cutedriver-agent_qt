@@ -20,6 +20,8 @@
 #include <QGraphicsWidget>
 #include <QGraphicsObject>
 #include <QApplication>
+#include <QQuickItem>
+#include <QQuickWindow>
 
 #include "testabilityutils.h"
 #include "taslogger.h"
@@ -27,10 +29,6 @@
 #include "tasqtcommandmodel.h"
 #include "taspointercache.h"
 #include "tasdeviceutils.h"
-
-#if QT_VERSION >= 0x040700
-#include <QDeclarativeItem>
-#endif
 
 /*!
   \class TestabilityUtils
@@ -592,14 +590,6 @@ ItemLocationDetails TestabilityUtils::getItemLocationDetails(QGraphicsItem* grap
             locationDetails.height = height;
         }
     }
-    
-#if QT_VERSION >= 0x040700
-    // Invisible items in QML are marked not visible
-    // This check could be for all apps?
-    if (qgraphicsitem_cast<QDeclarativeItem*>(graphicsItem) && graphicsItem->effectiveOpacity() == 0.0) {
-        isVisible = false;
-    }
-#endif
 
     locationDetails.visible = isVisible;
     return locationDetails;
@@ -608,6 +598,47 @@ ItemLocationDetails TestabilityUtils::getItemLocationDetails(QGraphicsItem* grap
 QString TestabilityUtils::graphicsItemId(QGraphicsItem* graphicsItem)
 {
     return QString::number((quintptr)graphicsItem);
+}
+
+QQuickItem* TestabilityUtils::findQuickItem(const QString& id, QQuickItem* current)
+{
+    QString currentId = TasCoreUtils::objectId(current);
+
+    if (id == currentId) {
+        return current;
+    }
+
+    foreach (QQuickItem* child, current->childItems()) {
+        QQuickItem* hit = findQuickItem(id, child);
+        if (hit) {
+            return hit;
+        }
+    }
+
+    return 0;
+}
+
+QQuickItem* TestabilityUtils::findQuickItem(const QString& id)
+{
+    QObject* o = TasPointerCache::instance()->getObject(id);
+    QQuickItem* item = qobject_cast<QQuickItem*>(o);
+
+    if (item) {
+        return item;
+    }
+
+    foreach (QWindow *w, QApplication::topLevelWindows()) {
+        QQuickWindow* view = qobject_cast<QQuickWindow*>(w);
+        if (view) {
+            item = findQuickItem(id, view->contentItem());
+
+            if (item) {
+                break;
+            }
+        }
+    }
+
+    return item;
 }
 
 QGraphicsWidget* TestabilityUtils::castToGraphicsWidget(QGraphicsItem* graphicsItem)

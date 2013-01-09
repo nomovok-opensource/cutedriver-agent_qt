@@ -19,9 +19,11 @@
 
 HEADERS += $$PWD/tasmouseeventgenerator.h
 HEADERS += $$PWD/tastoucheventgenerator.h
+HEADERS += $$PWD/taseventtarget.h
 
 SOURCES += $$PWD/tasmouseeventgenerator.cpp
 SOURCES += $$PWD/tastoucheventgenerator.cpp
+SOURCES += $$PWD/taseventtarget.cpp
 
 
 

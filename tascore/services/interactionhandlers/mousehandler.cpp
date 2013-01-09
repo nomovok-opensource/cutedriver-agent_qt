@@ -67,7 +67,7 @@ bool MouseHandler::executeInteraction(TargetData data)
             if(commandName == "TapScreen"){
                 details.target = qApp->widgetAt(details.point.x(), details.point.y());
             }
-            if(details.target){
+            if (details.target || details.targetWindow) {
                 int duration = command.parameter("duration").toFloat();
 
                 if(command.parameter("interval").isEmpty()){
@@ -88,7 +88,7 @@ bool MouseHandler::executeInteraction(TargetData data)
             }
         }
         else if(commandName == "MouseDblClick"){
-            mMouseGen.doMouseDblClick(details.target, details.button, details.point);
+            mMouseGen.doMouseDblClick(TasEventTarget(data), details.button, details.point);
         }
         else if(commandName == "MousePress"){
             press(details);
@@ -115,7 +115,7 @@ bool MouseHandler::executeInteraction(TargetData data)
                 direction = Qt::Horizontal;
             }
         }
-        mMouseGen.doScroll(details.target, details.point, deltaValue, details.button, direction);
+        mMouseGen.doScroll(TasEventTarget(details.target, details.targetWindow), details.point, deltaValue, details.button, direction);
     }
     else if(commandName == "Hover" || commandName == "Trigger"){
         wasConsumed = performActionEvent(makeDetails(data));
@@ -227,12 +227,18 @@ QAction* MouseHandler::getAction(QWidget* widget, int id)
 MouseHandler::TapDetails MouseHandler::makeDetails(TargetData data)
 {
     TasCommand& command = *data.command;
+
     TapDetails details;
     details.command = data.command;
     details.target = data.target;
     details.point = data.targetPoint;
+    details.targetWindow = data.targetWindow;
+
     if(data.targetItem){
         details.identifier = TasCoreUtils::pointerId(data.targetItem);
+    }
+    else if(data.targetWindow){
+        details.identifier = TasCoreUtils::objectId(data.targetWindow);
     }
     else{
         details.identifier = TasCoreUtils::objectId(data.target);
@@ -250,29 +256,29 @@ MouseHandler::TapDetails MouseHandler::makeDetails(TargetData data)
 void MouseHandler::press(TapDetails details)
 {
     if(details.pointerType == TypeTouch || details.pointerType == TypeBoth){
-        mTouchGen.doTouchBegin(details.target, details.point, details.identifier);
+        mTouchGen.doTouchBegin(TasEventTarget(details.target, details.targetWindow), details.point, details.identifier);
     }
     if(details.pointerType == TypeMouse || details.pointerType == TypeBoth){
-        mMouseGen.doMousePress(details.target, details.button, details.point);
+        mMouseGen.doMousePress(TasEventTarget(details.target, details.targetWindow), details.button, details.point);
     }
 }
 
 void MouseHandler::move(TapDetails details)
 {
     if(details.pointerType == TypeTouch || details.pointerType == TypeBoth){
-        mTouchGen.doTouchUpdate(details.target, details.point, details.identifier);
+        mTouchGen.doTouchUpdate(TasEventTarget(details.target, details.targetWindow), details.point, details.identifier);
     }
     if(details.pointerType == TypeMouse || details.pointerType == TypeBoth){
-        mMouseGen.doMouseMove(details.target, details.point, details.button);
+        mMouseGen.doMouseMove(TasEventTarget(details.target, details.targetWindow), details.point, details.button);
     }
 }
 void MouseHandler::release(TapDetails details)
 {
     if(details.pointerType == TypeTouch || details.pointerType == TypeBoth){
-        mTouchGen.doTouchEnd(details.target, details.point, details.identifier);
+        mTouchGen.doTouchEnd(TasEventTarget(details.target, details.targetWindow), details.point, details.identifier);
     }
     if(details.pointerType == TypeMouse || details.pointerType == TypeBoth){
-        mMouseGen.doMouseRelease(details.target, details.button, details.point);
+        mMouseGen.doMouseRelease(TasEventTarget(details.target, details.targetWindow), details.button, details.point);
     }
 }
 
@@ -297,7 +303,7 @@ void MouseHandler::checkMoveMouse(TapDetails details)
 {
     if(details.pointerType == TypeMouse || details.pointerType == TypeBoth){
         if(details.command->parameter("mouseMove") == "true"){
-            mMouseGen.doMouseMove(details.target, details.point, details.button);
+            mMouseGen.doMouseMove(TasEventTarget(details.target, details.targetWindow), details.point, details.button);
         }
     }
 }

@@ -1,21 +1,21 @@
-/*************************************************************************** 
-** 
-** Copyright (C) 2010 Nokia Corporation and/or its subsidiary(-ies). 
-** All rights reserved. 
-** Contact: Nokia Corporation (testabilitydriver@nokia.com) 
-** 
+/***************************************************************************
+**
+** Copyright (C) 2010 Nokia Corporation and/or its subsidiary(-ies).
+** All rights reserved.
+** Contact: Nokia Corporation (testabilitydriver@nokia.com)
+**
 ** This file is part of Testability Driver Qt Agent
-** 
-** If you have questions regarding the use of this file, please contact 
-** Nokia at testabilitydriver@nokia.com . 
-** 
-** This library is free software; you can redistribute it and/or 
-** modify it under the terms of the GNU Lesser General Public 
-** License version 2.1 as published by the Free Software Foundation 
-** and appearing in the file LICENSE.LGPL included in the packaging 
-** of this file. 
-** 
-****************************************************************************/ 
+**
+** If you have questions regarding the use of this file, please contact
+** Nokia at testabilitydriver@nokia.com .
+**
+** This library is free software; you can redistribute it and/or
+** modify it under the terms of the GNU Lesser General Public
+** License version 2.1 as published by the Free Software Foundation
+** and appearing in the file LICENSE.LGPL included in the packaging
+** of this file.
+**
+****************************************************************************/
 
 #include "tasgesture.h"
 #include "taslogger.h"
@@ -25,16 +25,16 @@
     \class TasGesture
 
     \brief TasGesture provides the details for the gesture simulating events.
-    
-    TasGesture provides the TasGestureRunner the require details to simulate a 
-    gesture on an object. The details include the points, duration and speed of 
-    the gesture. TasGestures may be multitouch type which means that touchpoints 
+
+    TasGesture provides the TasGestureRunner the require details to simulate a
+    gesture on an object. The details include the points, duration and speed of
+    the gesture. TasGestures may be multitouch type which means that touchpoints
     with multiple touch points will be generated for each touch event.
 */
 /*!
     \fn void TasGesture::startPoints()
 
-    Returns the starting point(s) of the gesture. Multiple points are used in 
+    Returns the starting point(s) of the gesture. Multiple points are used in
     multitouch situtations.
 */
 
@@ -48,7 +48,7 @@
 /*!
     \fn void TasGesture::endPoint()
 
-    Return the end point(s) of the gesture. 
+    Return the end point(s) of the gesture.
 */
 
 /*!
@@ -59,16 +59,17 @@
  */
 
 /*!
-  Base constructor for TasGesture. Sets the basic 
+  Base constructor for TasGesture. Sets the basic
   command details for all gestures.
  */
 TasGesture::TasGesture(TargetData data)
 {
     mPointerType = MouseHandler::TypeMouse;
-    
 
     mTarget = data.target;
     mTargetItem = data.targetItem;
+    mTargetWindow = data.targetWindow;
+
     if(mTargetItem){
         mTouchPointIdKey = TasCoreUtils::pointerId(mTargetItem);
     }
@@ -107,7 +108,7 @@ TasGesture::TasGesture(TargetData data)
 }
 
 /*!
-  Returns the pointer type to be used for the gesture. The type will not be changed 
+  Returns the pointer type to be used for the gesture. The type will not be changed
   during the gesture. The type determines that will mouse or touch events be generated
   to generate the gesture.
  */
@@ -116,13 +117,21 @@ MouseHandler::PointerType TasGesture::pointerType()
     return mPointerType;
 }
 
+/*!
+  Return the target window for the gesture. Used in qt5 qml.
+ */
+QWindow* TasGesture::getTargetWindow()
+{
+    return mTargetWindow;
+}
+
 Qt::MouseButton TasGesture::getMouseButton()
 {
     return mButton;
 }
 
 /*!
-  Set the pointer type to be used for the gesture. The type will not be changed 
+  Set the pointer type to be used for the gesture. The type will not be changed
   during the gesture. The type determines that will mouse or touch events be generated
   to generate the gesture.
  */
@@ -132,7 +141,7 @@ void TasGesture::setPointerType(MouseHandler::PointerType type)
 }
 
 /*!
-  Return the target for the gesture. Usually the viewport. 
+  Return the target for the gesture. Usually the viewport.
  */
 QWidget* TasGesture::getTarget()
 {
@@ -148,9 +157,9 @@ QGraphicsItem* TasGesture::getTargetItem()
 }
 
 /*!
-  Some touchevents handling requires that the start point and last position are delivered with 
+  Some touchevents handling requires that the start point and last position are delivered with
   the event. Generates a struct of the points.
- */ 
+ */
 TasTouchPoints TasGesture::makeTouchPoint(QPoint pos, QPoint lastPos, QPoint startPos)
 {
     TasTouchPoints touchPoint;
@@ -175,10 +184,10 @@ QList<TasTouchPoints> TasGesture::listFromPoint(QPoint pos, QPoint lastPos, QPoi
   \brief Returns points on a coordinate line
 
   Mousegesture done in a line format are done unsing QLines.
-  The line is divided in to sections of QPoints on the line. 
-  The mouse is then moved along those points. 
+  The line is divided in to sections of QPoints on the line.
+  The mouse is then moved along those points.
 
-*/    
+*/
 
 LineTasGesture::LineTasGesture(TargetData data, QLineF gestureLine)
     :TasGesture(data)
@@ -220,7 +229,7 @@ PointsTasGesture::PointsTasGesture(TargetData data, QList<QPoint> points)
   Will return a null point of list empty.
  */
 QList<TasTouchPoints> PointsTasGesture::startPoints()
-{    
+{
     if(!mPoints.isEmpty()){
         mStartPoint = mPoints.first();
     }
@@ -237,8 +246,8 @@ void PointsTasGesture::setIntervals(QList<int> intervals)
 
 
 /*!
-  Returns a point for the value. The value is something between 0 and 1. 
-  Calculated the correct point for the value. Will return a null point of 
+  Returns a point for the value. The value is something between 0 and 1.
+  Calculated the correct point for the value. Will return a null point of
   list empty.
  */
 QList<TasTouchPoints> PointsTasGesture::pointsAt(qreal value)
@@ -251,7 +260,7 @@ QList<TasTouchPoints> PointsTasGesture::pointsAt(qreal value)
         }
         else{
             current = mPoints.last();
-        }        
+        }
     }
     QList<TasTouchPoints> list = listFromPoint(current, mLastPoint, mStartPoint);
     mLastPoint = current;
@@ -304,7 +313,7 @@ void PointsTasGesture::calculateAnimation()
             timedPoints.append(point); // all points are added once (at least)
             multiplier--;
             for(int j = 0 ; j < multiplier; j++){
-                timedPoints.append(point);   
+                timedPoints.append(point);
             }
         }
         mPoints = timedPoints;
@@ -379,7 +388,7 @@ QList<QPoint> SectorTasGesture::activePoints()
 {
     QList<QPoint> points;
     points.append(mGestureLine.p1().toPoint());
-    points.append(mGestureLine.p2().toPoint());    
+    points.append(mGestureLine.p2().toPoint());
     return points;
 }
 
@@ -421,7 +430,7 @@ ArcsTasGesture::ArcsTasGesture(TargetData data, QLineF line1, QLineF line2, int 
 }
 
 QList<TasTouchPoints> ArcsTasGesture::startPoints()
-{    
+{
     mLastPoints = activePoints();
     mStartPoints = QList<QPoint>(mLastPoints);
 

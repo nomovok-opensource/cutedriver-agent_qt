@@ -173,16 +173,19 @@ bool MultitouchHandler::executeMultitouchInteraction(QList<TargetData> dataList)
 QString MultitouchHandler::idAndCoordinates(TargetData& data)
 {    
     QString id;
-    if(data.targetItem){
+    if (data.targetItem) {
         id = TasCoreUtils::pointerId(data.targetItem);
-    }
-    else{
+    } else if (data.targetWindow){
+        id = TasCoreUtils::pointerId(data.targetWindow);
+    } else{
         id = TasCoreUtils::pointerId(data.target);
     }
-    if(data.command->parameter("useCoordinates") == "true"){ 
+
+    if (data.command->parameter("useCoordinates") == "true") {
         data.targetPoint.setX(data.command->parameter("x").toInt());
         data.targetPoint.setY(data.command->parameter("y").toInt());        
         id = QString::number(data.targetPoint.x()) +"_"+ QString::number(data.targetPoint.y());
     }
+
     return id;
 }
