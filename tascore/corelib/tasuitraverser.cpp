@@ -25,6 +25,8 @@
 #include <QGraphicsProxyWidget>
 #include <QWidget>
 #include <QGraphicsView>
+#include <QQuickItem>
+#include <QQuickView>
 #include <QLocale>
 
 #include "tasuitraverser.h"
@@ -144,11 +146,15 @@ TasDataModel* TasUiTraverser::getUiState(TasCommand* command)
         }
     }
 
+    foreach (QWindow* w, qApp->topLevelWindows()) {
+        traverseObject(application.addObject(), w, command);
+    }
+
     finalizeTraverse();
+
     return model;
 }
     
-
 
 void TasUiTraverser::traverseObject(TasObject& objectInfo, QObject* object, TasCommand* command, bool traverseChildren)
 {
@@ -162,7 +168,23 @@ void TasUiTraverser::traverseObject(TasObject& objectInfo, QObject* object, TasC
     if(traverseChildren){
         printActions(objectInfo, object);
     }
-    if(traverseChildren){
+    if (traverseChildren) {
+
+        QQuickView* quickView = qobject_cast<QQuickView*>(object);
+        if (quickView) {
+            QQuickItem* root = quickView->rootObject();
+            if (root) {
+                traverseObject(objectInfo.addObject(), root, command);
+            }
+        }
+
+        QQuickItem* quickItem = qobject_cast<QQuickItem*>(object);
+        if (quickItem) {
+            foreach(QQuickItem* child, quickItem->childItems()) {
+                traverseObject(objectInfo.addObject(), child, command);
+            }
+        }
+
         //check decendants
         //1. is graphicsview
         QGraphicsView* gView = qobject_cast<QGraphicsView*>(object);

@@ -161,6 +161,7 @@ const char* const UI_STATE_FILE = "C:\\QTDumpUi.xml";
   Application view means application level (e.g screenshot)
 */
 const char* const TYPE_GRAPHICS_VIEW = "Graphics";
+const char* const TYPE_QSCENEGRAPH = "SceneGraph";
 const char* const TYPE_STANDARD_VIEW = "Standard";
 const char* const TYPE_APPLICATION_VIEW = "Application";
 const char* const TYPE_ACTION_VIEW = "Action";

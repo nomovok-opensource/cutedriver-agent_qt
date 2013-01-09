@@ -17,23 +17,40 @@
 ## 
 ############################################################################
 
-TEMPLATE = subdirs
 
-SUBDIRS += qttraverser
 
-SUBDIRS += viewitemtraverser
+TEMPLATE = lib
+TARGET = scenegraphtraverse
+CONFIG += plugin
 
-SUBDIRS += layouttraverser
+include(../../tasbase.pri)
 
-SUBDIRS += scenegraphtraverser
+target.path = $$TAS_TARGET_PLUGIN/traversers
 
-!CONFIG(no_webkit) {
-SUBDIRS += webkittraverser
-}
+symbian: {
+  TARGET.CAPABILITY=CAP_GENERAL_DLL
+  TARGET.EPOCALLOWDLLDATA = 1
+	TARGET.UID3 = 0x2003A9ED
 
-CONFIG(maemo){
-SUBDIRS += duitraverser
-}
-
-CONFIG  += ordered
+    scenegraphtraverse_plugin.sources = qttraverse.dll
+    scenegraphtraverse_plugin.path = /resource/qt/plugins/traversers
  
+    DEPLOYMENT += scenegraphtraverse_plugin
+}
+
+
+DEPENDPATH += . 
+INCLUDEPATH += . ../../tascore/corelib
+
+# Input
+HEADERS += scenegraphtraverse.h
+SOURCES += scenegraphtraverse.cpp
+OTHER_FILES += scenegraphtraverse.json
+
+QT += xml widgets qml quick
+
+DESTDIR = lib
+
+LIBS += -L../../tascore/lib/ -lqttestability
+
+INSTALLS += target
