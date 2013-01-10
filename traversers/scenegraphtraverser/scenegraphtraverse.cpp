@@ -29,6 +29,14 @@
 #include <QQuickView>
 #include <QQmlContext>
 #include <QQmlEngine>
+#include <QMetaObject>
+
+#ifdef USE_QTQML_PRIVATE_HEADERS
+// needed for getting to know the exact type of a qml component
+#include <private/qqmlmetatype_p.h>
+#include <private/qqmldata_p.h>
+#include <private/qqmlcontext_p.h>
+#endif
 
 /*!
     \class SceneGraphTraverse
@@ -74,6 +82,51 @@ void SceneGraphTraverse::traverseGraphicsItem(TasObject* objectInfo, QGraphicsIt
     Q_UNUSED(command);
 }
 
+#ifdef USE_QTQML_PRIVATE_HEADERS
+static void addTypeInfo(QQuickItem *object, TasObject* objectInfo)
+{
+    QString typeName;
+    QQmlType *type = QQmlMetaType::qmlType(object->metaObject());
+    if (type) {
+        typeName = type->qmlTypeName();
+        int lastSlash = typeName.lastIndexOf(QLatin1Char('/'));
+        if (lastSlash != -1)
+            typeName = typeName.mid(lastSlash+1);
+    } else {
+        typeName = QString::fromUtf8(object->metaObject()->className());
+        int marker = typeName.indexOf(QLatin1String("_QMLTYPE_"));
+        if (marker != -1)
+            typeName = typeName.left(marker);
+
+        marker = typeName.indexOf(QLatin1String("_QML_"));
+        if (marker != -1) {
+            typeName = typeName.left(marker);
+            typeName += QLatin1Char('*');
+            type = QQmlMetaType::qmlType(QMetaType::type(typeName.toLatin1()));
+            if (type) {
+                typeName = type->qmlTypeName();
+                int lastSlash = typeName.lastIndexOf(QLatin1Char('/'));
+                if (lastSlash != -1)
+                    typeName = typeName.mid(lastSlash+1);
+            }
+        }
+    }
+
+    if (!typeName.isEmpty()) {
+        objectInfo->setType(typeName);
+    }
+
+    objectInfo->addAttribute("QML_NATIVE_TYPE", typeName);
+
+    QQmlData *ddata = QQmlData::get(object, false);
+    if (ddata && ddata->outerContext && !ddata->outerContext->url.isEmpty()) {
+        objectInfo->addAttribute("QML_DEFINED_IN_URL", ddata->outerContext->url.toString());
+        objectInfo->addAttribute("QML_DEFINED_IN_LINE", ddata->lineNumber);
+        objectInfo->addAttribute("QML_DEFINED_IN_COLUMN", ddata->columnNumber);
+    }
+}
+#endif
+
 /*!
   Traverse QObject based items.
 */
@@ -90,6 +143,10 @@ void SceneGraphTraverse::traverseObject(TasObject* objectInfo, QObject* object, 
             QString name = context->nameForObject(object);
             objectInfo->addAttribute("QML_ID", name);
         }
+
+#ifdef USE_QTQML_PRIVATE_HEADERS
+        addTypeInfo(item, objectInfo);
+#endif
 
         mTraverseUtils->addObjectDetails(objectInfo, object);
 

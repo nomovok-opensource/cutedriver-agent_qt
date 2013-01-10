@@ -69,7 +69,7 @@ void TasTraverseUtils::addObjectDetails(TasObject* objectInfo, QObject* object)
     if(objectInfo->getType().isEmpty()){
         QString objectType = object->metaObject()->className();
         objectType.replace(QString(":"), QString("_"));
-        objectInfo->setType(objectType);    
+        objectInfo->setType(objectType);
     }
     if(includeAttribute("parent")){
         objectInfo->setParentId(getParentId(object));        

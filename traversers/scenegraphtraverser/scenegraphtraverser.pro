@@ -42,6 +42,30 @@ symbian: {
 DEPENDPATH += . 
 INCLUDEPATH += . ../../tascore/corelib
 
+
+isEmpty(QT_PRIVATE_HEADERS) {
+    QT_PRIVATE_HEADERS = $$[QT_INSTALL_HEADERS]
+}
+
+message($${QT_PRIVATE_HEADERS})
+
+isEmpty(QT_PRIVATE_HEADERS) {
+    message(BAD! - no_private_headers_found)
+    QT_PRIVATE_HEADERS = $$[QT_INSTALL_HEADERS]
+} else {
+    message(GOOD - private_headers_found)
+
+    exists($${QT_PRIVATE_HEADERS}/QtQml/5.0.0/QtQml/private/qqmlmetatype_p.h) {
+        message(GOOD - qtqml private headers found and used)
+        INCLUDEPATH += $$quote($${QT_PRIVATE_HEADERS})/QtQml/5.0.0/QtQml
+        INCLUDEPATH += $$quote($${QT_PRIVATE_HEADERS})/QtCore/5.0.0/QtCore
+        INCLUDEPATH += $$quote($${QT_PRIVATE_HEADERS})/QtV8/5.0.0/QtV8
+        DEFINES += USE_QTQML_PRIVATE_HEADERS
+    }
+}
+
+
+
 # Input
 HEADERS += scenegraphtraverse.h
 SOURCES += scenegraphtraverse.cpp

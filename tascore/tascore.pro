@@ -95,7 +95,7 @@ QT += network xml testlib gui widgets quick
 #configuration file
 configuration.files = conf/qt_testability.ini
 unix:{
-	configuration.path = /etc/qt_testability 
+  configuration.path = /etc/qt_testability
 
   HEADERS.path = /usr/include/tdriver/
 
@@ -108,12 +108,11 @@ unix:{
 }
 
 macx: {
-	configuration.path = /etc/qt_testability
+  configuration.path = /etc/qt_testability
   HEADERS.path = /usr/include/tdriver/
-
 }
 win32:{
-	configuration.path=/qttas/conf
+  configuration.path=/qttas/conf
   HEADERS.path = /qttas/inc
 }
 
