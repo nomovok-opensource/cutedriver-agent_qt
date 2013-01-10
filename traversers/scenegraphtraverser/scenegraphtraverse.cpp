@@ -97,10 +97,12 @@ void SceneGraphTraverse::traverseObject(TasObject* objectInfo, QObject* object, 
 
         QPointF point = item->mapToScene(QPoint());
 
-        objectInfo->addAttribute("x", point.x());
-        objectInfo->addAttribute("y", point.y());
-        objectInfo->addAttribute("x_absolute", point.x());
-        objectInfo->addAttribute("y_absolute", point.y());
+        // needed for visualizer
+        objectInfo->addAttribute("x", (int)point.x());
+        objectInfo->addAttribute("y", (int)point.y());
+        objectInfo->addAttribute("x_absolute", (int)point.x());
+        objectInfo->addAttribute("y_absolute", (int)point.y());
+
 
         objectInfo->addAttribute("x_relative", item->x());
         objectInfo->addAttribute("y_relative", item->y());
