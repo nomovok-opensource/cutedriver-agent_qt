@@ -73,9 +73,9 @@ void TasMouseEventGenerator::sendMouseEvent(const TasEventTarget& target, QMouse
 {
     if(mUseTapScreen){
 #if defined(Q_OS_WIN32)
-        if( GetForegroundWindow() != target.window()->winId()){
+        if( GetForegroundWindow() != target.winId()){
             TasLogger::logger()->debug("TasMouseEventGenerator::sendMouseEvent set foreground");
-            SetForegroundWindow(target.window()->winId());
+            SetForegroundWindow(target.winId());
         }
         if(event->type() == QEvent::MouseButtonPress || event->type() == QEvent::GraphicsSceneMousePress){
             TasDeviceUtils::sendMouseEvent(event->globalX(), event->globalY(), event->button(), QEvent::MouseMove, pointerNumber);

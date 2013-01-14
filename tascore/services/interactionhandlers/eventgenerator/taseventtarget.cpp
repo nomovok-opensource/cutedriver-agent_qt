@@ -70,3 +70,12 @@ QWidget *TasEventTarget::parentWidget() const
     }
     return 0;
 }
+
+WId TasEventTarget::winId() const
+{
+    if (target) {
+        return target->window()->winId();
+    } else {
+        return targetWindow->winId();
+    }
+}

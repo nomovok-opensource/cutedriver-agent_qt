@@ -40,6 +40,7 @@ public:
     QPoint mapToGlobal(const QPoint& point) const;
 
     QWidget* parentWidget() const;
+    WId winId() const;
 };
 
 
