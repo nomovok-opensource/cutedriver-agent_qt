@@ -24,9 +24,17 @@
 #include <QPoint>
 #include <QWidget>
 
+#include "tasgesture.h"
+
 TasEventTarget::TasEventTarget(QWidget* ptarget, QWindow* ptargetWindow) :
     target(ptarget),
     targetWindow(ptargetWindow)
+{
+}
+
+TasEventTarget::TasEventTarget(TasGesture *tg) :
+    target(tg->getTarget()),
+    targetWindow(tg->getTargetWindow())
 {
 }
 

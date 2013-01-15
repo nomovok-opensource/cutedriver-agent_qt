@@ -100,8 +100,8 @@ bool MultitouchHandler::executeMultitouchInteraction(QList<TargetData> dataList)
             }             
         }
 
-        //currently only one target widget supported
-        QWidget *target = dataList.first().target;
+        // currently only one target supported
+        TasEventTarget target = TasEventTarget(dataList.first());
 
         //make touch points from the collected points per graphicsitem
         QMutableHashIterator<QString, QList<TasTouchPoints>* > presses(itemPressPoints);
@@ -136,7 +136,7 @@ bool MultitouchHandler::executeMultitouchInteraction(QList<TargetData> dataList)
         if(!touchPoints.isEmpty()){
             QTouchEvent* touchPress = new QTouchEvent(QEvent::TouchBegin, device, Qt::NoModifier,
                                                       Qt::TouchPointPressed, touchPoints);
-            touchPress->setTarget(target);
+            touchPress->setTarget(target.receiver());
             mTouchGen.sendTouchEvent(target, touchPress);
 
             TasLogger::logger()->debug("MultitouchHandler::executeMultitouchInteraction send mouse event press.");
@@ -147,7 +147,7 @@ bool MultitouchHandler::executeMultitouchInteraction(QList<TargetData> dataList)
             //send end event
             QTouchEvent *touchRelease = new QTouchEvent(QEvent::TouchEnd, device, Qt::NoModifier,
                                                         Qt::TouchPointReleased, touchReleasePoints);
-            touchRelease->setTarget(target);
+            touchRelease->setTarget(target.receiver());
             mTouchGen.sendTouchEvent(target, touchRelease);            
             if(mouseReleasePoint == mousePressPoint){
                 TasLogger::logger()->debug("MultitouchHandler::executeMultitouchInteraction send mouse event release.");

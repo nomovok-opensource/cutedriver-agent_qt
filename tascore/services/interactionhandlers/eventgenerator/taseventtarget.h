@@ -23,13 +23,15 @@
 class QPoint;
 class QWidget;
 class QWindow;
+class TasGesture;
 
 #include "uicommandservice.h"
 
 class TasEventTarget
 {
 public:
-    TasEventTarget(QWidget* ptarget = 0, QWindow* ptargetWindow = 0);
+    TasEventTarget(QWidget* ptarget, QWindow* ptargetWindow);
+    TasEventTarget(TasGesture *tg);
     TasEventTarget(TargetData td);
 
     QWidget* target;

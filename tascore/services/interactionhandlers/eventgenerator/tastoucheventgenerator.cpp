@@ -98,7 +98,7 @@ void TasTouchEventGenerator::sendTouchEvent(const TasEventTarget& target, QTouch
 
 QList<QTouchEvent::TouchPoint> TasTouchEventGenerator::convertToTouchPoints(TargetData targetData, Qt::TouchPointState state)
 {
-    return convertToTouchPoints(targetData.target, state, toTouchPoints(targetData.targetPoint),
+    return convertToTouchPoints(TasEventTarget(targetData), state, toTouchPoints(targetData.targetPoint),
                                 TasCoreUtils::pointerId(targetData.targetItem));
 }
 

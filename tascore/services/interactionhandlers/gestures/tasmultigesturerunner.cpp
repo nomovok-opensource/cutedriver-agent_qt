@@ -63,14 +63,15 @@ void TasMultiGestureRunner::startGesture()
     //collect press points
     foreach(TasGesture* gesture, mGestures.keys()){
         if(gesture->isPress()){
-            touchPoints.append(mTouchGen.convertToTouchPoints(gesture->getTarget(), Qt::TouchPointPressed, 
+            touchPoints.append(mTouchGen.convertToTouchPoints(TasEventTarget(gesture->getTarget(), gesture->getTargetWindow()), Qt::TouchPointPressed,
                                                               gesture->startPoints(), gesture->touchPointIdKey()));
         }
         mPreviousPoints.insert(gesture, gesture->startPoints());
     }
 
     //only 1 target widget supported for now
-    QWidget* target = mGestures.keys().first()->getTarget();
+    TasGesture *gesture = mGestures.keys().first();
+    TasEventTarget target = TasEventTarget(gesture->getTarget(), gesture->getTargetWindow());
 
     //use qt touch event or send mouse event (native)
     if(!mUseTapScreen) {
@@ -79,13 +80,13 @@ void TasMultiGestureRunner::startGesture()
         touchDevice->setType(QTouchDevice::TouchScreen);
         QTouchEvent* touchPress = new QTouchEvent(QEvent::TouchBegin, touchDevice, Qt::NoModifier,
                                                   Qt::TouchPointPressed, touchPoints);
-        touchPress->setTarget(target);
+        touchPress->setTarget(target.receiver());
         mTouchGen.sendTouchEvent(target, touchPress);
     } else {
         //using 'n' as a pointer number
         for(int n=0;n<touchPoints.size();n++){
           QPoint point((int)touchPoints.at(n).pos().x(),(int)touchPoints.at(n).pos().y());
-          mMouseGen.doMousePress(target,Qt::LeftButton,point, n);
+          mMouseGen.doMousePress(target, Qt::LeftButton, point, n);
         }
     }
 
@@ -104,19 +105,20 @@ void TasMultiGestureRunner::gestureTimerEvent(qreal value)
             finished.append(gesture);
             if(gesture->isRelease()){
                 states |= Qt::TouchPointReleased;
-                touchPoints.append(mTouchGen.convertToTouchPoints(gesture->getTarget(), Qt::TouchPointReleased, 
+                touchPoints.append(mTouchGen.convertToTouchPoints(TasEventTarget(gesture->getTarget(), gesture->getTargetWindow()), Qt::TouchPointReleased,
                                                                   gesture->endPoints(), gesture->touchPointIdKey()));
             }            
         }
         else if(!mTouchGen.areIdentical(gesture->pointsAt(correctedValue), mPreviousPoints.value(gesture))){
-            touchPoints.append(mTouchGen.convertToTouchPoints(gesture->getTarget(), Qt::TouchPointMoved,
+            touchPoints.append(mTouchGen.convertToTouchPoints(TasEventTarget(gesture->getTarget(), gesture->getTargetWindow()), Qt::TouchPointMoved,
                                                               gesture->pointsAt(correctedValue), gesture->touchPointIdKey()));
         }
         mPreviousPoints.insert(gesture, gesture->pointsAt(correctedValue));
     }
 
     //only 1 target widget supported for now
-    QWidget* target = mGestures.keys().first()->getTarget();
+    TasGesture *gesture = mGestures.keys().first();
+    TasEventTarget target = TasEventTarget(gesture->getTarget(), gesture->getTargetWindow());
 
     //use qt touch event or send mouse event (native)
     if(!mUseTapScreen) {
@@ -125,13 +127,13 @@ void TasMultiGestureRunner::gestureTimerEvent(qreal value)
         touchDevice->setType(QTouchDevice::TouchScreen);
         QTouchEvent* touchEvent = new QTouchEvent(QEvent::TouchUpdate, touchDevice, Qt::NoModifier,
                                                   states, touchPoints);
-        touchEvent->setTarget(target);
+        touchEvent->setTarget(target.receiver());
         mTouchGen.sendTouchEvent(target, touchEvent);
     } else {
         //using 'n' as a pointer number
         for(int n=0;n<touchPoints.size();n++){
           QPoint point((int)touchPoints.at(n).pos().x(),(int)touchPoints.at(n).pos().y());
-          mMouseGen.doMouseMove(target,point,Qt::LeftButton, n);
+          mMouseGen.doMouseMove(target, point, Qt::LeftButton, n);
         }
     }
 
@@ -150,17 +152,18 @@ void TasMultiGestureRunner::finished()
     QList<QTouchEvent::TouchPoint> touchReleasePoints;
     foreach(TasGesture* gesture, mGestures.keys()){
         if(!mTouchGen.areIdentical(gesture->endPoints(), mPreviousPoints.value(gesture))){
-            touchPoints.append(mTouchGen.convertToTouchPoints(gesture->getTarget(), Qt::TouchPointMoved, 
+            touchPoints.append(mTouchGen.convertToTouchPoints(TasEventTarget(gesture->getTarget(), gesture->getTargetWindow()), Qt::TouchPointMoved,
                                                               gesture->endPoints(), gesture->touchPointIdKey()));
         }
         if(gesture->isRelease()){
-            touchReleasePoints.append(mTouchGen.convertToTouchPoints(gesture->getTarget(), Qt::TouchPointReleased, 
+            touchReleasePoints.append(mTouchGen.convertToTouchPoints(TasEventTarget(gesture->getTarget(), gesture->getTargetWindow()), Qt::TouchPointReleased,
                                                                      gesture->endPoints(), gesture->touchPointIdKey()));
         }
     }
 
     //only 1 target widget supported for now
-    QWidget* target = mGestures.keys().first()->getTarget();
+    TasGesture* gesture = mGestures.keys().first();
+    TasEventTarget target = TasEventTarget(gesture->getTarget(), gesture->getTargetWindow());
 
     //use qt touch event or send mouse event (native)
     if(!mUseTapScreen) {
@@ -169,13 +172,13 @@ void TasMultiGestureRunner::finished()
         touchDevice->setType(QTouchDevice::TouchScreen);
         QTouchEvent* touchEvent = new QTouchEvent(QEvent::TouchUpdate, touchDevice, Qt::NoModifier,
                                                   Qt::TouchPointMoved, touchPoints);
-        touchEvent->setTarget(target);
+        touchEvent->setTarget(target.receiver());
         mTouchGen.sendTouchEvent(target, touchEvent);
 
         //2. Send releases when needed
         QTouchEvent* releaseEvent = new QTouchEvent(QEvent::TouchEnd, touchDevice, Qt::NoModifier,
                                                   Qt::TouchPointReleased, touchReleasePoints);
-        releaseEvent->setTarget(target);
+        releaseEvent->setTarget(target.receiver());
         mTouchGen.sendTouchEvent(target, releaseEvent);
     } else {
         //using 'n' as a pointer number
