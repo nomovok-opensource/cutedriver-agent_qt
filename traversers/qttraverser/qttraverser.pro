@@ -48,7 +48,7 @@ HEADERS += tasqttraverse.h
 SOURCES += tasqttraverse.cpp 
 OTHER_FILES += tasqttraverse.json
 
-QT += xml widgets
+QT += xml widgets quick
 
 DESTDIR = lib
 

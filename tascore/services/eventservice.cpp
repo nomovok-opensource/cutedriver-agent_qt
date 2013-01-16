@@ -21,6 +21,7 @@
 #include <QApplication>
 #include <QPoint>
 #include <QRect>
+#include <QQuickItem>
 #include <QMouseEvent>
 #include <QGraphicsSceneMouseEvent>
 
@@ -154,10 +155,14 @@ TasEventFilter* EventService::getFilterForTarget(TasTarget* commandTarget, bool 
         }
         else if(targetType == TYPE_STANDARD_VIEW){
             target = findWidget(targetId);
-        }        
+        }
+        else if(targetType == TYPE_QSCENEGRAPH){
+            target = findQuickItem(targetId);
+        }
         else if(targetType == TYPE_APPLICATION_VIEW){
-            target= qApp;
-        }    
+            target = qApp;
+        }
+
         if(target){
             filter = new TasEventFilter(target);
             mEventFilters.insert(targetId, filter);

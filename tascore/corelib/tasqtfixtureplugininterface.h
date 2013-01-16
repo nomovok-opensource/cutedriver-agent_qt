@@ -28,6 +28,7 @@
 
 const char* const OBJECT_TYPE = "__fixture_object_type";
 const char* const WIDGET_TYPE = "QWidget";
+const char* const QQUICKITEM_TYPE = "QQuickItem";
 const char* const GRAPHICS_ITEM_TYPE = "QGraphicsItem";
 const char* const APPLICATION_TYPE = "QApplication";
 const char* const NULL_TYPE = "Null";

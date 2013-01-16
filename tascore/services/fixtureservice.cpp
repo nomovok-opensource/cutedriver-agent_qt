@@ -101,6 +101,10 @@ bool FixtureService::performFixture(TasCommandModel& model, QString& message)
             ptr = findWidget(targetId);
             objectType = WIDGET_TYPE;
         }        
+        else if(targetType == TYPE_QSCENEGRAPH){
+            ptr = findQuickItem(targetId);
+            objectType = QQUICKITEM_TYPE;
+        }
         else if(targetType == TYPE_APPLICATION_VIEW){
             ptr = qApp;
             objectType = APPLICATION_TYPE;

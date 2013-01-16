@@ -84,7 +84,10 @@ bool UiCommandService::executeService(TasCommandModel& model, TasResponse& respo
 void UiCommandService::startTimer()
 {
     disconnect(sender(), 0, this, 0);
+
+    if (!mTimer.isActive()) {
     mTimer.start();
+}
 }
 
 void UiCommandService::parseValidTargets(TasCommandModel& model)

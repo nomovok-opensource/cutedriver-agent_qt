@@ -60,9 +60,7 @@ public:
     UiCommandService(QObject* parent = 0);
         ~UiCommandService();
 
-        /*!
-          From ServiceInterface
-        */
+    /*! From ServiceInterface */
         bool executeService(TasCommandModel& model, TasResponse& response);
 
         QString serviceName()const { return UI_COMMAND; }

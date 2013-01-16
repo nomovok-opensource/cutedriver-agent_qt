@@ -24,6 +24,7 @@
 #include <QGraphicsItem>
 #include <QApplication>
 #include <QVariant>
+#include <QQuickItem>
 #include <QDateTime>
 
 #include "objectservice.h"
@@ -72,6 +73,9 @@ void ObjectService::performObjectService(TasCommandModel& model, TasResponse& re
         }
         else if(targetType == TYPE_STANDARD_VIEW){
             target = findWidget(targetId);
+        }
+        else if(targetType == TYPE_QSCENEGRAPH){
+            target = findQuickItem(targetId);
         }
         else if(targetType == TYPE_APPLICATION_VIEW ){
             target = qApp;

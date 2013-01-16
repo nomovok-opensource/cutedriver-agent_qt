@@ -20,6 +20,7 @@
 #include <QGraphicsProxyWidget>
 #include <QGraphicsWidget>
 #include <QtPlugin>
+#include <QQuickItem>
 #include <QDebug>
 
 #include <testabilityutils.h>
@@ -116,8 +117,13 @@ void TasQtTraverse::traverseObject(TasObject* objectInfo, QObject* object, TasCo
         }
     }    
     else{
+        QQuickItem* quickObject = qobject_cast<QQuickItem*>(object);
+
+        if (quickObject) {
+            objectInfo->addAttribute("objectType", TYPE_QSCENEGRAPH );
+        }
         //make sure that we are dealing with a widget
-        if (object->isWidgetType()){      
+        else if (object->isWidgetType()){
             QWidget* widget = qobject_cast<QWidget*>(object);            
             objectInfo->addAttribute("objectType", TYPE_STANDARD_VIEW );        
 
