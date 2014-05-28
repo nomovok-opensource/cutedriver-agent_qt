@@ -1,0 +1,7 @@
+unix:!macx:!symbian {
+    INCLUDEPATH += /usr/include/tdriver/                
+    LIBS += -lqttestability
+    TAS_TARGET_PLUGIN=$$[QT_INSTALL_PLUGINS]/
+    QTTAS_TRAVERSER_TARGET_PATH = $$TAS_TARGET_PLUGIN/traversers
+    CONFIG += plugin
+} # TODO other platforms

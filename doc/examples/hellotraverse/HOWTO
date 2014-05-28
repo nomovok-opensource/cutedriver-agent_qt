@@ -1,0 +1,11 @@
+Hello Travaserer stub.
+
+Compilation & Installation:
+
+- Copy the lib/libsystemuitraverse.so into the traverser directory in qt plugins, e.g. 
+  /usr/lib/qt4/plugins/traversers/
+- Restart the application under test.
+
+Other notes:
+- To use the logger, create /logs/testability directory with 'a+w' privileges.
+

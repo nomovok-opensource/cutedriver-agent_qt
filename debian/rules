@@ -1,0 +1,102 @@
+#!/usr/bin/make -f
+# -*- makefile -*-
+export DH_VERBOSE=1
+DEBDIR = ..
+comma :=,
+empty :=
+space := $(empty) $(empty)
+TMP_BUILD_OPTS = $(subst $(comma),$(space),$(DEB_BUILD_OPTIONS))
+ifneq (,$(filter parallel=%,$(TMP_BUILD_OPTS)))
+         NUMJOBS = $(patsubst parallel=%,%,$(filter parallel=%,$(TMP_BUILD_OPTS)))
+         PARALLEL_MAKEFLAGS += -j$(NUMJOBS)
+endif
+QMAKE_OPTIONS = -r CONFIG+=maemo
+CFLAGS = -Wall -g
+
+PACKAGE_TARGETS := $(foreach pkg,$(DEB_ALL_PACKAGES),binary/$(pkg))
+
+
+ifneq (,$(findstring noopt,$(DEB_BUILD_OPTIONS)))
+	CFLAGS += -O0
+else
+	CFLAGS += -O2
+endif
+
+ifeq (,$(findstring nostrip,$(DEB_BUILD_OPTIONS)))
+    INSTALL_PROGRAM += -s
+endif
+
+configure: configure-stamp
+configure-stamp:
+	dh_testdir
+	# Add here commands to configure the package.
+	qmake $(QMAKE_OPTIONS)
+	touch configure-stamp
+
+build: configure-stamp build-stamp
+
+build-stamp: configure-stamp 
+	dh_testdir
+	# Add here commands to compile the package.
+	$(MAKE) $(PARALLEL_MAKEFLAGS)
+	#docbook-to-man debian/qttas.sgml > qttas.1
+	touch $@
+
+clean:
+	dh_testdir
+	dh_testroot
+	rm -f build-stamp configure-stamp
+	# Add here commands to clean up after the build process.
+	[ ! -f Makefile ] || $(MAKE) distclean
+	dh_clean 
+
+install: build
+	dh_testdir
+	dh_testroot
+	dh_clean -k 
+	dh_installdirs
+	INSTALL_ROOT=$(CURDIR)/debian/tmp $(MAKE) $(PARALLEL_MAKEFLAGS) install
+	# Run custom script to pkg examples
+	debian/package_examples.sh $(CURDIR)/debian/tmp
+
+	# Add here commands to install the package into debian/qttas.
+
+# Build architecture-independent files here.
+binary-indep: build install
+# We have nothing to do by default.
+
+# Build architecture-dependent files here.
+binary-arch: build install
+	dh_testdir
+	dh_testroot
+	dh_installchangelogs 
+	dh_installdocs
+	dh_install --sourcedir=debian/tmp -v 
+#	dh_installexamples
+#	dh_installmenu
+#	dh_installdebconf	
+#	dh_installlogrotate
+#	dh_installemacsen
+#	dh_installpam
+#	dh_installmime
+#	dh_python
+#	dh_installinit
+#	dh_installcron
+#	dh_installinfo
+	dh_installman 
+	dh_link
+	dh_strip --dbg-package=qttas-server-dbg
+	dh_compress
+	dh_fixperms
+#	dh_perl
+	dh_makeshlibs
+	dh_installdeb
+	dh_shlibdeps
+	dh_gencontrol
+	dh_md5sums
+	dh_builddeb --destdir=$(DEBDIR)
+	aegis-deb-add -control debian/qttas-server/DEBIAN/control .. debian/qttas-server.aegis=_aegis
+#	aegis-deb-add -control debian/qttas-plugins/DEBIAN/control .. debian/qttas-plugins.aegis=_aegis
+
+binary: binary-indep binary-arch
+.PHONY: build clean binary-indep binary-arch binary install configure

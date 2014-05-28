@@ -1,0 +1,104 @@
+;############################################################################
+;## 
+;## Copyright (C) 2010 Nokia Corporation and/or its subsidiary(-ies). 
+;## All rights reserved. 
+;## Contact: Nokia Corporation (testabilitydriver@nokia.com) 
+;## 
+;## This file is part of Testability Driver Qt Agent
+;## 
+;## If you have questions regarding the use of this file, please contact 
+;## Nokia at testabilitydriver@nokia.com . 
+;## 
+;## This library is free software; you can redistribute it and/or 
+;## modify it under the terms of the GNU Lesser General Public 
+;## License version 2.1 as published by the Free Software Foundation 
+;## and appearing in the file LICENSE.LGPL included in the packaging 
+;## of this file. 
+;## 
+;############################################################################
+
+; Language
+&EN
+
+; SIS header: name, uid, version
+#{"QtTestability"},(0xE3B3C562),1,0,0, TYPE=SA, RU, NR
+
+; Localised Vendor name
+%{"Nokia, Qt Software"}
+
+; Unique Vendor name
+:"Nokia, Qt Software"
+
+; Dependencies
+[0x101F7961],0,0,0,{"S60ProductID"}
+[0x102032BE],0,0,0,{"S60ProductID"}
+[0x102752AE],0,0,0,{"S60ProductID"}
+[0x1028315F],0,0,0,{"S60ProductID"}
+
+; Executable and default resource files
+"\epoc32\release\armv5\udeb\qttasserver.exe"                          - "$:\sys\bin\qttasserver.exe"
+"\epoc32\data\z\resource\apps\qttasserver.rsc"                        - "$:\resource\apps\qttasserver.rsc"
+"\epoc32\data\z\private\10003a3f\import\apps\qttasserver_reg.rsc"     - "$:\private\10003a3f\import\apps\qttasserver_reg.rsc"
+
+"\epoc32\release\armv5\udeb\qttas_ui.exe"                             - "$:\sys\bin\qttas_ui.exe"
+"\epoc32\data\z\resource\apps\qttas_ui.rsc"                           - "$:\resource\apps\qttas_ui.rsc"
+"\epoc32\data\z\private\10003a3f\import\apps\qttas_ui_reg.rsc"        - "$:\private\10003a3f\import\apps\qttas_ui_reg.rsc"
+
+"\epoc32\release\armv5\udeb\qttasmemlog_srv.exe"                      - "$:\sys\bin\qttasmemlog_srv.exe"
+"\epoc32\data\z\resource\apps\qttasmemlog_srv.rsc"                    - "$:\resource\apps\qttasmemlog_srv.rsc"
+"\epoc32\data\z\private\10003a3f\import\apps\qttasmemlog_srv_reg.rsc" - "$:\private\10003a3f\import\apps\qttasmemlog_srv_reg.rsc"
+
+"\epoc32\release\armv5\udeb\qttasutilapp.exe"                         - "$:\sys\bin\qttasutilapp.exe"
+"\epoc32\data\z\resource\apps\qttasutilapp.rsc"                       - "$:\resource\apps\qttasutilapp.rsc"
+"\epoc32\data\z\private\10003a3f\import\apps\qttasutilapp_reg.rsc"    - "$:\private\10003a3f\import\apps\qttasutilapp_reg.rsc"
+
+"\epoc32\release\armv5\udeb\qttestability.dll"                        - "$:\sys\bin\qttestability.dll"
+"\epoc32\winscw\c\qt_testability\qt_testability.ini"                  - "$:\qt_testability\qt_testability.ini"
+
+"\epoc32\release\armv5\udeb\qttraverse.dll"                           - "$:\sys\bin\qttraverse.dll"
+"\epoc32\data\z\resource\qt\plugins\traversers\qttraverse.qtplugin"      - "$:\resource\qt\plugins\traversers\qttraverse.qtplugin"
+
+"\epoc32\release\armv5\udeb\viewitemtraverse.dll"                               - "$:\sys\bin\viewitemtraverse.dll"
+"\epoc32\data\z\resource\qt\plugins\traversers\viewitemtraverse.qtplugin"    - "$:\resource\qt\plugins\traversers\viewitemtraverse.qtplugin"
+
+"\epoc32\release\armv5\udeb\webkittraverse.dll"                               - "$:\sys\bin\webkittraverse.dll"
+"\epoc32\data\z\resource\qt\plugins\traversers\webkittraverse.qtplugin"    - "$:\resource\qt\plugins\traversers\webkittraverse.qtplugin"
+
+"\epoc32\release\armv5\udeb\layouttraverse.dll"                             - "$:\sys\bin\layouttraverse.dll"
+"\epoc32\data\z\resource\qt\plugins\traversers\layouttraverse.qtplugin"    - "$:\resource\qt\plugins\traversers\layouttraverse.qtplugin"
+
+"\epoc32\release\armv5\udeb\tasfixture.dll"                           - "$:\sys\bin\tasfixture.dll"
+"\epoc32\data\z\resource\qt\plugins\tasfixtures\tasfixture.qtplugin"         - "$:\resource\qt\plugins\tasfixtures\tasfixture.qtplugin"
+
+"\epoc32\release\armv5\udeb\tassignal.dll"                            - "$:\sys\bin\tassignal.dll"
+"\epoc32\data\z\resource\qt\plugins\tasfixtures\tassignal.qtplugin"       - "$:\resource\qt\plugins\tasfixtures\tassignal.qtplugin"
+
+"\epoc32\release\armv5\udeb\fpsfixture.dll"                           - "$:\sys\bin\fpsfixture.dll"
+"\epoc32\data\z\resource\qt\plugins\tasfixtures\fpsfixture.qtplugin"         - "$:\resource\qt\plugins\tasfixtures\fpsfixture.qtplugin"
+
+"\epoc32\release\armv5\udeb\filefixture.dll"                          - "$:\sys\bin\filefixture.dll"
+"\epoc32\data\z\resource\qt\plugins\tasfixtures\filefixture.qtplugin"       - "$:\resource\qt\plugins\tasfixtures\filefixture.qtplugin"
+
+"\epoc32\release\armv5\udeb\popupfixture.dll"                         - "$:\sys\bin\popupfixture.dll"
+"\epoc32\data\z\resource\qt\plugins\tasfixtures\popupfixture.qtplugin"     - "$:\resource\qt\plugins\tasfixtures\popupfixture.qtplugin"
+
+;"\epoc32\release\armv5\udeb\utilfixture.dll"                          - "$:\sys\bin\utilfixture.dll"
+;"\epoc32\data\z\resource\qt\plugins\tasfixtures\utilfixture.qtplugin" - "$:\resource\qt\plugins\tasfixtures\utilfixture.qtplugin"
+
+"\epoc32\release\armv5\udeb\testability.dll"                          - "$:\sys\bin\testability.dll"
+"\epoc32\data\z\resource\qt\plugins\testability\testability.qtplugin"        - "$:\resource\qt\plugins\testability\testability.qtplugin"
+
+"\epoc32\release\armv5\udeb\testabilitystyle.dll"                     - "$:\sys\bin\testabilitystyle.dll"
+"\epoc32\data\z\resource\qt\plugins\styles\testabilitystyle.qtplugin"         - "$:\resource\qt\plugins\styles\testabilitystyle.qtplugin"
+
+"\epoc32\release\armv5\udeb\mobilitysysinfofixture.dll"               - "$:\sys\bin\mobilitysysinfofixture.dll"
+"\epoc32\data\z\resource\qt\plugins\tasfixtures\mobilitysysinfofixture.qtplugin"   - "$:\resource\qt\plugins\tasfixtures\mobilitysysinfofixture.qtplugin"
+
+"\epoc32\release\armv5\udeb\contactfixture.dll"               - "$:\sys\bin\contactfixture.dll"
+"\epoc32\data\z\resource\qt\plugins\tasfixtures\contactfixture.qtplugin"   - "$:\resource\qt\plugins\tasfixtures\contactfixture.qtplugin"
+
+"\epoc32\release\armv5\udeb\launchfixture.dll"               - "$:\sys\bin\launchfixture.dll"
+"\epoc32\data\z\resource\qt\plugins\tasfixtures\launchfixture.qtplugin"   - "$:\resource\qt\plugins\tasfixtures\launchfixture.qtplugin"
+
+"\epoc32\release\armv5\udeb\settingfixture.dll"               - "$:\sys\bin\settingfixture.dll"
+"\epoc32\data\z\resource\qt\plugins\tasfixtures\settingfixture.qtplugin"   - "$:\resource\qt\plugins\tasfixtures\settingfixture.qtplugin"
