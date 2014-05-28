@@ -22,12 +22,13 @@
 
 #include <taslogger.h>
 
+#include <signal.h>
+
+#if defined(Q_WS_X11)
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
 #include <X11/Xatom.h>
-#include <signal.h>
 
-    
 
 int pidOfXWindow(Display* display, Window win) 
 {
@@ -256,12 +257,15 @@ int pidOfMeegoWindow(Display* display, Window root)
     return pid;
 }
 
+#endif
 
 int TasNativeUtils::pidOfActiveWindow(const QHash<quint64, TasClient*> clients)
 {
     const QList<quint64>& pids = clients.keys();
     TasLogger::logger()->debug("TasNativeUtils::pidOfActiveWindow Querying for active window");
     int pid = -1;
+
+#if defined(Q_WS_X11)
     Display* display = 0;
     display = XOpenDisplay(0); 
     XSetErrorHandler(errorHandler);
@@ -278,7 +282,10 @@ int TasNativeUtils::pidOfActiveWindow(const QHash<quint64, TasClient*> clients)
         Window win = queryStack(display, window, pids);
         pid = pidOfXWindow(display, win);
     }
-    XCloseDisplay(display);    
+    XCloseDisplay(display);
+#elif defined(TAS_WAYLAND)
+    // TODO:
+#endif
 
     TasLogger::logger()->debug("TasNativeUtils::pidOfActiveWindow Resolved " + QString::number(pid));
     return pid;

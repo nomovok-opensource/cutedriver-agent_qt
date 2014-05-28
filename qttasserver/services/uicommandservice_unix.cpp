@@ -21,9 +21,11 @@
 #include "uicommandservice.h"
 #include <taslogger.h>
 
+#if defined(Q_WS_X11)
 #include <X11/Xlib.h>
 #include <X11/extensions/XTest.h>
-
+#elif defined(TAS_WAYLAND)
+#endif
 
 
 /*!
@@ -77,7 +79,9 @@ void UiCommandService::performTapCommand(TasCommand* command)
     int duration = 1000000*command->parameter("time_to_hold").toFloat();
     TasLogger::logger()->debug("UiCommandService::performTapCommand holding " + 
                                QString::number(duration));
-     Display* dpy = 0;
+
+#if defined(Q_WS_X11)
+    Display* dpy = 0;
      Window root = None;
      dpy = XOpenDisplay(NULL);       
      root = DefaultRootWindow(dpy);    
@@ -96,7 +100,8 @@ void UiCommandService::performTapCommand(TasCommand* command)
      XTestFakeButtonEvent(dpy, Button1, false, CurrentTime);
      XFlush(dpy);
      XCloseDisplay(dpy);
-
+#elif defined(TAS_WAYLAND)
+#endif
 }
 
 void UiCommandService::pressEnter()
