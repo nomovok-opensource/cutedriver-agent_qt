@@ -37,9 +37,10 @@
 #include <taslogger.h>
 #include <stdlib.h>
 #include <sys/resource.h>
+#if defined(Q_WS_X11)
 #include <X11/Xlib.h>
 #include <X11/extensions/XTest.h>
-
+#endif
 
 #include <QEvent>
 
@@ -228,6 +229,7 @@ void TasDeviceUtils::addSystemMemoryStatus(TasObject& object)
 
 void TasDeviceUtils::sendMouseEvent(int x, int y, Qt::MouseButton button, QEvent::Type type, uint /*pointerNumber*/)
 {
+#if defined(Q_WS_X11)
     Display* dpy = 0;
     Window root = None;
     dpy = XOpenDisplay(NULL);       
@@ -272,6 +274,8 @@ void TasDeviceUtils::sendMouseEvent(int x, int y, Qt::MouseButton button, QEvent
     
 
     XCloseDisplay(dpy);
+#elif defined(TAS_WAYLAND)
+#endif
 }
 
 /*!
