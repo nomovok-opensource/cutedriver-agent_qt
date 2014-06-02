@@ -7,11 +7,12 @@ License: LGPL
 Source0: %{name}-%{version}.tar.gz
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
-BuildRequires: qt5-qtcore-devel
-BuildRequires: qt5-qtwidgets-devel
-BuildRequires: qt5-qtquick1-devel
-BuildRequires: qt5-qtdeclarative-devel
-#BuildRequires: qt5-qtwebkit
+BuildRequires:  pkgconfig(Qt5Core)
+BuildRequires:  pkgconfig(Qt5Gui)
+BuildRequires:  pkgconfig(Qt5Widgets)
+BuildRequires:  pkgconfig(Qt5Qml)
+BuildRequires:  pkgconfig(Qt5Declarative)
+BuildRequires:  pkgconfig(Qt5Quick)
 Requires: qttas-server-plugins
 
 %description
