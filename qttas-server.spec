@@ -1,19 +1,14 @@
 Name: qttas-server
 Version: 0.9.1
-Release: 1
+Release: 1%{?dist}
 Summary: Qt Test Automation Server
 Group: Development/Tools
 License: LGPL
-URL: https://code.nokia.com/
 Source0: %{name}-%{version}.tar.gz
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
 BuildRequires:  pkgconfig(QtCore)
-BuildRequires:  pkgconfig(QtWebKit)
-BuildRequires:  pkgconfig(x11)
-BuildRequires:  pkgconfig(xext)
-BuildRequires:  pkgconfig(xi)
-BuildRequires:  pkgconfig(xtst)
+#BuildRequires:  pkgconfig(QtWebKit)
 Requires: qttas-server-plugins
 
 %description
@@ -25,8 +20,7 @@ verify and control them.
 %setup -q
 
 %build
-# TODO add CONFIG+=maemo
-qmake -r CONFIG+=RPM
+qmake -r CONFIG+=RPM CONFIG+=no_mobility CONFIG+=no_webkit CONFIG+=wayland
 make %{?_smp_mflags}
 
 
@@ -97,5 +91,4 @@ Qt Test Automation Server plugins
 %files plugins
 %defattr(-,root,root,-)
 %{_libdir}/qt4/plugins/*
-
 
