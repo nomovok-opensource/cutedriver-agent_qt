@@ -13,7 +13,7 @@ BuildRequires:  pkgconfig(Qt5Qml)
 BuildRequires:  pkgconfig(Qt5Declarative)
 BuildRequires:  pkgconfig(Qt5Quick)
 BuildRequires:  pkgconfig(Qt5Xml)
-BuildRequires:  pkgconfig(Qt5Testlib)
+BuildRequires:  pkgconfig(Qt5Test)
 Requires: qttas-server-plugins
 
 %description
