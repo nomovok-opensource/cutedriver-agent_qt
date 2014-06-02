@@ -7,8 +7,8 @@ License: LGPL
 Source0: %{name}-%{version}.tar.gz
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
-BuildRequires:  pkgconfig(QtCore)
-#BuildRequires:  pkgconfig(QtWebKit)
+BuildRequires:  qt5-qtcore-devel
+#BuildRequires: qt5-qtwebkit
 Requires: qttas-server-plugins
 
 %description
@@ -77,7 +77,7 @@ Qt TAS development header.
 %files devel
 %defattr(-,root,root,-)
 %{_includedir}/tdriver/*
-/usr/share/qt4/mkspecs/features/*
+/usr/share/qt5/mkspecs/features/*
 /usr/share/doc/qttas-dev/examples/hellotraverse/*
 
 
@@ -90,5 +90,5 @@ Qt Test Automation Server plugins
 
 %files plugins
 %defattr(-,root,root,-)
-%{_libdir}/qt4/plugins/*
+%{_libdir}/qt5/plugins/*
 
