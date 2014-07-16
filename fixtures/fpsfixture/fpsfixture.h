@@ -61,8 +61,10 @@ public:
 	void restartFpsMeasure();
 	void stopFpsMeasure();
 	QList< QPair<QString,int> > collectedData();
-
+public slots:
+	void collectFps();
 private:
+
 	QObject* mTarget;
 	int mFpsCounter;
 	QTime mTimeStamp;

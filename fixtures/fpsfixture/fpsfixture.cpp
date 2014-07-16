@@ -19,6 +19,7 @@
  
 
 #include <QApplication>
+#include <QQuickView>
 #include <QtPlugin>
 #include <QDebug>
 #include <QHash>
@@ -26,7 +27,6 @@
 #include <taslogger.h>
 #include <testabilityutils.h>
 #include <tasqtdatamodel.h>
-
 #include "fpsfixture.h"
 
 
@@ -167,7 +167,13 @@ QObject* FpsFixture::getTarget(void* objectInstance, QString objectType)
             QWidget* viewPort = TestabilityUtils::viewPortAndPosition(item, point);
             target = qobject_cast<QObject*>(viewPort);
         }
-    }    
+    }
+    else if(objectType == QQUICKVIEW_TYPE) {
+        QQuickView* view = reinterpret_cast<QQuickView*>(objectInstance);
+        if (view) {
+            target = qobject_cast<QObject*>(view);
+        }
+    }   
     return target;
 }
 
@@ -201,7 +207,14 @@ void FspMeasurer::startFpsMeasure()
 {
     mFpsValues.clear();
     mFpsCounter = 0;
-    mTarget->installEventFilter(this);
+
+    if(mTarget->isWidgetType()) {
+        mTarget->installEventFilter(this);
+    } else if(mTarget->isWindowType()) {
+        QQuickView* view = qobject_cast<QQuickView*>(mTarget);
+	view->connect(view, SIGNAL(frameSwapped()),
+                         this, SLOT(collectFps()), Qt::DirectConnection);
+    }
 }
 
 void FspMeasurer::restartFpsMeasure()
@@ -213,30 +226,42 @@ void FspMeasurer::restartFpsMeasure()
 void FspMeasurer::stopFpsMeasure()
 {
     restartFpsMeasure();
-    mTarget->removeEventFilter(this);
+    
+    if(mTarget->isWidgetType()) {
+        mTarget->removeEventFilter(this);
+    } else if(mTarget->isWindowType()) {
+	QQuickView* view = qobject_cast<QQuickView*>(mTarget);
+        view->disconnect(view, SIGNAL(frameSwapped()),
+                         this, SLOT(collectFps()));
+    }
+}
+
+void FspMeasurer::collectFps()
+{
+    //start collecting
+    if(mFpsCounter == 0){
+        mTimeStamp = QTime::currentTime();
+        mTimer.start();
+        mFpsCounter++;
+    }
+    else{
+        if(mTimer.elapsed() < 1000){
+            mFpsCounter++;
+        }
+        else{
+            mFpsValues.append(QPair<QString,int>(mTimeStamp.toString("hh:mm:ss.zzz"), mFpsCounter)); 
+            mFpsCounter = 1;
+            mTimer.restart();
+            mTimeStamp = QTime::currentTime();
+        }
+    }  
 }
 
 bool FspMeasurer::eventFilter(QObject *target, QEvent *event)
 {   
     Q_UNUSED(target);
     if( event->type() == QEvent::Paint){
-        //start collecting
-        if(mFpsCounter == 0){
-            mTimeStamp = QTime::currentTime();
-            mTimer.start();
-            mFpsCounter++;
-        }
-        else{
-            if(mTimer.elapsed() < 1000){
-                mFpsCounter++;
-            }
-            else{
-                mFpsValues.append(QPair<QString,int>(mTimeStamp.toString("hh:mm:ss.zzz"), mFpsCounter)); 
-                mFpsCounter = 1;
-                mTimer.restart();
-                mTimeStamp = QTime::currentTime();
-            }
-        }
-    }
+    	collectFps();
+	}
     return false;
 }
