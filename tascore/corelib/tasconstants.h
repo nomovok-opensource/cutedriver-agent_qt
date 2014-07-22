@@ -163,6 +163,7 @@ const char* const UI_STATE_FILE = "C:\\QTDumpUi.xml";
 const char* const TYPE_GRAPHICS_VIEW = "Graphics";
 const char* const TYPE_QSCENEGRAPH = "SceneGraph";
 const char* const TYPE_STANDARD_VIEW = "Standard";
+const char* const TYPE_WINDOW_VIEW = "Window";
 const char* const TYPE_APPLICATION_VIEW = "Application";
 const char* const TYPE_ACTION_VIEW = "Action";
 const char* const TYPE_LAYOUT = "Layout";

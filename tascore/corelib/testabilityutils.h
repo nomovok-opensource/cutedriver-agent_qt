@@ -25,6 +25,7 @@
 #include <QObject>
 #include <QtGui>
 #include <QWidget>
+#include <QWindow>
 #include <QAction>
 #include <QGraphicsView>
 
@@ -70,6 +71,7 @@ public:
 
 protected:
 	QWidget* findWidget(const QString& id);
+	QWindow* findWindow(const QString& id);
 	QGraphicsItem* findFromObject(const QString& id, QObject* object);
 	QGraphicsItem* findGraphicsItem(const QString& id);
 	QGraphicsItem* lookForMatch(QList<QGraphicsItem*> itemList, const QString& targetId);
