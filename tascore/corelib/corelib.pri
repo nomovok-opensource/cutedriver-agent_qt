@@ -79,6 +79,7 @@ unix: {
          SOURCES += $$PWD/tasdeviceutils_unix.cpp	
        }
     }
+    LIBS += -lrt
 }
 win32: {
     SOURCES += $$PWD/tasdeviceutils_win.cpp
