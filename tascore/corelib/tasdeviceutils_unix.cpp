@@ -37,6 +37,7 @@
 #include <taslogger.h>
 #include <stdlib.h>
 #include <sys/resource.h>
+#include <time.h>
 #if defined(Q_WS_X11)
 #include <X11/Xlib.h>
 #include <X11/extensions/XTest.h>
@@ -177,7 +178,12 @@ void TasDeviceUtils::addSystemInformation(TasObject& object)
 
 qreal TasDeviceUtils::currentProcessCpuTime()
 {
-    return -1;
+    struct timespec now;
+    if(clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &now) == 0) {
+       return (double)now.tv_sec + (double)now.tv_nsec / 1000000000.0;
+    } else {
+       return -1.0;
+    }
 }
 
 
