@@ -180,7 +180,7 @@ qreal TasDeviceUtils::currentProcessCpuTime()
 {
     struct timespec now;
     if(clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &now) == 0) {
-       return (double)now.tv_sec + (double)now.tv_nsec / 1000000000.0;
+       return (double)now.tv_sec + (double)now.tv_nsec / 1000000.0;
     } else {
        return -1.0;
     }
