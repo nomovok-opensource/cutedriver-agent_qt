@@ -1,6 +1,6 @@
 Name: qttas-server
-Version: 0.9.1
-Release: 4%{?dist}
+Version: 0.9.1.skytree39
+Release: 1%{?dist}
 Summary: Qt Test Automation Server
 Group: Development/Tools
 License: LGPL
