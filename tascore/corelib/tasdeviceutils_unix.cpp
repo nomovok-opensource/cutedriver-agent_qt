@@ -22,6 +22,9 @@
 
 #include "tasdeviceutils.h"
 
+#include <unistd.h>
+#include <sys/types.h>
+
 #if defined(TAS_MAEMO) && defined(HAVE_QAPP)
 #include <MApplication>
 #include <MWindow>
