@@ -23,12 +23,12 @@
 #include <taslogger.h>
 
 #include <signal.h>
+#include <unistd.h>
 
 #if defined(Q_WS_X11)
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
 #include <X11/Xatom.h>
-
 
 int pidOfXWindow(Display* display, Window win) 
 {
