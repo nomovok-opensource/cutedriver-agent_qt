@@ -69,7 +69,7 @@ unix:!symbian {
 #  EXAMPLES = doc/
   EXAMPLES.files = doc/*
   EXAMPLES.path = /usr/share/doc/qttas-dev/
-  DESKTOP.files = /etc/qttas_ui.desktop
+  DESKTOP.files = etc/qttas_ui.desktop
   DESKTOP.path = /usr/share/applications/
   INSTALLS += EXAMPLES DESKTOP
   # TODO other platforms to support?

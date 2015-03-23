@@ -1,5 +1,5 @@
 Name: qttas-server
-Version: 0.9.1.skytree39
+Version: 0.9.1.skytree41
 Release: 1%{?dist}
 Summary: Qt Test Automation Server
 Group: Development/Tools
@@ -49,7 +49,7 @@ rm -rf %{buildroot}
 %{_bindir}/qttas*
 %config %{_sysconfdir}/qt_testability/*
 %config %{_sysconfdir}/xdg/autostart/qttasserver.desktop
-%{_datadir}/qttas_ui.desktop
+%{_datadir}/applications/qttas_ui.desktop
 
 %package libs
 Summary: Qt Test automation server library files
