@@ -22,6 +22,9 @@
 #include <QLibrary>
 #include <QDebug>
 
+#include <sys/types.h>
+#include <unistd.h>
+
 #include <QCoreApplication>
 
 #ifdef Q_OS_SYMBIAN
