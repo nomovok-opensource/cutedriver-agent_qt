@@ -49,7 +49,7 @@ rm -rf %{buildroot}
 %{_bindir}/qttas*
 %config %{_sysconfdir}/qt_testability/*
 %config %{_sysconfdir}/xdg/autostart/qttasserver.desktop
-
+%{_datadir}/qttas_ui.desktop
 
 %package libs
 Summary: Qt Test automation server library files
