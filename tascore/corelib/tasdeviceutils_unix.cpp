@@ -40,17 +40,11 @@
 #include <taslogger.h>
 #include <stdlib.h>
 #include <sys/resource.h>
-<<<<<<< HEAD
-#include <X11/Xlib.h>
-#include <X11/extensions/XTest.h>
-
-=======
 #include <time.h>
 #if defined(Q_WS_X11)
 #include <X11/Xlib.h>
 #include <X11/extensions/XTest.h>
 #endif
->>>>>>> nomovok/skytree-build
 
 #include <QEvent>
 
@@ -187,16 +181,12 @@ void TasDeviceUtils::addSystemInformation(TasObject& object)
 
 qreal TasDeviceUtils::currentProcessCpuTime()
 {
-<<<<<<< HEAD
-    return -1;
-=======
     struct timespec now;
     if(clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &now) == 0) {
        return (double)now.tv_sec + (double)now.tv_nsec / 1000000.0;
     } else {
        return -1.0;
     }
->>>>>>> nomovok/skytree-build
 }
 
 
@@ -248,10 +238,7 @@ void TasDeviceUtils::addSystemMemoryStatus(TasObject& object)
 
 void TasDeviceUtils::sendMouseEvent(int x, int y, Qt::MouseButton button, QEvent::Type type, uint /*pointerNumber*/)
 {
-<<<<<<< HEAD
-=======
 #if defined(Q_WS_X11)
->>>>>>> nomovok/skytree-build
     Display* dpy = 0;
     Window root = None;
     dpy = XOpenDisplay(NULL);       
@@ -296,11 +283,8 @@ void TasDeviceUtils::sendMouseEvent(int x, int y, Qt::MouseButton button, QEvent
     
 
     XCloseDisplay(dpy);
-<<<<<<< HEAD
-=======
 #elif defined(TAS_WAYLAND)
 #endif
->>>>>>> nomovok/skytree-build
 }
 
 /*!

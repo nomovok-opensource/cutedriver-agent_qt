@@ -91,12 +91,7 @@ CONFIG(maemo){
 LIBS += -lqmsystem2
 }
 
-
-<<<<<<< HEAD
-unix:!symbian:!macx:!CONFIG(no_x) {
-=======
 unix:!symbian:!macx:!CONFIG(no_x):!wayland {
->>>>>>> nomovok/skytree-build
   LIBS += -lX11 -lXtst 
 }
 
