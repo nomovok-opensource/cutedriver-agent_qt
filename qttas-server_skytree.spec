@@ -1,19 +1,19 @@
 Name: qttas-server
-Version: 0.9.1
-Release: 1
+Version: 0.9.1.skytree41
+Release: 1%{?dist}
 Summary: Qt Test Automation Server
 Group: Development/Tools
 License: LGPL
-URL: https://code.nokia.com/
 Source0: %{name}-%{version}.tar.gz
-BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
-BuildRequires:  pkgconfig(QtCore)
-BuildRequires:  pkgconfig(QtWebKit)
-BuildRequires:  pkgconfig(x11)
-BuildRequires:  pkgconfig(xext)
-BuildRequires:  pkgconfig(xi)
-BuildRequires:  pkgconfig(xtst)
+BuildRequires:  pkgconfig(Qt5Core)
+BuildRequires:  pkgconfig(Qt5Gui)
+BuildRequires:  pkgconfig(Qt5Widgets)
+BuildRequires:  pkgconfig(Qt5Qml)
+BuildRequires:  pkgconfig(Qt5Declarative)
+BuildRequires:  pkgconfig(Qt5Quick)
+BuildRequires:  pkgconfig(Qt5Xml)
+BuildRequires:  pkgconfig(Qt5Test)
 Requires: qttas-server-plugins
 
 %description
@@ -25,8 +25,7 @@ verify and control them.
 %setup -q
 
 %build
-# TODO add CONFIG+=maemo
-qmake -r CONFIG+=RPM
+qtchooser -run-tool=qmake -qt=5 -r CONFIG+=RPM CONFIG+=no_mobility CONFIG+=no_webkit CONFIG+=wayland
 make %{?_smp_mflags}
 
 
@@ -50,6 +49,7 @@ rm -rf %{buildroot}
 %{_bindir}/qttas*
 %config %{_sysconfdir}/qt_testability/*
 %config %{_sysconfdir}/xdg/autostart/qttasserver.desktop
+%{_datadir}/applications/qttas_ui.desktop
 
 %package libs
 Summary: Qt Test automation server library files
@@ -82,8 +82,10 @@ Qt TAS development header.
 %files devel
 %defattr(-,root,root,-)
 %{_includedir}/tdriver/*
-/usr/share/qt4/mkspecs/features/*
+/usr/share/qt5/mkspecs/features/*
 /usr/share/doc/qttas-dev/examples/hellotraverse/*
+
+
 
 %package plugins
 Summary: Qt Test automation server plugins
@@ -93,5 +95,5 @@ Qt Test Automation Server plugins
 
 %files plugins
 %defattr(-,root,root,-)
-%{_libdir}/qt4/plugins/*
+%{_libdir}/qt5/plugins/*
 

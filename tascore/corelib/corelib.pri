@@ -79,6 +79,7 @@ unix: {
          SOURCES += $$PWD/tasdeviceutils_unix.cpp	
        }
     }
+    LIBS += -lrt
 }
 win32: {
     SOURCES += $$PWD/tasdeviceutils_win.cpp
@@ -91,7 +92,11 @@ LIBS += -lqmsystem2
 }
 
 
+<<<<<<< HEAD
 unix:!symbian:!macx:!CONFIG(no_x) {
+=======
+unix:!symbian:!macx:!CONFIG(no_x):!wayland {
+>>>>>>> nomovok/skytree-build
   LIBS += -lX11 -lXtst 
 }
 

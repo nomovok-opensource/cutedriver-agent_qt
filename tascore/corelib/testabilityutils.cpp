@@ -65,6 +65,18 @@ QWidget* TestabilityUtils::findWidget(const QString& id)
     return widget;
 }
 
+QWindow* TestabilityUtils::findWindow(const QString& id)
+{
+    QWindow* window = NULL;
+    QObject* o = TasPointerCache::instance()->getObject(id);
+    if(o != 0){
+        window = qobject_cast<QWindow*>(o);
+        if(window){
+            return window;
+        }
+    }
+}
+
 /*!
   Casting direclty from the id does not work so we need to look
   for the object with a matching id.

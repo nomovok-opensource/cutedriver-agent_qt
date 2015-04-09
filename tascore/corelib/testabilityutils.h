@@ -25,6 +25,7 @@
 #include <QObject>
 #include <QtGui>
 #include <QWidget>
+#include <QWindow>
 #include <QAction>
 #include <QGraphicsView>
 
@@ -70,6 +71,10 @@ public:
 
 protected:
 	QWidget* findWidget(const QString& id);
+<<<<<<< HEAD
+=======
+	QWindow* findWindow(const QString& id);
+>>>>>>> nomovok/skytree-build
 	QGraphicsItem* findFromObject(const QString& id, QObject* object);
 	QGraphicsItem* findGraphicsItem(const QString& id);
 	QGraphicsItem* lookForMatch(QList<QGraphicsItem*> itemList, const QString& targetId);

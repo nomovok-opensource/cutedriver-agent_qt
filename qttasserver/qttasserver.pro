@@ -91,6 +91,10 @@ CONFIG(maemo){
 DEFINES += TAS_MAEMO
 }
 
+wayland {
+DEFINES += TAS_WAYLAND
+}
+
 INSTALLS += target
 
 

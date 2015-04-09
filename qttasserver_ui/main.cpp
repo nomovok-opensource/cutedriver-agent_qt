@@ -25,6 +25,7 @@
 #include <QDialogButtonBox>
 #include <QGridLayout>
 #include <QApplication>
+#include <QDesktopWidget>
 
 #include "serverwindow.h"
 
@@ -36,9 +37,30 @@ int main(int argc, char *argv[])
     QApplication::setOrganizationDomain("nokia.com");
     QApplication::setApplicationName("QtTasserverUi");
 
-    ServerWindow serverWindow;    
-    serverWindow.show();
+    bool isFullscreen = false;
+    QStringList arguments = app.arguments();
+    for (int i = 0; i < arguments.count(); ++i) {
+        QString parameter = arguments.at(i);
+        if (parameter == "-fullscreen") {
+            isFullscreen = true;
+        } else if (parameter == "-help") {
+            qDebug() << "TDriver Qttas_ui application.";
+            qDebug() << "-fullscreen   - show QML fullscreen";
+            qDebug() << "-help  - This message";
+            exit(0);
+        } 
+    }
 
+    ServerWindow serverWindow;
+
+    if (isFullscreen) {
+        serverWindow.resize(QApplication::desktop()->size());
+        serverWindow.showFullScreen();
+    } else {
+        serverWindow.setFixedSize(350,600);
+        serverWindow.show();
+    }
+        
     return app.exec();
 }
 

@@ -163,6 +163,8 @@ void TasQtTraverse::traverseObject(TasObject* objectInfo, QObject* object, TasCo
 #endif 
 
              
+        } else if(object->isWindowType()) { 
+            objectInfo->addAttribute("objectType", TYPE_WINDOW_VIEW);
         } else {
             if(object != qApp){
                 objectInfo->addAttribute("objectType", embeddedApp? TYPE_WEB : TYPE_STANDARD_VIEW );        

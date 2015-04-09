@@ -69,7 +69,9 @@ unix:!symbian {
 #  EXAMPLES = doc/
   EXAMPLES.files = doc/*
   EXAMPLES.path = /usr/share/doc/qttas-dev/
-  INSTALLS += EXAMPLES
+  DESKTOP.files = etc/qttas_ui.desktop
+  DESKTOP.path = /usr/share/applications/
+  INSTALLS += EXAMPLES DESKTOP
   # TODO other platforms to support?
 
   MKSPECS.files = mkspecs/features/qttas_traverser.prf mkspecs/features/qttas_fixture.prf

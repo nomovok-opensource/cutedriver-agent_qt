@@ -72,7 +72,7 @@ HEADERS += $$PUBLIC_HEADERS
 QT += network xml widgets
 INSTALLS += target
 
-unix:!symbian:!macx:!CONFIG(no_x) {
+unix:!symbian:!macx:!CONFIG(no_x):!wayland {
   LIBS += -lX11 -lXtst 
 }
 

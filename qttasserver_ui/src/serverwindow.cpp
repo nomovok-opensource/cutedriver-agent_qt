@@ -132,12 +132,12 @@ ServerWindow::ServerWindow(QWidget* parent)
 #endif
     setLayout(mainLayout);     
 
-    QRect rect = qApp->desktop()->screenGeometry();    
-    if(rect.width() > 864)
-        setFixedSize(350,600);
-    else{
-        showFullScreen();    
-    }
+//    QRect rect = qApp->desktop()->screenGeometry();    
+//    if(rect.width() > 864)
+//        setFixedSize(350,600);
+//    else{
+//        showFullScreen();    
+//    }
 
 }
 
