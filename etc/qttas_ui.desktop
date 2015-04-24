@@ -3,6 +3,6 @@ Encoding=UTF-8
 Version=1.0
 Type=Application
 Terminal=false
-Name=TDriver UI
+Name=cuTeDriver UI
 Exec=invoker -s -r 0 --type=generic /usr/bin/qttas_ui -fullscreen
 Icon=icon-app-default

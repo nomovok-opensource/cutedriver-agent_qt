@@ -44,7 +44,7 @@ int main(int argc, char *argv[])
         if (parameter == "-fullscreen") {
             isFullscreen = true;
         } else if (parameter == "-help") {
-            qDebug() << "TDriver Qttas_ui application.";
+            qDebug() << "cuTeDriver Qttas_ui application.";
             qDebug() << "-fullscreen   - show QML fullscreen";
             qDebug() << "-help  - This message";
             exit(0);
