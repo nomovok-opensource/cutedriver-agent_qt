@@ -77,7 +77,7 @@ ServerMonitor::ServerMonitor(QObject* parent)
     connect(mClient, SIGNAL(serverResponse(const QString&)), this, SLOT(serverResponse(const QString&)));
 
     TasLogger::logger()->setLogFile("qttas_ui.log");         
-    TasLogger::logger()->setLevel(DEBUG);                              
+    TasLogger::logger()->setLevel(LOG_DEBUG);
     TasLogger::logger()->clearLogFile();   
     
 }

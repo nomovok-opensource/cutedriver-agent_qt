@@ -22,7 +22,8 @@
 TEMPLATE = lib
 TARGET = fpsfixture
 CONFIG += plugin
-QT += xml widgets quick
+QT += xml widgets quick qml
+
 
 include(../../tasbase.pri)
 
