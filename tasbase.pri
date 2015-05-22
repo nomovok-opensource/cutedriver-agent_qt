@@ -47,7 +47,7 @@ EXPORT_DIR=/epoc32/include/ext/app/exttesttools/%1
 }
 win32: {
 TAS_TARGET_BIN=/qttas/bin
-TAS_TARGET_LIB=/qttas/lib
+TAS_TARGET_LIB=/qttas/bin
 TAS_TARGET_STEPS=/qttas/cucumber
 TAS_TARGET_PLUGIN=$$[QT_INSTALL_PLUGINS]/
 }
