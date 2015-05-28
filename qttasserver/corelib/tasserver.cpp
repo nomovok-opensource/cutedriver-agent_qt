@@ -88,7 +88,7 @@ TasServer::TasServer(QString hostBinding, QObject *parent)
 {
     TasLogger::logger()->setLogFile("qttasserver.log");
     //TasLogger::logger()->disableLogger();
-    TasLogger::logger()->setLevel(DEBUG);
+    TasLogger::logger()->setLevel(LOG_DEBUG);
 
     TasLogger::logger()->debug("Logger created");
 

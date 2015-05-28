@@ -23,7 +23,9 @@
 #include <QDebug>
 
 #include <sys/types.h>
+#ifdef Q_OS_UNIX
 #include <unistd.h>
+#endif
 
 #include <QCoreApplication>
 

@@ -62,7 +62,7 @@ TasLogger::TasLogger()
     mLogSize = LOG_SIZE;
     mEnabled = false;    
     mUseQDebug = false;
-    mCurrentLevel = INFO;
+    mCurrentLevel = LOG_INFO;
     mLogFileName = TasCoreUtils::getApplicationName()+".log";
 #ifdef Q_OS_SYMBIAN
     if(QDir(E_LOG_PATH).exists()){
@@ -103,19 +103,19 @@ void TasLogger::configureLogger(TasCommand& command)
 	QMutexLocker locker(mInstanceMutex);
 
     if(command.parameter(LOG_LEVEL) == "FATAL"){
-        setLevel(FATAL);
+        setLevel(LOG_FATAL);
     }
     else if(command.parameter(LOG_LEVEL) == "ERROR"){
-        setLevel(ERROR);
+        setLevel(LOG_ERROR);
     }
     else if(command.parameter(LOG_LEVEL) == "INFO"){
-        setLevel(INFO);
+        setLevel(LOG_INFO);
     }
     else if(command.parameter(LOG_LEVEL) == "WARNING"){
-        setLevel(WARNING);
+        setLevel(LOG_WARNING);
     }
     else if(command.parameter(LOG_LEVEL) == "DEBUG"){
-        setLevel(DEBUG);
+        setLevel(LOG_DEBUG);
     }
 
     if(command.parameter(LOG_TO_QDEBUG) == "true"){
@@ -252,27 +252,27 @@ void TasLogger::removeLogger()
 
 void TasLogger::debug(const QString message)
 {
-    writeLogLine(DEBUG, message);    
+    writeLogLine(LOG_DEBUG, message);    
 }
 
 void TasLogger::info(const QString message)
 {
-    writeLogLine(INFO, message);    
+    writeLogLine(LOG_INFO, message);    
 }
 
 void TasLogger::error(const QString message)
 {
-    writeLogLine(ERROR, message);    
+    writeLogLine(LOG_ERROR, message);    
 }
 
 void TasLogger::warning(const QString message)
 {
-    writeLogLine(WARNING, message);    
+    writeLogLine(LOG_WARNING, message);    
 }
 
 void TasLogger::fatal(const QString message)
 {
-    writeLogLine(FATAL, message);    
+    writeLogLine(LOG_FATAL, message);    
 }
 
 void TasLogger::setLevel(const LogType& level)
@@ -320,19 +320,19 @@ void TasLogger::writeLogLine(LogType type, const QString& message)
         out << QTime::currentTime().toString("hh:mm:ss.zzz").toLatin1();
         out << ">";
         switch (type) {
-        case FATAL:
+        case LOG_FATAL:
             out << "FATAL: ";            
             break;            
-        case ERROR:
+        case LOG_ERROR:
             out << "ERROR: ";            
             break;            
-        case INFO:
+        case LOG_INFO:
             out << "INFO: ";            
             break;            
-        case WARNING:
+        case LOG_WARNING:
             out << "WARNING: ";            
             break;            
-        case DEBUG:
+        case LOG_DEBUG:
             out << "DEBUG: ";    
             break;            
         }

@@ -20,4 +20,4 @@ bin/
 TAGS
 #don't ignore files in symbian folder
 !/symbian/*
-qt_testability.pro.user
+*.pro.user

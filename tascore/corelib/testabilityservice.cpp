@@ -89,7 +89,7 @@ extern "C" TAS_EXPORT void qt_testability_init()
 TestabilityLoader::TestabilityLoader()
 {
     TasLogger::logger()->setLogFile(TestabilityUtils::getApplicationName()+".log");    
-    TasLogger::logger()->setLevel(DEBUG); 
+    TasLogger::logger()->setLevel(LOG_DEBUG); 
     mService = 0;
     connect(qApp, SIGNAL(aboutToQuit()), this, SLOT(unload()));
 }
