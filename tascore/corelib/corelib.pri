@@ -79,20 +79,24 @@ unix: {
          SOURCES += $$PWD/tasdeviceutils_unix.cpp	
        }
     }
-    LIBS += -lrt
 }
+
 win32: {
     SOURCES += $$PWD/tasdeviceutils_win.cpp
-	LIBS += -lPsapi
-	LIBS +=	-lUser32
+    LIBS += -lPsapi
+    LIBS +=	-lUser32
 }
 
 CONFIG(maemo){
-LIBS += -lqmsystem2
+    LIBS += -lqmsystem2
 }
 
 unix:!symbian:!macx:!CONFIG(no_x):!wayland {
-  LIBS += -lX11 -lXtst 
+    LIBS += -lX11 -lXtst 
+}
+
+unix:!macx {
+    LIBS += -lrt
 }
 
 symbian: {
