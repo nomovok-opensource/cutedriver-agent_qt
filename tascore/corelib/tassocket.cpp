@@ -23,6 +23,7 @@
 #include <QStack>    
 #include <QObject>
 #include <QWeakPointer>
+#include <QDataStream>
 
 #include "tascoreutils.h"
 #include "tassocket.h"
