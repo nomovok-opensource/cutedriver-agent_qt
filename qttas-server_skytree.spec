@@ -1,5 +1,5 @@
 Name: qttas-server
-Version: 0.9.1.skytree41
+Version: 2.0.0.skytree41
 Release: 1%{?dist}
 Summary: Qt Test Automation Server
 Group: Development/Tools

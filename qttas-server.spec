@@ -1,5 +1,5 @@
 Name: qttas-server
-Version: 0.9.1
+Version: 2.0.0
 Release: 1
 Summary: Qt Test Automation Server
 Group: Development/Tools
