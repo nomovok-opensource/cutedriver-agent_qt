@@ -89,7 +89,7 @@ bool SettingFixture::execute(void * /*objectInstance*/, QString actionName, QHas
 
 QString SettingFixture::editSettings(QSettings& settings, const QString& action, QHash<QString, QString> parameters)
 {
-    QString hashEntity = ":%1 =>'%2'";
+    QString hashEntity = "\"%1\": \"%2\"";
     parameters.remove(OBJECT_TYPE);
     QString returnValue;
 
