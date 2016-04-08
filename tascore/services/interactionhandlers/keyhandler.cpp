@@ -91,7 +91,10 @@ void KeyHandler::doKeyEvent(QWidget* target, QEvent::Type type, Qt::Key keyCode)
     QKeyEvent* a = new QKeyEvent(type, keyCode, mModifiers, text);        
     QSpontaneKeyEvent::setSpontaneous(a);
     //qApp->notify(target, &a);
-    qApp->postEvent(target, a);
+    if (!target)
+        qApp->postEvent(qApp->focusObject(), a);
+    else
+        qApp->postEvent(target, a);
 
     if(type == QEvent::KeyPress){
         enableModifiers(keyCode);
