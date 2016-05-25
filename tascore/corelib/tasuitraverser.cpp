@@ -185,6 +185,15 @@ void TasUiTraverser::traverseObject(TasObject& objectInfo, QObject* object, TasC
             }
         }
 
+        // support for QML Window.
+        QQuickWindow* quickWindow = qobject_cast<QQuickWindow*>(object);
+        if (quickWindow) {
+            QQuickItem* root = quickWindow->contentItem();
+            if (root) {
+                traverseObject(objectInfo.addObject(), root, command);
+            }
+        }
+
         //check decendants
         //1. is graphicsview
         QGraphicsView* gView = qobject_cast<QGraphicsView*>(object);
