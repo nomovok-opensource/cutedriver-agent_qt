@@ -169,7 +169,6 @@ void TasUiTraverser::traverseObject(TasObject& objectInfo, QObject* object, TasC
         printActions(objectInfo, object);
     }
     if (traverseChildren) {
-
         QQuickView* quickView = qobject_cast<QQuickView*>(object);
         if (quickView) {
             QQuickItem* root = quickView->rootObject();
@@ -186,11 +185,13 @@ void TasUiTraverser::traverseObject(TasObject& objectInfo, QObject* object, TasC
         }
 
         // support for QML Window.
-        QQuickWindow* quickWindow = qobject_cast<QQuickWindow*>(object);
-        if (quickWindow) {
-            QQuickItem* root = quickWindow->contentItem();
-            if (root) {
-                traverseObject(objectInfo.addObject(), root, command);
+        if (QString::fromLatin1(object->metaObject()->className()).compare("QQuickView")!=0) {
+            QQuickWindow* quickWindow = qobject_cast<QQuickWindow*>(object);
+            if (quickWindow) {
+                QQuickItem* root = quickWindow->contentItem();
+                if (root) {
+                    traverseObject(objectInfo.addObject(), root, command);
+                }
             }
         }
 
