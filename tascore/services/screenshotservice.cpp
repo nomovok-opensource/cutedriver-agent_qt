@@ -178,7 +178,7 @@ void ScreenshotService::getScreenshot(TasCommandModel& model, TasResponse& respo
                 screenshot.setText("tas_id", objectId(widget));
             }
         } else if (qtQuickWindow) {
-            screenshot = qtQuickWindow->grabWindow();
+            screenshot = qtQuickWindow->screen()->grabWindow(qtQuickWindow->winId(), rect.x(), rect.y(), rect.width(), rect.height()).toImage();
             if (!screenshot.isNull()) {
                 screenshot.setText("tas_id", objectId(qtQuickWindow));
             }
