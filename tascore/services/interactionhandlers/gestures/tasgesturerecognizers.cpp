@@ -298,7 +298,7 @@ TasGesture* RotationTasGestureRecognizer::create(TargetData data)
     TasCommand& command = *data.command;
 
     if(!validateRotationParams(command)){
-        return false;
+        return 0;
     }
 
     QPoint point = data.targetPoint;
