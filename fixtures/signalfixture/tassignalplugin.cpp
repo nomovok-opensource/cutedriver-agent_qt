@@ -249,5 +249,8 @@ QObject* TasSignalPlugin::castToObject(void* objectInstance, QString ptrType)
     else if( ptrType == APPLICATION_TYPE ){
         target = qApp;
     }
+    else if( ptrType == QQUICKITEM_TYPE){
+        target = reinterpret_cast<QObject *>(objectInstance);
+    }
     return target;
 }
