@@ -26,6 +26,8 @@
 #include "tasconstants.h"
 
 #include "utilityapp.h"
+#include <QWindow>
+#include <QScreen>
  
 
 TasUtilityApp::TasUtilityApp()
@@ -36,7 +38,12 @@ TasUtilityApp::~TasUtilityApp()
 
 void TasUtilityApp::sendScreenShot(uint id)
 {
-    QPixmap screenshot = QPixmap::grabWindow(QApplication::desktop()->winId());
+    QWindow* window = QWindow::fromWinId(QApplication::desktop()->winId());
+    if (!window) {
+        return;
+    }
+    QPixmap screenshot = QPixmap::fromImage(window->screen()->grabWindow(QApplication::desktop()->winId(), window->x(), window->y(), window->width(), window->height()).toImage());
+
     QByteArray bytes;
     QBuffer buffer(&bytes);
     buffer.open(QIODevice::WriteOnly);
