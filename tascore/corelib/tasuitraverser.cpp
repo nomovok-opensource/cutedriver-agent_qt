@@ -182,6 +182,13 @@ void TasUiTraverser::traverseObject(TasObject& objectInfo, QObject* object, TasC
             foreach(QQuickItem* child, quickItem->childItems()) {
                 traverseObject(objectInfo.addObject(), child, command);
             }
+            // support for custom QObject inherited
+            foreach(QObject* child, quickItem->children()) {
+                QQuickItem* isQuickItem = qobject_cast<QQuickItem*>(child);
+                if (child && !isQuickItem) {
+                    traverseObject(objectInfo.addObject(), child, command);
+                }
+            }
         }
 
         // support for QML Window.
@@ -194,7 +201,6 @@ void TasUiTraverser::traverseObject(TasObject& objectInfo, QObject* object, TasC
                 }
             }
         }
-
         //check decendants
         //1. is graphicsview
         QGraphicsView* gView = qobject_cast<QGraphicsView*>(object);
