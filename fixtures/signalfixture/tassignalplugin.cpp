@@ -1,29 +1,29 @@
-/*************************************************************************** 
-** 
-** Copyright (C) 2010 Nokia Corporation and/or its subsidiary(-ies). 
-** All rights reserved. 
-** Contact: Nokia Corporation (testabilitydriver@nokia.com) 
-** 
+/***************************************************************************
+**
+** Copyright (C) 2010 Nokia Corporation and/or its subsidiary(-ies).
+** All rights reserved.
+** Contact: Nokia Corporation (testabilitydriver@nokia.com)
+**
 ** This file is part of Testability Driver Qt Agent
-** 
-** If you have questions regarding the use of this file, please contact 
-** Nokia at testabilitydriver@nokia.com . 
-** 
-** This library is free software; you can redistribute it and/or 
-** modify it under the terms of the GNU Lesser General Public 
-** License version 2.1 as published by the Free Software Foundation 
-** and appearing in the file LICENSE.LGPL included in the packaging 
-** of this file. 
-** 
-****************************************************************************/ 
- 
+**
+** If you have questions regarding the use of this file, please contact
+** Nokia at testabilitydriver@nokia.com .
+**
+** This library is free software; you can redistribute it and/or
+** modify it under the terms of the GNU Lesser General Public
+** License version 2.1 as published by the Free Software Foundation
+** and appearing in the file LICENSE.LGPL included in the packaging
+** of this file.
+**
+****************************************************************************/
+
 
 /*
- 
+
 	what if scenarios:
 		1) singal enabled to e.g button and button object is deleted, does get_signal work anymore due to tasserver cannot retrieve button object?
- 
- 
+
+
 */
 
 #include <QtPlugin>
@@ -53,11 +53,11 @@ static QString TRAVERSE_SENDER = "traverse_sender";
 /*!
   \class TasFixturePlugin
   \brief TasDuiTraverse traverse DUI components for adding custom details to them
-        
-  Using standard qt objects it is not always possible to get specific details from the 
-  components. This TasHelperInterface implementation will allow us to add details from 
+
+  Using standard qt objects it is not always possible to get specific details from the
+  components. This TasHelperInterface implementation will allow us to add details from
   the wanted dui components that are not accesible through the property or other
-  generic way. 
+  generic way.
 */
 
 /*!
@@ -86,16 +86,16 @@ bool TasSignalPlugin::execute(void * objectInstance, QString actionName, QHash<Q
 {
     TasLogger::logger()->debug("TasSignalPlugin::execute action: " + actionName );
     bool result = true;
-    // set the stdOut if you wish to pass information back to Testability Driver    
-    if (actionName == "list_signals") {                
-    	result = listSignals( objectInstance, parameters.value(OBJECT_TYPE), stdOut);    	
+    // set the stdOut if you wish to pass information back to Testability Driver
+    if (actionName == "list_signals") {
+    	result = listSignals( objectInstance, parameters.value(OBJECT_TYPE), stdOut);
     }
-    else if (actionName == "get_signal") {            
+    else if (actionName == "get_signal") {
         result = printSignals(stdOut);
-    }    
+    }
     else if (actionName == "enable_signal") {
         result = enableSignal(objectInstance, parameters, stdOut);
-    }    
+    }
     else if (actionName == "remove_signals") {
         result = clearSignals(stdOut);
     }
@@ -110,28 +110,28 @@ bool TasSignalPlugin::execute(void * objectInstance, QString actionName, QHash<Q
   Print error message.
  */
 void TasSignalPlugin::printErrorMsg(QHash<QString, QString> parameters, QString& stdOut)
-{            
-    QHash<QString, QString>::const_iterator i = parameters.constBegin();    
+{
+    QHash<QString, QString>::const_iterator i = parameters.constBegin();
     stdOut.append("(");
     while (i != parameters.constEnd()) {
         stdOut.append(i.key());
         stdOut.append("=>");
         stdOut.append(i.value());
         stdOut.append(")");
-        ++i;        
+        ++i;
         }
     stdOut.append("}");
 }
 
 /*!
-  Serialize the model used by TasSignalSpies to report 
+  Serialize the model used by TasSignalSpies to report
   occured signals.
-*/ 
+*/
 
 bool TasSignalPlugin::printSignals(QString& stdOut)
 {
     QByteArray xml;
-    mOccuredSignals->serializeModel(xml);    
+    mOccuredSignals->serializeModel(xml);
     stdOut.append(QString::fromUtf8(xml.data()));
     return true;
 }
@@ -149,7 +149,7 @@ bool TasSignalPlugin::clearSignals(QString& stdOut)
     }
     spyContainerHash.clear();
     mOccuredSignals->clearModel();
-    stdOut = "Signals removed OK";       
+    stdOut = "Signals removed OK";
     return true;
 }
 
@@ -157,11 +157,11 @@ bool TasSignalPlugin::clearSignals(QString& stdOut)
   List all signals from the target object.
  */
 bool TasSignalPlugin::listSignals(void* objectInstance, QString ptrType, QString & stdOut)
-{  
+{
     QObject *target = castToObject(objectInstance, ptrType);
     bool result = false;
     if(target){
-        TasDataModel* model = new TasDataModel();    
+        TasDataModel* model = new TasDataModel();
         TasObjectContainer& container = model->addNewObjectContainer(CONTAINER_ID.toInt(), "QtSignals", "QtSignals");
 
         for(int i = 0; i < target->metaObject()->methodCount(); ++i) {
@@ -169,7 +169,7 @@ bool TasSignalPlugin::listSignals(void* objectInstance, QString ptrType, QString
                 container.addNewObject(QString::number(i), QString::fromLatin1(target->metaObject()->method(i).methodSignature()), "QtSignal");
         }
         QByteArray xml;
-        model->serializeModel(xml);    
+        model->serializeModel(xml);
         stdOut.append(QString::fromUtf8(xml.data()));
         delete model;
         result =  true;
@@ -194,7 +194,7 @@ bool TasSignalPlugin::enableSignal(void *objectInstance, QHash<QString, QString>
         if(target && parameters[CHILD_SIGNAL] == "true"){
             owner = target;
             QObject* obj = target->findChild<QObject*>(parameters[CHILD_CLASS]);
-            target = obj;            
+            target = obj;
         }
         if(target){
             int signalId = target->metaObject()->indexOfMethod(signalName.toLatin1().data());
@@ -217,7 +217,7 @@ bool TasSignalPlugin::enableSignal(void *objectInstance, QHash<QString, QString>
                 TasSignalSpy *tasSpy = new TasSignalSpy(target, (QString::number(QSIGNAL_CODE)+signature).toLatin1().data(),
                                                         *container, traverseSender);
                 tasSpy->setTarget(owner);
-                spyContainerHash.insert(QString(hashIdentificator + signature), tasSpy);                
+                spyContainerHash.insert(QString(hashIdentificator + signature), tasSpy);
                 stdOut = "Enable signal called";
                 result = true;
             }
@@ -231,7 +231,7 @@ bool TasSignalPlugin::enableSignal(void *objectInstance, QHash<QString, QString>
     }
     else{
         stdOut = "No signal defined in parameters";
-    }	
+    }
     return result;
 }
 
@@ -239,15 +239,18 @@ bool TasSignalPlugin::enableSignal(void *objectInstance, QHash<QString, QString>
 QObject* TasSignalPlugin::castToObject(void* objectInstance, QString ptrType)
 {
     QObject* target = 0;
-    if( ptrType == WIDGET_TYPE ){     
+    if( ptrType == WIDGET_TYPE ){
         target = reinterpret_cast<QWidget*>(objectInstance);
     }
     else if( ptrType == GRAPHICS_ITEM_TYPE ){
-        QGraphicsItem* item = reinterpret_cast<QGraphicsItem*>(objectInstance);   
+        QGraphicsItem* item = reinterpret_cast<QGraphicsItem*>(objectInstance);
         target = item->toGraphicsObject();
     }
     else if( ptrType == APPLICATION_TYPE ){
         target = qApp;
+    }
+    else if( ptrType == QQUICKITEM_TYPE){
+        target = reinterpret_cast<QObject *>(objectInstance);
     }
     return target;
 }
