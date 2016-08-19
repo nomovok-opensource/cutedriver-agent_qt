@@ -183,8 +183,7 @@ void ScreenshotService::getScreenshot(TasCommandModel& model, TasResponse& respo
                 screenshot.setText("tas_id", objectId(qtQuickWindow));
             }
         } else if (winId) {
-            QWindow* window = getApplicationWindow();
-            screenshot = window->screen()->grabWindow(winId, rect.x(), rect.y(), rect.width(), rect.height()).toImage();
+            screenshot = QPixmap::grabWindow(winId, rect.x(), rect.y(), rect.width(), rect.height()).toImage();
 
             if (!screenshot.isNull()) {
                 screenshot.setText("tas_id", QString::number(winId));
