@@ -52,10 +52,9 @@ bool ScreenshotService::executeService(TasCommandModel& model, TasResponse& resp
     if(model.service() == serviceName() ){
         TasLogger::logger()->debug("ScreenshotService::executeService in");
         QGuiApplication *app = qobject_cast<QGuiApplication*>(qApp);
-        if(app){
+        if (app) {
             getScreenshot(model, response);
-        }
-        else{
+        } else {
             TasLogger::logger()->debug("ScreenshotService::executeService application has no ui!");
             response.setErrorMessage(NO_UI_ERROR);
         }
@@ -74,8 +73,10 @@ void ScreenshotService::getScreenshot(TasCommandModel& model, TasResponse& respo
     QString pictureFormat = "PNG";
     while (i.hasNext()) {
         TasTarget* commandTarget = i.next();
+
         QString targetId = commandTarget->id();
         QString targetType = commandTarget->type();
+
         TasCommand* command = commandTarget->findCommand("Screenshot");
 
         // are required for command completion
@@ -102,7 +103,6 @@ void ScreenshotService::getScreenshot(TasCommandModel& model, TasResponse& respo
         errorMsg = "Taking screenshot failed!";
 
         if (targetType == TYPE_GRAPHICS_VIEW) {
-            //TasLogger::logger()->debug("TYPE_GRAPHICS_VIEW Target id:" + targetId);
             QGraphicsItem* item = findGraphicsItem(targetId);
 
             if (item) {
@@ -126,7 +126,6 @@ void ScreenshotService::getScreenshot(TasCommandModel& model, TasResponse& respo
                 errorMsg = "Could not find the GraphicsItem!";
             }
         } else if (targetType == TYPE_STANDARD_VIEW) {
-            //TasLogger::logger()->debug("TYPE_STANDARD_VIEW about to find widget Target id:" + targetId);
             widget = findWidget(targetId);
 
             if (widget) {
@@ -157,7 +156,6 @@ void ScreenshotService::getScreenshot(TasCommandModel& model, TasResponse& respo
                 qtQuickWindow = item->window();
             }
         } else {
-            //TasLogger::logger()->debug("TYPE_APPLICATION_VIEW about to find application window Target id:" + targetId);
             widget = getApplicationWidget();
 
             if (!widget) {
@@ -167,7 +165,11 @@ void ScreenshotService::getScreenshot(TasCommandModel& model, TasResponse& respo
 
                 if (!window) {
                     widget = qApp->desktop();
+                } else {
+                    TasLogger::logger()->warning("did find a window");
                 }
+            } else {
+                TasLogger::logger()->warning("did not find widget");
             }
         }
 
@@ -176,18 +178,29 @@ void ScreenshotService::getScreenshot(TasCommandModel& model, TasResponse& respo
 
             if (!screenshot.isNull()) {
                 screenshot.setText("tas_id", objectId(widget));
+            } else {
+                TasLogger::logger()->warning("widget: screenshot was null");
             }
         } else if (qtQuickWindow) {
             screenshot = qtQuickWindow->screen()->grabWindow(qtQuickWindow->winId(), rect.x(), rect.y(), rect.width(), rect.height()).toImage();
             if (!screenshot.isNull()) {
                 screenshot.setText("tas_id", objectId(qtQuickWindow));
+            } else {
+                screenshot = qtQuickWindow->grabWindow();
+                if (screenshot.isNull()) {
+                    TasLogger::logger()->warning("qtQuickWindow: screenshot was null");
+                }
             }
         } else if (winId) {
             screenshot = QPixmap::grabWindow(winId, rect.x(), rect.y(), rect.width(), rect.height()).toImage();
 
             if (!screenshot.isNull()) {
                 screenshot.setText("tas_id", QString::number(winId));
+            } else {
+                TasLogger::logger()->warning("winId: screenshot was null");
             }
+        } else {
+            TasLogger::logger()->warning("UNHANDLED SCREENSHOT CASE");
         }
 
         break;
@@ -201,6 +214,7 @@ void ScreenshotService::getScreenshot(TasCommandModel& model, TasResponse& respo
         response.setData(bytes);
         buffer.close();
     } else {
+        TasLogger::logger()->warning(errorMsg);
         response.setErrorMessage(errorMsg);
     }
 
