@@ -18,7 +18,7 @@
 ****************************************************************************/ 
  
 
-
+#include <QtGlobal>
 #include <QApplication>
 #include <QGraphicsItem>
 #include <QGraphicsWidget>
@@ -30,7 +30,6 @@
 #include <QLocale>
 
 #include "tasuitraverser.h"
-#include "taslogger.h"
 #include "testabilityutils.h"
 #include "tastraverserloader.h"
 #include "tasdeviceutils.h"
@@ -182,13 +181,6 @@ void TasUiTraverser::traverseObject(TasObject& objectInfo, QObject* object, TasC
             foreach(QQuickItem* child, quickItem->childItems()) {
                 traverseObject(objectInfo.addObject(), child, command);
             }
-            // support for custom QObject inherited
-            foreach(QObject* child, quickItem->children()) {
-                QQuickItem* isQuickItem = qobject_cast<QQuickItem*>(child);
-                if (child && !isQuickItem) {
-                    traverseObject(objectInfo.addObject(), child, command);
-                }
-            }
         }
 
         // support for QML Window.
@@ -224,6 +216,19 @@ void TasUiTraverser::traverseObject(TasObject& objectInfo, QObject* object, TasC
                         // TODO This (and other similar hacks) needs to be moved to plugins once OSS changes are done
                         if (TestabilityUtils::isCustomTraverse() || widget->isVisible() ) /*&& !wasTraversed(widget)*/{
                             traverseObject(objectInfo.addObject(), widget, command);
+                        }
+                    } else if (obj->parent() == object) {
+                        // support for QObject inherited objects, which does not have an visible UI
+                        QQuickItem* isQuickItem = qobject_cast<QQuickItem*>(obj);
+                        if (obj && !isQuickItem) {
+                            QString objName = QString(obj->metaObject()->className());
+
+// QDeclarativeRadioData can crash in QML app if no radio data available
+// https://bugreports.qt.io/browse/QTBUG-47859
+#if QT_VERSION < 0x050501
+                            if (objName.startsWith("QDeclarativeRadioData")) continue;
+#endif
+                            traverseObject(objectInfo.addObject(), obj, command);
                         }
                     }
                 }
