@@ -29,6 +29,7 @@
 
 #include "objectservice.h"
 #include "taslogger.h"
+#include "taspointercache.h"
 
 /*!
   \class ObjectService
@@ -73,6 +74,11 @@ void ObjectService::performObjectService(TasCommandModel& model, TasResponse& re
         }
         else if(targetType == TYPE_STANDARD_VIEW){
             target = findWidget(targetId);
+
+            //If Type is Standard View check QObjects in cache too.
+            if(!target) {
+              target = findObject(targetId);
+            }
         }
         else if(targetType == TYPE_QSCENEGRAPH){
             target = findQuickItem(targetId);
