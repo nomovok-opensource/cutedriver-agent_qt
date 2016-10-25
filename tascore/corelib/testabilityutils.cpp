@@ -78,6 +78,19 @@ QWindow* TestabilityUtils::findWindow(const QString& id)
 }
 
 /*!
+  Finding QObject from TasPointerCache. Traversing trough all QObjects of
+  Application is not feasible.
+*/
+QObject* TestabilityUtils::findObject(const QString& id)
+{
+  QObject* o = TasPointerCache::instance()->getObject(id);
+  if(o != 0){
+      return o;
+      }
+  return NULL;
+}
+
+/*!
   Casting direclty from the id does not work so we need to look
   for the object with a matching id.
 

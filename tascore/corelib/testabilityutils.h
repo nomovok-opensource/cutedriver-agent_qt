@@ -54,7 +54,7 @@ public:
 	static bool isItemInView(QGraphicsView* view, QGraphicsItem* graphicsItem);
 	static QWidget* viewPortAndPosition(QGraphicsItem* graphicsItem, QPoint& point);
 	static bool isBlackListed();
-	static QGraphicsProxyWidget* parentProxy(QWidget* widget); 
+	static QGraphicsProxyWidget* parentProxy(QWidget* widget);
 	static QPoint proxyCoordinates(QGraphicsItem* item, bool absolute = true);
 	static ItemLocationDetails getItemLocationDetails(QGraphicsItem* graphicsItem, TasCommand* command=0);
 	static bool isCustomTraverse();
@@ -72,6 +72,7 @@ public:
 protected:
 	QWidget* findWidget(const QString& id);
 	QWindow* findWindow(const QString& id);
+	QObject* findObject(const QString& id);
 	QGraphicsItem* findFromObject(const QString& id, QObject* object);
 	QGraphicsItem* findGraphicsItem(const QString& id);
 	QGraphicsItem* lookForMatch(QList<QGraphicsItem*> itemList, const QString& targetId);

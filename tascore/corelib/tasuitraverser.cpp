@@ -227,6 +227,8 @@ void TasUiTraverser::traverseObject(TasObject& objectInfo, QObject* object, TasC
 // https://bugreports.qt.io/browse/QTBUG-47859
 #if QT_VERSION < 0x050501
                             if (objName.startsWith("QDeclarativeRadioData")) continue;
+                            if (objName.startsWith("QDeclarativeRadio")) continue;
+
 #endif
                             traverseObject(objectInfo.addObject(), obj, command);
                         }
