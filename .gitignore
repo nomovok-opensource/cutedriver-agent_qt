@@ -21,3 +21,4 @@ TAGS
 #don't ignore files in symbian folder
 !/symbian/*
 *.pro.user
+*.log

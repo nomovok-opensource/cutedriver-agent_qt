@@ -1,48 +1,67 @@
 Source: qttas
 Section: devel
 Priority: extra
-Maintainer: Petri Kiiskinen <ext-petri.ak.kiiskinen@nokia.com>
-Build-Depends: debhelper (>= 5), libqt4-dev (>=4.6.1~), libqtwebkit-dev (>=2.1~), libqmsystem2-dev (>= 0.1.33~), x11proto-xext-dev, libxtst-dev, libqtcontacts-dev, libqtm-serviceframework-dev,libqtm-systeminfo-dev,libmeegotouch-dev, aegis-builder, libqjson-dev
-Standards-Version: 3.7.2
+Maintainer: Link Motion Cutedriver Team <info+cutedriver@link-motion.com>
+Build-Depends: debhelper (>= 9),
+               dpkg-dev (>= 1.16.1),
+               libxtst-dev,
+               libx11-dev,
+               libx11-xcb-dev,
+               libxcb1-dev,
+               libqt5webkit5-dev
+Standards-Version: 3.9.7
 
 Package: qttas-server
 Architecture: any
 Replaces: xserver-security-policy
-Depends: libqt4-network (>= 4.6.1~), libqt4-xml (>= 4.6.1~), libqtcore4 (>= 4.6.1~), libqtgui4 (>= 4.6.1~), libc6 (>= 2.5.0), libqmsystem2, libxtst6, aegis-testing-tools, xserver-security-policy [armel]
+Depends: libqt5network5,
+         libqt5xml5,
+         libqt5core5a, 
+         libpcre16-3, 
+         libpcre3,
+         ${shlibs:Depends},
+         ${misc:Depends},
 Description: QT Tas Server implementation
  QT TAS is a test automation server which provides testability 
  interface. Interface is used to access UI components to 
- verify and control them. Xserver-security-policy owned file security.conf will be replaced when installing this packet
+ verify and control them. Xserver-security-policy owned file 
+ security.conf will be replaced when installing this packet
 
 Package: qttas
 Architecture: any
-Depends: qttas-server (= ${Source-Version}), qttas-plugins (= ${Source-Version}), qttas-plugins-dui (= ${Source-Version})
+Depends: qttas-server (= ${source:Version}),
+         qttas-plugins (= ${source:Version}),
+         ${shlibs:Depends},
+         ${misc:Depends},
 Description: Metapackage for Qttas
  QT TAS is a test automation server which provides testability 
  interface. Interface is used to access UI components to 
  verify and control them. 
 
-Package: qttas-plugins-dui
-Architecture: any
-Depends: libqt4-xml (>= 4.6.1~), libqtcore4 (>= 4.6.1~), libqtgui4 (>= 4.6.1~), libc6 (>= 2.5.0)
-Description: Libdui plugins for QtTas server
- lorem ipsum
-
 Package: qttas-plugins
 Architecture: any
-Depends: libqtwebkit4 (>= 2.1~), libqt4-network (>= 4.6.1~), libqt4-test (>= 4.6.1~), libqt4-xml (>= 4.6.1~), libqtcore4 (>= 4.6.1~), libqtgui4 (>= 4.6.1~), libc6 (>= 2.5.0),libqtm-systeminfo,libmeegotouchcore0
+Depends: libqt5webkit5,
+         libqt5widgets5,
+         libqt5webkit5,
+         libqt5gui5,
+         libqt5network5,
+         libqt5xml5,
+         libqt5test5,
+         libqt5printsupport5,
+         libqt5opengl5,
+         libqt5qml5,
+         lib32z1, 
+         libjpeg-turbo8,
+         ${shlibs:Depends},
+         ${misc:Depends},
 Description: Required plugins for QT Tas Server
  Testability and traverser plugins
 
-
-Package: qttas-server-dbg
-Architecture: any
-Depends: qttas-server (= ${Source-Version})
-Description: Debug files for qttas-server
-
 Package: qttas-dev
 Architecture: any
-Depends: qttas-server (= ${Source-Version})
+Depends: qttas-server (= ${source:Version}),
+         ${shlibs:Depends},
+         ${misc:Depends},
 Description: QT Tas Server Development files
-  Development headers for QTTAS
+ Development headers for QTTAS
 

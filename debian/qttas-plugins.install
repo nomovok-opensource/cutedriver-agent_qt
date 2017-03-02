@@ -1,15 +1,1 @@
-usr/lib/qt4/plugins/testability/lib*.so
-usr/lib/qt4/plugins/tasfixtures/libtasfixture.so
-usr/lib/qt4/plugins/tasfixtures/libtassignal.so
-usr/lib/qt4/plugins/tasfixtures/libdialogfixture.so
-usr/lib/qt4/plugins/tasfixtures/libfilefixture.so
-usr/lib/qt4/plugins/tasfixtures/libfpsfixture.so
-usr/lib/qt4/plugins/tasfixtures/libpopupfixture.so
-usr/lib/qt4/plugins/tasfixtures/libsettingfixture.so
-usr/lib/qt4/plugins/tasfixtures/liblocalefixture.so
-# usr/lib/qt4/plugins/tasfixtures/libqtscriptfixture.so
-usr/lib/qt4/plugins/traversers/liblayouttraverse.so
-usr/lib/qt4/plugins/traversers/libqttraverse.so
-usr/lib/qt4/plugins/traversers/libviewitemtraverse.so
-usr/lib/qt4/plugins/traversers/libwebkittraverse.so
-# etc/qt_testability/cucumber/qtscriptfixture.default.steps
+usr/lib/*/qt5/plugins/*
