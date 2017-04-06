@@ -47,6 +47,10 @@ CONFIG(no_webkit) {
 DEFINES += NO_WEBKIT
 }
 
+CONFIG(debug_enabled) {
+DEFINES += DEBUG_ENABLED
+}
+
 # Input
 include(corelib/uilib.pri)
 include(corelib/corelib.pri)

@@ -63,6 +63,15 @@ void TasTraverseUtils::clearFilter()
 
 void TasTraverseUtils::addObjectDetails(TasObject* objectInfo, QObject* object)
 {
+    if (!object) {
+        TasLogger::logger()->warning(" TasTraverseUtils::addObjectDetails object is NULL");
+        return;
+    }
+    if (!objectInfo) {
+        TasLogger::logger()->warning(" TasTraverseUtils::addObjectDetails objectInfo is NULL");
+        return;
+    }
+
     objectInfo->setId(TasCoreUtils::objectId(object));
 
     //custom traversers may want to add their own types
@@ -86,6 +95,10 @@ void TasTraverseUtils::addObjectDetails(TasObject* objectInfo, QObject* object)
 
 QString TasTraverseUtils::getParentId(QObject* object)
 {
+    if (!object) {
+        TasLogger::logger()->warning(" TasTraverseUtils::getParentId object is NULL");
+        return "";
+    }
     QString parentId;
     QGraphicsWidget* go = qobject_cast<QGraphicsWidget*>(object);
     if(go){
@@ -147,7 +160,20 @@ void TasTraverseUtils::addVariantValue(TasAttribute& attr, const QVariant& value
 */
 void TasTraverseUtils::printProperties(TasObject* objectInfo, QObject* object)
 {
+    if (!object) {
+        TasLogger::logger()->warning(" TasTraverseUtils::printProperties object is NULL");
+        return;
+    }
+    if (!objectInfo) {
+        TasLogger::logger()->warning(" TasTraverseUtils::printProperties objectInfo is NULL");
+        return;
+    }
+
     const QMetaObject *metaobject = object->metaObject();
+    if (!metaobject) {
+        TasLogger::logger()->warning(" TasTraverseUtils::printProperties metaobject is NULL");
+        return;
+    }
     int count = metaobject->propertyCount();
     for (int i=0; i<count; i++){        
         QMetaProperty metaproperty = metaobject->property(i);
@@ -161,6 +187,7 @@ void TasTraverseUtils::printProperties(TasObject* objectInfo, QObject* object)
             else{
                 attr.setName(QString(QT_PREFIX)+name);
             }
+
             QVariant value = object->property(name);                  
             if(metaproperty.isEnumType() && !metaproperty.isFlagType()){
                 QMetaEnum enumeration = metaproperty.enumerator();

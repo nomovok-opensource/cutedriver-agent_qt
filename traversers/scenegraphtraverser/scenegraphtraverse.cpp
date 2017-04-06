@@ -119,13 +119,30 @@ static void addTypeInfo(QQuickItem *object, TasObject* objectInfo)
     objectInfo->addAttribute("QML_NATIVE_TYPE", typeName);
 
     QQmlData *ddata = QQmlData::get(object, false);
-    if (ddata && ddata->outerContext && !ddata->outerContext->url.isEmpty()) {
-        objectInfo->addAttribute("QML_DEFINED_IN_URL", ddata->outerContext->url.toString());
+    if (ddata && ddata->outerContext && !ddata->outerContext->baseUrl.isEmpty()) {
+        objectInfo->addAttribute("QML_DEFINED_IN_URL", ddata->outerContext->baseUrl.toString());
         objectInfo->addAttribute("QML_DEFINED_IN_LINE", ddata->lineNumber);
         objectInfo->addAttribute("QML_DEFINED_IN_COLUMN", ddata->columnNumber);
     }
 }
 #endif
+
+void SceneGraphTraverse::process(TasObject *objectInfo, QObject *object, TasCommand *command) {
+    Q_UNUSED(command);
+    QQmlContext* context = QQmlEngine::contextForObject(object);
+
+    if (context) {
+        QString name = context->nameForObject(object);
+        objectInfo->addAttribute("QML_ID", name);
+    }
+
+    mTraverseUtils->addObjectDetails(objectInfo, object);
+
+    objectInfo->addAttribute("objectType", TYPE_QSCENEGRAPH);
+
+
+}
+
 
 /*!
   Traverse QObject based items.
@@ -135,23 +152,14 @@ void SceneGraphTraverse::traverseObject(TasObject* objectInfo, QObject* object, 
     Q_UNUSED(command);
 
     QQuickItem* item = qobject_cast<QQuickItem*>(object);
-
+    bool found = false;
     if (item) {
-        QQmlContext* context = QQmlEngine::contextForObject(object);
-
-        if (context) {
-            QString name = context->nameForObject(object);
-            objectInfo->addAttribute("QML_ID", name);
-        }
+        found = true;
+        process(objectInfo, object, command);
 
 #ifdef USE_QTQML_PRIVATE_HEADERS
         addTypeInfo(item, objectInfo);
 #endif
-
-        mTraverseUtils->addObjectDetails(objectInfo, object);
-
-        objectInfo->addAttribute("objectType", TYPE_QSCENEGRAPH);
-
         QPointF point = item->mapToScene(QPoint());
 
         // needed for visualizer
@@ -168,6 +176,24 @@ void SceneGraphTraverse::traverseObject(TasObject* objectInfo, QObject* object, 
         objectInfo->addAttribute("width", item->width());
         objectInfo->addAttribute("height", item->height());
     }
+
+    if (!found) {
+        QQuickView* quickView = qobject_cast<QQuickView*>(object);
+        if (quickView) {
+            process(objectInfo, object, command);
+            found = true;
+        }
+    }
+
+    // support for QML Window.
+    if (!found && QString::fromLatin1(object->metaObject()->className()).compare("QQuickView")!=0) {
+        QQuickWindow* quickWindow = qobject_cast<QQuickWindow*>(object);
+        if (quickWindow) {
+            process(objectInfo, object, command);
+            found = true;
+        }
+    }
+
 }
 
 

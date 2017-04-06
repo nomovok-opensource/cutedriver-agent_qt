@@ -68,6 +68,8 @@ public:
 
     static QQuickItem* findQuickItem(const QString& id);
     static QQuickItem* findQuickItem(const QString& id, QQuickItem* current);
+    static bool compareObjectName(const QString& objectName,const QString& targetObjectName);
+    static QQuickItem* findQuickItemByObjectName(QQuickItem* current, const QString& objectName, const QString& id);
 
 protected:
 	QWidget* findWidget(const QString& id);

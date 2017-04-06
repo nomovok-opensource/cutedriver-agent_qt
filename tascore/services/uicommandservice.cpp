@@ -92,7 +92,7 @@ void UiCommandService::startTimer()
 
 void UiCommandService::parseValidTargets(TasCommandModel& model)
 {
-    TasTarget* target = 0;
+    TasTarget* target = Q_NULLPTR;
     foreach(target, model.targetList()){
         if(model.isMultitouch()){
             TasLogger::logger()->debug("UiCommandService::parseValidTargets is multi");
@@ -111,7 +111,7 @@ void UiCommandService::executeNextCommand()
     //1. check for multitouch operations
     if(!mMultiTouchCommands.isEmpty()){
         QList<TargetData> dataList;
-        TasTarget* target;
+        TasTarget* target = Q_NULLPTR;
         foreach(target, mMultiTouchCommands){
             TasCommand* command = 0;
             foreach(command, target->commandList()){
@@ -154,9 +154,9 @@ TargetData UiCommandService::makeInteractionData(TasTarget* commandTarget)
 {
     QString targetType = commandTarget->type();
     QString id = commandTarget->id();
-    QWidget* target = 0;
-    QGraphicsItem* item = 0;
-    QWindow* targetWindow = 0;
+    QWidget* target = Q_NULLPTR;
+    QGraphicsItem* item = Q_NULLPTR;
+    QWindow* targetWindow = Q_NULLPTR;
     QPoint point;
     if(targetType == TYPE_GRAPHICS_VIEW){
         item = findGraphicsItem(id);
@@ -216,7 +216,7 @@ TargetData UiCommandService::makeInteractionData(TasTarget* commandTarget)
         }
     }
     else if (targetType == TYPE_QSCENEGRAPH){
-        QQuickWindow *window;
+        QQuickWindow *window = Q_NULLPTR;
         foreach (QWindow* w, QApplication::topLevelWindows()) {
             window = qobject_cast<QQuickWindow*>(w);
             if (window) {
