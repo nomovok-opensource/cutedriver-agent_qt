@@ -26,6 +26,7 @@
 #include <QPoint>
 #include <QTouchEvent>
 #include <QHash>
+#include <QTouchDevice>
 
 #include "uicommandservice.h"
 #include "taseventtarget.h"
@@ -65,7 +66,11 @@ public slots:
     void doTouchEnd(const TasEventTarget& target, QList<TasTouchPoints> points, QString identifier=QString());
 
 private:
+    void createTouchDevice();
+
+private:
     static int mTouchPointCounter;
+    QTouchDevice* mTouchDevice;
 };
 
 #endif

@@ -42,7 +42,7 @@
 */
 QWidget* TestabilityUtils::findWidget(const QString& id)
 {
-    QWidget* widget = NULL;
+    QWidget* widget = Q_NULLPTR;
     QObject* o = TasPointerCache::instance()->getObject(id);
     if(o != 0){
         widget = qobject_cast<QWidget*>(o);
@@ -67,7 +67,7 @@ QWidget* TestabilityUtils::findWidget(const QString& id)
 
 QWindow* TestabilityUtils::findWindow(const QString& id)
 {
-    QWindow* window = NULL;
+    QWindow* window = Q_NULLPTR;
     QObject* o = TasPointerCache::instance()->getObject(id);
     if(o != 0){
         window = qobject_cast<QWindow*>(o);
@@ -75,6 +75,8 @@ QWindow* TestabilityUtils::findWindow(const QString& id)
             return window;
         }
     }
+
+    return window;
 }
 
 /*!
@@ -87,7 +89,7 @@ QObject* TestabilityUtils::findObject(const QString& id)
   if(o != 0){
       return o;
       }
-  return NULL;
+  return Q_NULLPTR;
 }
 
 /*!
@@ -99,7 +101,7 @@ QObject* TestabilityUtils::findObject(const QString& id)
 */
 QGraphicsItem* TestabilityUtils::findGraphicsItem(const QString& id)
 {
-    QGraphicsItem* item = NULL;
+    QGraphicsItem* item = Q_NULLPTR;
     QObject* o = TasPointerCache::instance()->getObject(id);
     if(o != 0){
         TasLogger::logger()->debug("TestabilityUtils::findGraphicsItem Object found from cache try casting");
@@ -133,9 +135,9 @@ QGraphicsItem* TestabilityUtils::findGraphicsItem(const QString& id)
 */
 QGraphicsItem* TestabilityUtils::findFromObject(const QString& id, QObject* object)
 {
-    QGraphicsItem* item = NULL;
+    QGraphicsItem* item = Q_NULLPTR;
     //check view first
-    if (!object) return NULL;
+    if (!object) return Q_NULLPTR;
 
     QGraphicsView* view = qobject_cast<QGraphicsView*>(object);
     if (view){
@@ -175,7 +177,7 @@ QGraphicsItem* TestabilityUtils::findFromObject(const QString& id, QObject* obje
 */
 QGraphicsItem* TestabilityUtils::lookForMatch(QList<QGraphicsItem*> itemList, const QString& targetId)
 {
-    QGraphicsItem* item = NULL;
+    QGraphicsItem* item = Q_NULLPTR;
     if (!itemList.isEmpty()){
         foreach(QGraphicsItem* child, itemList){
             if(verifyGraphicsItemMatch(targetId, child)){
@@ -225,7 +227,7 @@ bool TestabilityUtils::verifyGraphicsItemMatch(const QString& targetId, QGraphic
 QWidget* TestabilityUtils::viewPortAndPosition(QGraphicsItem* graphicsItem, QPoint& point)
 {
     QGraphicsView* view = getViewForItem(graphicsItem);
-    QWidget* widget = NULL;
+    QWidget* widget = Q_NULLPTR;
     if(view){
         widget = view->viewport();
     }
@@ -246,9 +248,9 @@ QWidget* TestabilityUtils::viewPortAndPosition(QGraphicsItem* graphicsItem, QPoi
 QGraphicsView* TestabilityUtils::getViewForItem(QGraphicsItem* graphicsItem)
 {
     if(!graphicsItem){
-        return NULL;
+        return Q_NULLPTR;
     }
-    QGraphicsView* match = NULL;
+    QGraphicsView* match = Q_NULLPTR;
 
     QGraphicsScene* scene = graphicsItem->scene();
     if(scene){
@@ -294,7 +296,7 @@ bool TestabilityUtils::isItemInView(QGraphicsView* view, QGraphicsItem* graphics
                 QPoint resultPoint = clippedVisibleRegion.rects().at(0).center();
                 QList<QGraphicsItem*> topItems = view->items(resultPoint);
 
-                QGraphicsItem* topItem = NULL;
+                QGraphicsItem* topItem = Q_NULLPTR;
 
                 // top most item check disabled by default
                 if(isVisibilityCheckOn()) {
@@ -470,7 +472,7 @@ bool TestabilityUtils::isItemBlackListed(QString objectName, QString className)
  */
 QGraphicsProxyWidget* TestabilityUtils::parentProxy(QWidget* widget) {
     if (!widget) {
-        return 0;
+        return Q_NULLPTR;
     }
 
     QGraphicsProxyWidget* proxy = widget->graphicsProxyWidget();
@@ -499,7 +501,7 @@ QPoint TestabilityUtils::proxyCoordinates(QGraphicsItem* item, bool absolute)
 
 QGraphicsItem* TestabilityUtils::findTopMostRotated(QGraphicsItem *item)
 {
-    QGraphicsItem* target = 0;
+    QGraphicsItem* target = Q_NULLPTR;
     if(item->parentItem()){
         target = findTopMostRotated(item->parentItem());
     }
@@ -625,6 +627,39 @@ QString TestabilityUtils::graphicsItemId(QGraphicsItem* graphicsItem)
     return QString::number((quintptr)graphicsItem);
 }
 
+bool TestabilityUtils::compareObjectName(const QString& objectName,const QString& targetObjectName) {
+    if (targetObjectName == objectName) {
+        return true;
+    } else if (targetObjectName.contains('/')) {
+        return QRegularExpression(targetObjectName).match(objectName).hasMatch();
+    }
+    return false;
+}
+
+QQuickItem* TestabilityUtils::findQuickItemByObjectName(QQuickItem* current, const QString& objectName, const QString& id)
+{
+    QString currentId = TasCoreUtils::objectId(current);
+
+    if (id == currentId) {
+        return current;
+    }
+
+    if (compareObjectName(current->objectName(), objectName)) {
+        return current;
+    }
+
+    foreach (QQuickItem* child, current->childItems()) {
+        QQuickItem* hit = findQuickItemByObjectName(child, objectName, id);
+        if (hit) {
+            // lets cache item
+            TasCoreUtils::objectId(hit);
+            return hit;
+        }
+    }
+
+    return Q_NULLPTR;
+}
+
 QQuickItem* TestabilityUtils::findQuickItem(const QString& id, QQuickItem* current)
 {
     QString currentId = TasCoreUtils::objectId(current);
@@ -636,11 +671,13 @@ QQuickItem* TestabilityUtils::findQuickItem(const QString& id, QQuickItem* curre
     foreach (QQuickItem* child, current->childItems()) {
         QQuickItem* hit = findQuickItem(id, child);
         if (hit) {
+            // lets cache item
+            TasCoreUtils::objectId(hit);
             return hit;
         }
     }
 
-    return 0;
+    return Q_NULLPTR;
 }
 
 QQuickItem* TestabilityUtils::findQuickItem(const QString& id)
@@ -663,6 +700,11 @@ QQuickItem* TestabilityUtils::findQuickItem(const QString& id)
         }
     }
 
+    if (item) {
+        // lets cache item
+        TasCoreUtils::objectId(item);
+    }
+
     return item;
 }
 
@@ -671,6 +713,6 @@ QGraphicsWidget* TestabilityUtils::castToGraphicsWidget(QGraphicsItem* graphicsI
     if(graphicsItem && graphicsItem->isWidget()){
         return static_cast<QGraphicsWidget*>(graphicsItem);
     }
-    return 0;
+    return Q_NULLPTR;
 }
 

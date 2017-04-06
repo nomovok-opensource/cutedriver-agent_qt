@@ -28,6 +28,7 @@
 #include "tasqtdatamodel.h"
 #include "tastraverseinterface.h"
 #include "testabilityutils.h"
+#include "tastraverseutils.h"
 
 class TAS_EXPORT TasUiTraverser : public TestabilityUtils
 {
@@ -56,6 +57,7 @@ private:
 	QHash<QString, TasTraverseInterface*> mTraversers;
 	QStringList mPluginBlackList;
 	QStringList mPluginWhiteList;
+    TasTraverseUtils* mTraverseUtils;
 };
 
 

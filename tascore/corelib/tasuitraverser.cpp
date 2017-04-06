@@ -27,12 +27,17 @@
 #include <QGraphicsView>
 #include <QQuickItem>
 #include <QQuickView>
+#include <QQmlContext>
+#include <QQmlEngine>
 #include <QLocale>
+#include <QScreen>
 
 #include "tasuitraverser.h"
 #include "testabilityutils.h"
 #include "tastraverserloader.h"
 #include "tasdeviceutils.h"
+#include "taslogger.h"
+
 
 #if defined(TAS_MAEMO) && defined(HAVE_QAPP)
 #include <MApplication>
@@ -42,6 +47,8 @@
 TasUiTraverser::TasUiTraverser(QHash<QString, TasTraverseInterface*> traversers)
 {
     mTraversers = traversers;
+    qRegisterMetaType<QScreen*>();
+    mTraverseUtils = new TasTraverseUtils();
 }
 
 TasUiTraverser::~TasUiTraverser()
@@ -125,7 +132,6 @@ TasObject& TasUiTraverser::addModelRoot(TasDataModel& model, TasCommand* command
 TasDataModel* TasUiTraverser::getUiState(TasCommand* command)
 {
     initializeTraverse(command);
-
     TasDataModel* model = new TasDataModel();
     TasObject& application = addModelRoot(*model, command);
 
@@ -144,6 +150,7 @@ TasDataModel* TasUiTraverser::getUiState(TasCommand* command)
             }            
         }
     }
+
 
     foreach (QWindow* w, qApp->topLevelWindows()) {
         traverseObject(application.addObject(), w, command);
@@ -164,55 +171,73 @@ void TasUiTraverser::traverseObject(TasObject& objectInfo, QObject* object, TasC
             i.value()->traverseObject(&objectInfo, object, command);
         }
     }
-    if(traverseChildren){
-        printActions(objectInfo, object);
-    }
     if (traverseChildren) {
+        bool found = false;
+
         QQuickView* quickView = qobject_cast<QQuickView*>(object);
         if (quickView) {
+
             QQuickItem* root = quickView->rootObject();
             if (root) {
-                traverseObject(objectInfo.addObject(), root, command);
+                traverseObject(objectInfo.addObject(), root, command, traverseChildren);
+                found = true;
             }
         }
 
-        QQuickItem* quickItem = qobject_cast<QQuickItem*>(object);
-        if (quickItem) {
-            foreach(QQuickItem* child, quickItem->childItems()) {
-                traverseObject(objectInfo.addObject(), child, command);
+        if (!found) {
+            QQuickItem* quickItem = qobject_cast<QQuickItem*>(object);
+            if (quickItem) {
+                foreach(QQuickItem* child, quickItem->childItems()) {
+                    traverseObject(objectInfo.addObject(), child, command, traverseChildren);
+                }
+                found = true;
             }
         }
 
         // support for QML Window.
-        if (QString::fromLatin1(object->metaObject()->className()).compare("QQuickView")!=0) {
-            QQuickWindow* quickWindow = qobject_cast<QQuickWindow*>(object);
-            if (quickWindow) {
-                QQuickItem* root = quickWindow->contentItem();
-                if (root) {
-                    traverseObject(objectInfo.addObject(), root, command);
+        if (!found) {
+            if (QString::fromLatin1(object->metaObject()->className()).compare("QQuickView")!=0) {
+                QQuickWindow* quickWindow = qobject_cast<QQuickWindow*>(object);
+                if (quickWindow) {
+                    QQuickItem* root = quickWindow->contentItem();
+                    if (root) {
+                        traverseObject(objectInfo.addObject(), root, command, traverseChildren);
+                    }
+                    found = true;
                 }
             }
         }
+
         //check decendants
         //1. is graphicsview
-        QGraphicsView* gView = qobject_cast<QGraphicsView*>(object);
-        if(gView){ 
-            traverseGraphicsViewItems(objectInfo, gView, command);
+        if (!found) {
+            QGraphicsView* gView = qobject_cast<QGraphicsView*>(object);
+            if(gView){
+                traverseGraphicsViewItems(objectInfo, gView, command);
+                found = true;
+            }
         }
+
         //2. is QGraphicsObject
-        QGraphicsObject* graphicsObject = qobject_cast<QGraphicsObject*>(object);               
-        if(graphicsObject){
-            traverseGraphicsItemList(objectInfo, graphicsObject,command);
+        if (!found) {
+            QGraphicsObject* graphicsObject = qobject_cast<QGraphicsObject*>(object);
+            if(graphicsObject){
+                traverseGraphicsItemList(objectInfo, graphicsObject,command);
+                found = true;
+            }
         }
+
         //3. Widget children
-        else{
-            QObjectList children = object->children();                
-            if (!children.isEmpty()) {                    
-                for (int i = 0; i < children.size(); ++i){                    
+        if (!found) {
+            printActions(objectInfo, object);
+            QObjectList children = object->children();
+            if (!children.isEmpty()) {
+                for (int i = 0; i < children.size(); ++i) {
                     QObject *obj = children.at(i);
                     //only include widgets
                     if (obj->isWidgetType() && obj->parent() == object){
                         QWidget *widget = qobject_cast<QWidget*>(obj);
+
                         // TODO This (and other similar hacks) needs to be moved to plugins once OSS changes are done
                         if (TestabilityUtils::isCustomTraverse() || widget->isVisible() ) /*&& !wasTraversed(widget)*/{
                             traverseObject(objectInfo.addObject(), widget, command);
@@ -222,6 +247,15 @@ void TasUiTraverser::traverseObject(TasObject& objectInfo, QObject* object, TasC
                         QQuickItem* isQuickItem = qobject_cast<QQuickItem*>(obj);
                         if (obj && !isQuickItem) {
                             QString objName = QString(obj->metaObject()->className());
+                            QQmlContext* context = QQmlEngine::contextForObject(object);
+
+                            if (context) {
+                                QString name = context->nameForObject(object);
+                                objectInfo.addAttribute("QML_ID", name);
+                            }
+
+                            mTraverseUtils->addObjectDetails(&objectInfo, object);
+                            objectInfo.addAttribute("objectType", TYPE_QSCENEGRAPH);
 
 // QDeclarativeRadioData can crash in QML app if no radio data available
 // https://bugreports.qt.io/browse/QTBUG-47859
@@ -234,7 +268,8 @@ void TasUiTraverser::traverseObject(TasObject& objectInfo, QObject* object, TasC
                         }
                     }
                 }
-            }        
+                found = true;
+            }
         }
     }
 }

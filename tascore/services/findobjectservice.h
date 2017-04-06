@@ -50,6 +50,7 @@ private:
 
 private:
 	TasUiTraverser* mTraverser;
+    TasTraverseUtils* mTraverseUtils;
 };
 
 #endif

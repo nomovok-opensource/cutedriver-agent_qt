@@ -48,6 +48,8 @@ public:
 private:
     TasTraverseUtils* mTraverseUtils;
 
+    void process(TasObject* objectInfo, QObject* object, TasCommand* command);
+
 };
 
 #endif

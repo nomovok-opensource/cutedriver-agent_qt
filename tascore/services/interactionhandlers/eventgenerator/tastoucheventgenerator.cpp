@@ -31,12 +31,16 @@
 int TasTouchEventGenerator::mTouchPointCounter = 0;
 
 TasTouchEventGenerator::TasTouchEventGenerator(QObject* parent)
-    :QObject(parent)
+    :QObject(parent), mTouchDevice(NULL)
 {
 }
 
 TasTouchEventGenerator::~TasTouchEventGenerator()
 {
+    if (mTouchDevice) {
+        delete mTouchDevice;
+        mTouchDevice = NULL;
+    }
 }
 
 void TasTouchEventGenerator::doTouchBegin(const TasEventTarget& target, QPoint point, QString identifier)
@@ -58,10 +62,13 @@ void TasTouchEventGenerator::doTouchEnd(const TasEventTarget& target, QPoint poi
 void TasTouchEventGenerator::doTouchBegin(const TasEventTarget& target, QList<TasTouchPoints> points, QString identifier)
 {
     QList<QTouchEvent::TouchPoint> touchPoints = convertToTouchPoints(target, Qt::TouchPointPressed, points, identifier);
-    // TODO [hhinrich] delete touchDevice?
-    QTouchDevice* touchDevice = new QTouchDevice();
-    touchDevice->setType(QTouchDevice::TouchScreen);
-    QTouchEvent* touchPress = new QTouchEvent(QEvent::TouchBegin, touchDevice, Qt::NoModifier, Qt::TouchPointPressed, touchPoints);
+
+    //Create QTouchDevice if it is missing
+    if (!mTouchDevice) {
+        createTouchDevice();
+    }
+
+    QTouchEvent* touchPress = new QTouchEvent(QEvent::TouchBegin, mTouchDevice, Qt::NoModifier, Qt::TouchPointPressed, touchPoints);
     touchPress->setTarget(target.receiver());
     sendTouchEvent(target, touchPress);
 }
@@ -69,10 +76,13 @@ void TasTouchEventGenerator::doTouchBegin(const TasEventTarget& target, QList<Ta
 void TasTouchEventGenerator::doTouchUpdate(const TasEventTarget& target, QList<TasTouchPoints> points, QString identifier)
 {
     QList<QTouchEvent::TouchPoint> touchPoints = convertToTouchPoints(target, Qt::TouchPointMoved, points, identifier);
-    // TODO [hhinrich] delete touchDevice?
-    QTouchDevice* touchDevice = new QTouchDevice();
-    touchDevice->setType(QTouchDevice::TouchScreen);
-    QTouchEvent* touchMove = new QTouchEvent(QEvent::TouchUpdate, touchDevice, Qt::NoModifier, Qt::TouchPointMoved, touchPoints);
+
+    //Create QTouchDevice if it is missing
+    if (!mTouchDevice) {
+        createTouchDevice();
+    }
+
+    QTouchEvent* touchMove = new QTouchEvent(QEvent::TouchUpdate, mTouchDevice, Qt::NoModifier, Qt::TouchPointMoved, touchPoints);
     touchMove->setTarget(target.receiver());
     sendTouchEvent(target, touchMove);
 }
@@ -80,10 +90,13 @@ void TasTouchEventGenerator::doTouchUpdate(const TasEventTarget& target, QList<T
 void TasTouchEventGenerator::doTouchEnd(const TasEventTarget& target, QList<TasTouchPoints> points, QString identifier)
 {
     QList<QTouchEvent::TouchPoint> touchPoints = convertToTouchPoints(target, Qt::TouchPointReleased, points, identifier);
-    // TODO [hhinrich] delete touchDevice?
-    QTouchDevice* touchDevice = new QTouchDevice();
-    touchDevice->setType(QTouchDevice::TouchScreen);
-    QTouchEvent *touchRelease = new QTouchEvent(QEvent::TouchEnd, touchDevice, Qt::NoModifier, Qt::TouchPointReleased, touchPoints);
+
+    //Create QTouchDevice if it is missing
+    if (!mTouchDevice) {
+        createTouchDevice();
+    }
+
+    QTouchEvent *touchRelease = new QTouchEvent(QEvent::TouchEnd, mTouchDevice, Qt::NoModifier, Qt::TouchPointReleased, touchPoints);
     touchRelease->setTarget(target.receiver());
     sendTouchEvent(target, touchRelease);
 }
@@ -202,4 +215,11 @@ bool TasTouchEventGenerator::areIdentical(QList<TasTouchPoints> points1, QList<T
         }
     }
     return true;
+}
+
+void TasTouchEventGenerator::createTouchDevice()
+{
+    mTouchDevice = new QTouchDevice();
+    mTouchDevice->setType(QTouchDevice::TouchScreen);
+    mTouchDevice->setName(metaObject()->className());
 }
