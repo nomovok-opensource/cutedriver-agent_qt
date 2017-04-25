@@ -33,10 +33,10 @@ TasPointerCache* TasPointerCache::instance()
 }
 
 QObject* TasPointerCache::getObject(const QString& pointerId)
-{    
-    QPointer<QObject> pointer = mPointers.value(pointerId, 0);    
+{
+    QPointer<QObject> pointer = mPointers.value(pointerId, 0);
     if(pointer.isNull()){
-        mPointers.remove(pointerId);        
+        mPointers.remove(pointerId);
         return 0;
     }
     return pointer.data();

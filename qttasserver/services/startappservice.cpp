@@ -102,7 +102,6 @@ void StartAppService::startApplication(TasCommand& command, TasResponse& respons
         response.requester()->sendResponse(response.messageId(), QString("0"));
     }
     else{
-#if !defined(Q_OS_SYMBIAN)
         //check for search path
         if(!command.parameter("app_path").isEmpty()){
             //look for the app binary
@@ -111,7 +110,6 @@ void StartAppService::startApplication(TasCommand& command, TasResponse& respons
                 applicationPath = fullName;
             }
         }
-#endif
         arguments.removeAll(DETACH_MODE);
         arguments.removeAll(NO_WAIT);
 
@@ -119,14 +117,14 @@ void StartAppService::startApplication(TasCommand& command, TasResponse& respons
         launchDetached(applicationPath, arguments, environmentVars, dir, responseData, responseErrorMessage);
         if (!responseData.isEmpty()) response.setData(responseData);
         if (!responseErrorMessage.isEmpty()) response.setErrorMessage(responseErrorMessage);
-                
+
         //add pids to startedapp pid list
         if(!response.isError() && !response.dataAsString().isEmpty() ){
             //try to set to foreground
             bool ok;
-            quint64 startedPid = response.dataAsString().toULongLong(&ok);  
+            quint64 startedPid = response.dataAsString().toULongLong(&ok);
             if(ok){
-                TasClientManager::instance()->addStartedPid(startedPid);        
+                TasClientManager::instance()->addStartedPid(startedPid);
                 TasNativeUtils::bringAppToForeground(startedPid);
             }
         }
@@ -209,65 +207,12 @@ QHash<QString, QString> StartAppService::parseEnvironmentVariables(const QString
 }
 
 
-#ifdef Q_OS_SYMBIAN
-//Qt startDetach seems to leak memory so need to do it for now.
-//to be removed when fix in qt
-static void qt_create_symbian_commandline(
-    const QStringList &arguments, const QString &nativeArguments, QString &commandLine)
-{
-    for (int i = 0; i < arguments.size(); ++i) {
-        QString tmp = arguments.at(i);
-        tmp.replace(QLatin1String("\\\""), QLatin1String("\\\\\""));
-        tmp.replace(QLatin1String("\""), QLatin1String("\\\""));
-        if (tmp.isEmpty() || tmp.contains(QLatin1Char(' ')) || tmp.contains(QLatin1Char('\t'))) {
-            QString endQuote(QLatin1String("\""));
-            int i = tmp.length();
-            while (i > 0 && tmp.at(i - 1) == QLatin1Char('\\')) {
-                --i;
-                endQuote += QLatin1String("\\");
-            }
-            commandLine += QLatin1String("\"") + tmp.left(i) + endQuote + QLatin1Char(' ');
-        } else {
-            commandLine += tmp + QLatin1Char(' ');
-        }
-    }
-
-    if (!nativeArguments.isEmpty())
-        commandLine += nativeArguments;
-    else if (!commandLine.isEmpty()) // Chop the extra trailing space if any arguments were appended
-        commandLine.chop(1);
-}
-#endif
-
-
 void StartAppService::launchDetached(const QString &applicationPath, const QStringList &arguments,
                                      const QStringList &environmentVars, const QString &workingDirectory,
                                      QString &responseData, QString& responseErrorMessage)
 {
     QString additionalMessage;
-#ifdef Q_OS_SYMBIAN
-    //Qt startDetach seems to leak memory so need to do it for now.
-    //to be removed when fix in qt
-
-    if (!workingDirectory.isEmpty()) {
-        TasLogger::logger()->warning(QString("TasServer::launchDetached: Working directory not supported on Symbian"));
-    }
-
-    qint64 pid;
-    QString commandLine;
-    QString nativeArguments;
-    qt_create_symbian_commandline(arguments, nativeArguments, commandLine);
-    TPtrC program_ptr(reinterpret_cast<const TText*>(applicationPath.constData()));
-    TPtrC cmdline_ptr(reinterpret_cast<const TText*>(commandLine.constData()));
-    RProcess process;
-    if( process.Create(program_ptr, cmdline_ptr) == KErrNone){
-        process.Resume();
-        pid = process.Id().Id();
-        process.Close();
-        TasClientManager::instance()->addStartedApp(applicationPath, QDateTime::currentMSecsSinceEpoch());
-        responseData = QString::number(pid);
-    }
-#elif (defined(Q_OS_WIN32) || defined(Q_OS_WINCE))
+#if (defined(Q_OS_WIN32) || defined(Q_OS_WINCE))
 
     STARTUPINFO si;
     PROCESS_INFORMATION pi;
@@ -550,7 +495,7 @@ void StartAppService::launchDetached(const QString &applicationPath, const QStri
     }
 #endif
     else{
-#if (defined(Q_OS_UNIX) || defined(Q_OS_MAC)) && !defined(Q_OS_SYMBIAN)
+#if (defined(Q_OS_UNIX) || defined(Q_OS_MAC))
         // if parent fork fails, clear mem and send error
         while (mem.isAttached())
         {

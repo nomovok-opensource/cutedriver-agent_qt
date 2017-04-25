@@ -1,22 +1,22 @@
-/*************************************************************************** 
-** 
-** Copyright (C) 2010 Nokia Corporation and/or its subsidiary(-ies). 
-** All rights reserved. 
-** Contact: Nokia Corporation (testabilitydriver@nokia.com) 
-** 
+/***************************************************************************
+**
+** Copyright (C) 2010 Nokia Corporation and/or its subsidiary(-ies).
+** All rights reserved.
+** Contact: Nokia Corporation (testabilitydriver@nokia.com)
+**
 ** This file is part of Testability Driver Qt Agent
-** 
-** If you have questions regarding the use of this file, please contact 
-** Nokia at testabilitydriver@nokia.com . 
-** 
-** This library is free software; you can redistribute it and/or 
-** modify it under the terms of the GNU Lesser General Public 
-** License version 2.1 as published by the Free Software Foundation 
-** and appearing in the file LICENSE.LGPL included in the packaging 
-** of this file. 
-** 
-****************************************************************************/ 
- 
+**
+** If you have questions regarding the use of this file, please contact
+** Nokia at testabilitydriver@nokia.com .
+**
+** This library is free software; you can redistribute it and/or
+** modify it under the terms of the GNU Lesser General Public
+** License version 2.1 as published by the Free Software Foundation
+** and appearing in the file LICENSE.LGPL included in the packaging
+** of this file.
+**
+****************************************************************************/
+
 
 
 #include "keyhandler.h"
@@ -28,7 +28,7 @@
   \class KeyHandler
   \brief KeyHandler generates keyboard events.
 
-*/    
+*/
 
 
 KeyHandler::KeyHandler()
@@ -36,7 +36,7 @@ KeyHandler::KeyHandler()
 
 KeyHandler::~KeyHandler()
 {}
-  
+
 bool KeyHandler::executeInteraction(TargetData data)
 {
     QWidget* target = data.target;
@@ -88,7 +88,7 @@ void KeyHandler::doKeyEvent(QWidget* target, QEvent::Type type, Qt::Key keyCode)
         text = text.toUpper();
     }
 
-    QKeyEvent* a = new QKeyEvent(type, keyCode, mModifiers, text);        
+    QKeyEvent* a = new QKeyEvent(type, keyCode, mModifiers, text);
     QSpontaneKeyEvent::setSpontaneous(a);
     //qApp->notify(target, &a);
     if (!target)
@@ -126,7 +126,7 @@ void KeyHandler::enableModifiers(Qt::Key keyCode)
             break;
         default:
             break;
-    }    
+    }
 }
 
 void KeyHandler::disableModifiers(Qt::Key keyCode)
@@ -150,5 +150,5 @@ void KeyHandler::disableModifiers(Qt::Key keyCode)
             break;
         default:
             break;
-    }    
+    }
 }

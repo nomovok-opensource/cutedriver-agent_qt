@@ -41,14 +41,14 @@ public:
     bool executeMultitouchInteraction(QList<TargetData> dataList);
 
 private:
-	QString idAndCoordinates(TargetData& data);
+    QString idAndCoordinates(TargetData& data);
 
 private:
-	QStringList mPressCommands;
-	QStringList mReleaseCommands;
-	TasGestureFactory* mFactory;
-	TasTouchEventGenerator mTouchGen;
-	TasMouseEventGenerator mMouseGen;
+    QStringList mPressCommands;
+    QStringList mReleaseCommands;
+    TasGestureFactory* mFactory;
+    TasTouchEventGenerator mTouchGen;
+    TasMouseEventGenerator mMouseGen;
 };
 
 #endif

@@ -5,7 +5,7 @@ export DH_VERBOSE=1
 export CFLAGS := $(shell dpkg-buildflags --get CFLAGS) $(shell dpkg-buildflags --get CPPFLAGS) -Wno-deprecated-declarations -Wno-unused-variable
 export CXXFLAGS := $(shell dpkg-buildflags --get CXXFLAGS) $(shell dpkg-buildflags --get CPPFLAGS) -Wno-deprecated-declarations -Wno-unused-variable
 export LDFLAGS := $(shell dpkg-buildflags --get LDFLAGS) -Wl,--as-needed
-export QMAKE_OPTIONS := -r CONFIG+=no_mobility
+export QMAKE_OPTIONS := -r
 export QT_SELECT := qt5
 
 %:

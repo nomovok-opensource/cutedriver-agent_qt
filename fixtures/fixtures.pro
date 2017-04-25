@@ -19,14 +19,6 @@
 
 TEMPLATE = subdirs
 
-!win32:{
-	!CONFIG(no_mobility)  {
-    	SUBDIRS += mobilitysfwfixture
-	    SUBDIRS += contactfixture
-		SUBDIRS += mobilitysysinfofixture
-	}
-}
-
 SUBDIRS += signalfixture
 
 SUBDIRS += tasfixture
@@ -39,15 +31,6 @@ SUBDIRS += popupfixture
 
 !symbian: {
 #SUBDIRS += qtscriptfixture
-}
-
-symbian: {
-#	SUBDIRS += utilfixture
-        SUBDIRS += launchfixture
-}
-CONFIG(maemo){
-SUBDIRS += localefixture
-#SUBDIRS += duifixture #not supported anymore
 }
 
 SUBDIRS += tapfixture

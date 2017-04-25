@@ -1,24 +1,24 @@
-/*************************************************************************** 
- **  
- ** Copyright (C) 2010 Nokia Corporation and/or its subsidiary(-ies). 
- ** All rights reserved. 
- ** Contact: Nokia Corporation (testabilitydriver@nokia.com) 
- ** 
+/***************************************************************************
+ **
+ ** Copyright (C) 2010 Nokia Corporation and/or its subsidiary(-ies).
+ ** All rights reserved.
+ ** Contact: Nokia Corporation (testabilitydriver@nokia.com)
+ **
  ** This file is part of Testability Driver Qt Agent
- ** 
- ** If you have questions regarding the use of this file, please contact 
- ** Nokia at testabilitydriver@nokia.com . 
- ** 
- ** This library is free software; you can redistribute it and/or 
- ** modify it under the terms of the GNU Lesser General Public 
- ** License version 2.1 as published by the Free Software Foundation 
- ** and appearing in the file LICENSE.LGPL included in the packaging 
- ** of this file. 
- ** 
- ****************************************************************************/ 
- 
+ **
+ ** If you have questions regarding the use of this file, please contact
+ ** Nokia at testabilitydriver@nokia.com .
+ **
+ ** This library is free software; you can redistribute it and/or
+ ** modify it under the terms of the GNU Lesser General Public
+ ** License version 2.1 as published by the Free Software Foundation
+ ** and appearing in the file LICENSE.LGPL included in the packaging
+ ** of this file.
+ **
+ ****************************************************************************/
 
-                      
+
+
 #include <QMutableListIterator>
 #include <QtPlugin>
 #include <QLibrary>
@@ -40,22 +40,18 @@
 
 const char* const RESPONSE_HEADER = "<tasMessage version=\"%1\"><tasInfo id=\"%2\" name=\"%3\" type=\"sut\">";
 const char* const RESPONSE_FOOTER = "</tasInfo></tasMessage>";
-#ifdef Q_OS_SYMBIAN   
-const char* const ENV_NAME = "symbian";
-#else
 const char* const ENV_NAME = "qt";
-#endif    
 
 /*!
   \class TasServerServiceManager
   \brief TasServerServiceManager manages the service commands used by qttasserver.
-    
+
   TasServerServiceManager is the manager for the commands in the service architecture
   used by qttasserver. The service requests are implemented using a relatively
   standard form of the chain of responsibility pattern. TasServerServiceManager class
   takes care of the command execution and management. The command implementations
-  only need to concern with the actual command implementation. 
-  
+  only need to concern with the actual command implementation.
+
   The difference to TasServiceManager is that a waiter is started for the responses
   which originate from the connected plugins.
 
@@ -95,12 +91,12 @@ void TasServerServiceManager::handleServiceRequest(TasCommandModel& commandModel
     TasClient* targetClient = 0;
     if (!commandModel.id().isEmpty() && commandModel.id() != "1"){
         bool ok;
-        quint64 clientPid = commandModel.id().toULongLong(&ok);  
+        quint64 clientPid = commandModel.id().toULongLong(&ok);
         targetClient = mClientManager->findByProcessId(clientPid);
 
         //no registered client check for platform specific handles for the process id
-        if(!targetClient && extensionHandled(commandModel, requester, responseId)){            
-            return;        
+        if(!targetClient && extensionHandled(commandModel, requester, responseId)){
+            return;
         }
 
         if(!targetClient){
@@ -114,7 +110,7 @@ void TasServerServiceManager::handleServiceRequest(TasCommandModel& commandModel
 
     }
 
-    if(!targetClient && (commandModel.service() == APPLICATION_STATE || commandModel.service() == SCREEN_SHOT 
+    if(!targetClient && (commandModel.service() == APPLICATION_STATE || commandModel.service() == SCREEN_SHOT
                          || commandModel.service() == FIND_OBJECT_SERVICE)){
         targetClient = mClientManager->findClient(commandModel);
     }
@@ -135,23 +131,23 @@ void TasServerServiceManager::handleServiceRequest(TasCommandModel& commandModel
 
         ResponseWaiter* waiter = new ResponseWaiter(responseId, requester, timeout);
         if(commandModel.service() == CLOSE_APPLICATION){
-            waiter->setResponseFilter(new CloseFilter(commandModel));        
+            waiter->setResponseFilter(new CloseFilter(commandModel));
         }
         connect(waiter, SIGNAL(responded(qint32)), this, SLOT(removeWaiter(qint32)));
         mResponseQueue.insert(responseId, waiter);
         if(commandModel.service() == APPLICATION_STATE || commandModel.service() == FIND_OBJECT_SERVICE){
             commandModel.addDomAttribute("needFragment", "true");
             //send request for qt uistate to client
-            targetClient->socket()->sendRequest(responseId, commandModel.sourceString(false));                        
+            targetClient->socket()->sendRequest(responseId, commandModel.sourceString(false));
             //in the meantime process native
             getNativeUiState(responseId, commandModel);
         }
         else{
             //can respond as soon as response from qt side
             waiter->okToRespond();
-            targetClient->socket()->sendRequest(responseId, commandModel.sourceString());            
+            targetClient->socket()->sendRequest(responseId, commandModel.sourceString());
         }
-    }        
+    }
     else{
         handleClientLess(commandModel, requester, responseId);
     }
@@ -170,16 +166,8 @@ void TasServerServiceManager::getNativeUiState(qint32 responseId, TasCommandMode
                 else{
                     return;
                 }
-            }        
-        }
-#ifdef Q_OS_SYMBIAN   
-        QByteArray vkbData; 
-        if(appendVkbData(commandModel, vkbData)){
-            if(mResponseQueue.contains(responseId)){
-                mResponseQueue.value(responseId)->appendPlatformData(vkbData);
             }
         }
-#endif
         if(mResponseQueue.contains(responseId)){
             mResponseQueue.value(responseId)->okToRespond();
         }
@@ -200,7 +188,7 @@ void TasServerServiceManager::handleClientLess(TasCommandModel& commandModel, Ta
         QProcess::startDetached("qttasutilapp", args);
     }
     else{
-        //try to detect pc side connection breaks        
+        //try to detect pc side connection breaks
         TasResponse response(responseId);
         response.setRequester(requester);
         performService(commandModel, response);
@@ -216,20 +204,17 @@ void TasServerServiceManager::handleClientLess(TasCommandModel& commandModel, Ta
 bool TasServerServiceManager::extensionHandled(TasCommandModel& commandModel, TasSocket* requester, qint32 responseId)
 {
     bool handled = false;
-    foreach(TasExtensionInterface* extension, mExtensions){            
+    foreach(TasExtensionInterface* extension, mExtensions){
         QByteArray data;
         if(commandModel.service() == APPLICATION_STATE || commandModel.service() == FIND_OBJECT_SERVICE){
             QByteArray uiState = extension->traverseApplication(commandModel);
             if(!uiState.isEmpty()){
                 handled = true;
-#ifdef Q_OS_SYMBIAN   
-                appendVkbData(commandModel,uiState);
-#endif
             }
             data = QString(RESPONSE_HEADER).arg(TAS_VERSION).arg(qVersion()).arg(ENV_NAME).toUtf8();
             data.append(uiState);
             data.append(QString(RESPONSE_FOOTER).toUtf8());
-        }        
+        }
         else {
             handled = extension->performCommand(commandModel, data);
         }
@@ -238,9 +223,9 @@ bool TasServerServiceManager::extensionHandled(TasCommandModel& commandModel, Ta
             //make sure the pid is removed from the started apps list
             if(commandModel.service() == CLOSE_APPLICATION){
                 bool ok;
-                quint64 pid = commandModel.id().toULongLong(&ok);  
+                quint64 pid = commandModel.id().toULongLong(&ok);
                 if(ok) TasClientManager::instance()->removeStartedPid(pid);
-                    
+
             }
             TasResponse response(responseId, data);
             requester->sendMessage(response);
@@ -249,46 +234,6 @@ bool TasServerServiceManager::extensionHandled(TasCommandModel& commandModel, Ta
     }
     return handled;
 }
-
-#ifdef Q_OS_SYMBIAN   
-/*!
- * Look for a special vkb and added if present and needed.
- */
-bool TasServerServiceManager::appendVkbData(TasCommandModel& commandModel, QByteArray& data)
-{
-    TasLogger::logger()->debug("TasServerServiceManager::appendVkbData");
-    bool appended = false;
-    if( commandModel.name() != PENINPUT_SERVER && (commandModel.service() == FIND_OBJECT_SERVICE || commandModel.service() == APPLICATION_STATE) ){
-        TasClient* targetClient = mClientManager->findByApplicationName(PENINPUT_SERVER);
-        if(targetClient){
-            TasLogger::logger()->debug("TasServerServiceManager::appendVkbData peninputserver found");
-            bool requestVkb = false;
-            if(commandModel.service() == FIND_OBJECT_SERVICE){
-                foreach(TasTarget* target, commandModel.targetList()){
-                    TasTargetObject *targetObj = target->targetObject();   
-                    if(targetObj->className().contains(VKB_IDENTIFIER)){
-                        requestVkb = true;
-                        break;
-                    }
-                }
-            }
-            if(requestVkb || commandModel.service() == APPLICATION_STATE){
-                commandModel.addDomAttribute("needFragment", "true");
-                TasMessage reply;
-                if(targetClient->socket()->syncRequest(qrand(), commandModel.sourceString(false), reply)){
-                    if(!reply.data().isEmpty()){
-                        TasLogger::logger()->debug("TasServerServiceManager::appendVkbData append vkb data");
-                        appended = true;
-                        data.append(reply.data());
-                    }
-                }
-            }
-        }
-    }
-    return appended;
-}
-#endif
-
 
 void TasServerServiceManager::loadExtensions()
 {
@@ -314,10 +259,10 @@ void TasServerServiceManager::loadExtensions()
 */
 void TasServerServiceManager::loadExtension(const QString& filePath)
 {
-    TasExtensionInterface* interface = 0; 
+    TasExtensionInterface* interface = 0;
     QObject *plugin = mPluginLoader.loadPlugin(filePath);
     if(plugin){
-        interface = qobject_cast<TasExtensionInterface *>(plugin);        
+        interface = qobject_cast<TasExtensionInterface *>(plugin);
         if (interface){
             TasLogger::logger()->debug("TasServerServiceManager::loadTraverser added a traverser");
             mExtensions.append(interface);
@@ -325,7 +270,7 @@ void TasServerServiceManager::loadExtension(const QString& filePath)
         else{
             TasLogger::logger()->warning("TasServerServiceManager::loadTraverser could not cast to TasApplicationTraverseInterface");
         }
-    }    
+    }
 }
 
 
@@ -354,7 +299,7 @@ ResponseWaiter::ResponseWaiter(qint32 responseId, TasSocket* relayTarget, int ti
     mCanRespond = false;
     mSocket = relayTarget;
     mResponseId = responseId;
-    mWaiter.setSingleShot(true);    
+    mWaiter.setSingleShot(true);
     connect(&mWaiter, SIGNAL(timeout()), this, SLOT(timeout()));
     connect(mSocket, SIGNAL(socketClosed()), this, SLOT(socketClosed()));
     mWaiter.start(timeout);
@@ -374,13 +319,13 @@ void ResponseWaiter::okToRespond()
     mCanRespond = true;
     if(mPluginResponded){
         sendMessage();
-    }   
+    }
 }
 
 void ResponseWaiter::cleanup()
 {
     disconnect(&mWaiter, 0, this, 0);
-    disconnect(mSocket.data(), 0, this, 0);    
+    disconnect(mSocket.data(), 0, this, 0);
 }
 
 void ResponseWaiter::appendPlatformData(const QByteArray& data)
@@ -472,19 +417,19 @@ CloseFilter::CloseFilter(TasCommandModel& model)
     mPassThrough = true;
     mWaitTime = 3000;
     mKill = false;
-    TasTarget* target = model.findTarget(APPLICATION_TARGET);    
+    TasTarget* target = model.findTarget(APPLICATION_TARGET);
     if(target){
         TasCommand* command = target->findCommand("Close");
         if(command){
             bool ok;
-            mPid = command->parameter("uid").toULongLong(&ok, 10);     
+            mPid = command->parameter("uid").toULongLong(&ok, 10);
             if(ok){
                 mPassThrough = false;
             }
             QString timeString = command->parameter("wait_time");
             if(!timeString.isEmpty()){
                 mWaitTime = timeString.toInt() * 1000;
-            }        
+            }
             if( command->parameter("kill") == "true"){
                 mKill = true;
             }
@@ -499,7 +444,7 @@ CloseFilter::~CloseFilter()
 void CloseFilter::filterResponse(TasMessage& response)
 {
     if(mPassThrough) return;
-    
+
     TasLogger::logger()->debug("CloseFilter::filterResponse");
 
     //we need to check that the app really closed
@@ -510,14 +455,14 @@ void CloseFilter::filterResponse(TasMessage& response)
     bool didNotCloseInTime = false;
 
     while(!TasNativeUtils::processExitStatus(mPid, errorCode)){
-        TasCoreUtils::wait(wait);        
+        TasCoreUtils::wait(wait);
         totalSleep+=wait;
         if(totalSleep >= mWaitTime){
             TasLogger::logger()->debug("CloseFilter::filterResponse application did not close in time!");
             errorMessage = "Application did not close in time.";
             didNotCloseInTime = true;
             if(mKill){
-                TasNativeUtils::killProcess(mPid);                     
+                TasNativeUtils::killProcess(mPid);
             }
             break;
         }

@@ -55,16 +55,6 @@
 #include "../cucumber_wireprotocol/cucumberwireprotocolserver.h"
 #endif
 
-#ifdef Q_OS_SYMBIAN
-#include <e32property.h>
- // TasServer Secure ID
-const TUid KHTISecID = { 0x1020DEB6 };
-// Key for qttasserver start
-const TUint KQtTasserverStarted = 2372349;
-const TInt KQtTasRunning = 1;
-#endif
-
-
 
 /*!
   \class TasServer
@@ -129,11 +119,7 @@ TasServer::TasServer(QString hostBinding, QObject *parent)
         mHostBinding = QHostAddress::LocalHost;
     }
     else{
-#ifdef Q_OS_SYMBIAN
-        mHostBinding = QHostAddress::LocalHost;
-#else
         mHostBinding = QHostAddress::Any;
-#endif
     }
 
     connect(QCoreApplication::instance(), SIGNAL(aboutToQuit()), this, SLOT(shutdown()));
@@ -253,17 +239,17 @@ bool TasServer::startServer()
     QFile handle(mLocalServer->fullServerName());
     if (handle.exists()) {
         // Allow everything on the socket
-        if (!handle.setPermissions(QFile::ReadOwner	|
-                                   QFile::WriteOwner	|
-                                   QFile::ExeOwner	  |
-                                   QFile::ReadUser	  |
-                                   QFile::WriteUser	|
-                                   QFile::ExeUser	  |
-                                   QFile::ReadGroup	|
-                                   QFile::WriteGroup	|
-                                   QFile::ExeGroup	  |
-                                   QFile::ReadOther	|
-                                   QFile::WriteOther	|
+        if (!handle.setPermissions(QFile::ReadOwner |
+                                   QFile::WriteOwner|
+                                   QFile::ExeOwner  |
+                                   QFile::ReadUser  |
+                                   QFile::WriteUser |
+                                   QFile::ExeUser   |
+                                   QFile::ReadGroup |
+                                   QFile::WriteGroup|
+                                   QFile::ExeGroup  |
+                                   QFile::ReadOther |
+                                   QFile::WriteOther|
                                    QFile::ExeOther)) {
             TasLogger::logger()->warning("TasServer::startServer failed to set global write for local socket");
         }
@@ -291,16 +277,6 @@ bool TasServer::startServer()
     }
 #endif
 
-#ifdef Q_OS_SYMBIAN
-    TInt err = RProperty::Set(KHTISecID, KQtTasserverStarted, KQtTasRunning);
-    if(err == KErrNone ){
-        TasLogger::logger()->info("TasServer::startServer server started and ps key set.");
-    }
-    else{
-        TasLogger::logger()->warning("TasServer::startServer server started ok but could not set ps key error : "
-                                     + QString::number(err));
-    }
-#endif
     return true;
 }
 

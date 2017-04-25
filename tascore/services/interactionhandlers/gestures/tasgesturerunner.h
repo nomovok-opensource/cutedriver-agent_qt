@@ -1,21 +1,21 @@
-/*************************************************************************** 
-** 
-** Copyright (C) 2010 Nokia Corporation and/or its subsidiary(-ies). 
-** All rights reserved. 
-** Contact: Nokia Corporation (testabilitydriver@nokia.com) 
-** 
+/***************************************************************************
+**
+** Copyright (C) 2010 Nokia Corporation and/or its subsidiary(-ies).
+** All rights reserved.
+** Contact: Nokia Corporation (testabilitydriver@nokia.com)
+**
 ** This file is part of Testability Driver Qt Agent
-** 
-** If you have questions regarding the use of this file, please contact 
-** Nokia at testabilitydriver@nokia.com . 
-** 
-** This library is free software; you can redistribute it and/or 
-** modify it under the terms of the GNU Lesser General Public 
-** License version 2.1 as published by the Free Software Foundation 
-** and appearing in the file LICENSE.LGPL included in the packaging 
-** of this file. 
-** 
-****************************************************************************/ 
+**
+** If you have questions regarding the use of this file, please contact
+** Nokia at testabilitydriver@nokia.com .
+**
+** This library is free software; you can redistribute it and/or
+** modify it under the terms of the GNU Lesser General Public
+** License version 2.1 as published by the Free Software Foundation
+** and appearing in the file LICENSE.LGPL included in the packaging
+** of this file.
+**
+****************************************************************************/
 
 #ifndef TASGESTURERUNNER_H
 #define TASGESTURERUNNER_H
@@ -27,7 +27,7 @@
 class TasGestureRunner : public QObject
 {
     Q_OBJECT
-public:  
+public:
     TasGestureRunner(TasGesture* gesture, QObject* parent=0);
     ~TasGestureRunner();
 
@@ -35,20 +35,20 @@ public:
 
 protected slots:
     void gestureTimerEvent(qreal);
-	void finished();
-	void releaseMouse();
+    void finished();
+    void releaseMouse();
 
 private:
-	void startGesture();
-	void move(QList<TasTouchPoints> points, bool force=false);
-	bool noMovement(QList<TasTouchPoints> points);
+    void startGesture();
+    void move(QList<TasTouchPoints> points, bool force=false);
+    bool noMovement(QList<TasTouchPoints> points);
 
 private:
-	QTimeLine mTimeLine;
-	TasGesture* mGesture;
-	TasMouseEventGenerator mMouseGen;
-	TasTouchEventGenerator mTouchGen;	
-	QList<TasTouchPoints> mPreviousPoints;
+    QTimeLine mTimeLine;
+    TasGesture* mGesture;
+    TasMouseEventGenerator mMouseGen;
+    TasTouchEventGenerator mTouchGen;
+    QList<TasTouchPoints> mPreviousPoints;
 };
 
 

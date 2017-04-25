@@ -272,7 +272,7 @@ bool TestabilityUtils::isCustomTraverse() {
 
     QString applicationName = getApplicationName();
 
-    return( applicationName == "webwidgetrunner" || applicationName == "mappletrunner" || applicationName == "duiappletrunner" );
+    return( applicationName == "webwidgetrunner" );
 
 }
 
@@ -534,9 +534,6 @@ ItemLocationDetails TestabilityUtils::getItemLocationDetails(QGraphicsItem* grap
             QRectF sceneRect = graphicsItem->sceneBoundingRect();
 #if QT_VERSION >= 0x040704 && QT_VERSION < 0x050000
             if( view->testAttribute(Qt::WA_SymbianNoSystemRotation)){
-#ifdef Q_OS_SYMBIAN
-                TasDeviceUtils::flipOrigo = false;
-#endif
                 //this a bit problematic, lets look for the top most item in the hierachy
                 //with rotation transformation
                 QGraphicsItem* rotator = findTopMostRotated(graphicsItem);
@@ -551,9 +548,6 @@ ItemLocationDetails TestabilityUtils::getItemLocationDetails(QGraphicsItem* grap
 #endif
                 QTransform transform = view->viewportTransform();
                 sceneRect = transform.mapRect(sceneRect);
-#ifdef Q_OS_SYMBIAN
-                TasDeviceUtils::flipOrigo = true;
-#endif
             }
             QPoint point = sceneRect.topLeft().toPoint();
             QPoint screenPoint = view->viewport()->mapToGlobal(point);

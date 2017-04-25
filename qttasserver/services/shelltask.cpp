@@ -1,21 +1,21 @@
-/*************************************************************************** 
-** 
-** Copyright (C) 2010 Nokia Corporation and/or its subsidiary(-ies). 
-** All rights reserved. 
-** Contact: Nokia Corporation (testabilitydriver@nokia.com) 
-** 
+/***************************************************************************
+**
+** Copyright (C) 2010 Nokia Corporation and/or its subsidiary(-ies).
+** All rights reserved.
+** Contact: Nokia Corporation (testabilitydriver@nokia.com)
+**
 ** This file is part of Testability Driver Qt Agent
-** 
-** If you have questions regarding the use of this file, please contact 
-** Nokia at testabilitydriver@nokia.com . 
-** 
-** This library is free software; you can redistribute it and/or 
-** modify it under the terms of the GNU Lesser General Public 
-** License version 2.1 as published by the Free Software Foundation 
-** and appearing in the file LICENSE.LGPL included in the packaging 
-** of this file. 
-** 
-****************************************************************************/ 
+**
+** If you have questions regarding the use of this file, please contact
+** Nokia at testabilitydriver@nokia.com .
+**
+** This library is free software; you can redistribute it and/or
+** modify it under the terms of the GNU Lesser General Public
+** License version 2.1 as published by the Free Software Foundation
+** and appearing in the file LICENSE.LGPL included in the packaging
+** of this file.
+**
+****************************************************************************/
 
 
 
@@ -24,7 +24,7 @@
 #include "shelltask.h"
 
 
- 
+
 
 #include <QProcess>
 #include <QMutexLocker>
@@ -36,9 +36,9 @@
 
 
 
-ShellTask::ShellTask(const QString &command) : 
-    mCommand(command), 
-    mStatus(ShellTask::NOT_STARTED), 
+ShellTask::ShellTask(const QString &command) :
+    mCommand(command),
+    mStatus(ShellTask::NOT_STARTED),
     mPid(0),
     mProcess(0)
 {
@@ -46,7 +46,7 @@ ShellTask::ShellTask(const QString &command) :
 
 ShellTask::~ShellTask()
 {
-    if (mProcess) {      
+    if (mProcess) {
         if (mProcess->state() == QProcess::Running ||
             mProcess->state() == QProcess::Starting) {
             mProcess->terminate();
@@ -54,7 +54,7 @@ ShellTask::~ShellTask()
         }
         mProcess->deleteLater();
         mProcess=0;
-    }            
+    }
 }
 
 void ShellTask::run()
@@ -63,14 +63,14 @@ void ShellTask::run()
     qRegisterMetaType<QProcess::ExitStatus>("QProcess::ExitStatus");
     qRegisterMetaType<QProcess::ProcessError>("QProcess::ProcessError");
     mProcess = new QProcess(this);
-    connect(mProcess, SIGNAL(started()), 
+    connect(mProcess, SIGNAL(started()),
             this, SLOT(started()));
     connect(mProcess, SIGNAL(error(QProcess::ProcessError)) ,
             this, SLOT(processError(QProcess::ProcessError)));
 
     connect(mProcess, SIGNAL(finished(int, QProcess::ExitStatus)),
             this, SLOT(finished(int, QProcess::ExitStatus)));
-    connect(mProcess, SIGNAL(readyReadStandardOutput()), 
+    connect(mProcess, SIGNAL(readyReadStandardOutput()),
             this, SLOT(readStdOut()));
 
     mProcess->setReadChannelMode(QProcess::MergedChannels);
@@ -80,7 +80,7 @@ void ShellTask::run()
 #ifdef Q_OS_WIN32
     mPid = mProcess->pid()->dwProcessId;
 #else
-	mPid = mProcess->pid();
+    mPid = mProcess->pid();
 #endif
     mProcess->closeWriteChannel();
 
@@ -91,12 +91,12 @@ void ShellTask::run()
 void ShellTask::endTask()
 {
     if (mProcess) {
-        mProcess->kill();	
+        mProcess->kill();
     }
     quit();
 }
 
-ShellTask::Status ShellTask::status() 
+ShellTask::Status ShellTask::status()
 {
     QMutexLocker locker(&mutex);
     return mStatus;
@@ -119,14 +119,14 @@ int ShellTask::returnCode() const
 {
     if (mProcess) {
         return mProcess->exitCode();
-    } 
+    }
     return 0;
 }
 
 void ShellTask::readStdOut()
 {
     QMutexLocker locker(&mutex);
-    mResponse.append(mProcess->readAll());    
+    mResponse.append(mProcess->readAll());
 }
 
 void ShellTask::started()
@@ -144,15 +144,14 @@ void ShellTask::finished(int exitCode, QProcess::ExitStatus )
 
 }
 
-void ShellTask::processError(QProcess::ProcessError processError) 
+void ShellTask::processError(QProcess::ProcessError processError)
 {
 //    TasLogger::logger()->debug("ShellTask::error in task");
-	
+
     mStatus = ShellTask::ERR;
     switch (processError) {
     case QProcess::FailedToStart:
         mResponse = QString("Command failed to start").toUtf8();
-
         break;
     case QProcess::Crashed:
         mResponse = QString("Program crashed.").toUtf8();

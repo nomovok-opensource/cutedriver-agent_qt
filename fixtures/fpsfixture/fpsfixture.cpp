@@ -1,22 +1,22 @@
-/*************************************************************************** 
-** 
-** Copyright (C) 2010 Nokia Corporation and/or its subsidiary(-ies).  
-** All rights reserved. 
-** Contact: Nokia Corporation (testabilitydriver@nokia.com) 
-** 
+/***************************************************************************
+**
+** Copyright (C) 2010 Nokia Corporation and/or its subsidiary(-ies).
+** All rights reserved.
+** Contact: Nokia Corporation (testabilitydriver@nokia.com)
+**
 ** This file is part of Testability Driver Qt Agent
-** 
-** If you have questions regarding the use of this file, please contact 
-** Nokia at testabilitydriver@nokia.com . 
-** 
-** This library is free software; you can redistribute it and/or 
-** modify it under the terms of the GNU Lesser General Public 
-** License version 2.1 as published by the Free Software Foundation 
-** and appearing in the file LICENSE.LGPL included in the packaging 
-** of this file. 
-** 
-****************************************************************************/ 
- 
+**
+** If you have questions regarding the use of this file, please contact
+** Nokia at testabilitydriver@nokia.com .
+**
+** This library is free software; you can redistribute it and/or
+** modify it under the terms of the GNU Lesser General Public
+** License version 2.1 as published by the Free Software Foundation
+** and appearing in the file LICENSE.LGPL included in the packaging
+** of this file.
+**
+****************************************************************************/
+
 
 #include <QApplication>
 #include <QQuickView>
@@ -33,7 +33,7 @@
 /*!
   \class FpsFixture
   \brief Collects frames per second data from widgets.
-        
+
   Filters paint events to the given target and calculates fps.
   For graphicsitems the view's viewport is used.
 */
@@ -82,7 +82,7 @@ bool FpsFixture::execute(void * objectInstance, QString actionName, QHash<QStrin
                 FspMeasurer* fpsM = mFpsCounters.value(target);
                 //make model
                 printFpsResults(fpsM->collectedData(), target, stdOut);
-                //restart collecting or stop 
+                //restart collecting or stop
                 if (actionName == "stopFps"){
                     fpsM->stopFpsMeasure();
                 }
@@ -128,14 +128,14 @@ void FpsFixture::printFpsResults(QList< QPair<QString,int> > fpsData, QObject* t
 
     TasObject& fpsObj = targetObj.addNewObject(TasCoreUtils::pointerId(&fpsData),"FpsResults", "results");
     fpsObj.addAttribute("count", QString::number(fpsData.size()));
-    for(int i = 0 ; i < fpsData.size(); i++ ){        
-        TasObject& fpsD = fpsObj.addNewObject(QString::number(i),"FpsData", "fps");     
+    for(int i = 0 ; i < fpsData.size(); i++ ){
+        TasObject& fpsD = fpsObj.addNewObject(QString::number(i),"FpsData", "fps");
         QPair<QString,int> value = fpsData.at(i);
         fpsD.addAttribute("timeStamp", value.first);
         fpsD.addAttribute("frameCount", value.second);
     }
     QByteArray xml;
-    model->serializeModel(xml);    
+    model->serializeModel(xml);
     stdOut.append(QString::fromUtf8(xml.data()));
     delete model;
 }
@@ -149,7 +149,7 @@ QObject* FpsFixture::getTarget(void* objectInstance, QString objectType)
     if(objectType == WIDGET_TYPE ){
         QWidget* widget = reinterpret_cast<QWidget*>(objectInstance);
         if (widget) {
-            //if graphicsview, then paint events go to viewport 
+            //if graphicsview, then paint events go to viewport
             //make that the target (as with graphicsitems)
             QGraphicsView* view = qobject_cast<QGraphicsView*>(widget);
             if(view){
@@ -173,7 +173,7 @@ QObject* FpsFixture::getTarget(void* objectInstance, QString objectType)
         if (view) {
             target = qobject_cast<QObject*>(view);
         }
-    }   
+    }
     return target;
 }
 
@@ -199,7 +199,7 @@ FspMeasurer::~FspMeasurer()
 QList< QPair<QString,int> > FspMeasurer::collectedData()
 {
     //add the last one also
-    mFpsValues.append(QPair<QString, int>(mTimeStamp.toString("hh:mm:ss.zzz"), mFpsCounter)); 
+    mFpsValues.append(QPair<QString, int>(mTimeStamp.toString("hh:mm:ss.zzz"), mFpsCounter));
     return mFpsValues;
 }
 
@@ -212,8 +212,7 @@ void FspMeasurer::startFpsMeasure()
         mTarget->installEventFilter(this);
     } else if(mTarget->isWindowType()) {
         QQuickView* view = qobject_cast<QQuickView*>(mTarget);
-	view->connect(view, SIGNAL(frameSwapped()),
-                         this, SLOT(collectFps()), Qt::DirectConnection);
+        view->connect(view, SIGNAL(frameSwapped()), this, SLOT(collectFps()), Qt::DirectConnection);
     }
 }
 
@@ -226,13 +225,12 @@ void FspMeasurer::restartFpsMeasure()
 void FspMeasurer::stopFpsMeasure()
 {
     restartFpsMeasure();
-    
+
     if(mTarget->isWidgetType()) {
         mTarget->removeEventFilter(this);
     } else if(mTarget->isWindowType()) {
-	QQuickView* view = qobject_cast<QQuickView*>(mTarget);
-        view->disconnect(view, SIGNAL(frameSwapped()),
-                         this, SLOT(collectFps()));
+        QQuickView* view = qobject_cast<QQuickView*>(mTarget);
+        view->disconnect(view, SIGNAL(frameSwapped()), this, SLOT(collectFps()));
     }
 }
 
@@ -249,19 +247,19 @@ void FspMeasurer::collectFps()
             mFpsCounter++;
         }
         else{
-            mFpsValues.append(QPair<QString,int>(mTimeStamp.toString("hh:mm:ss.zzz"), mFpsCounter)); 
+            mFpsValues.append(QPair<QString,int>(mTimeStamp.toString("hh:mm:ss.zzz"), mFpsCounter));
             mFpsCounter = 1;
             mTimer.restart();
             mTimeStamp = QTime::currentTime();
         }
-    }  
+    }
 }
 
 bool FspMeasurer::eventFilter(QObject *target, QEvent *event)
-{   
+{
     Q_UNUSED(target);
     if( event->type() == QEvent::Paint){
-    	collectFps();
-	}
+        collectFps();
+    }
     return false;
 }

@@ -30,8 +30,8 @@
 
 #include <QtCore>
 
-#include <qjson_warpper.h>
-
+#include <qjson/parser.h>
+#include <qjson/serializer.h>
 
 //#define DPL "CucumberWireprotocolServer" << QString("%1:%2").arg(__FUNCTION__).arg(__LINE__)
 

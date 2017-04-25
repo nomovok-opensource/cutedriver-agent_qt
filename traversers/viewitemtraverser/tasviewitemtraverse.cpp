@@ -1,22 +1,22 @@
-/*************************************************************************** 
-** 
-** Copyright (C) 2010 Nokia Corporation and/or its subsidiary(-ies). 
-** All rights reserved. 
-** Contact: Nokia Corporation (testabilitydriver@nokia.com) 
-** 
+/***************************************************************************
+**
+** Copyright (C) 2010 Nokia Corporation and/or its subsidiary(-ies).
+** All rights reserved.
+** Contact: Nokia Corporation (testabilitydriver@nokia.com)
+**
 ** This file is part of Testability Driver Qt Agent
-** 
-** If you have questions regarding the use of this file, please contact 
-** Nokia at testabilitydriver@nokia.com . 
-** 
-** This library is free software; you can redistribute it and/or 
-** modify it under the terms of the GNU Lesser General Public 
-** License version 2.1 as published by the Free Software Foundation 
-** and appearing in the file LICENSE.LGPL included in the packaging 
-** of this file. 
-** 
-****************************************************************************/ 
- 
+**
+** If you have questions regarding the use of this file, please contact
+** Nokia at testabilitydriver@nokia.com .
+**
+** This library is free software; you can redistribute it and/or
+** modify it under the terms of the GNU Lesser General Public
+** License version 2.1 as published by the Free Software Foundation
+** and appearing in the file LICENSE.LGPL included in the packaging
+** of this file.
+**
+****************************************************************************/
+
 
 #include <QHeaderView>
 #include <QtPlugin>
@@ -31,10 +31,10 @@
 /*!
     \class TasViewItemTraverse
     \brief TasViewItemTraverse traverse list model items
-        
-    QT lists do not provide any details about items and this makes 
-    it impossible to control them. This component adds needed information 
-    to the lis object (items) to allow verification and control. 
+
+    QT lists do not provide any details about items and this makes
+    it impossible to control them. This component adds needed information
+    to the lis object (items) to allow verification and control.
 */
 
 /*!
@@ -70,16 +70,16 @@ void TasViewItemTraverse::endTraverse()
 
 
 /*!
-    
+
     Add items in QAbstractView decendants to the object data.
 
 */
 void TasViewItemTraverse::traverseObject(TasObject* objectInfo, QObject* object, TasCommand* command)
 {
     Q_UNUSED(command)
-    if(object->inherits("QAbstractItemView")){          
-        //traverse the different types of viewitems 
-        //1. QTreeWidget 
+    if(object->inherits("QAbstractItemView")){
+        //traverse the different types of viewitems
+        //1. QTreeWidget
         QTreeWidget* treeWidget = qobject_cast<QTreeWidget*>(object);
         if(treeWidget){
             traverseTreeWidget(treeWidget, objectInfo);
@@ -98,35 +98,35 @@ void TasViewItemTraverse::traverseObject(TasObject* objectInfo, QObject* object,
             return;
         }
         //4. HeaderView
-        QHeaderView* header = qobject_cast<QHeaderView*>(object);        
+        QHeaderView* header = qobject_cast<QHeaderView*>(object);
         if(header){
             traverseHeaderView(header, objectInfo);
             return;
         }
         //For the rest use the basic view traverse
-        QAbstractItemView* view = qobject_cast<QAbstractItemView*>(object);        
-        if(view){                     
+        QAbstractItemView* view = qobject_cast<QAbstractItemView*>(object);
+        if(view){
             traverseAbstractItemView(view, objectInfo);
             return;
         }
     }
 }
 
-void TasViewItemTraverse::traverseHeaderView(QHeaderView* headerView, TasObject* objectInfo)    
+void TasViewItemTraverse::traverseHeaderView(QHeaderView* headerView, TasObject* objectInfo)
 {
     objectInfo->addBooleanAttribute("clickable", headerView->sectionsClickable());
     objectInfo->addBooleanAttribute("movable", headerView->sectionsMovable());
     objectInfo->addAttribute("offset", headerView->offset());
 
-    if(headerView->orientation() == Qt::Horizontal){             
+    if(headerView->orientation() == Qt::Horizontal){
         objectInfo->addAttribute("orientation", "horizontal");
     }
     else{
         objectInfo->addAttribute("orientation", "vertical");
     }
 
-    QAbstractItemModel* model = headerView->model();         
-    
+    QAbstractItemModel* model = headerView->model();
+
     if(model) {
         int count = headerView->count();
         for(int i = 0; i < count; i++){
@@ -135,15 +135,15 @@ void TasViewItemTraverse::traverseHeaderView(QHeaderView* headerView, TasObject*
                 headerItem.setId(TasCoreUtils::pointerId(&headerItem));
                 headerItem.setType("ItemData");
                 headerItem.addAttribute("section", i);
-                headerItem.addAttribute("text", model->headerData(i, headerView->orientation()).toString()); 
+                headerItem.addAttribute("text", model->headerData(i, headerView->orientation()).toString());
                 headerItem.addAttribute("sectionPosition", headerView->sectionPosition(i));
 
                 int size = headerView->sectionSize(i);
                 int viewPortPos = headerView->sectionViewportPosition(i);
-                
+
                 QRect itemRect;
 
-                if(headerView->orientation() == Qt::Horizontal){                
+                if(headerView->orientation() == Qt::Horizontal){
                     itemRect.setX(viewPortPos);
                     itemRect.setY(headerView->viewport()->pos().y());
                     itemRect.setWidth(size);
@@ -179,10 +179,10 @@ void TasViewItemTraverse::traverseTableWidget(QTableWidget* tableWidget, TasObje
 void TasViewItemTraverse::traverseTableWidgetItem(QTableWidgetItem* item, TasObject& objectInfo, QTableWidget *tableWidget)
 {
     TasLogger::logger()->debug("TasViewItemTraverse::traverseTableWidgetItem");
-    objectInfo.setId(TasCoreUtils::pointerId(item));    
+    objectInfo.setId(TasCoreUtils::pointerId(item));
     objectInfo.setType("QTableWidgetItem");
     objectInfo.addBooleanAttribute("selected", item->isSelected());
-    objectInfo.addAttribute("checkState", item->checkState());      
+    objectInfo.addAttribute("checkState", item->checkState());
     objectInfo.addAttribute("row", item->row());
     objectInfo.addAttribute("column", item->column());
     objectInfo.addAttribute("text", item->text());
@@ -205,7 +205,7 @@ void TasViewItemTraverse::traverseListWidget(QListWidget* listWidget, TasObject*
         QListWidgetItem* item = listWidget->item(i);
         if(item && !item->isHidden()){
             TasObject& listItem = objectInfo->addObject();
-            listItem.setId(TasCoreUtils::pointerId(item));            
+            listItem.setId(TasCoreUtils::pointerId(item));
             listItem.setType("QListWidgetItem");
             listItem.addAttribute("text", item->text());
             listItem.addAttribute("textAlignment", item->textAlignment());
@@ -219,7 +219,7 @@ void TasViewItemTraverse::traverseListWidget(QListWidget* listWidget, TasObject*
             if(addItemLocationDetails(listItem, rect, listWidget)){
                 mTraverseUtils->addTextInfo(&listItem, item->text(), item->font(),
                             (rect.width() - listWidget->contentsMargins().right() - listWidget->contentsMargins().left()));
-            }       
+            }
         }
     }
 }
@@ -227,7 +227,7 @@ void TasViewItemTraverse::traverseListWidget(QListWidget* listWidget, TasObject*
 void TasViewItemTraverse::traverseTreeWidget(QTreeWidget* treeWidget, TasObject* objectInfo)
 {
     //The widget is already traversed only the items are needed
-    int count = treeWidget->topLevelItemCount(); 
+    int count = treeWidget->topLevelItemCount();
     for(int i = 0; i < count; i++){
         QTreeWidgetItem* item = treeWidget->topLevelItem(i);
         if(item){
@@ -252,15 +252,15 @@ void TasViewItemTraverse::traverseTreeWidgetItem(QTreeWidgetItem* item, TasObjec
     QRect rect = treeWidget->visualItemRect(item);
     addItemLocationDetails(objectInfo, rect, treeWidget);
 
-    //check columns 
+    //check columns
     //will be added as object to make things more clear (no size, location details)
     int count = item->columnCount();
     for(int i = 0; i < count; i++){
-        TasObject& column = objectInfo.addObject();    
+        TasObject& column = objectInfo.addObject();
         column.setId(TasCoreUtils::pointerId(&column));
         column.setType("TreeWidgetItemColumn");
         column.addAttribute("column", i);
-        //text 
+        //text
         column.addAttribute("text", item->text(i));
         mTraverseUtils->addFont(&column, item->font(i));
         //toolTip
@@ -285,62 +285,62 @@ void TasViewItemTraverse::traverseTreeWidgetItem(QTreeWidgetItem* item, TasObjec
 
 void TasViewItemTraverse::traverseAbstractItemView(QAbstractItemView* view, TasObject* objectInfo)
 {
-    QAbstractItemModel* model = view->model();         
-    int role = Qt::DisplayRole;                        
+    QAbstractItemModel* model = view->model();
+    int role = Qt::DisplayRole;
     if(model) {
         if (!view->rootIndex().isValid()) {
         }
-        if(view->model()->inherits("QSortFilterProxyModel")){                
+        if(view->model()->inherits("QSortFilterProxyModel")){
             QSortFilterProxyModel* proxy = qobject_cast<QSortFilterProxyModel*>(model);
             if(proxy){
                 role = proxy->sortRole();
             }
-        }    
-        mTraversed.clear();        
+        }
+        mTraversed.clear();
         traverseIndexLevel(view, model, role, view->rootIndex(), objectInfo);
     }
 }
-            
-void TasViewItemTraverse::traverseIndexLevel(QAbstractItemView* view, QAbstractItemModel *model, 
+
+void TasViewItemTraverse::traverseIndexLevel(QAbstractItemView* view, QAbstractItemModel *model,
                                             int role, QModelIndex parent, TasObject* objectInfo)
 {
-    if(model->hasChildren(parent)){  
+    if(model->hasChildren(parent)){
         int rows = model->rowCount(parent);
         int columns = model->columnCount(parent);
         for(int i = 0 ; i < rows; i++){
             for(int j = 0 ; j < columns; j++){
                 QModelIndex index = model->index(i, j, parent);
                 if (index.isValid() && !mTraversed.contains(index)) {
-                    mTraversed.append(index);            
+                    mTraversed.append(index);
                     fillTraverseData(view, model->data(index, role), objectInfo, index);
                     traverseIndexLevel(view, model, role, index, objectInfo);
                 }
             }
-        }        
-    }       
-}             
-            
-            
+        }
+    }
+}
+
+
 void TasViewItemTraverse::fillTraverseData(QAbstractItemView* view, QVariant data, TasObject* objectInfo, QModelIndex index)
-{    
+{
     if (!data.isValid()) {
         return;
     }
     QRect rect = view->visualRect(index );
     if(isItemVisible(rect, view)){
         TasObject& viewItem = objectInfo->addObject();
-        viewItem.setId(TasCoreUtils::pointerId(&viewItem));                
+        viewItem.setId(TasCoreUtils::pointerId(&viewItem));
         viewItem.setType("ItemData");
         viewItem.addAttribute("row",index.row());
         viewItem.addAttribute("column",index.column());
-        viewItem.addAttribute("text",data.toString()); 
+        viewItem.addAttribute("text",data.toString());
         mTraverseUtils->addFont(&viewItem, view->font());
-        if(addItemLocationDetails(viewItem, rect, view)){   
+        if(addItemLocationDetails(viewItem, rect, view)){
             // The margin eats away the available space for the text
-            // TODO check from Qt code how actually the available space is being calculated        
+            // TODO check from Qt code how actually the available space is being calculated
             mTraverseUtils->addTextInfo(&viewItem, data.toString(), view->font(),
                                         (rect.width() - view->contentsMargins().right() - view->contentsMargins().left()));
-        
+
         }
     }
 }
@@ -355,11 +355,11 @@ bool TasViewItemTraverse::isItemVisible(QRect rect, QAbstractItemView* view)
 }
 
 /*!
-  Adds location and size details to the item. 
+  Adds location and size details to the item.
  */
 bool TasViewItemTraverse::addItemLocationDetails(TasObject& objectInfo, QRect rect, QAbstractItemView* view)
 {
-    
+
     if(isItemVisible(rect, view)){
         objectInfo.addAttribute("width",rect.width());
         objectInfo.addAttribute("height",rect.height());
@@ -368,30 +368,30 @@ bool TasViewItemTraverse::addItemLocationDetails(TasObject& objectInfo, QRect re
         QGraphicsProxyWidget* proxy = TestabilityUtils::parentProxy(view);
         QPoint proxyPos(0,0);
         if (proxy) {
-            // If the webview is inside a graphics proxy, 
+            // If the webview is inside a graphics proxy,
             // Take the proxy widget global position
             proxyPos = TestabilityUtils::proxyCoordinates((QGraphicsItem*)proxy);
             objectInfo.addAttribute("objectType", "Web");
         } else {
-            objectInfo.addAttribute("objectType","ViewItem");                        
+            objectInfo.addAttribute("objectType","ViewItem");
         }
 
-        //print window coordinates        
+        //print window coordinates
         QPoint windowPoint = view->viewport()->mapTo(view->window(),rect.topLeft());
-        objectInfo.addAttribute("visible","true");                            
+        objectInfo.addAttribute("visible","true");
         objectInfo.addAttribute("x", windowPoint.x());
-        objectInfo.addAttribute("y", windowPoint.y());                            
+        objectInfo.addAttribute("y", windowPoint.y());
         //print screen coordinates, offset by proxy
         QPoint screenPoint = view->viewport()->mapToGlobal(rect.topLeft());
         if (proxy) {
             screenPoint = windowPoint+proxyPos;
         }
         objectInfo.addAttribute("x_absolute", screenPoint.x());
-        objectInfo.addAttribute("y_absolute", screenPoint.y());     
+        objectInfo.addAttribute("y_absolute", screenPoint.y());
         return true;
     }
     else{
-        objectInfo.addAttribute("visible","false");                            
+        objectInfo.addAttribute("visible","false");
         return false;
     }
 }

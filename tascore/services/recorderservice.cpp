@@ -1,21 +1,21 @@
-/*************************************************************************** 
-** 
-** Copyright (C) 2010 Nokia Corporation and/or its subsidiary(-ies). 
-** All rights reserved. 
-** Contact: Nokia Corporation (testabilitydriver@nokia.com) 
-** 
+/***************************************************************************
+**
+** Copyright (C) 2010 Nokia Corporation and/or its subsidiary(-ies).
+** All rights reserved.
+** Contact: Nokia Corporation (testabilitydriver@nokia.com)
+**
 ** This file is part of Testability Driver Qt Agent
-** 
-** If you have questions regarding the use of this file, please contact 
-** Nokia at testabilitydriver@nokia.com . 
-** 
-** This library is free software; you can redistribute it and/or 
-** modify it under the terms of the GNU Lesser General Public 
-** License version 2.1 as published by the Free Software Foundation 
-** and appearing in the file LICENSE.LGPL included in the packaging 
-** of this file. 
-** 
-****************************************************************************/ 
+**
+** If you have questions regarding the use of this file, please contact
+** Nokia at testabilitydriver@nokia.com .
+**
+** This library is free software; you can redistribute it and/or
+** modify it under the terms of the GNU Lesser General Public
+** License version 2.1 as published by the Free Software Foundation
+** and appearing in the file LICENSE.LGPL included in the packaging
+** of this file.
+**
+****************************************************************************/
 
 #include <QApplication>
 #include <QPoint>
@@ -32,7 +32,7 @@
   \class RecorderService
   \brief RecorderService collects events
 
-*/    
+*/
 
 RecorderService::RecorderService(QObject* parent)
     :QObject(parent)
@@ -44,13 +44,13 @@ RecorderService::RecorderService(QObject* parent)
 }
 
 RecorderService::~RecorderService()
-{    
+{
     delete mTasModel;
     mTraversers.clear();
 }
 
 bool RecorderService::executeService(TasCommandModel& model, TasResponse& response)
-{    
+{
     if(model.service() == serviceName() ){
         performRecorderCommands(model, response);
         return true;
@@ -66,9 +66,9 @@ void RecorderService::performRecorderCommands(TasCommandModel& model, TasRespons
     QListIterator<TasTarget*> i(model.targetList());
     bool commandExecuted = false;
     while (i.hasNext()){
-        TasTarget* commandTarget = i.next();        
+        TasTarget* commandTarget = i.next();
         if(commandTarget->type() == TYPE_APPLICATION_VIEW){
-            TasCommand* command = commandTarget->findCommand("Start");            
+            TasCommand* command = commandTarget->findCommand("Start");
             if(command){
                 start();
                 commandExecuted = true;
@@ -112,7 +112,7 @@ void RecorderService::start()
     TasObjectContainer& container = mTasModel->addNewObjectContainer(1, "QT4.4", "qt");
     mTasEvents = &container.addNewObject(0, "QtRecordedEvents", "events");
 
-    qApp->installEventFilter(this);    
+    qApp->installEventFilter(this);
 }
 
 
@@ -120,7 +120,7 @@ void RecorderService::start()
   Filter to receive all events and store events that have been added to the inclusion list
 */
  bool RecorderService::eventFilter(QObject *target, QEvent *event)
- {    
+ {
     if (mTasEvents){
         QString eventType = TestabilityUtils::eventType(event) ;
 
@@ -141,7 +141,7 @@ void RecorderService::start()
             eventObj.addAttribute("button", (int)mouseEvent->button());
 
             QPoint position = mouseEvent->pos();
-            QWidget* widget = qobject_cast<QWidget*>(target);            
+            QWidget* widget = qobject_cast<QWidget*>(target);
             //add window position
             QPoint windowPoint = widget->mapTo(widget->window(), position);
             eventObj.addAttribute("windowX", windowPoint.x());
@@ -156,7 +156,7 @@ void RecorderService::start()
                     QGraphicsScene* scene = view->scene();
                     QPointF pos = view->mapToScene(position);
                     QGraphicsItem* graphicsItem = scene->itemAt(pos, QTransform());
-                    if(graphicsItem){                        
+                    if(graphicsItem){
                         if (graphicsItem->isWindow() || graphicsItem->isWidget()) {
                             QObject * objectAt = (QObject*)TestabilityUtils::castToGraphicsWidget(graphicsItem);
                             printTargetDetails(objectAt, targetObj);
@@ -167,10 +167,10 @@ void RecorderService::start()
                             while (i.hasNext()) {
                                 i.next();
                                 i.value()->traverseGraphicsItem(&targetObj, graphicsItem);
-                            }    
-                        }    
+                            }
+                        }
                     }
-                    //calculate window coordinates                   
+                    //calculate window coordinates
                     //windowPoint = view->mapTo(view->window(), position);
                 }
                 else{

@@ -33,5 +33,5 @@ build_script:
   - if "%PLATFORM%" == "X86" call "%VSCOMNTOOLS%\..\..\VC\vcvarsall.bat"
   - if "%PLATFORM%" == "X64" "C:\Program Files\Microsoft SDKs\Windows\v7.1\Bin\SetEnv.cmd" /x64
   - if "%PLATFORM%" == "X64" call "%VSCOMNTOOLS%\..\..\VC\vcvarsall.bat" x86_amd64
-  - qmake -spec %SPEC% -r CONFIG+=debug_and_release CONFIG+=no_mobility CONFIG+=no_webkit qt_testability.pro
+  - qmake -spec %SPEC% -r CONFIG+=debug_and_release CONFIG+=no_webkit qt_testability.pro
   - jom

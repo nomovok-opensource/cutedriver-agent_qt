@@ -31,20 +31,13 @@ SOURCES += corelib/tasserverservicemanager.cpp
 
 
 unix:{
-        symbian: {
-            SOURCES += corelib/tasnativeutils_symbian.cpp
-        }
-        else{
-                !macx:!CONFIG(no_x) {
-                SOURCES += corelib/tasnativeutils_unix.cpp
-                }
-                else {
+        !macx:!CONFIG(no_x) {
+            SOURCES += corelib/tasnativeutils_unix.cpp
+        } else {
                 SOURCES += corelib/tasnativeutils.cpp
-        }
         }
 }
 win32: {
     SOURCES += corelib/tasnativeutils_win.cpp
     LIBS += -lPsapi
 }
-

@@ -77,7 +77,7 @@ task :build_qttas do
   cmd = "#{make} distclean"
   system(cmd)
   
-  cmd = "qmake CONFIG+=release CONFIG+=no_mobility qt_testability.pro"
+  cmd = "qmake CONFIG+=release qt_testability.pro"
   failure = system(cmd)
   raise "qmake failed" if (failure != true) or ($? != 0) 
     
@@ -109,7 +109,7 @@ task :build_qttas_vs do
   cmd = "#{make} distclean"
   system(cmd)
   
-  cmd = "qmake CONFIG+=release CONFIG+=no_mobility qt_testability.pro"
+  cmd = "qmake CONFIG+=release qt_testability.pro"
   failure = system(cmd)
   raise "qmake failed" if (failure != true) or ($? != 0) 
     

@@ -1,22 +1,22 @@
-/*************************************************************************** 
-** 
-** Copyright (C) 2010 Nokia Corporation and/or its subsidiary(-ies). 
-** All rights reserved. 
-** Contact: Nokia Corporation (testabilitydriver@nokia.com) 
-** 
+/***************************************************************************
+**
+** Copyright (C) 2010 Nokia Corporation and/or its subsidiary(-ies).
+** All rights reserved.
+** Contact: Nokia Corporation (testabilitydriver@nokia.com)
+**
 ** This file is part of Testability Driver Qt Agent
-** 
-** If you have questions regarding the use of this file, please contact 
-** Nokia at testabilitydriver@nokia.com . 
-** 
-** This library is free software; you can redistribute it and/or 
-** modify it under the terms of the GNU Lesser General Public 
-** License version 2.1 as published by the Free Software Foundation 
-** and appearing in the file LICENSE.LGPL included in the packaging 
-** of this file. 
-** 
-****************************************************************************/ 
- 
+**
+** If you have questions regarding the use of this file, please contact
+** Nokia at testabilitydriver@nokia.com .
+**
+** This library is free software; you can redistribute it and/or
+** modify it under the terms of the GNU Lesser General Public
+** License version 2.1 as published by the Free Software Foundation
+** and appearing in the file LICENSE.LGPL included in the packaging
+** of this file.
+**
+****************************************************************************/
+
 
 #include <QFontMetricsF>
 #include <QTextCodec>
@@ -35,11 +35,11 @@ const char* const VKB_APP_ID = "vkb_app_id";
 TasTraverseUtils::TasTraverseUtils()
 {
     mTraverseFilter = new TasDataFilter();
-    
+
 }
 
 TasTraverseUtils::~TasTraverseUtils()
-{    
+{
     delete mTraverseFilter;
 }
 
@@ -56,8 +56,8 @@ void TasTraverseUtils::createFilter(TasCommand* command)
   Clears the filter.
  */
 void TasTraverseUtils::clearFilter()
- {    
-    mTraverseFilter->clear(); 
+ {
+    mTraverseFilter->clear();
 }
 
 
@@ -81,9 +81,9 @@ void TasTraverseUtils::addObjectDetails(TasObject* objectInfo, QObject* object)
         objectInfo->setType(objectType);
     }
     if(includeAttribute("parent")){
-        objectInfo->setParentId(getParentId(object));        
+        objectInfo->setParentId(getParentId(object));
     }
-    printProperties(objectInfo, object);      
+    printProperties(objectInfo, object);
     objectInfo->setName(object->objectName());
 
     //allows to detect vkb
@@ -102,7 +102,7 @@ QString TasTraverseUtils::getParentId(QObject* object)
     QString parentId;
     QGraphicsWidget* go = qobject_cast<QGraphicsWidget*>(object);
     if(go){
-        QGraphicsItem* gParent = go->parentItem();        
+        QGraphicsItem* gParent = go->parentItem();
         parentId = gParent ? TestabilityUtils::graphicsItemId(gParent):"";
     }
     if(parentId == 0){
@@ -113,7 +113,7 @@ QString TasTraverseUtils::getParentId(QObject* object)
 }
 
 
-void TasTraverseUtils::addVariantValue(TasAttribute& attr, const QVariant& value) 
+void TasTraverseUtils::addVariantValue(TasAttribute& attr, const QVariant& value)
 {
     switch (value.type()) {
     case QVariant::Size:
@@ -175,7 +175,7 @@ void TasTraverseUtils::printProperties(TasObject* objectInfo, QObject* object)
         return;
     }
     int count = metaobject->propertyCount();
-    for (int i=0; i<count; i++){        
+    for (int i=0; i<count; i++){
         QMetaProperty metaproperty = metaobject->property(i);
         const char *name = metaproperty.name();
         if(includeAttribute(name)){
@@ -188,7 +188,7 @@ void TasTraverseUtils::printProperties(TasObject* objectInfo, QObject* object)
                 attr.setName(QString(QT_PREFIX)+name);
             }
 
-            QVariant value = object->property(name);                  
+            QVariant value = object->property(name);
             if(metaproperty.isEnumType() && !metaproperty.isFlagType()){
                 QMetaEnum enumeration = metaproperty.enumerator();
                 bool ok = false;
@@ -196,7 +196,7 @@ void TasTraverseUtils::printProperties(TasObject* objectInfo, QObject* object)
                 if(ok){
                     attr.addValue(enumeration.valueToKey(enumValue));
                 }
-                else{                    
+                else{
                     attr.addValue(value.toString());
                 }
             }
@@ -223,7 +223,7 @@ void TasTraverseUtils::printProperties(TasObject* objectInfo, QObject* object)
                 }
                 attr.setType(propertyTypes);
             }
-        }       
+        }
     }
 
     QList<QByteArray> dynNames = object->dynamicPropertyNames();
@@ -231,7 +231,7 @@ void TasTraverseUtils::printProperties(TasObject* objectInfo, QObject* object)
         QString name(bytes);
         TasAttribute& attr = objectInfo->addAttribute();
         attr.setName(name);
-        addVariantValue(attr, object->property(bytes.data()));        
+        addVariantValue(attr, object->property(bytes.data()));
     }
 }
 
@@ -268,10 +268,10 @@ void TasTraverseUtils::addFont(TasObject* objectInfo, QFont font)
         objectInfo->addBooleanAttribute("kerning", font.kerning());
     }
     if(includeAttribute("overline")){
-        objectInfo->addBooleanAttribute("overline", font.overline());  
+        objectInfo->addBooleanAttribute("overline", font.overline());
     }
     if(includeAttribute("strikeOut")){
-        objectInfo->addBooleanAttribute("strikeOut", font.strikeOut());  
+        objectInfo->addBooleanAttribute("strikeOut", font.strikeOut());
     }
     if(includeAttribute("capitalization")){
         objectInfo->addAttribute("capitalization", font.capitalization());
@@ -285,7 +285,7 @@ void TasTraverseUtils::addFont(TasObject* objectInfo, QFont font)
 }
 
 bool TasTraverseUtils::includeAttribute(const QString& attributeName)
-{    
+{
     if(mTraverseFilter){
         if(mTraverseFilter->includeAttribute(attributeName) || mTraverseFilter->includeAttribute(QT_PREFIX+attributeName)){
             return true;
@@ -299,24 +299,24 @@ bool TasTraverseUtils::useViewCrop()
     return mTraverseFilter && mTraverseFilter->useViewCrop();
 }
 
-QPair<QPoint,QPoint> TasTraverseUtils::addGraphicsItemCoordinates(TasObject* objectInfo, 
-                                                                 QGraphicsItem* graphicsItem, 
+QPair<QPoint,QPoint> TasTraverseUtils::addGraphicsItemCoordinates(TasObject* objectInfo,
+                                                                 QGraphicsItem* graphicsItem,
                                                                  TasCommand* command)
-{   
-    objectInfo->addAttribute("scenePos", graphicsItem->scenePos());   
+{
+    objectInfo->addAttribute("scenePos", graphicsItem->scenePos());
     ItemLocationDetails locationDetails = TestabilityUtils::getItemLocationDetails(graphicsItem, command);
 
     QPair<QPoint,QPoint> coords;
     if(true /*locationDetails.visible*/){
         objectInfo->addAttribute("x", locationDetails.windowPoint.x());
-        objectInfo->addAttribute("y", locationDetails.windowPoint.y());   
+        objectInfo->addAttribute("y", locationDetails.windowPoint.y());
 
         objectInfo->addAttribute("x_absolute", locationDetails.screenPoint.x());
         objectInfo->addAttribute("y_absolute", locationDetails.screenPoint.y());
-    
+
         coords.first = locationDetails.windowPoint;
         coords.second = locationDetails.screenPoint;
-    
+
         objectInfo->addAttribute("width", locationDetails.width);
         objectInfo->addAttribute("height", locationDetails.height);
     }
@@ -326,26 +326,26 @@ QPair<QPoint,QPoint> TasTraverseUtils::addGraphicsItemCoordinates(TasObject* obj
     if (qobj) {
         QVariant onDisplay = qobj->property("onDisplay");
         if (onDisplay.isValid() && !onDisplay.toBool()) {
-            objectInfo->addBooleanAttribute("visibleOnScreen", false);  
+            objectInfo->addBooleanAttribute("visibleOnScreen", false);
         } else {
-            objectInfo->addBooleanAttribute("visibleOnScreen", locationDetails.visible);  
+            objectInfo->addBooleanAttribute("visibleOnScreen", locationDetails.visible);
         }
-    } else { 
-        objectInfo->addBooleanAttribute("visibleOnScreen", locationDetails.visible);  
+    } else {
+        objectInfo->addBooleanAttribute("visibleOnScreen", locationDetails.visible);
     }
     return coords;
 }
 
 
-/*! 
+/*!
   Add details about the text into the attribute. Including elide and coded details.
-  Add the elided text, e.g. "This is a long text" -> "This is a long ...", into attributes 
+  Add the elided text, e.g. "This is a long text" -> "This is a long ...", into attributes
 */
-void TasTraverseUtils::addTextInfo(TasObject* objectInfo, const QString& text, 
+void TasTraverseUtils::addTextInfo(TasObject* objectInfo, const QString& text,
                                   const QFont& font, qreal width, Qt::TextElideMode mode)
 {
     QFontMetricsF metrics(font);
-    
+
     QString elided = metrics.elidedText(text, mode, width);
     objectInfo->addAttribute("elidedText", elided);
     bool inFont = true;
@@ -360,11 +360,11 @@ void TasTraverseUtils::addTextInfo(TasObject* objectInfo, const QString& text,
 }
 
 
-/*! 
+/*!
     Print graphicsitem details that could be usable to the model.
 */
 void TasTraverseUtils::printGraphicsItemProperties(TasObject* objectInfo, QGraphicsItem* graphicsItem)
-{       
+{
     QGraphicsObject* gObject = graphicsItem->toGraphicsObject();
 
     if(mTraverseFilter->includeAttribute("visible")){
@@ -397,15 +397,15 @@ void TasTraverseUtils::printGraphicsItemProperties(TasObject* objectInfo, QGraph
     }
     if(mTraverseFilter->includeAttribute("hoverable")){
         if(gObject && !gObject->property("hoverable").isValid())
-            objectInfo->addBooleanAttribute("hoverable", graphicsItem->acceptHoverEvents());    
+            objectInfo->addBooleanAttribute("hoverable", graphicsItem->acceptHoverEvents());
     }
     if(mTraverseFilter->includeAttribute("tooltip")){
         if(gObject && !gObject->property("tooltip").isValid())
-            objectInfo->addAttribute("tooltip", graphicsItem->toolTip());   
+            objectInfo->addAttribute("tooltip", graphicsItem->toolTip());
     }
     if(mTraverseFilter->includeAttribute("z-value")){
         if(gObject && !gObject->property("z-value").isValid())
-            objectInfo->addAttribute("z-value", QString::number(graphicsItem->zValue()));   
+            objectInfo->addAttribute("z-value", QString::number(graphicsItem->zValue()));
     }
 
     //allows to detect vkb
@@ -418,7 +418,7 @@ void TasTraverseUtils::printGraphicsItemProperties(TasObject* objectInfo, QGraph
 
 TasDataFilter::TasDataFilter()
 {
-    mExcludeProperties = true;    
+    mExcludeProperties = true;
 }
 
 TasDataFilter::~TasDataFilter()
@@ -427,7 +427,7 @@ TasDataFilter::~TasDataFilter()
 }
 
 void TasDataFilter::initialize(TasCommand* command)
-{   
+{
     clear();
     if(!command){
         return;
@@ -441,7 +441,7 @@ void TasDataFilter::initialize(TasCommand* command)
     QStringList attributeWhiteList;
     if(!command->apiParameter("attributeWhiteList").isEmpty()){
         mAttributeWhiteList = command->apiParameter("attributeWhiteList").split(",");
-    }    
+    }
     mExcludeProperties = false;
     if(command->apiParameter("filterProperties") =="true"){
         mExcludeProperties = true;
@@ -453,7 +453,7 @@ void TasDataFilter::clear()
 {
     mAttributeWhiteList.clear();
     mAttributeBlackList.clear();
-    mExcludeProperties = true;    
+    mExcludeProperties = true;
 }
 
 bool TasDataFilter::filterProperties()

@@ -132,7 +132,7 @@ void ObjectService::performObjectService(TasCommandModel& model, TasResponse& re
 }
 
 
-QVariantList ObjectService::parseArguments(TasCommand* command) 
+QVariantList ObjectService::parseArguments(TasCommand* command)
 {
     TasLogger::logger()->debug("Parse args");
     int index = 0;
@@ -165,7 +165,7 @@ QVariantList ObjectService::parseArguments(TasCommand* command)
 
         ++index;
     }
-    
+
     while (index <= 9) {
         args << QVariant();
         ++index;
@@ -202,7 +202,7 @@ QString ObjectService::doCallMethod(TasCommand* command, QObject* target, QStrin
             arguments << genericArgument;
         }
 
-        QVariant returnValue(QMetaType::type(metaMethod.typeName()), 
+        QVariant returnValue(QMetaType::type(metaMethod.typeName()),
                              static_cast<void*>(NULL));
         QGenericReturnArgument returnArgument(
             metaMethod.typeName(),
@@ -227,7 +227,7 @@ QString ObjectService::doCallMethod(TasCommand* command, QObject* target, QStrin
             return returnValue.toString();
         }
     }
-    return QString(""); 
+    return QString("");
 }
 
 

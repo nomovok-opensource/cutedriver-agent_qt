@@ -1,20 +1,20 @@
 ############################################################################
-## 
-## Copyright (C) 2010 Nokia Corporation and/or its subsidiary(-ies). 
-## All rights reserved. 
-## Contact: Nokia Corporation (testabilitydriver@nokia.com) 
-## 
+##
+## Copyright (C) 2010 Nokia Corporation and/or its subsidiary(-ies).
+## All rights reserved.
+## Contact: Nokia Corporation (testabilitydriver@nokia.com)
+##
 ## This file is part of Testability Driver Qt Agent
-## 
-## If you have questions regarding the use of this file, please contact 
-## Nokia at testabilitydriver@nokia.com . 
-## 
-## This library is free software; you can redistribute it and/or 
-## modify it under the terms of the GNU Lesser General Public 
-## License version 2.1 as published by the Free Software Foundation 
-## and appearing in the file LICENSE.LGPL included in the packaging 
-## of this file. 
-## 
+##
+## If you have questions regarding the use of this file, please contact
+## Nokia at testabilitydriver@nokia.com .
+##
+## This library is free software; you can redistribute it and/or
+## modify it under the terms of the GNU Lesser General Public
+## License version 2.1 as published by the Free Software Foundation
+## and appearing in the file LICENSE.LGPL included in the packaging
+## of this file.
+##
 ############################################################################
 
 
@@ -31,25 +31,6 @@ TARGET = qttasmemlog_srv
 DESTDIR = bin
 target.path = $$TAS_TARGET_BIN
 DEFINES += TDTASSERVER
-
-symbian: {
-    TARGET.CAPABILITY = ReadUserData WriteUserData ReadDeviceData WriteDeviceData SwEvent PowerMgmt
-	TARGET.VID = VID_DEFAULT
-  	TARGET.EPOCALLOWDLLDATA = 1 
-	TARGET.EPOCHEAPSIZE = 0x20000 0x1400000
-	TARGET.UID3 = 0x2003A9E7
-
-    LIBS += -lmemspydriverclient
-    LIBS += -lmemspyclient
-    INCLUDEPATH += /epoc32/include/platform/memspy/driver
-
-    LIBS += -lhal
-    LIBS += -lcone
-    LIBS += -lws32
-#if ( NCP_COMMON_S60_VERSION_SUPPORT >= S60_VERSION_50 && NCP_COMMON_FAMILY_ID >= 70 )
-	LIBS += -llibEGL
-#endif
-}
 
 win32: {
 	LIBS +=  -lUser32
@@ -70,10 +51,10 @@ include(corelib/corelib.pri)
 include(services/services.pri)
 
 QT -= gui
-QT += network xml 
+QT += network xml
 INSTALLS += target
 
-unix:!symbian:!macx:!CONFIG(no_x):!wayland {
+unix:!macx:!CONFIG(no_x):!wayland {
   LIBS += -lX11 -lXtst
 }
 

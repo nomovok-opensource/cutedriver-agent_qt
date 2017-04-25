@@ -1,22 +1,22 @@
-/*************************************************************************** 
-** 
-** Copyright (C) 2010 Nokia Corporation and/or its subsidiary(-ies). 
-** All rights reserved. 
-** Contact: Nokia Corporation (testabilitydriver@nokia.com) 
-** 
+/***************************************************************************
+**
+** Copyright (C) 2010 Nokia Corporation and/or its subsidiary(-ies).
+** All rights reserved.
+** Contact: Nokia Corporation (testabilitydriver@nokia.com)
+**
 ** This file is part of Testability Driver Qt Agent
-** 
-** If you have questions regarding the use of this file, please contact 
-** Nokia at testabilitydriver@nokia.com . 
-** 
-** This library is free software; you can redistribute it and/or 
-** modify it under the terms of the GNU Lesser General Public 
-** License version 2.1 as published by the Free Software Foundation 
-** and appearing in the file LICENSE.LGPL included in the packaging 
-** of this file. 
-** 
-****************************************************************************/ 
- 
+**
+** If you have questions regarding the use of this file, please contact
+** Nokia at testabilitydriver@nokia.com .
+**
+** This library is free software; you can redistribute it and/or
+** modify it under the terms of the GNU Lesser General Public
+** License version 2.1 as published by the Free Software Foundation
+** and appearing in the file LICENSE.LGPL included in the packaging
+** of this file.
+**
+****************************************************************************/
+
 
 #include <tasqtdatamodel.h>
 #include <taslogger.h>
@@ -83,14 +83,14 @@ void ShellCommandService::killTask(qint64 pid, TasResponse& response)
         TasLogger::logger()->debug("ShellCommandService::killTask Pid " + QString::number(pid) + " was not found.");
         response.setData("Pid " + QString::number(pid) + " was not found.");
     }
-    
+
 }
 
 void ShellCommandService::shellStatus(qint64 pid, TasResponse& response)
 {
-    TasLogger::logger()->debug("ShellCommandService::service: looking for pid " + 
+    TasLogger::logger()->debug("ShellCommandService::service: looking for pid " +
                                QString::number(pid));
-    
+
     if (mTasks.contains(pid)) {
         TasLogger::logger()->debug("ShellCommandService::got it");
 
@@ -100,32 +100,32 @@ void ShellCommandService::shellStatus(qint64 pid, TasResponse& response)
         TasDataModel* model = new TasDataModel();
         QString qtVersion = "Qt" + QString(qVersion());
         TasObjectContainer& container = model->addNewObjectContainer(1, qtVersion, "qt");
-        
+
         TasObject& output = container.addNewObject("2","Response","Response");
-        
+
         ShellTask::Status status = task->status();
 
         switch (status) {
         case ShellTask::ERR:
             output.addAttribute("status", "ERROR");
-            break;            
+            break;
         case ShellTask::RUNNING:
             output.addAttribute("status", "RUNNING");
             break;
         case ShellTask::FINISHED:
             output.addAttribute("status", "FINISHED");
             output.addAttribute("exitCode", task->returnCode());
-            break;            
+            break;
         case ShellTask::NOT_STARTED:
         default:
             output.addAttribute("status", "NOT_STARTED");
-            break;            
+            break;
 
-        }        
-        output.addAttribute("output", QString(task->responseData()));    
-    
+        }
+        output.addAttribute("output", QString(task->responseData()));
+
         // Clean up if process is done.
-        if (status != ShellTask::RUNNING) {            
+        if (status != ShellTask::RUNNING) {
             mTasks.remove(pid);
             if (task->isRunning()) {
                 task->endTask();
@@ -136,10 +136,10 @@ void ShellCommandService::shellStatus(qint64 pid, TasResponse& response)
 
 
             TasLogger::logger()->debug("ShellCommandService::service: deleting");
-	
+
             TasLogger::logger()->debug("ShellCommandService::service: donne");
         }
-        
+
         QByteArray xml;
         model->serializeModel(xml);
         delete model;
@@ -162,7 +162,7 @@ void ShellCommandService::shellCommand(QString message, TasResponse& response)
     process.setReadChannelMode(QProcess::MergedChannels);
     process.setEnvironment(QProcess::systemEnvironment());
     process.start(message);
-    
+
     process.closeWriteChannel();
     process.waitForFinished(4000);
 

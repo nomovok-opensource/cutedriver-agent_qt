@@ -1,22 +1,22 @@
-/*************************************************************************** 
-** 
-** Copyright (C) 2010 Nokia Corporation and/or its subsidiary(-ies). 
-** All rights reserved. 
-** Contact: Nokia Corporation (testabilitydriver@nokia.com) 
-** 
+/***************************************************************************
+**
+** Copyright (C) 2010 Nokia Corporation and/or its subsidiary(-ies).
+** All rights reserved.
+** Contact: Nokia Corporation (testabilitydriver@nokia.com)
+**
 ** This file is part of Testability Driver Qt Agent
-** 
-** If you have questions regarding the use of this file, please contact 
-** Nokia at testabilitydriver@nokia.com . 
-** 
-** This library is free software; you can redistribute it and/or 
-** modify it under the terms of the GNU Lesser General Public 
-** License version 2.1 as published by the Free Software Foundation 
-** and appearing in the file LICENSE.LGPL included in the packaging 
-** of this file. 
-** 
-****************************************************************************/ 
- 
+**
+** If you have questions regarding the use of this file, please contact
+** Nokia at testabilitydriver@nokia.com .
+**
+** This library is free software; you can redistribute it and/or
+** modify it under the terms of the GNU Lesser General Public
+** License version 2.1 as published by the Free Software Foundation
+** and appearing in the file LICENSE.LGPL included in the packaging
+** of this file.
+**
+****************************************************************************/
+
 
 
 #ifndef FPSFIXTUREPLUGIN_H
@@ -35,18 +35,18 @@ class FpsFixture : public QObject, public TasFixturePluginInterface
     Q_OBJECT
     Q_PLUGIN_METADATA(IID "com.nokia.testability.FpsFixture" FILE "fpsfixture.json")
     Q_INTERFACES(TasFixturePluginInterface)
- 
+
 public:
      FpsFixture(QObject* parent=0);
      ~FpsFixture();
      bool execute(void* objectInstance, QString actionName, QHash<QString, QString> parameters, QString & stdOut);
 
 private:
-	 void printFpsResults(QList< QPair<QString,int> > fpsData, QObject* target, QString& stdOut);
-	 QObject* getTarget(void* objectInstance, QString objectType);
+     void printFpsResults(QList< QPair<QString,int> > fpsData, QObject* target, QString& stdOut);
+     QObject* getTarget(void* objectInstance, QString objectType);
 
 private:
-	 QHash<QObject*, FspMeasurer*> mFpsCounters;
+     QHash<QObject*, FspMeasurer*> mFpsCounters;
  };
 
 class FspMeasurer : public QObject
@@ -57,20 +57,20 @@ public:
     FspMeasurer(QObject* target);
     ~FspMeasurer();
     bool eventFilter(QObject *target, QEvent *event);
-	void startFpsMeasure();
-	void restartFpsMeasure();
-	void stopFpsMeasure();
-	QList< QPair<QString,int> > collectedData();
+    void startFpsMeasure();
+    void restartFpsMeasure();
+    void stopFpsMeasure();
+    QList< QPair<QString,int> > collectedData();
 public slots:
-	void collectFps();
+    void collectFps();
 private:
 
-	QObject* mTarget;
-	int mFpsCounter;
-	QTime mTimeStamp;
-	QTime mTimer;
-	QList< QPair<QString,int> > mFpsValues;
+    QObject* mTarget;
+    int mFpsCounter;
+    QTime mTimeStamp;
+    QTime mTimer;
+    QList< QPair<QString,int> > mFpsValues;
 
 };
 #endif
- 
+

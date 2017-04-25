@@ -1,23 +1,23 @@
-/*************************************************************************** 
-** 
-** Copyright (C) 2010 Nokia Corporation and/or its subsidiary(-ies). 
-** All rights reserved. 
-** Contact: Nokia Corporation (testabilitydriver@nokia.com) 
-** 
+/***************************************************************************
+**
+** Copyright (C) 2010 Nokia Corporation and/or its subsidiary(-ies).
+** All rights reserved.
+** Contact: Nokia Corporation (testabilitydriver@nokia.com)
+**
 ** This file is part of Testability Driver Qt Agent
-** 
-** If you have questions regarding the use of this file, please contact 
-** Nokia at testabilitydriver@nokia.com . 
-** 
-** This library is free software; you can redistribute it and/or 
-** modify it under the terms of the GNU Lesser General Public 
-** License version 2.1 as published by the Free Software Foundation 
-** and appearing in the file LICENSE.LGPL included in the packaging 
-** of this file. 
-** 
-****************************************************************************/ 
- 
- 
+**
+** If you have questions regarding the use of this file, please contact
+** Nokia at testabilitydriver@nokia.com .
+**
+** This library is free software; you can redistribute it and/or
+** modify it under the terms of the GNU Lesser General Public
+** License version 2.1 as published by the Free Software Foundation
+** and appearing in the file LICENSE.LGPL included in the packaging
+** of this file.
+**
+****************************************************************************/
+
+
 
 #include <QCoreApplication>
 #include <tasxmlwriter.h>
@@ -29,25 +29,25 @@
 
 static const int SERVER_REGISTRATION_TIMEOUT = 12000;
 static const QString SRV_NAME = "qttasmemlog_srv";
- 
+
 TasQtMemLogService::TasQtMemLogService(QObject* parent)
     : QObject(parent)
-{        
+{
     mSocket = 0;
     mServerConnection = 0;
     mMessageId = 0;
     mDoNotReconnect = false;
     TasLogger::logger()->setLogFile(SRV_NAME+".log");
-    TasLogger::logger()->setLevel(DEBUG);                              
+    TasLogger::logger()->setLevel(DEBUG);
     TasLogger::logger()->debug("TasQtMemLogService::TasQtMemLogService start");
     mConnected = false;
-    mRegistered = false;   
-    mServiceManager = new TasServiceManager();    
+    mRegistered = false;
+    mServiceManager = new TasServiceManager();
     mServiceManager->registerCommand(new ResourceLoggingService());
     initializeConnections();
     connect(QCoreApplication::instance(), SIGNAL(aboutToQuit()), this, SLOT(unReqisterServicePlugin()));
     connect(&mRegisterTime, SIGNAL(timeout()), this, SLOT(timeout()));
-    
+
 }
 
 void TasQtMemLogService::initializeConnections()
@@ -57,7 +57,7 @@ void TasQtMemLogService::initializeConnections()
 #else
     mServerConnection = new QLocalSocket(this);
 #endif
-    mSocket = new TasClientSocket(mServerConnection, this);               
+    mSocket = new TasClientSocket(mServerConnection, this);
     connect(mSocket, SIGNAL(socketClosed()), this, SLOT(connectionClosed()));
     mSocket->setRequestHandler(mServiceManager);
 
@@ -69,7 +69,7 @@ void TasQtMemLogService::initializeConnections()
     mServerConnection->connectToHost(QT_SERVER_NAME, QT_SERVER_PORT);
 #else
     mServerConnection->connectToServer(LOCAL_SERVER_NAME);
-#endif   
+#endif
 }
 
 /*!
@@ -93,13 +93,13 @@ void TasQtMemLogService::cleanConnections()
     }
     if(mServerConnection){
         disconnect(mServerConnection, 0, this, 0);
-        delete mServerConnection;    
+        delete mServerConnection;
         mServerConnection = 0;
     }
 }
 
 void TasQtMemLogService::sendRegisterMessage()
-{  
+{
     disconnect(mServerConnection, SIGNAL(connected()), this, SLOT(sendRegisterMessage()));
 
     if(mRegistered){
@@ -113,10 +113,10 @@ void TasQtMemLogService::sendRegisterMessage()
     QString message = makeReqisterMessage(COMMAND_REGISTER, attrs);
     mSocket->setResponseHandler(this);
 
-    TasLogger::logger()->info("TasQtMemLogService::reqisterServicePlugin send register message."); 
+    TasLogger::logger()->info("TasQtMemLogService::reqisterServicePlugin send register message.");
     mMessageId++;
     if(!mSocket->sendRequest(mMessageId, message)){
-        TasLogger::logger()->error("TasQtMemLogService::reqisterServicePlugin registering failed"); 
+        TasLogger::logger()->error("TasQtMemLogService::reqisterServicePlugin registering failed");
         mRegisterTime.stop();
         mSocket->closeConnection();
         mDoNotReconnect = true;
@@ -132,7 +132,7 @@ void TasQtMemLogService::sendRegisterMessage()
 void TasQtMemLogService::connectionClosed()
 {
     TasLogger::logger()->error("TasQtMemLogService::connectionClosed was closed");
-    mRegistered = false;   
+    mRegistered = false;
     mConnected = false;
     cleanConnections();
     if(!QCoreApplication::closingDown() && !mDoNotReconnect){
@@ -159,46 +159,46 @@ void TasQtMemLogService::serviceResponse(TasMessage& response)
 
 void TasQtMemLogService::timeout()
 {
-    TasLogger::logger()->error("TasQtMemLogService::timeout registering failed");        
-    mDoNotReconnect = true;    
+    TasLogger::logger()->error("TasQtMemLogService::timeout registering failed");
+    mDoNotReconnect = true;
     mSocket->closeConnection();
     cleanConnections();
     QCoreApplication::instance()->quit();
 }
 
 /*!
- 
+
     Sends an unregister message to the TasServer.
 
     Only use this function if you really need to unregister.
     The default behaviour is to let the plugin destructor
     take care of this.
- 
+
  */
 void TasQtMemLogService::unReqisterServicePlugin()
-{       
+{
     mDoNotReconnect = true;
 
-    if(mRegistered && mSocket){  
+    if(mRegistered && mSocket){
         TasLogger::logger()->info("TasQtMemLogService::unReqisterServicePlugin");
         QMap<QString, QString> attrs;
         attrs[PLUGIN_ID] = QString::number(QCoreApplication::instance()->applicationPid());
         QString message = makeReqisterMessage(COMMAND_UNREGISTER, attrs);
         mMessageId++;
         mSocket->sendRequest(mMessageId, message);
-        mRegistered = false;        
+        mRegistered = false;
     }
 }
 
 QString TasQtMemLogService::makeReqisterMessage(QString command, QMap<QString,QString> attributes)
-{    
+{
     QString xml;
-    
+
     QTextStream stream(&xml, QIODevice::WriteOnly);
     TasXmlWriter xmlWriter(stream);
-    
+
     QMap<QString, QString> attrs;
-    attrs[COMMAND_SERVICE] = REGISTER; 
+    attrs[COMMAND_SERVICE] = REGISTER;
     xmlWriter.openElement(COMMAND_ROOT, attrs);
     attrs.clear();
     attrs[COMMAND_TARGET_ID] = APPLICATION_TARGET;
@@ -209,7 +209,7 @@ QString TasQtMemLogService::makeReqisterMessage(QString command, QMap<QString,QS
 
     xmlWriter.closeElement(COMMAND_TYPE);
     xmlWriter.closeElement(COMMAND_TARGET);
-    xmlWriter.closeElement(COMMAND_ROOT);   
+    xmlWriter.closeElement(COMMAND_ROOT);
     return xml;
 }
 

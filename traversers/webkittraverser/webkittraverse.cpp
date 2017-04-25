@@ -1,21 +1,21 @@
 /***************************************************************************
-** 
-** Copyright (C) 2010 Nokia Corporation and/or its subsidiary(-ies). 
-** All rights reserved. 
-** Contact: Nokia Corporation (testabilitydriver@nokia.com) 
-** 
+**
+** Copyright (C) 2010 Nokia Corporation and/or its subsidiary(-ies).
+** All rights reserved.
+** Contact: Nokia Corporation (testabilitydriver@nokia.com)
+**
 ** This file is part of Testability Driver Qt Agent
-** 
-** If you have questions regarding the use of this file, please contact 
-** Nokia at testabilitydriver@nokia.com . 
-** 
-** This library is free software; you can redistribute it and/or 
-** modify it under the terms of the GNU Lesser General Public 
-** License version 2.1 as published by the Free Software Foundation 
-** and appearing in the file LICENSE.LGPL included in the packaging 
-** of this file. 
-** 
-****************************************************************************/ 
+**
+** If you have questions regarding the use of this file, please contact
+** Nokia at testabilitydriver@nokia.com .
+**
+** This library is free software; you can redistribute it and/or
+** modify it under the terms of the GNU Lesser General Public
+** License version 2.1 as published by the Free Software Foundation
+** and appearing in the file LICENSE.LGPL included in the packaging
+** of this file.
+**
+****************************************************************************/
 
 
 #include <QtPlugin>
@@ -90,7 +90,7 @@ void WebKitTraverse::traverseGraphicsItem(TasObject* objectInfo, QGraphicsItem* 
   Traverse object(widget) for web kit
 */
 void WebKitTraverse::traverseObject(TasObject* objectInfo, QObject* object, TasCommand* command)
-{    
+{
 
     //TasLogger::logger()->debug("WebKitTaverse::traverseObject");
 #if QT_VERSION >= 0x040600
@@ -115,94 +115,6 @@ void WebKitTraverse::traverseObject(TasObject* objectInfo, QObject* object, TasC
     }
 
 
-
-    if (object->inherits("DuiApplication")){
-        //TasLogger::logger()->debug("WebKitTaverse::traverseObject DuiApplication.");
-        
-        QVariant angelPid = object->property("angelPid");
-        
-        if (angelPid.isValid()){
-            int pid = angelPid.toInt();
-            //TasLogger::logger()->debug("WebKitTaverse::traverseObject Actually an angel pid.");
-                    TasObject& obj = objectInfo->addObject();
-                    obj.setId(0);
-                    obj.setType("TDriverRef");
-                    obj.setName("TDriverRef");
-                    //TasLogger::logger()->debug("WebKit::traverseObject referring to " + QString::number(pid));
-
-
-                    addAttribute(obj, "uri", QString::number(pid));
-
-            
-            return;
-        }
-
-
-
-        QList<QObject*> list = object->findChildren<QObject*>();
-        TasLogger::logger()->debug(">>>> Found : " + QString::number(list.size())  + " children");
-        foreach (QObject* obj, list){
-            const QMetaObject* mObj = obj->metaObject();
-            TasLogger::logger()->debug(">>>> Found : " + QString(mObj->className()));
-
-
-            if (QString(mObj->className()) == "WRT::Maemo::WebAppletRunner"){
-                TasLogger::logger()->debug("Found communication server");
-                QGraphicsWebView* view = 0;
-                TasLogger::logger()->debug("Invoking method for communicationserver");
-                
-                QMetaObject::invokeMethod(obj, "view",
-                                          Qt::DirectConnection,
-                                          Q_RETURN_ARG(QGraphicsWebView*, view));
-                if (view){
-                    TasLogger::logger()->debug("Traversing webpage");
-                    TasObject& obj = objectInfo->addObject();
-                    QPoint p;
-                    // Retrieve parent xy coords
-                    TasLogger::logger()->debug("Trying to retrieve parent xy");
-                    QString xpos = command->parameter("x_parent_absolute");
-                    QString ypos = command->parameter("y_parent_absolute");
-                    if (!xpos.isEmpty() && !ypos.isEmpty()){
-                        TasLogger::logger()->debug("XY: " + xpos + " " + ypos);
-
-                        p = QPoint(xpos.toInt(), ypos.toInt());
-                    }
-                    traverseQWebPage(obj,view->page(), p, p);
-                } else {
-                    TasLogger::logger()->debug("Page instance not found");
-                }
-            }
-        }
-    }
-
-    // support for Symbian CWRT 9.2 and 10.1 - Fullscreen mode only
-    if (object->inherits("WRT__WrtWebView")){
-        TasLogger::logger()->debug("WebKitTaverse::traverseObject WRT__WrtWebView");
-        
-        QGraphicsWebView* view = 0;
-        QMetaObject::invokeMethod(object, "view",
-                                  Qt::DirectConnection,
-                                  Q_RETURN_ARG(QGraphicsWebView*, view));
-
-        if (view){
-            TasLogger::logger()->debug("Traversing webpage");
-            TasObject& webPageObject = objectInfo->addObject();
-            QPoint p;
-            // Retrieve parent xy coords
-            TasLogger::logger()->debug("Trying to retrieve parent xy");
-            QString xpos = "0"; //command->parameter("x_parent_absolute");
-            QString ypos = "0"; //command->parameter("y_parent_absolute");
-            if (!xpos.isEmpty() && !ypos.isEmpty()){
-                TasLogger::logger()->debug("XY: " + xpos + " " + ypos);
-
-                p = QPoint(xpos.toInt(), ypos.toInt());
-            }
-            traverseQWebPage(webPageObject,view->page(), p, p);
-        } else {
-            TasLogger::logger()->debug("Page instance not found");
-        }
-
-    }
 
     if (object->inherits("GVA::WebChromeItem")){
 //        TasLogger::logger()->debug(" WebKitTaverse::traverseObject found " + QString(object->metaObject()->className()) );
@@ -233,7 +145,7 @@ void WebKitTraverse::traverseObject(TasObject* objectInfo, QObject* object, TasC
 
 
 // There's no common base clas..
-void WebKitTraverse::traverseQGraphicsWebView(TasObject* objectInfo, QGraphicsWebView* webView, TasCommand* command) 
+void WebKitTraverse::traverseQGraphicsWebView(TasObject* objectInfo, QGraphicsWebView* webView, TasCommand* command)
 {
     objectInfo->setType("QGraphicsWebView");
 
@@ -253,7 +165,7 @@ void WebKitTraverse::traverseQGraphicsWebView(TasObject* objectInfo, QGraphicsWe
 
         traverseQWebPage(pageInfo, webPage, coords.first, coords.second);
     }
-    
+
 //     QPoint screenPos = webView->mapToGlobal(QPoint(0, 0));
 //     QGraphicsProxyWidget* proxy = TestabilityUtils::parentProxy(webView);
 //     if (proxy){
@@ -265,10 +177,10 @@ void WebKitTraverse::traverseQGraphicsWebView(TasObject* objectInfo, QGraphicsWe
 //     }
 
 
-    
+
 }
 
-void WebKitTraverse::traverseQWebView(TasObject* objectInfo, QWebView* webView) 
+void WebKitTraverse::traverseQWebView(TasObject* objectInfo, QWebView* webView)
 {
 //    TasLogger::logger()->debug("WebKitTaverse::traverseObject QWebView != null");
     objectInfo->setType("QWebView");
@@ -489,7 +401,7 @@ void WebKitTraverse::addAttribute( TasObject& object, const QString &name, QWebF
 
 }
 
-void WebKitTraverse::traverseQWebPage(TasObject& pageInfo, QWebPage* webPage, const QPoint& webViewPos, const QPoint& screenPos) 
+void WebKitTraverse::traverseQWebPage(TasObject& pageInfo, QWebPage* webPage, const QPoint& webViewPos, const QPoint& screenPos)
 {
 
       pageInfo.setId(TasCoreUtils::objectId(webPage));
@@ -582,11 +494,11 @@ void WebKitTraverse::traverseFrame(QWebFrame* webFrame, TasObject& parent, QStri
         }
 
         if (frameName.trimmed().startsWith("<!--framePath",Qt::CaseInsensitive)){
-            
+
             QWebFrame* parentFrame = webFrame->parentFrame();
 
             QWebElement frameSet = parentFrame->findFirstElement("frameset");
-            
+
             if (!frameSet.isNull()){
 
                 QWebElementCollection frames = frameSet.findAll("frame");
@@ -652,13 +564,8 @@ void WebKitTraverse::traverseFrame(QWebFrame* webFrame, TasObject& parent, QStri
 
         addAttribute(frameInfo, "x", x);
         addAttribute(frameInfo, "y", y);
-#ifdef Q_OS_SYMBIAN
-        addAttribute(frameInfo, "x_absolute", x );
-        addAttribute(frameInfo, "y_absolute", y );
-#else
         addAttribute(frameInfo, "x_absolute", x + screenPos.x());
         addAttribute(frameInfo, "y_absolute", y + screenPos.y());
-#endif
         addAttribute(frameInfo, "width", width);
         addAttribute(frameInfo, "height", height);
 
@@ -736,13 +643,8 @@ void WebKitTraverse::traverseWebElement(TasObject* parent, QPoint parentPos, QPo
         x = screenPosition.x() - screenPos.x(); // screenPosition
         y = screenPosition.y() - screenPos.y(); // screenPosition
 
-#ifdef Q_OS_SYMBIAN
-        x_absolute = screenPosition.x() - screenPos.x(); // screenPosition
-        y_absolute = screenPosition.y() - screenPos.y(); // screenPosition
-#else
         x_absolute = screenPosition.x();
         y_absolute = screenPosition.y();
-#endif
       } else {
 
           QPoint childPos = QPoint( webElement->geometry().x(), webElement->geometry().y() );
@@ -752,13 +654,8 @@ void WebKitTraverse::traverseWebElement(TasObject* parent, QPoint parentPos, QPo
           width = webElement->geometry().width();
           height = webElement->geometry().width();
 
-#ifdef Q_OS_SYMBIAN
-          x_absolute = childPos.x() + parentPos.x();
-          y_absolute = childPos.y() + parentPos.y();
-#else
           x_absolute = childPos.x() + screenPos.x();
           y_absolute = childPos.y() + screenPos.y();
-#endif
       }
       //  }
 
@@ -778,7 +675,7 @@ void WebKitTraverse::traverseWebElement(TasObject* parent, QPoint parentPos, QPo
     }
     else
     {
-        TasObject& childInfo = parent->addObject();        
+        TasObject& childInfo = parent->addObject();
 
         uint elementId = qHash(webElement->toOuterXml() + webFrameId);
 

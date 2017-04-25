@@ -1,22 +1,22 @@
-/*************************************************************************** 
- ** 
- ** Copyright (C) 2010 Nokia Corporation and/or its subsidiary(-ies). 
- ** All rights reserved. 
- ** Contact: Nokia Corporation (testabilitydriver@nokia.com) 
- ** 
+/***************************************************************************
+ **
+ ** Copyright (C) 2010 Nokia Corporation and/or its subsidiary(-ies).
+ ** All rights reserved.
+ ** Contact: Nokia Corporation (testabilitydriver@nokia.com)
+ **
  ** This file is part of Testability Driver Qt Agent
- ** 
- ** If you have questions regarding the use of this file, please contact 
- ** Nokia at testabilitydriver@nokia.com . 
- ** 
- ** This library is free software; you can redistribute it and/or 
- ** modify it under the terms of the GNU Lesser General Public 
- ** License version 2.1 as published by the Free Software Foundation 
- ** and appearing in the file LICENSE.LGPL included in the packaging 
- ** of this file. 
- ** 
- ****************************************************************************/ 
- 
+ **
+ ** If you have questions regarding the use of this file, please contact
+ ** Nokia at testabilitydriver@nokia.com .
+ **
+ ** This library is free software; you can redistribute it and/or
+ ** modify it under the terms of the GNU Lesser General Public
+ ** License version 2.1 as published by the Free Software Foundation
+ ** and appearing in the file LICENSE.LGPL included in the packaging
+ ** of this file.
+ **
+ ****************************************************************************/
+
 
 #include <QtPlugin>
 #include <QDebug>
@@ -34,11 +34,11 @@
 /*!
   \class TasFixturePlugin
   \brief TasDuiTraverse traverse DUI components for adding custom details to them
-        
-  Using standard qt objects it is not always possible to get specific details from the 
-  components. This TasHelperInterface implementation will allow us to add details from 
+
+  Using standard qt objects it is not always possible to get specific details from the
+  components. This TasHelperInterface implementation will allow us to add details from
   the wanted dui components that are not accesible through the property or other
-  generic way. 
+  generic way.
 */
 
 /*!
@@ -66,7 +66,7 @@ bool TasFixturePlugin::execute(void * objectInstance, QString actionName, QHash<
         QWindow* appWindow = TestabilityUtils::getApplicationWindow();
         if (appWindow) {
             QSize newSize(appWindow->height(), appWindow->width());
-            appWindow->resize(newSize);    
+            appWindow->resize(newSize);
             result =  true;
         } else {
             QWidget* appWidget = TestabilityUtils::getApplicationWidget();
@@ -129,7 +129,7 @@ bool TasFixturePlugin::execute(void * objectInstance, QString actionName, QHash<
             TasLogger::logger()->debug("TasFixturePlugin::execute widget");
             widget = reinterpret_cast<QWidget*>(objectInstance);
         }
-        
+
         if (widget) {
             TasLogger::logger()->debug("TasFixturePlugin::execute widget != null");
             item = reinterpret_cast<QGraphicsItem*>(widget);
@@ -152,11 +152,11 @@ bool TasFixturePlugin::execute(void * objectInstance, QString actionName, QHash<
     else if(actionName == "ensureQmlVisible"){
         TasLogger::logger()->debug("TasFixturePlugin::execute ensureQmlVisible");
         if(parameters.value(OBJECT_TYPE) == GRAPHICS_ITEM_TYPE ){
-			QGraphicsItem* item = reinterpret_cast<QGraphicsItem*>(objectInstance);  
-			if(item){
+            QGraphicsItem* item = reinterpret_cast<QGraphicsItem*>(objectInstance);
+            if(item){
                 QGraphicsItem* parentItem = item->parentItem();
                 while(parentItem){
-                    QGraphicsObject* parentObject = parentItem->toGraphicsObject();                 
+                    QGraphicsObject* parentObject = parentItem->toGraphicsObject();
                     if(parentObject && parentObject->inherits("QDeclarativeFlickable")){
                         //first check is the item already visibile (inside the flickable visible area)
                         QVariant variant = parentObject->property("visibleArea");
@@ -185,10 +185,10 @@ bool TasFixturePlugin::execute(void * objectInstance, QString actionName, QHash<
                             if(item->x() < contentX || item->x() > (contentX + visibleWidth)){
                                 parentObject->setProperty("contentX", QVariant(item->x()));
                             }
-                     
+
                             if(item->y() < contentY || item->y() > (contentY + visibleHeight)){
                                 parentObject->setProperty("contentY", QVariant(item->y()));
-                            }                        
+                            }
                             break;
                         }
                         else{
@@ -201,19 +201,19 @@ bool TasFixturePlugin::execute(void * objectInstance, QString actionName, QHash<
         }
     }
     else if(actionName == "setFocus"){
-		if(parameters.value(OBJECT_TYPE) == WIDGET_TYPE ){
-			QWidget* widget = reinterpret_cast<QWidget*>(objectInstance);
-			if(widget){
-				widget->setFocus(Qt::MouseFocusReason);
-			}
-		}
-		else if(parameters.value(OBJECT_TYPE) == GRAPHICS_ITEM_TYPE ){
-			QGraphicsItem* item = reinterpret_cast<QGraphicsItem*>(objectInstance);  
-			if(item){
-				item->setFocus(Qt::MouseFocusReason); 
-			}
-		}
-	}
+        if(parameters.value(OBJECT_TYPE) == WIDGET_TYPE ){
+            QWidget* widget = reinterpret_cast<QWidget*>(objectInstance);
+            if(widget){
+                widget->setFocus(Qt::MouseFocusReason);
+            }
+        }
+        else if(parameters.value(OBJECT_TYPE) == GRAPHICS_ITEM_TYPE ){
+            QGraphicsItem* item = reinterpret_cast<QGraphicsItem*>(objectInstance);
+            if(item){
+                item->setFocus(Qt::MouseFocusReason);
+            }
+        }
+    }
     else if(actionName == "logProperty" ){
         QObject* o = castToObject(objectInstance, parameters.value(OBJECT_TYPE));
         if(o){
@@ -245,7 +245,7 @@ bool TasFixturePlugin::execute(void * objectInstance, QString actionName, QHash<
             stdOut.append(i.value());
             stdOut.append(")");
             ++i;
-            
+
             stdOut.append("}");
             // set the return value as boolean
         }
@@ -261,7 +261,7 @@ QObject* TasFixturePlugin::castToObject(void* objectInstance, const QString& typ
         return widget;
     }
     else if(type == GRAPHICS_ITEM_TYPE ){
-        QGraphicsItem* item = reinterpret_cast<QGraphicsItem*>(objectInstance);  
+        QGraphicsItem* item = reinterpret_cast<QGraphicsItem*>(objectInstance);
         return item->toGraphicsObject();
     }
     else if(type == APPLICATION_TYPE ){

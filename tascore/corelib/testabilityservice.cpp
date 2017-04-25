@@ -1,21 +1,21 @@
 /***************************************************************************
-** 
-** Copyright (C) 2010 Nokia Corporation and/or its subsidiary(-ies). 
-** All rights reserved. 
-** Contact: Nokia Corporation (testabilitydriver@nokia.com) 
-** 
+**
+** Copyright (C) 2010 Nokia Corporation and/or its subsidiary(-ies).
+** All rights reserved.
+** Contact: Nokia Corporation (testabilitydriver@nokia.com)
+**
 ** This file is part of Testability Driver Qt Agent
-** 
-** If you have questions regarding the use of this file, please contact 
-** Nokia at testabilitydriver@nokia.com . 
-** 
-** This library is free software; you can redistribute it and/or 
-** modify it under the terms of the GNU Lesser General Public 
-** License version 2.1 as published by the Free Software Foundation 
-** and appearing in the file LICENSE.LGPL included in the packaging 
-** of this file. 
-** 
-****************************************************************************/ 
+**
+** If you have questions regarding the use of this file, please contact
+** Nokia at testabilitydriver@nokia.com .
+**
+** This library is free software; you can redistribute it and/or
+** modify it under the terms of the GNU Lesser General Public
+** License version 2.1 as published by the Free Software Foundation
+** and appearing in the file LICENSE.LGPL included in the packaging
+** of this file.
+**
+****************************************************************************/
 
 #include "tasxmlwriter.h"
 #include "testabilityservice.h"
@@ -47,31 +47,31 @@ const int PAINT_EVENT_LIMIT = 10;
 /*!
     \class TestabilityService
     \brief TestabilityService listens to ui commands and ui state requests from TasServer.
-    
+
     TestabilityServiceable TasPlugins use the TestabilityService component to reqister to the TasServer. TestabilityService
-    provides services to accept ui commands originating from the TasServer. 
-            
+    provides services to accept ui commands originating from the TasServer.
+
     TasPlugins that want to use this component must implement the TestabilityServiceable interface.
-    
+
     TestabilityService is implemented as a singleton.
-    
+
 */
 extern "C" TAS_EXPORT void qt_testability_init()
 {
     QGuiApplication* guiApp = qobject_cast<QGuiApplication*>(qApp);
 
     // Ignore command line applications and the special launcher daemon in meego booster apps
-    if (    !guiApp ||
-            TestabilityUtils::getApplicationName() == "applauncherd.bin" ||
-            TestabilityUtils::getApplicationName() == "applifed.x" ||
-            TestabilityUtils::getApplicationName() == "applifed") {
-        return;
+    if (!guiApp ||
+        TestabilityUtils::getApplicationName() == "applauncherd.bin" ||
+        TestabilityUtils::getApplicationName() == "applifed.x" ||
+        TestabilityUtils::getApplicationName() == "applifed") {
+          return;
     }
 
-    /* black listed apps */ 
+    /* black listed apps */
     if(TestabilityUtils::isBlackListed()){
         return;
-	}	
+    }
 
     QVariant prop = qApp->property(PLUGIN_ATTR);
     if(prop.isValid() && prop.toBool()){
@@ -88,8 +88,8 @@ extern "C" TAS_EXPORT void qt_testability_init()
 
 TestabilityLoader::TestabilityLoader()
 {
-    TasLogger::logger()->setLogFile(TestabilityUtils::getApplicationName()+".log");    
-    TasLogger::logger()->setLevel(LOG_DEBUG); 
+    TasLogger::logger()->setLogFile(TestabilityUtils::getApplicationName()+".log");
+    TasLogger::logger()->setLevel(LOG_DEBUG);
     mService = 0;
     connect(qApp, SIGNAL(aboutToQuit()), this, SLOT(unload()));
 }
@@ -99,11 +99,11 @@ void TestabilityLoader::load()
     //set prop for app that dll loaded
     qApp->setProperty(PLUGIN_ATTR, QVariant(true));
     mService = new TestabilityService();
-    TasLogger::logger()->info("TestabilityLoader::intialized"); 
+    TasLogger::logger()->info("TestabilityLoader::intialized");
 }
 
 void TestabilityLoader::unload()
-{    
+{
     if(mService){
         qDebug("TestabilityLoader::remove testability");
         QVariant prop = qApp->property(CLOSE_REQUESTED);
@@ -125,14 +125,14 @@ void TestabilityLoader::unload()
  */
 TestabilityService::TestabilityService(QObject* parent)
     : QObject(parent)
-{        
+{
     mMessageId = 0;
     mPaintEventCounter = 0;
     mServiceManager = 0;
 
     mConnected = false;
-    mRegistered = false;   
-       
+    mRegistered = false;
+
     mPluginId = QString::number(qApp->applicationPid());
 
     initializeServiceManager();
@@ -161,7 +161,7 @@ void TestabilityService::initializeConnections()
 #else
     mServerConnection = new QLocalSocket(this);
 #endif
-    mSocket = new TasClientSocket(mServerConnection, this);               
+    mSocket = new TasClientSocket(mServerConnection, this);
     connect(mSocket, SIGNAL(socketClosed()), this, SLOT(connectionClosed()));
     mSocket->setRequestHandler(mServiceManager);
 
@@ -181,12 +181,12 @@ TestabilityService::~TestabilityService()
     if(mSocket){
         disconnect(mSocket, SIGNAL(socketClosed()), this, SLOT(connectionClosed()));
         mSocket->clearHandlers();
-        mSocket->closeConnection();     
+        mSocket->closeConnection();
         mSocket->deleteLater();
         mSocket = 0;
     }
     if(mServerConnection){
-        mServerConnection->deleteLater();    
+        mServerConnection->deleteLater();
         mServerConnection = 0;
     }
     if(mServiceManager){
@@ -196,17 +196,17 @@ TestabilityService::~TestabilityService()
 }
 
 /*!
-     
+
     Register the TestabilityServiceable plugin to use the service.
     A register message is sent to the TasServer. The reqister
     message will include connection indentification that allows
-    the server to send requests to the service and through to 
+    the server to send requests to the service and through to
     the actual plugin.
     The sequence when registering is:
-    1. Connect 
+    1. Connect
     2. Connected slot (listend to connected from socket) called send register
     3. emit registered
- 
+
  */
 void TestabilityService::registerPlugin()
 {
@@ -220,7 +220,7 @@ void TestabilityService::registerPlugin()
     qApp->removeEventFilter(this);
 
     if(!mRegistered && !mRegisterTime.isActive()){
-        TasLogger::logger()->info("TestabilityService::registerPlugin not registered begin register process..."); 
+        TasLogger::logger()->info("TestabilityService::registerPlugin not registered begin register process...");
         mRegisterWatchDog.stop();
         mRegisterTime.start(SERVER_REGISTRATION_TIMEOUT);
         connect(mServerConnection, SIGNAL(connected()), this, SLOT(sendRegisterMessage()));
@@ -228,30 +228,26 @@ void TestabilityService::registerPlugin()
         mServerConnection->connectToHost(QT_SERVER_NAME, QT_SERVER_PORT);
 #else
         mServerConnection->connectToServer(LOCAL_SERVER_NAME);
-#endif   
+#endif
     }
 }
 
 void TestabilityService::sendRegisterMessage()
-{  
+{
     disconnect(mServerConnection, SIGNAL(connected()), this, SLOT(sendRegisterMessage()));
 
     QMap<QString, QString> attrs;
     attrs[PLUGIN_ID] = mPluginId;
     attrs[PLUGIN_NAME] = TestabilityUtils::getApplicationName();
     attrs[PLUGIN_TYPE] = TAS_PLUGIN;
-#ifdef Q_OS_SYMBIAN
-    quintptr uid = CEikonEnv::Static()->EikAppUi()->Application()->AppDllUid().iUid;
-    attrs[APP_UID] = QString::number(uid);
-#endif        
     QString message = makeReqisterMessage(COMMAND_REGISTER, attrs);
 
     mSocket->setResponseHandler(this);
 
-    TasLogger::logger()->info("TestabilityService::reqisterServicePlugin send register message."); 
+    TasLogger::logger()->info("TestabilityService::reqisterServicePlugin send register message.");
     mMessageId++;
     if(!mSocket->sendRequest(mMessageId, message)){
-        TasLogger::logger()->error("TestabilityService::reqisterServicePlugin registering failed"); 
+        TasLogger::logger()->error("TestabilityService::reqisterServicePlugin registering failed");
         mRegisterTime.stop();
         mSocket->closeConnection();
         connectionClosed();
@@ -264,7 +260,7 @@ void TestabilityService::sendRegisterMessage()
 void TestabilityService::connectionClosed()
 {
     TasLogger::logger()->error("TestabilityService::connectionClosed was closed");
-    mRegistered = false;   
+    mRegistered = false;
     mConnected = false;
     mRegisterTime.stop();
 
@@ -272,17 +268,13 @@ void TestabilityService::connectionClosed()
 
     //Proper fix needed at some point:
     //for some reason we need to reuse the old connections in symbian (seems to crash or freeze if not)
-    //but in windows the old connections will not work at all and we need to recreate them     
-#ifdef Q_OS_SYMBIAN
-    //for now do nothing
-#else
-    // make new connections, deleting current once later. Deleting the current object inside the slot 
+    //but in windows the old connections will not work at all and we need to recreate them
+    // make new connections, deleting current once later. Deleting the current object inside the slot
     // caused random crashes.
     mSocket->deleteLater();
     mServerConnection->deleteLater();
     initializeConnections();
-#endif
-    mRegisterWatchDog.start(SERVER_REGISTRATION_TIMEOUT);     
+    mRegisterWatchDog.start(SERVER_REGISTRATION_TIMEOUT);
     emit unRegistered();
 }
 
@@ -305,28 +297,28 @@ void TestabilityService::serviceResponse(TasMessage& response)
 
 void TestabilityService::timeout()
 {
-    TasLogger::logger()->error("TestabilityService::timeout registering failed");        
+    TasLogger::logger()->error("TestabilityService::timeout registering failed");
     connectionClosed();
 }
 
 /*!
- 
+
     Sends an unregister message to the TasServer.
 
     Only use this function if you really need to unregister.
     The default behaviour is to let the plugin destructor
     take care of this.
- 
+
  */
 void TestabilityService::unReqisterServicePlugin()
-{       
-    if(mRegistered){  
+{
+    if(mRegistered){
         QMap<QString, QString> attrs;
         attrs[PLUGIN_ID] = mPluginId;
         QString message = makeReqisterMessage(COMMAND_UNREGISTER, attrs);
         mMessageId++;
         mSocket->sendRequest(mMessageId, message);
-        mRegistered = false;        
+        mRegistered = false;
     }
 }
 
@@ -334,14 +326,14 @@ void TestabilityService::unReqisterServicePlugin()
 
 
 QString TestabilityService::makeReqisterMessage(QString command, QMap<QString,QString> attributes)
-{    
+{
     QString xml;
-    
+
     QTextStream stream(&xml, QIODevice::WriteOnly);
     TasXmlWriter xmlWriter(stream);
-    
+
     QMap<QString, QString> attrs;
-    attrs[COMMAND_SERVICE] = REGISTER; 
+    attrs[COMMAND_SERVICE] = REGISTER;
     xmlWriter.openElement(COMMAND_ROOT, attrs);
     attrs.clear();
     attrs[COMMAND_TARGET_ID] = APPLICATION_TARGET;
@@ -352,7 +344,7 @@ QString TestabilityService::makeReqisterMessage(QString command, QMap<QString,QS
 
     xmlWriter.closeElement(COMMAND_TYPE);
     xmlWriter.closeElement(COMMAND_TARGET);
-    xmlWriter.closeElement(COMMAND_ROOT);   
+    xmlWriter.closeElement(COMMAND_ROOT);
     return xml;
 }
 
@@ -360,7 +352,7 @@ void TestabilityService::initializeServiceManager()
 {
 
     mServiceManager = new TasServiceManager();
-    mServiceManager->registerCommand(new CloseAppService());    
+    mServiceManager->registerCommand(new CloseAppService());
     mServiceManager->registerCommand(new ConfService());
     mServiceManager->registerCommand(new InfoService());
     mServiceManager->registerCommand(new ObjectService());
@@ -368,10 +360,10 @@ void TestabilityService::initializeServiceManager()
     mServiceManager->registerCommand(new UiCommandService());
 #if !defined(NO_WEBKIT)
     mServiceManager->registerCommand(new WebkitCommandService());
-#endif   
+#endif
     mServiceManager->registerCommand(new UiStateService());
-    mServiceManager->registerCommand(new RecorderService());    
-    mServiceManager->registerCommand(new FindObjectService());    
+    mServiceManager->registerCommand(new RecorderService());
+    mServiceManager->registerCommand(new FindObjectService());
 
     mEventService = new EventService();
     mServiceManager->registerCommand(mEventService);
@@ -419,7 +411,7 @@ void TestabilityService::enableSignalTracking(QString signal, QString timeStamp)
     command.addDomAttribute("name", "Fixture");
     command.addDomAttribute("plugin","tassignal");
     command.addDomAttribute("method","enable_signal");
-    command.addApiParameter(SIGNAL_KEY,signal, "QString");    
+    command.addApiParameter(SIGNAL_KEY,signal, "QString");
     command.addApiParameter(PROCESS_START_TIME,timeStamp, "QString");
     QString message;
     if(!mFixtureService->performFixture(*model, message)){
@@ -429,14 +421,14 @@ void TestabilityService::enableSignalTracking(QString signal, QString timeStamp)
 }
 
 bool TestabilityService::eventFilter(QObject *target, QEvent *event)
-{     
+{
     Q_UNUSED(target);
     if( event->type() == QEvent::Paint){
         ++mPaintEventCounter;
-        mPaintTracker.start(REGISTER_INTERVAL);        
+        mPaintTracker.start(REGISTER_INTERVAL);
     }
     if (mPaintEventCounter > PAINT_EVENT_LIMIT) {
-        TasLogger::logger()->debug("TestabilityService::eventFilter Paint limit exceeded, forcing register");         
+        TasLogger::logger()->debug("TestabilityService::eventFilter Paint limit exceeded, forcing register");
         registerPlugin();
     }
 

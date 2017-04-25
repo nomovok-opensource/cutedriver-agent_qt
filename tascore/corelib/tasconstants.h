@@ -131,12 +131,7 @@ static const int QT_SERVER_PORT = 55534;
 static const int QT_SERVER_PORT_OUT = 55535;
 static const int QT_CUCUMBER_SERVER_OUT = 55536;
 
-#ifdef TAS_MAEMO
-// Duo to bug in security system explicit declaration. Remove if works.
-const char* const LOCAL_SERVER_NAME = "/var/tmp/qttasserver_pipe";
-#else
 const char* const LOCAL_SERVER_NAME = "qttasserver_pipe";
-#endif
 
 
 const char* const DATE_FORMAT = "yyyyMMddhhmmsszzz";
@@ -236,14 +231,6 @@ const char* const APP_ROTATION = "native_rotation";
 
 // no local sockets for 0.5.0 release
 
-//#ifdef Q_OS_SYMBIAN
-//#define TAS_NOLOCALSOCKET
-//#else
 #define TAS_USELOCALSOCKET
-//#endif
-
-//#ifndef Q_OS_SYMBIAN
-//#define TAS_USE_CUCUMBER_WIRE_PROTOCOL
-//#endif
 
 #endif

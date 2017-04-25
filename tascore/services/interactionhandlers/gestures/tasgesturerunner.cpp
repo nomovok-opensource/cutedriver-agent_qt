@@ -1,4 +1,4 @@
-/*************************************************************************** 
+/***************************************************************************
  **
  ** Copyright (C) 2010 Nokia Corporation and/or its subsidiary(-ies).
  ** All rights reserved.
@@ -19,8 +19,8 @@
 
 #include <QApplication>
 
-#include "tasgesturerunner.h" 
-#include "taslogger.h" 
+#include "tasgesturerunner.h"
+#include "taslogger.h"
 
 TasGestureRunner::TasGestureRunner(TasGesture* gesture, QObject* parent)
     :QObject(parent)
@@ -29,12 +29,7 @@ TasGestureRunner::TasGestureRunner(TasGesture* gesture, QObject* parent)
     connect(&mTimeLine, SIGNAL(valueChanged(qreal)), this, SLOT(gestureTimerEvent(qreal)));
     connect(&mTimeLine, SIGNAL(finished()), this, SLOT(finished()));
     qApp->installEventFilter(this);
-#ifdef TAS_MAEMO
-    // Non tap screen events no longer work, so forcing it on (in maemo). Also, send touches manually.
-    mMouseGen.setUseTapScreen(true);
-#else
     mMouseGen.setUseTapScreen(gesture->getUseTapScreen());
-#endif
     startGesture();
 }
 
@@ -51,17 +46,6 @@ void TasGestureRunner::startGesture()
     mTimeLine.setFrameRange(0,duration/FRAME_RANGE_DIV);
 
     if(mGesture->isPress()){
-#ifdef TAS_MAEMO
-        // tap screen is forced on, send it via X and touch via normals
-        if(mGesture->pointerType() == MouseHandler::TypeMouse || mGesture->pointerType() == MouseHandler::TypeBoth){
-            mMouseGen.doMousePress(TasEventTarget(mGesture), mGesture->getMouseButton(), mGesture->startPoints().first().screenPoint);
-        }
-        
-        if(mGesture->pointerType() == MouseHandler::TypeTouch || mGesture->pointerType() == MouseHandler::TypeBoth){
-            bool sendPrimary = (mGesture->pointerType() == MouseHandler::TypeBoth);
-            mTouchGen.doTouchBegin(TasEventTarget(mGesture), mGesture->startPoints(), sendPrimary, mGesture->touchPointIdKey());
-        }
-#else
         if(!mGesture->getUseTapScreen()){
             if(mGesture->pointerType() == MouseHandler::TypeTouch || mGesture->pointerType() == MouseHandler::TypeBoth){
                 mTouchGen.doTouchBegin(TasEventTarget(mGesture), mGesture->startPoints(), mGesture->touchPointIdKey());
@@ -75,7 +59,6 @@ void TasGestureRunner::startGesture()
                 mMouseGen.doMousePress(TasEventTarget(mGesture),  mGesture->getMouseButton(), mGesture->startPoints().at(n).screenPoint, n);
             }
         }
-#endif
     }
 
     mTimeLine.start();
@@ -108,16 +91,6 @@ void TasGestureRunner::finished()
 void TasGestureRunner::releaseMouse()
 {
 
-#ifdef TAS_MAEMO
-    if(mGesture->pointerType() == MouseHandler::TypeMouse || mGesture->pointerType() == MouseHandler::TypeBoth){
-        mMouseGen.doMouseRelease(TasEventTarget(mGesture), mGesture->getMouseButton(), mGesture->endPoints().first().screenPoint);
-    }
-
-    if(mGesture->pointerType() == MouseHandler::TypeTouch || mGesture->pointerType() == MouseHandler::TypeBoth){
-        bool sendPrimary = (mGesture->pointerType() == MouseHandler::TypeBoth);
-        mTouchGen.doTouchEnd(TasEventTarget(mGesture), mGesture->endPoints(), sendPrimary, mGesture->touchPointIdKey());
-    }
-#else
     if(!mGesture->getUseTapScreen()){
         if(mGesture->pointerType() == MouseHandler::TypeTouch || mGesture->pointerType() == MouseHandler::TypeBoth){
             mTouchGen.doTouchEnd(TasEventTarget(mGesture), mGesture->endPoints(), mGesture->touchPointIdKey());
@@ -131,8 +104,6 @@ void TasGestureRunner::releaseMouse()
             mMouseGen.doMouseRelease(TasEventTarget(mGesture),mGesture->getMouseButton(),mGesture->endPoints().at(n).screenPoint, n);
         }
     }
-
-#endif
 
     qApp->removeEventFilter(this);
     deleteLater();
@@ -148,16 +119,6 @@ void TasGestureRunner::move(QList<TasTouchPoints> points, bool force)
         }
     }
 
-#ifdef TAS_MAEMO
-    if(mGesture->pointerType() == MouseHandler::TypeMouse || mGesture->pointerType() == MouseHandler::TypeBoth){
-        mMouseGen.doMouseMove(TasEventTarget(mGesture), points.first().screenPoint, mGesture->getMouseButton());
-    }
-
-    if(mGesture->pointerType() == MouseHandler::TypeTouch || mGesture->pointerType() == MouseHandler::TypeBoth){
-        bool sendPrimary = (mGesture->pointerType() == MouseHandler::TypeBoth);
-        mTouchGen.doTouchUpdate(TasEventTarget(mGesture), points, sendPrimary, mGesture->touchPointIdKey());
-    }
-#else
     if(!mGesture->getUseTapScreen()){
         if(mGesture->pointerType() == MouseHandler::TypeTouch || mGesture->pointerType() == MouseHandler::TypeBoth){
             mTouchGen.doTouchUpdate(TasEventTarget(mGesture), points, mGesture->touchPointIdKey());
@@ -172,7 +133,7 @@ void TasGestureRunner::move(QList<TasTouchPoints> points, bool force)
             mMouseGen.doMouseMove(TasEventTarget(mGesture),touchpoint.screenPoint,mGesture->getMouseButton(), n);
         }
     }
-#endif
+
 }
 
 bool TasGestureRunner::eventFilter(QObject *target, QEvent *event)

@@ -1,21 +1,21 @@
-/*************************************************************************** 
-** 
-** Copyright (C) 2010 Nokia Corporation and/or its subsidiary(-ies). 
-** All rights reserved. 
-** Contact: Nokia Corporation (testabilitydriver@nokia.com) 
-** 
+/***************************************************************************
+**
+** Copyright (C) 2010 Nokia Corporation and/or its subsidiary(-ies).
+** All rights reserved.
+** Contact: Nokia Corporation (testabilitydriver@nokia.com)
+**
 ** This file is part of Testability Driver Qt Agent
-** 
-** If you have questions regarding the use of this file, please contact 
-** Nokia at testabilitydriver@nokia.com . 
-** 
-** This library is free software; you can redistribute it and/or 
-** modify it under the terms of the GNU Lesser General Public 
-** License version 2.1 as published by the Free Software Foundation 
-** and appearing in the file LICENSE.LGPL included in the packaging 
-** of this file. 
-** 
-****************************************************************************/ 
+**
+** If you have questions regarding the use of this file, please contact
+** Nokia at testabilitydriver@nokia.com .
+**
+** This library is free software; you can redistribute it and/or
+** modify it under the terms of the GNU Lesser General Public
+** License version 2.1 as published by the Free Software Foundation
+** and appearing in the file LICENSE.LGPL included in the packaging
+** of this file.
+**
+****************************************************************************/
 
 #include <QtTest/qtestspontaneevent.h>
 #include <QDesktopWidget>
@@ -124,10 +124,10 @@ QList<QTouchEvent::TouchPoint> TasTouchEventGenerator::convertToTouchPoints(cons
         QVariant pointStore = qApp->property(identifier.toLatin1());
         if(pointStore.isValid()){
             pointIds = pointStore.toList();
-        }      
+        }
     }
 
-    QList<QTouchEvent::TouchPoint> touchPoints;    
+    QList<QTouchEvent::TouchPoint> touchPoints;
     if(!points.isEmpty()){
         for(int i = 0 ; i < points.size() ; i++){
             if(pointIds.size() <= i ){
@@ -142,19 +142,19 @@ QList<QTouchEvent::TouchPoint> TasTouchEventGenerator::convertToTouchPoints(cons
     if(state == Qt::TouchPointReleased){
         qApp->setProperty(identifier.toLatin1(), QVariant());
         mTouchPointCounter = 0;
-    }       
+    }
     else if(!identifier.isEmpty()){
         //we store the point id to the app as property
         //this allows new gestures to use the ids when needed
         qApp->setProperty(identifier.toLatin1(), QVariant(pointIds));
-    } 
+    }
     return touchPoints;
 }
 
 QTouchEvent::TouchPoint TasTouchEventGenerator::makeTouchPoint(const TasEventTarget& target, TasTouchPoints points,
                                                                Qt::TouchPointState state, int id)
 {
-    TasLogger::logger()->debug("TasTouchEventGenerator:: generating point with id: " + 
+    TasLogger::logger()->debug("TasTouchEventGenerator:: generating point with id: " +
                                QString::number(id));
     QTouchEvent::TouchPoint touchPoint(id);
     Qt::TouchPointStates states = state;
@@ -174,7 +174,7 @@ QTouchEvent::TouchPoint TasTouchEventGenerator::makeTouchPoint(const TasEventTar
 
     touchPoint.setScreenPos(points.screenPoint);
 
-    //in addition to the position we also need to set last and start positions as 
+    //in addition to the position we also need to set last and start positions as
     //some gesture may depend on them
     if(!points.lastScreenPoint.isNull()){
         touchPoint.setLastPos(target.mapFromGlobal(points.lastScreenPoint));

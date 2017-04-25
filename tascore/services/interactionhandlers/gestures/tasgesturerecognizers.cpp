@@ -1,27 +1,27 @@
-/*************************************************************************** 
-** 
-** Copyright (C) 2010 Nokia Corporation and/or its subsidiary(-ies). 
-** All rights reserved. 
-** Contact: Nokia Corporation (testabilitydriver@nokia.com) 
-** 
+/***************************************************************************
+**
+** Copyright (C) 2010 Nokia Corporation and/or its subsidiary(-ies).
+** All rights reserved.
+** Contact: Nokia Corporation (testabilitydriver@nokia.com)
+**
 ** This file is part of Testability Driver Qt Agent
-** 
-** If you have questions regarding the use of this file, please contact 
-** Nokia at testabilitydriver@nokia.com . 
-** 
-** This library is free software; you can redistribute it and/or 
-** modify it under the terms of the GNU Lesser General Public 
-** License version 2.1 as published by the Free Software Foundation 
-** and appearing in the file LICENSE.LGPL included in the packaging 
-** of this file. 
-** 
-****************************************************************************/ 
+**
+** If you have questions regarding the use of this file, please contact
+** Nokia at testabilitydriver@nokia.com .
+**
+** This library is free software; you can redistribute it and/or
+** modify it under the terms of the GNU Lesser General Public
+** License version 2.1 as published by the Free Software Foundation
+** and appearing in the file LICENSE.LGPL included in the packaging
+** of this file.
+**
+****************************************************************************/
 
 #include "taslogger.h"
 #include "tasgesturerecognizers.h"
 
-const char* const DIST_ONE = "distance_1"; 
-const char* const DIST_TWO = "distance_2"; 
+const char* const DIST_ONE = "distance_1";
+const char* const DIST_TWO = "distance_2";
 const char* const DIFF     = "differential";
 const char* const TYPE     = "type";
 const char* const RADIUS   = "radius";
@@ -33,7 +33,7 @@ const char* const ROTATE_DIRECTION = "rotate_direction";
     \class TasGestureRecognizer
 
     \brief Creates a TasGesture from the given data.
-    
+
     TasGestures are created from the data passed from the testabilitydriver host.
     Recornizers are used to identify and create the correct gestures from the data.
 */
@@ -56,9 +56,9 @@ QPoint TasGestureUtils::getTargetPoint(TasCommand& command)
     QString targetId = command.parameter("targetId");
     QPoint targetPoint;
     if(command.parameter("targetType") == TYPE_GRAPHICS_VIEW){
-        QGraphicsItem* targetItem = findGraphicsItem(targetId); 
+        QGraphicsItem* targetItem = findGraphicsItem(targetId);
         if(targetItem){
-            viewPortAndPosition(targetItem, targetPoint);   
+            viewPortAndPosition(targetItem, targetPoint);
         }
     }
     else{
@@ -75,13 +75,13 @@ void TasGestureUtils::doTransform(QGraphicsItem* targetItem, QLineF& gestureLine
 {
     if(targetItem){
         QGraphicsView* view = TestabilityUtils::getViewForItem(targetItem);
-        if(view && !view->viewportTransform().isIdentity()){                    
+        if(view && !view->viewportTransform().isIdentity()){
             QTransform transform = view->viewportTransform();
             QLineF transformedLine = transform.map(gestureLine);
             //set new angle and length based on transformation
             gestureLine.setLength(transformedLine.length());
             gestureLine.setAngle(transformedLine.angle());
-        }    
+        }
     }
 }
 
@@ -150,12 +150,12 @@ TasGesture* LineTasGestureRecognizer::create(TargetData data)
     QLineF gestureLine;
     if(command.name() == "MouseGestureFromCoordinates"){
         QPoint start = mUtils.getPoint(command);
-        gestureLine.setP1(QPointF(start));    
+        gestureLine.setP1(QPointF(start));
     }
     else{
         gestureLine.setP1(QPointF(point));
     }
- 
+
     if(command.name() == "MouseGesture" || command.name() == "MouseGestureFromCoordinates"){
         gestureLine.setLength(mUtils.getDistance(command));
         gestureLine.setAngle(mUtils.getDirection(command));
@@ -189,7 +189,7 @@ TasGesture* PointsTasGestureRecognizer::create(TargetData data)
 {
     TasCommand& command = *data.command;
     QWidget* target = data.target;
-    
+
     QList<QPoint> gesturePoints;
     QList<int> gestureIntervals;
     QStringList points = command.text().split(";",QString::SkipEmptyParts);
@@ -203,10 +203,10 @@ TasGesture* PointsTasGestureRecognizer::create(TargetData data)
             int y = pointData.at(1).toInt();
             QPoint windowPoint(x,y);
             if(target->window()){
-                gesturePoints.append(target->window()->mapToGlobal(windowPoint));  
+                gesturePoints.append(target->window()->mapToGlobal(windowPoint));
             }
             else{
-                gesturePoints.append(windowPoint);  
+                gesturePoints.append(windowPoint);
             }
             if(pointData.size() == 3){
                 gestureIntervals.append(pointData.at(2).toInt());
@@ -236,13 +236,13 @@ TasGesture* PinchZoomTasGestureRecognizer::create(TargetData data)
     }
 
     QPoint point = data.targetPoint;
-    if(command.parameter("useCoordinates") == "true"){ 
+    if(command.parameter("useCoordinates") == "true"){
         point = mUtils.getPoint(command);
     }
 
     int distance_1 = command.parameter(DIST_ONE).toInt();
     int distance_2 = command.parameter(DIST_TWO).toInt();
-    int differential = command.parameter(DIFF).toInt();        
+    int differential = command.parameter(DIFF).toInt();
     QLineF line1;
     QLineF line2;
     QPoint start1 = point;
@@ -272,15 +272,15 @@ bool PinchZoomTasGestureRecognizer::validateZoomParams(TasCommand& command)
     bool valid = true;
     if(command.parameter(DIST_ONE).isEmpty() || command.parameter(DIST_TWO).isEmpty()) {
         TasLogger::logger()->error("MultitouchHandler::validateZoomParams invalid pinch command given invalid directions.");
-        valid = false;        
-    }    
+        valid = false;
+    }
     if(command.parameter(TYPE).isEmpty()){
         TasLogger::logger()->error("MultitouchHandler::validateZoomParams no type defined.");
-        valid = false;        
+        valid = false;
     }
     if(command.parameter(DIFF).isEmpty()) {
         TasLogger::logger()->error("MultitouchHandler::validateZoomParams no differential defined.");
-        valid = false;        
+        valid = false;
     }
     return valid;
 }
@@ -302,7 +302,7 @@ TasGesture* RotationTasGestureRecognizer::create(TargetData data)
     }
 
     QPoint point = data.targetPoint;
-    if(command.parameter("useCoordinates") == "true"){ 
+    if(command.parameter("useCoordinates") == "true"){
         point = mUtils.getPoint(command);
         TasLogger::logger()->debug("set point");
     }
@@ -331,15 +331,15 @@ bool RotationTasGestureRecognizer::validateRotationParams(TasCommand& command)
     bool valid = true;
     if(command.parameter(TYPE).isEmpty()){
         TasLogger::logger()->error("MultitouchHandler::validateRotationParams no type defined.");
-        valid = false;        
+        valid = false;
     }
     if(command.parameter(RADIUS).isEmpty()) {
         TasLogger::logger()->error("MultitouchHandler::executeInteraction no radius defined.");
-        valid = false;        
+        valid = false;
     }
     if(command.parameter(ROTATE_DIRECTION).isEmpty()) {
         TasLogger::logger()->error("MultitouchHandler::executeInteraction no rotation direction defined.");
-        valid = false;        
+        valid = false;
     }
     return valid;
 }

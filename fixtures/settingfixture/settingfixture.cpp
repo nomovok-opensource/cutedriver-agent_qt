@@ -1,22 +1,22 @@
-/*************************************************************************** 
-** 
-** Copyright (C) 2010 Nokia Corporation and/or its subsidiary(-ies). 
-** All rights reserved. 
-** Contact: Nokia Corporation (testabilitydriver@nokia.com) 
-** 
+/***************************************************************************
+**
+** Copyright (C) 2010 Nokia Corporation and/or its subsidiary(-ies).
+** All rights reserved.
+** Contact: Nokia Corporation (testabilitydriver@nokia.com)
+**
 ** This file is part of Testability Driver Qt Agent
-** 
-** If you have questions regarding the use of this file, please contact 
-** Nokia at testabilitydriver@nokia.com . 
-** 
-** This library is free software; you can redistribute it and/or 
-** modify it under the terms of the GNU Lesser General Public 
-** License version 2.1 as published by the Free Software Foundation 
-** and appearing in the file LICENSE.LGPL included in the packaging 
-** of this file. 
-** 
-****************************************************************************/ 
- 
+**
+** If you have questions regarding the use of this file, please contact
+** Nokia at testabilitydriver@nokia.com .
+**
+** This library is free software; you can redistribute it and/or
+** modify it under the terms of the GNU Lesser General Public
+** License version 2.1 as published by the Free Software Foundation
+** and appearing in the file LICENSE.LGPL included in the packaging
+** of this file.
+**
+****************************************************************************/
+
 
 #include <QtPlugin>
 #include <QHash>
@@ -40,7 +40,7 @@ const char* const REMOVE_ACTION = "remove";
 /*!
   \class SettingFixture
   \brief Manipulate QSettings
-         
+
   Set, edit and read QSettings values.
 */
 
@@ -67,7 +67,7 @@ bool SettingFixture::execute(void * /*objectInstance*/, QString actionName, QHas
     bool returnValue = true;
     //check the type of settings
     if(parameters.contains(ORGANIZATION)){
-        QString organization = parameters.take(ORGANIZATION);        
+        QString organization = parameters.take(ORGANIZATION);
         QString application;
         if(parameters.contains(APPLICATION)){
             application = parameters.take(APPLICATION);
@@ -75,13 +75,13 @@ bool SettingFixture::execute(void * /*objectInstance*/, QString actionName, QHas
         QSettings settings(getFormat(parameters), getScope(parameters), organization, application);
         stdOut = editSettings(settings, actionName, parameters);
     }
-    else if(parameters.contains(FILE_NAME) && parameters.contains(FORMAT)){        
+    else if(parameters.contains(FILE_NAME) && parameters.contains(FORMAT)){
         QSettings settings(parameters.take(FILE_NAME), getFormat(parameters));
         stdOut = editSettings(settings, actionName, parameters);
     }
     else{
         stdOut = "No organization or file name given for settings.";
-        returnValue = false;            
+        returnValue = false;
     }
 
     return returnValue;
@@ -101,7 +101,7 @@ QString SettingFixture::editSettings(QSettings& settings, const QString& action,
             if(keys.hasNext()){
                 returnValue.append(", ");
             }
-        }            
+        }
     }
     else{
         QHashIterator<QString, QString> i(parameters);
@@ -112,7 +112,7 @@ QString SettingFixture::editSettings(QSettings& settings, const QString& action,
             }
             else if(action == REMOVE_ACTION){
                 settings.remove(i.key());
-            }        
+            }
             else if(action == READ_ACTION){
                 returnValue.append(hashEntity.arg(i.key()).arg(settings.value(i.key()).toString()));
                 if(i.hasNext()){
@@ -131,7 +131,7 @@ QString SettingFixture::editSettings(QSettings& settings, const QString& action,
 QSettings::Scope SettingFixture::getScope(QHash<QString, QString>& parameters)
 {
     QSettings::Scope scope = QSettings::UserScope;
-    if(parameters.contains(SCOPE) && parameters.take(SCOPE) == "system"){        
+    if(parameters.contains(SCOPE) && parameters.take(SCOPE) == "system"){
         scope = QSettings::SystemScope;
     }
     return scope;

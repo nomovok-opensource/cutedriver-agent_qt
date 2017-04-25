@@ -29,16 +29,6 @@ target.path = $$TAS_TARGET_PLUGIN/tasfixtures
 stepsfiles.path = $$TAS_TARGET_STEPS
 stepsfiles.files = qtscriptfixture.default.steps
 
-symbian: {
-        TARGET.EPOCALLOWDLLDATA = 1
-        TARGET.CAPABILITY=CAP_GENERAL_DLL
-        TARGET.UID3 = 0x2003AA00
-
-        qtscript_fixture_plugin.sources = qtscriptfixture.dll
-        qtscript_fixture_plugin.path = /resource/qt/plugins/tasfixtures
-        DEPLOYMENT += qtscript_fixture_plugin
-}
-
 DEPENDPATH += .
 INCLUDEPATH += . ../../tascore/corelib
 

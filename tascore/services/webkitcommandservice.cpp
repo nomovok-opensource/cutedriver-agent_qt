@@ -464,8 +464,7 @@ QList<QWebFrame*> WebkitCommandService::traverseGraphicsItemList(QGraphicsItem* 
 //        TasLogger::logger()->debug(" "+ QString(item->metaObject()->className()) );
         if(graphicsItem == item->parentItem()){
             // TODO This needs to be moved to plugins once OSS changes are done
-            if(getApplicationName() == "webwidgetrunner" || item->isVisible() ||
-               getApplicationName() == "duiappletrunner") {
+            if(getApplicationName() == "webwidgetrunner" || item->isVisible()) {
                list.append(traverseGraphicsItem(item));
             }
         }
@@ -480,8 +479,7 @@ QList<QWebFrame*> WebkitCommandService::traverseGraphicsViewItems(QGraphicsView*
 //        TasLogger::logger()->debug("  "+ QString(item) );
         if(item->parentItem() == 0){
             // TODO This needs to be moved to plugins once OSS changes are done
-            if(getApplicationName() == "webwidgetrunner" || item->isVisible() ||
-               getApplicationName() == "duiappletrunner") {
+            if(getApplicationName() == "webwidgetrunner" || item->isVisible()) {
                 list.append(traverseGraphicsItem(item));
             }
         }

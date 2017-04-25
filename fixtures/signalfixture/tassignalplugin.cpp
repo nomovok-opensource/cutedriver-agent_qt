@@ -20,8 +20,8 @@
 
 /*
 
-	what if scenarios:
-		1) singal enabled to e.g button and button object is deleted, does get_signal work anymore due to tasserver cannot retrieve button object?
+    what if scenarios:
+        1) singal enabled to e.g button and button object is deleted, does get_signal work anymore due to tasserver cannot retrieve button object?
 
 
 */
@@ -88,7 +88,7 @@ bool TasSignalPlugin::execute(void * objectInstance, QString actionName, QHash<Q
     bool result = true;
     // set the stdOut if you wish to pass information back to Testability Driver
     if (actionName == "list_signals") {
-    	result = listSignals( objectInstance, parameters.value(OBJECT_TYPE), stdOut);
+        result = listSignals( objectInstance, parameters.value(OBJECT_TYPE), stdOut);
     }
     else if (actionName == "get_signal") {
         result = printSignals(stdOut);

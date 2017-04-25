@@ -42,12 +42,9 @@ bool RegisterService::executeService(TasCommandModel& model, TasResponse& respon
             ClientDetails client;
             bool ok;
             //this should not really ever fail (app pid used to generate in client side)
-            quint64 clientPid = command->parameter(PLUGIN_ID).toULongLong(&ok); 
+            quint64 clientPid = command->parameter(PLUGIN_ID).toULongLong(&ok);
             client.processId = clientPid;
             client.processName = command->parameter(PLUGIN_NAME);
-#ifdef Q_OS_SYMBIAN
-            client.applicationUid = command->parameter(APP_UID);
-#endif
             client.pluginType = command->parameter(PLUGIN_TYPE);
             client.socket = response.requester();
             registerPlugin(client);
@@ -72,12 +69,7 @@ void RegisterService::registerPlugin(ClientDetails& client)
                               + QString::number(client.processId) + " name: " + client.processName +", type: "+
                               client.pluginType);
 
-#ifdef Q_OS_SYMBIAN
-    TasClientManager::instance()->addRegisteredClient(client.processId, client.processName,
-                                                      client.socket.data(), client.pluginType, client.applicationUid);
-#else
     TasClientManager::instance()->addRegisteredClient(client.processId, client.processName, client.socket, client.pluginType);
-#endif
     TasClientManager::instance()->detachFromStartupData(client.processName);
 }
 
@@ -85,7 +77,7 @@ void RegisterService::unRegisterPlugin(TasCommand& command)
 {
     bool ok;
     //this should not really ever fail (app pid used to generate in client side)
-    quint64 clientPid = command.parameter("processId").toULongLong(&ok); 
+    quint64 clientPid = command.parameter("processId").toULongLong(&ok);
     TasLogger::logger()->info("TasServer::serviceRequest: unregister plugin: " + QString::number(clientPid));
     TasClientManager::instance()->removeClient(clientPid);
 }

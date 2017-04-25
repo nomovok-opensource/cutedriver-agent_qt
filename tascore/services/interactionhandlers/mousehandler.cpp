@@ -212,6 +212,7 @@ QAction* MouseHandler::getAction(QWidget* widget, int id)
     QAction* action = NULL;
     QList<QAction*> actions = widget->actions();
     if(actions.size() > 0){
+        // TODO(rasjani): pointer from it?!
         QAction* target = (QAction*)id;
         for(int i = 0 ; i < actions.size(); i++){
             QAction * ac = actions.at(i);
@@ -319,7 +320,7 @@ void MouseHandler::setPoint(TasCommand& command, TapDetails& details)
 
 
         details.point.setX(x);
-        details.point.setY(y);           
+        details.point.setY(y);
         details.identifier.append(QString::number(details.point.x()) +"_"+ QString::number(details.point.y()));
     }
 }

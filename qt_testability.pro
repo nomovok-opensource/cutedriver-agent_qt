@@ -20,11 +20,6 @@
 
 TEMPLATE = subdirs
 
-#for mac use "qmake -spec macx-g++" to avoid xcode files
-
-!symbian: {
-#    SUBDIRS += 3rdparty
-}
 SUBDIRS += tascore
 
 SUBDIRS += qttasserver
@@ -39,33 +34,9 @@ SUBDIRS += loaders
 
 SUBDIRS += utilityapp
 
-CONFIG(maemo) {
-SUBDIRS  += xsession
-}
-
 CONFIG  += ordered
 
-symbian: {
-        SUBDIRS  += memlogsrv
-
-        !CONFIG(no_mobility)  {
-                CONFIG += mobility
-        }
-
-        SUBDIRS  += symbian
-}
-
-CONFIG(maemo){
-        !CONFIG(no_mobility)  {
-                CONFIG += mobility
-        }
-}
-
-CONFIG(iby_export){
-include(s60/s60.pri)
-}
-
-unix:!symbian {
+unix:!macx {
 #  EXAMPLES = doc/
   EXAMPLES.files = doc/*
   EXAMPLES.path = /usr/share/doc/qttas-dev/
