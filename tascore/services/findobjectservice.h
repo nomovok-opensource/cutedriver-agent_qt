@@ -47,6 +47,7 @@ private:
     QList<QObject*> findMatchingObject(QList<QObject*> objectList, TasTargetObject *targetObj);
     bool isMatch(QObject* candidate, TasTargetObject *targetObj);
     bool propertiesMatch(QHash<QString,QString>, QObject* object);
+    QList<QObject*> findAllObjects(QObject* parent);
 
 private:
     TasUiTraverser* mTraverser;

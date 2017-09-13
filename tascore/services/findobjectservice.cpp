@@ -80,10 +80,15 @@ bool FindObjectService::executeService(TasCommandModel& model, TasResponse& resp
             #ifdef DEBUG_ENABLED
             TasLogger::logger()->debug(QString("! %0 %1").arg(Q_FUNC_INFO).arg("command: " + command->name() + " text: " + command->text()));
             #endif
-            if(!addObjectDetails(application, targetObj, command)){
-                //not found so the we need to traverse the old way
+            if (targetObj->className() == "*") {
                 traverseAll = true;
                 break;
+            } else {
+                if(!addObjectDetails(application, targetObj, command)){
+                    //not found so the we need to traverse the old way
+                    traverseAll = true;
+                    break;
+                }
             }
             mTraverser->finalizeTraverse();
         }
@@ -105,6 +110,7 @@ bool FindObjectService::executeService(TasCommandModel& model, TasResponse& resp
         delete uiModel;
         response.setData(xml);
         #ifdef DEBUG_ENABLED
+        TasLogger::logger()->debug(xml);
         TasLogger::logger()->debug(QString("(%1) << %0 %2").arg(Q_FUNC_INFO).arg(true).arg(xml.length()));
         #endif
         return true;
@@ -207,7 +213,7 @@ bool FindObjectService::addObjectDetails(TasObject& parent, TasTargetObject *tar
                 objects.append(parentObject);
             }
 
-            if (objects.isEmpty()) {
+            if (objects.isEmpty() && targetObj->className().compare("*")!=0) {
                 #ifdef DEBUG_ENABLED
                 TasLogger::logger()->debug(QString("! %0 parentObject: objects still empty: %1").arg(Q_FUNC_INFO).arg("objectName:" + targetObj->objectName() + " classname:" + targetObj->className() + " id:" + targetObj->objectId()));
                 #endif
@@ -226,7 +232,6 @@ bool FindObjectService::addObjectDetails(TasObject& parent, TasTargetObject *tar
                         TasLogger::logger()->debug(QString("! %0 parentObject: objects still empty (searchForObject): %1").arg(Q_FUNC_INFO).arg("objectName:" + targetObj->objectName() + " classname:" + targetObj->className() + " id:" + targetObj->objectId()));
                         #endif
                     }
-
                 }
             }
         }
@@ -286,12 +291,61 @@ bool FindObjectService::addObjectDetails(TasObject& parent, TasTargetObject *tar
     }
 }
 
+QList<QObject*> FindObjectService::findAllObjects(QObject* parent) {
+#ifdef DEBUG_ENABLED
+    TasLogger::logger()->debug(QString("! %0 parent: %1").arg(Q_FUNC_INFO).arg("objectName:" + parent->objectName() + " classname:" + parent->metaObject()->className()));
+#endif
+    QList<QObject*> retval;
+
+    QWindow* window = qobject_cast<QWindow*>(parent);
+    if (window) {
+        foreach (QObject* child, window->children()) {
+            retval.append(child);
+            retval.append(findAllObjects(child));
+        }
+        return retval;
+    }
+
+    QQuickWindow* quickWindow = qobject_cast<QQuickWindow*>(parent);
+    if (quickWindow) {
+        foreach (QObject* child, quickWindow->children()) {
+            retval.append(child);
+            retval.append(findAllObjects(child));
+        }
+        return retval;
+    }
+
+    QQuickItem* item = qobject_cast<QQuickItem*>(parent);
+    if (item) {
+        foreach (QQuickItem* child, item->childItems()) {
+            retval.append(child);
+            retval.append(findAllObjects(child));
+        }
+        return retval;
+    }
+
+    foreach (QObject* child, parent->children()) {
+        retval.append(child);
+        retval.append(findAllObjects(child));
+    }
+
+
+    return retval;
+}
+
 QList<QObject*> FindObjectService::searchForObject(TasTargetObject *targetObj)
 {
+#ifdef DEBUG_ENABLED
+    TasLogger::logger()->debug(QString("! %0 objects empty: %1").arg(Q_FUNC_INFO).arg("objectName:" + targetObj->objectName() + " classname:" + targetObj->className() + " id:" + targetObj->objectId()));
+#endif
     QList<QObject*> targetObjects;
     QString objectName = targetObj->objectName();
 
     foreach (QWindow *w, QApplication::allWindows()) {
+        if (targetObj->className() == "*") {
+            targetObjects.append(findAllObjects(w));
+            break;
+        }
         if (isMatch(w, targetObj)) {
             targetObjects.append(w);
             break;
