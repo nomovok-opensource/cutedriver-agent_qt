@@ -1,22 +1,22 @@
-/*************************************************************************** 
-** 
-** Copyright (C) 2010 Nokia Corporation and/or its subsidiary(-ies). 
-** All rights reserved. 
-** Contact: Nokia Corporation (testabilitydriver@nokia.com) 
-** 
+/***************************************************************************
+**
+** Copyright (C) 2010 Nokia Corporation and/or its subsidiary(-ies).
+** All rights reserved.
+** Contact: Nokia Corporation (testabilitydriver@nokia.com)
+**
 ** This file is part of Testability Driver Qt Agent
-** 
-** If you have questions regarding the use of this file, please contact 
-** Nokia at testabilitydriver@nokia.com . 
-** 
-** This library is free software; you can redistribute it and/or 
-** modify it under the terms of the GNU Lesser General Public 
-** License version 2.1 as published by the Free Software Foundation 
-** and appearing in the file LICENSE.LGPL included in the packaging 
-** of this file. 
-** 
-****************************************************************************/ 
- 
+**
+** If you have questions regarding the use of this file, please contact
+** Nokia at testabilitydriver@nokia.com .
+**
+** This library is free software; you can redistribute it and/or
+** modify it under the terms of the GNU Lesser General Public
+** License version 2.1 as published by the Free Software Foundation
+** and appearing in the file LICENSE.LGPL included in the packaging
+** of this file.
+**
+****************************************************************************/
+
 
 #include <QApplication>
 #include <QtPlugin>
@@ -40,7 +40,7 @@ static const QString INTERVAL = "interval";
 /*!
   \class PopupFixture
   \brief Listens to events to detect a popup
-        
+
 */
 
 /*!
@@ -70,7 +70,7 @@ bool PopupFixture::execute(void * objectInstance, QString actionName, QHash<QStr
     Q_UNUSED(objectInstance);
     TasLogger::logger()->debug("PopupFixture::execute");
     bool result = true;
-  
+
     if(actionName == "waitPopup"){
         QString className = parameters[CLASS_NAME].trimmed();
         int interval = parameters[INTERVAL].toInt();
@@ -86,7 +86,7 @@ bool PopupFixture::execute(void * objectInstance, QString actionName, QHash<QStr
             mPopupData.remove(className);
 
             QByteArray xml;
-            model->serializeModel(xml);    
+            model->serializeModel(xml);
             stdOut.append(QString::fromUtf8(xml.data()));
             delete model;
 
@@ -130,7 +130,7 @@ bool PopupFixture::eventFilter(QObject *target, QEvent *event)
         QHashIterator<QString, int> i(mClassNames);
         while (i.hasNext()) {
             i.next();
-            QString className = i.key();            
+            QString className = i.key();
             if(target->inherits(className.toLatin1()) || QString(target->metaObject()->className()).contains(className)){
                 PopupTimer* timer = new PopupTimer(className, mClassNames.value(className));
                 connect(timer, SIGNAL(traverseState(const QString&)), this, SLOT(traverse(const QString&)));
@@ -151,7 +151,7 @@ void PopupFixture::traverse(const QString& className)
         mPopupData.insert(className, model);
     }
 }
-    
+
 PopupTimer::PopupTimer(const QString className, int interval)
 {
     mClassName = className;

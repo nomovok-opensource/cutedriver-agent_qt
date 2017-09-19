@@ -1,5 +1,5 @@
 pkill qttasserver
-qmake CONFIG+=no_mobility
+qmake
 make
 sudo make install
 qttasserver &

@@ -1,20 +1,20 @@
 ############################################################################
-## 
-## Copyright (C) 2010 Nokia Corporation and/or its subsidiary(-ies). 
-## All rights reserved. 
-## Contact: Nokia Corporation (testabilitydriver@nokia.com) 
-## 
+##
+## Copyright (C) 2010 Nokia Corporation and/or its subsidiary(-ies).
+## All rights reserved.
+## Contact: Nokia Corporation (testabilitydriver@nokia.com)
+##
 ## This file is part of Testability Driver Qt Agent
-## 
-## If you have questions regarding the use of this file, please contact 
-## Nokia at testabilitydriver@nokia.com . 
-## 
-## This library is free software; you can redistribute it and/or 
-## modify it under the terms of the GNU Lesser General Public 
-## License version 2.1 as published by the Free Software Foundation 
-## and appearing in the file LICENSE.LGPL included in the packaging 
-## of this file. 
-## 
+##
+## If you have questions regarding the use of this file, please contact
+## Nokia at testabilitydriver@nokia.com .
+##
+## This library is free software; you can redistribute it and/or
+## modify it under the terms of the GNU Lesser General Public
+## License version 2.1 as published by the Free Software Foundation
+## and appearing in the file LICENSE.LGPL included in the packaging
+## of this file.
+##
 ############################################################################
 
 
@@ -33,24 +33,6 @@ DESTDIR = bin
 DEFINES += TDTASSERVER
 
 target.path = $$TAS_TARGET_BIN
-
-symbian: {
-    TARGET.UID3 = 0x2003A9E3
-    TARGET.CAPABILITY=ALL -TCB
-	TARGET.VID = VID_DEFAULT
-  	TARGET.EPOCALLOWDLLDATA = 1 
-	TARGET.EPOCHEAPSIZE = 0x20000 0x1400000
-    LIBS += -lhal
-    LIBS += -leikcore 
-    LIBS += -lws32
-    LIBS += -lcone
-    INCLUDEPATH += /epoc32/include/platform/memspy/driver
-#if ( NCP_COMMON_S60_VERSION_SUPPORT >= S60_VERSION_50 && NCP_COMMON_FAMILY_ID >= 70 )
-	LIBS += -llibEGL
-#endif
-}
-
-
 
 INCLUDEPATH += . src
 INCLUDEPATH += ../tascore/corelib
@@ -72,8 +54,8 @@ HEADERS += $$PUBLIC_HEADERS
 QT += network xml widgets
 INSTALLS += target
 
-unix:!symbian:!macx:!CONFIG(no_x):!wayland {
-  LIBS += -lX11 -lXtst 
+unix:!macx:!CONFIG(no_x):!wayland {
+  LIBS += -lX11 -lXtst
 }
 
 

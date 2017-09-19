@@ -1,22 +1,22 @@
-/*************************************************************************** 
-** 
-** Copyright (C) 2010 Nokia Corporation and/or its subsidiary(-ies). 
-** All rights reserved. 
-** Contact: Nokia Corporation (testabilitydriver@nokia.com) 
-** 
+/***************************************************************************
+**
+** Copyright (C) 2010 Nokia Corporation and/or its subsidiary(-ies).
+** All rights reserved.
+** Contact: Nokia Corporation (testabilitydriver@nokia.com)
+**
 ** This file is part of Testability Driver Qt Agent
-** 
-** If you have questions regarding the use of this file, please contact 
-** Nokia at testabilitydriver@nokia.com . 
-** 
-** This library is free software; you can redistribute it and/or 
-** modify it under the terms of the GNU Lesser General Public 
-** License version 2.1 as published by the Free Software Foundation 
-** and appearing in the file LICENSE.LGPL included in the packaging 
-** of this file. 
-** 
-****************************************************************************/ 
- 
+**
+** If you have questions regarding the use of this file, please contact
+** Nokia at testabilitydriver@nokia.com .
+**
+** This library is free software; you can redistribute it and/or
+** modify it under the terms of the GNU Lesser General Public
+** License version 2.1 as published by the Free Software Foundation
+** and appearing in the file LICENSE.LGPL included in the packaging
+** of this file.
+**
+****************************************************************************/
+
 
 #include <QProcess>
 #include <tasqtdatamodel.h>
@@ -36,7 +36,7 @@ ListAppsService::~ListAppsService()
 {}
 
 bool ListAppsService::executeService(TasCommandModel& model, TasResponse& response)
-{    
+{
     bool consumed = false;
     if(model.service() == serviceName()){
         TasCommand* command = getCommandParameters(model, "listApps");
@@ -88,15 +88,15 @@ void ListAppsService::listApplications(TasCommand& command, TasResponse& respons
     int minutes = started.secsTo(current)/60;
     if(minutes > 0){ started = started.addSecs(minutes*60); }
     QString upTime = QString("Running: %1 days %2 hours %3 minutes %4 secs").arg(days).arg(hours).arg(minutes).arg(started.secsTo(current));
-    
+
     TasObject& starTime = container.addNewObject("2", "startTime", "QDateTime");
     starTime.addAttribute("startTime", QDateTime::fromMSecsSinceEpoch(mStartTime).toString("dd.MM.yyyy hh:mm:ss"));
     starTime.addAttribute("upTime", upTime);
-    
+
 
 
     QByteArray xml;
-    model->serializeModel(xml);    
+    model->serializeModel(xml);
     delete model;
     response.setData(xml);
 }
@@ -108,7 +108,7 @@ void ListAppsService::listRunningProcesses(TasResponse& response)
     TasObject& apps = container.addNewObject(0, "processList", "processList");
     TasNativeUtils::runningProcesses(apps);
     QByteArray xml;
-    model->serializeModel(xml);    
+    model->serializeModel(xml);
     delete model;
     response.setData(xml);
 }

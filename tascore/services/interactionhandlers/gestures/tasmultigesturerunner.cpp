@@ -1,30 +1,30 @@
-/*************************************************************************** 
-** 
-** Copyright (C) 2010 Nokia Corporation and/or its subsidiary(-ies). 
-** All rights reserved. 
-** Contact: Nokia Corporation (testabilitydriver@nokia.com) 
-** 
+/***************************************************************************
+**
+** Copyright (C) 2010 Nokia Corporation and/or its subsidiary(-ies).
+** All rights reserved.
+** Contact: Nokia Corporation (testabilitydriver@nokia.com)
+**
 ** This file is part of Testability Driver Qt Agent
-** 
-** If you have questions regarding the use of this file, please contact 
-** Nokia at testabilitydriver@nokia.com . 
-** 
-** This library is free software; you can redistribute it and/or 
-** modify it under the terms of the GNU Lesser General Public 
-** License version 2.1 as published by the Free Software Foundation 
-** and appearing in the file LICENSE.LGPL included in the packaging 
-** of this file. 
-** 
-****************************************************************************/ 
+**
+** If you have questions regarding the use of this file, please contact
+** Nokia at testabilitydriver@nokia.com .
+**
+** This library is free software; you can redistribute it and/or
+** modify it under the terms of the GNU Lesser General Public
+** License version 2.1 as published by the Free Software Foundation
+** and appearing in the file LICENSE.LGPL included in the packaging
+** of this file.
+**
+****************************************************************************/
 
 #include <QApplication>
 #include "taslogger.h"
-#include "tasmultigesturerunner.h" 
+#include "tasmultigesturerunner.h"
 
 
 TasMultiGestureRunner::TasMultiGestureRunner(QList<TasGesture*> gestures, QObject* parent)
   :QObject(parent), mUseTapScreen(false)
-{    
+{
     connect(&mTimeLine, SIGNAL(valueChanged(qreal)), this, SLOT(gestureTimerEvent(qreal)));
     connect(&mTimeLine, SIGNAL(finished()), this, SLOT(finished()));
     //calculate duration multipliers
@@ -46,7 +46,7 @@ TasMultiGestureRunner::TasMultiGestureRunner(QList<TasGesture*> gestures, QObjec
     }
 
     mTimeLine.setDuration(maxDuration);
-    mTimeLine.setFrameRange(0, maxDuration/FRAME_RANGE_DIV);    
+    mTimeLine.setFrameRange(0, maxDuration/FRAME_RANGE_DIV);
 
     startGesture();
 }
@@ -107,7 +107,7 @@ void TasMultiGestureRunner::gestureTimerEvent(qreal value)
                 states |= Qt::TouchPointReleased;
                 touchPoints.append(mTouchGen.convertToTouchPoints(TasEventTarget(gesture->getTarget(), gesture->getTargetWindow()), Qt::TouchPointReleased,
                                                                   gesture->endPoints(), gesture->touchPointIdKey()));
-            }            
+            }
         }
         else if(!mTouchGen.areIdentical(gesture->pointsAt(correctedValue), mPreviousPoints.value(gesture))){
             touchPoints.append(mTouchGen.convertToTouchPoints(TasEventTarget(gesture->getTarget(), gesture->getTargetWindow()), Qt::TouchPointMoved,
@@ -137,11 +137,11 @@ void TasMultiGestureRunner::gestureTimerEvent(qreal value)
         }
     }
 
-    //remove ended gestures 
+    //remove ended gestures
     foreach(TasGesture* gesture, finished){
         mGestures.remove(gesture);
         mPreviousPoints.remove(gesture);
-    }    
+    }
     qDeleteAll(finished);
 }
 

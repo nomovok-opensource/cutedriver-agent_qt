@@ -1,22 +1,22 @@
-/*************************************************************************** 
-** 
-** Copyright (C) 2010 Nokia Corporation and/or its subsidiary(-ies). 
-** All rights reserved. 
-** Contact: Nokia Corporation (testabilitydriver@nokia.com) 
-** 
+/***************************************************************************
+**
+** Copyright (C) 2010 Nokia Corporation and/or its subsidiary(-ies).
+** All rights reserved.
+** Contact: Nokia Corporation (testabilitydriver@nokia.com)
+**
 ** This file is part of Testability Driver Qt Agent
-** 
-** If you have questions regarding the use of this file, please contact 
-** Nokia at testabilitydriver@nokia.com . 
-** 
-** This library is free software; you can redistribute it and/or 
-** modify it under the terms of the GNU Lesser General Public 
-** License version 2.1 as published by the Free Software Foundation 
-** and appearing in the file LICENSE.LGPL included in the packaging 
-** of this file. 
-** 
-****************************************************************************/ 
- 
+**
+** If you have questions regarding the use of this file, please contact
+** Nokia at testabilitydriver@nokia.com .
+**
+** This library is free software; you can redistribute it and/or
+** modify it under the terms of the GNU Lesser General Public
+** License version 2.1 as published by the Free Software Foundation
+** and appearing in the file LICENSE.LGPL included in the packaging
+** of this file.
+**
+****************************************************************************/
+
 
 #include <QtGlobal>
 #include <QApplication>
@@ -39,11 +39,6 @@
 #include "taslogger.h"
 
 
-#if defined(TAS_MAEMO) && defined(HAVE_QAPP)
-#include <MApplication>
-#include <MLocale>
-#endif
-
 TasUiTraverser::TasUiTraverser(QHash<QString, TasTraverseInterface*> traversers)
 {
     mTraversers = traversers;
@@ -52,7 +47,7 @@ TasUiTraverser::TasUiTraverser(QHash<QString, TasTraverseInterface*> traversers)
 }
 
 TasUiTraverser::~TasUiTraverser()
-{  
+{
     mTraversers.clear();
     mPluginBlackList.clear();
     mPluginWhiteList.clear();
@@ -65,7 +60,7 @@ void TasUiTraverser::setFilterLists(TasCommand* command)
     mPluginWhiteList.clear();
 
     if(!command) return;
-    
+
     if(!command->apiParameter("pluginBlackList").isEmpty()){
         mPluginBlackList = command->apiParameter("pluginBlackList").split(",");
     }
@@ -86,7 +81,7 @@ bool TasUiTraverser::filterPlugin(const QString& pluginName)
     //black list is valued higher than white list
     else if(mPluginWhiteList.contains(pluginName) && !mPluginBlackList.contains(pluginName)){
         filter = false;
-    }    
+    }
     else if(mPluginWhiteList.isEmpty() && !mPluginBlackList.contains(pluginName)){
         filter = false;
     }
@@ -119,8 +114,8 @@ TasObject& TasUiTraverser::addModelRoot(TasDataModel& model, TasCommand* command
 {
     TasObjectContainer& container = model.addNewObjectContainer("qt", "sut");
     container.setId(qVersion());
-    QString appName = getApplicationName();   
-    TasObject& application = container.addNewObject(QString::number(qApp->applicationPid()), appName, "application");          
+    QString appName = getApplicationName();
+    TasObject& application = container.addNewObject(QString::number(qApp->applicationPid()), appName, "application");
     if(appName == PENINPUT_SERVER){
         application.setType(VKB_IDENTIFIER);
     }
@@ -147,7 +142,7 @@ TasDataModel* TasUiTraverser::getUiState(TasCommand* command)
                 if(!widget->parent() || widget->parent() == qApp){
                     traverseObject(application.addObject(), widget, command);
                 }
-            }            
+            }
         }
     }
 
@@ -160,7 +155,7 @@ TasDataModel* TasUiTraverser::getUiState(TasCommand* command)
 
     return model;
 }
-    
+
 
 void TasUiTraverser::traverseObject(TasObject& objectInfo, QObject* object, TasCommand* command, bool traverseChildren)
 {
@@ -282,8 +277,8 @@ void TasUiTraverser::traverseGraphicsItem(TasObject& objectInfo, QGraphicsItem* 
         // Traverse the actual widget under the proxy, if available
         QGraphicsProxyWidget* proxy = qobject_cast<QGraphicsProxyWidget*>(object);
         if (proxy) {
-            traverseObject(objectInfo.addObject(), proxy->widget(), command, traverseChildren);        
-        }      
+            traverseObject(objectInfo.addObject(), proxy->widget(), command, traverseChildren);
+        }
     }
     else{
         objectInfo.setType("QGraphicsItem");
@@ -297,7 +292,7 @@ void TasUiTraverser::traverseGraphicsItem(TasObject& objectInfo, QGraphicsItem* 
         if(traverseChildren){
             traverseGraphicsItemList(objectInfo, graphicsItem, command);
         }
-    }    
+    }
 }
 
 void TasUiTraverser::traverseGraphicsItemList(TasObject& parent, QGraphicsItem* graphicsItem, TasCommand* command)
@@ -305,23 +300,23 @@ void TasUiTraverser::traverseGraphicsItemList(TasObject& parent, QGraphicsItem* 
     foreach (QGraphicsItem* item, graphicsItem->childItems()){
         if(graphicsItem == item->parentItem()){
             // TODO This needs to be moved to plugins once OSS changes are done
-            if(TestabilityUtils::isCustomTraverse()|| item->isVisible() ) {                
+            if(TestabilityUtils::isCustomTraverse()|| item->isVisible() ) {
                 traverseGraphicsItem(parent.addObject(), item, command);
             }
         }
-    }        
+    }
 }
 
 void TasUiTraverser::traverseGraphicsViewItems(TasObject& parent, QGraphicsView* view, TasCommand* command)
-{ 
+{
     foreach(QGraphicsItem* item, view->items()){
         if(item->parentItem() == 0){
             // TODO This needs to be moved to plugins once OSS changes are done
-            if(TestabilityUtils::isCustomTraverse() || item->isVisible()) {                
+            if(TestabilityUtils::isCustomTraverse() || item->isVisible()) {
                 traverseGraphicsItem(parent.addObject(), item, command);
             }
         }
-    }        
+    }
 }
 
 
@@ -333,25 +328,10 @@ void TasUiTraverser::addApplicationDetails(TasObject& application, TasCommand* c
     //set these again cause properties overwrite them
     application.setName(getApplicationName());
     application.setId(QString::number(qApp->applicationPid()));
-#ifdef Q_OS_SYMBIAN
-    quintptr uid = CEikonEnv::Static()->EikAppUi()->Application()->AppDllUid().iUid;
-    application.addAttribute("applicationUid", QString::number(uid));    
-    
-    CWsScreenDevice* sws = new ( ELeave ) CWsScreenDevice( CEikonEnv::Static()->WsSession() );
-    CleanupStack::PushL( sws );
-    if( sws->Construct() == KErrNone) 
-    {
-        TPixelsAndRotation sizeAndRotation;    
-        sws->GetDefaultScreenSizeAndRotation( sizeAndRotation );
-        qApp->setProperty(APP_ROTATION, QVariant(sizeAndRotation.iRotation));   
-        application.addAttribute(APP_ROTATION, sizeAndRotation.iRotation);
-    }
-    CleanupStack::PopAndDestroy( sws );
-#endif    
 
     application.addAttribute("arguments", qApp->arguments().join(" ").toLatin1().data());
-    application.addAttribute("exepath", qApp->applicationFilePath().toLatin1().data());    
-    application.addAttribute("FullName", qApp->applicationFilePath().toLatin1().data());    
+    application.addAttribute("exepath", qApp->applicationFilePath().toLatin1().data());
+    application.addAttribute("FullName", qApp->applicationFilePath().toLatin1().data());
     application.addAttribute("dirpath", qApp->applicationDirPath().toLatin1().data());
     application.addAttribute("processId", QString::number(qApp->applicationPid()).toLatin1().data());
     application.addAttribute("version", qApp->applicationVersion().toLatin1().data());
@@ -363,36 +343,20 @@ void TasUiTraverser::addApplicationDetails(TasObject& application, TasCommand* c
     if(mem != -1){
         application.addAttribute("memUsage", mem);
     }
-#if defined(TAS_MAEMO) && defined(HAVE_QAPP)
-    MApplication* app = MApplication::instance();
-    if (app){
-        MLocale defaultMLocale;
-        application.addAttribute("localeName", defaultMLocale.name());
-        application.addAttribute("localeCountry", defaultMLocale.country());
-        application.addAttribute("localeLanguage", defaultMLocale.language());
-    }
-    else{
-        QLocale defaultLocale;
-        application.addAttribute("localeName", defaultLocale.name());
-        application.addAttribute("localeCountry", defaultLocale.countryToString(defaultLocale.country()));
-        application.addAttribute("localeLanguage", defaultLocale.languageToString(defaultLocale.language()));
-    }
-#else
     QLocale defaultLocale;
     application.addAttribute("localeName", defaultLocale.name());
     application.addAttribute("localeCountry", defaultLocale.countryToString(defaultLocale.country()));
     application.addAttribute("localeLanguage", defaultLocale.languageToString(defaultLocale.language()));
-#endif
 }
 
 
 /*!
-  
-  Prints all of the actions that a widget has under the widget. 
-  Makes it possible to easily map the correct action to the 
+
+  Prints all of the actions that a widget has under the widget.
+  Makes it possible to easily map the correct action to the
   correct widget and also command the correct widget.
-  Returns true if an action was added.  
-  
+  Returns true if an action was added.
+
  */
 
 void TasUiTraverser::printActions(TasObject& objectInfo, QObject* object)
@@ -410,12 +374,12 @@ void TasUiTraverser::printActions(TasObject& objectInfo, QObject* object)
 }
 
 void TasUiTraverser::addActions(TasObject& parentObject, QList<QAction*> actions)
-{ 
-    if(actions.size() > 0){                   
+{
+    if(actions.size() > 0){
         for(int i = 0 ; i < actions.size(); i++){
-            QObject* action = actions.at(i);              
+            QObject* action = actions.at(i);
             traverseObject(parentObject.addObject(), action, 0);
         }
-    }     
+    }
 }
 

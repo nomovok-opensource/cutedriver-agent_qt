@@ -1,21 +1,21 @@
-/*************************************************************************** 
-** 
-** Copyright (C) 2010 Nokia Corporation and/or its subsidiary(-ies). 
-** All rights reserved. 
-** Contact: Nokia Corporation (testabilitydriver@nokia.com) 
-** 
+/***************************************************************************
+**
+** Copyright (C) 2010 Nokia Corporation and/or its subsidiary(-ies).
+** All rights reserved.
+** Contact: Nokia Corporation (testabilitydriver@nokia.com)
+**
 ** This file is part of Testability Driver Qt Agent
-** 
-** If you have questions regarding the use of this file, please contact 
-** Nokia at testabilitydriver@nokia.com . 
-** 
-** This library is free software; you can redistribute it and/or 
-** modify it under the terms of the GNU Lesser General Public 
-** License version 2.1 as published by the Free Software Foundation 
-** and appearing in the file LICENSE.LGPL included in the packaging 
-** of this file. 
-** 
-****************************************************************************/ 
+**
+** If you have questions regarding the use of this file, please contact
+** Nokia at testabilitydriver@nokia.com .
+**
+** This library is free software; you can redistribute it and/or
+** modify it under the terms of the GNU Lesser General Public
+** License version 2.1 as published by the Free Software Foundation
+** and appearing in the file LICENSE.LGPL included in the packaging
+** of this file.
+**
+****************************************************************************/
 
 #include "tasgesturefactory.h"
 
@@ -23,7 +23,7 @@
     \class TasGestureRecognizer
 
     \brief Creates a TasGesture from the given data.
-    
+
     TasGestures are created from the data passed from the testabilitydriver host.
     Recornizers are used to identify and create the correct gestures from the data.
 */
@@ -37,7 +37,7 @@
     \class TasGestureFactory
 
     \brief Finds the correct tasgesturerecognizer and uses it to create a TasGesture
-    
+
     TasGestures are created from the data passed from the testabilitydriver host.
     The factory stores all of the TasGestureRecognizers which create the actual
     TasGesture.

@@ -63,7 +63,7 @@ public:
 
   TasClient* addClient(quint64 processId, const QString& processName=QString());
   TasClient* addRegisteredClient(quint64 processId, const QString& processName, TasSocket* socket,
-                                 const QString& type=TAS_PLUGIN, QString applicationUid=QString());
+                                 const QString& type=TAS_PLUGIN);
 
   void addStartedApp(const QString& processName, qint64 epochString);
 
@@ -79,9 +79,6 @@ public:
   TasClient* findClient(TasCommandModel& request);
   TasClient* findByProcessId(quint64 processId);
   TasClient* findByApplicationName(const QString& applicationName);
-#ifdef Q_OS_SYMBIAN
-  TasClient* findByApplicationUid(const QString applicationUid);
-#endif
   TasClient* logMemClient();
   void removeMe(const TasClient& client);
 
@@ -90,7 +87,7 @@ public:
 
 private:
   TasClient* latestClient();
-  TasClient* removeByProcessId(quint64 processId);  
+  TasClient* removeByProcessId(quint64 processId);
 
   bool verifyClient(TasClient* client);
 
@@ -143,7 +140,7 @@ private slots:
 
 private:
   TasSocket* mSocket;
-  QString mApplicationName;  
+  QString mApplicationName;
   friend class TasClientManager;
   qint64 mCreationTime;
   QString mApplicationUid;

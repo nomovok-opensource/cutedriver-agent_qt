@@ -1,22 +1,22 @@
-/*************************************************************************** 
-** 
-** Copyright (C) 2010 Nokia Corporation and/or its subsidiary(-ies). 
-** All rights reserved. 
-** Contact: Nokia Corporation (testabilitydriver@nokia.com) 
-** 
+/***************************************************************************
+**
+** Copyright (C) 2010 Nokia Corporation and/or its subsidiary(-ies).
+** All rights reserved.
+** Contact: Nokia Corporation (testabilitydriver@nokia.com)
+**
 ** This file is part of Testability Driver Qt Agent
-** 
-** If you have questions regarding the use of this file, please contact 
-** Nokia at testabilitydriver@nokia.com . 
-** 
-** This library is free software; you can redistribute it and/or 
-** modify it under the terms of the GNU Lesser General Public 
-** License version 2.1 as published by the Free Software Foundation 
-** and appearing in the file LICENSE.LGPL included in the packaging 
-** of this file. 
-** 
-****************************************************************************/ 
- 
+**
+** If you have questions regarding the use of this file, please contact
+** Nokia at testabilitydriver@nokia.com .
+**
+** This library is free software; you can redistribute it and/or
+** modify it under the terms of the GNU Lesser General Public
+** License version 2.1 as published by the Free Software Foundation
+** and appearing in the file LICENSE.LGPL included in the packaging
+** of this file.
+**
+****************************************************************************/
+
 
 
 #include <QApplication>
@@ -44,18 +44,8 @@ ServerWindow::ServerWindow(QWidget* parent)
     startButton = new QPushButton("Start");
     resetButton =  new QPushButton ("Reset server");
     loadPluginsButton = new QPushButton("Load Plugins");
-#ifdef Q_OS_SYMBIAN
-    pluginButton = new QPushButton ("Enable tas");    
-    autoStart = new QCheckBox("Autostart"); 
-    autoStart->setTristate(false);
-    if(monitor->autostartState()){
-        autoStart->setCheckState(Qt::Checked);
-    }
-    connect(autoStart, SIGNAL(toggled(bool)), monitor, SLOT(setAutoStart(bool)));
-#endif
-
     QLabel* stateLabel = new QLabel("Server state:");
-    QLabel* versionLabel = new QLabel("Server version:");   
+    QLabel* versionLabel = new QLabel("Server version:");
     QLabel* stateValue = new QLabel("Unknown");
     QLabel* versionValue = new QLabel(TAS_VERSION);
 
@@ -89,15 +79,10 @@ ServerWindow::ServerWindow(QWidget* parent)
     connect(localBindRadioButton, SIGNAL(clicked()), monitor, SLOT(setLocalBinding()));
 
 
-#ifdef Q_OS_SYMBIAN
-    connect(pluginButton, SIGNAL(clicked()), editField, SLOT(clear()));
-    connect(pluginButton, SIGNAL(clicked()), monitor, SLOT(enablePluginLoad()));
-#endif
-
-    connect(statusButton, SIGNAL(clicked()), monitor, SLOT(serverState()));    
+    connect(statusButton, SIGNAL(clicked()), monitor, SLOT(serverState()));
     connect(stopButton, SIGNAL(clicked()), monitor, SLOT(stopServer()));
     connect(startButton, SIGNAL(clicked()), monitor, SLOT(startServer()));
-    connect(resetButton, SIGNAL(clicked()), monitor, SLOT(restartServer()));    
+    connect(resetButton, SIGNAL(clicked()), monitor, SLOT(restartServer()));
     connect(loadPluginsButton, SIGNAL(clicked()),monitor, SLOT(loadPlugins()));
 
     QPushButton* quitButton = new QPushButton("Quit");
@@ -115,28 +100,19 @@ ServerWindow::ServerWindow(QWidget* parent)
     mainLayout->addWidget(localBindRadioButton, 3, 1);
 
     mainLayout->addWidget(editField, 4,0, 1, 2);
-#ifdef Q_OS_SYMBIAN
-    mainLayout->addWidget(statusButton, 5, 0);
-    mainLayout->addWidget(pluginButton, 5, 1);
-#else
     mainLayout->addWidget(statusButton, 5, 0);
     mainLayout->addWidget(loadPluginsButton, 5, 1);
-#endif
     mainLayout->addWidget(stopButton, 6, 0);
     mainLayout->addWidget(startButton, 6, 1);
     mainLayout->addWidget(resetButton, 7, 0);
     mainLayout->addWidget(quitButton, 7, 1);
-#ifdef Q_OS_SYMBIAN
-    mainLayout->addWidget(autoStart, 8, 0);
-    mainLayout->addWidget(loadPluginsButton, 8, 1);
-#endif
-    setLayout(mainLayout);     
+    setLayout(mainLayout);
 
-//    QRect rect = qApp->desktop()->screenGeometry();    
+//    QRect rect = qApp->desktop()->screenGeometry();
 //    if(rect.width() > 864)
 //        setFixedSize(350,600);
 //    else{
-//        showFullScreen();    
+//        showFullScreen();
 //    }
 
 }

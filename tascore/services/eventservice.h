@@ -1,22 +1,22 @@
-/*************************************************************************** 
- ** 
- ** Copyright (C) 2010 Nokia Corporation and/or its subsidiary(-ies). 
- ** All rights reserved. 
- ** Contact: Nokia Corporation (testabilitydriver@nokia.com) 
- ** 
+/***************************************************************************
+ **
+ ** Copyright (C) 2010 Nokia Corporation and/or its subsidiary(-ies).
+ ** All rights reserved.
+ ** Contact: Nokia Corporation (testabilitydriver@nokia.com)
+ **
  ** This file is part of Testability Driver Qt Agent
- ** 
- ** If you have questions regarding the use of this file, please contact 
- ** Nokia at testabilitydriver@nokia.com . 
- ** 
- ** This library is free software; you can redistribute it and/or 
- ** modify it under the terms of the GNU Lesser General Public 
- ** License version 2.1 as published by the Free Software Foundation 
- ** and appearing in the file LICENSE.LGPL included in the packaging 
- ** of this file. 
- ** 
- ****************************************************************************/ 
- 
+ **
+ ** If you have questions regarding the use of this file, please contact
+ ** Nokia at testabilitydriver@nokia.com .
+ **
+ ** This library is free software; you can redistribute it and/or
+ ** modify it under the terms of the GNU Lesser General Public
+ ** License version 2.1 as published by the Free Software Foundation
+ ** and appearing in the file LICENSE.LGPL included in the packaging
+ ** of this file.
+ **
+ ****************************************************************************/
+
 
 
 #ifndef EVENTSERVICE_H
@@ -32,7 +32,7 @@
 
 class TasEventFilter;
 
-class EventService : public TasServiceBase 
+class EventService : public TasServiceBase
 {
 public:
     EventService();
@@ -47,7 +47,7 @@ public:
     void enableEvents(QString targetId, QObject* target, QStringList eventsToListen);
     void addProcessStartEvent(QDateTime startTime);
 
-private:	
+private:
     void performEventCommands(TasCommandModel& model, TasResponse& response);
     TasEventFilter* getFilterForTarget(TasTarget* commandTarget, bool create=false);
 
@@ -63,7 +63,7 @@ public:
 
     void startFiltering(QStringList eventsToListen);
     void setTrackId(const QString& id);
-    bool eventFilter(QObject *target, QEvent *event);        
+    bool eventFilter(QObject *target, QEvent *event);
     QByteArray getEvents();
 
     void addStartTime(QDateTime startTime);
@@ -72,12 +72,12 @@ private:
     void addMouseEventDetails(QEvent *event, TasObject& eventObject);
     void addTouchEventDetails(QEvent *event, TasObject& eventObject);
 
-private:	
+private:
     QString trackId;
     bool found;
     QObject* mTarget;
     TasDataModel* mTasModel;
-    TasObject* mTasEvents; 
+    TasObject* mTasEvents;
     QStringList mEventsToListen;
 };
 

@@ -35,8 +35,8 @@
 #include <QVariantMap>
 #include <QTimer>
 
-#include <qjson_warpper.h>
-
+#include <qjson/parser.h>
+#include <qjson/serializer.h>
 
 
 //#define DP "CucumberWireprotocolServer" << __FUNCTION__
@@ -243,7 +243,7 @@ void CucumberWireprotocolServer::connectionDisconnect()
 
 
 void CucumberWireprotocolServer::connectionError()
-{    
+{
 
     QIODevice *connection = qobject_cast<QIODevice*>(sender());
     if (connection) {

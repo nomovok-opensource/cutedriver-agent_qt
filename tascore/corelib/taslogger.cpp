@@ -1,21 +1,21 @@
-/*************************************************************************** 
-** 
-** Copyright (C) 2010 Nokia Corporation and/or its subsidiary(-ies). 
-** All rights reserved. 
-** Contact: Nokia Corporation (testabilitydriver@nokia.com) 
-** 
+/***************************************************************************
+**
+** Copyright (C) 2010 Nokia Corporation and/or its subsidiary(-ies).
+** All rights reserved.
+** Contact: Nokia Corporation (testabilitydriver@nokia.com)
+**
 ** This file is part of Testability Driver Qt Agent
-** 
-** If you have questions regarding the use of this file, please contact 
-** Nokia at testabilitydriver@nokia.com . 
-** 
-** This library is free software; you can redistribute it and/or 
-** modify it under the terms of the GNU Lesser General Public 
-** License version 2.1 as published by the Free Software Foundation 
-** and appearing in the file LICENSE.LGPL included in the packaging 
-** of this file. 
-** 
-****************************************************************************/ 
+**
+** If you have questions regarding the use of this file, please contact
+** Nokia at testabilitydriver@nokia.com .
+**
+** This library is free software; you can redistribute it and/or
+** modify it under the terms of the GNU Lesser General Public
+** License version 2.1 as published by the Free Software Foundation
+** and appearing in the file LICENSE.LGPL included in the packaging
+** of this file.
+**
+****************************************************************************/
 
 #include <QDir>
 #include <QDebug>
@@ -25,23 +25,21 @@
 #include "taslogger.h"
 #include "tascoreutils.h"
 
-#ifdef Q_OS_SYMBIAN
-const char* const C_LOG_PATH = "c:\\logs\\testability\\";
-const char* const E_LOG_PATH = "e:\\logs\\testability\\";
-#else
 const char* const LOG_PATH = "/logs/testability/";
-#endif
+
 const int LOG_SIZE = 100000;
 
 void debugOutput(QtMsgType type, const QMessageLogContext &, const QString &message)
 {
     if (message.length() <= 0)
       return;
-    switch (type) 
+    switch (type)
         {
         case QtDebugMsg:
             TasLogger::logger()->debug(message);
             break;
+        case QtInfoMsg:
+            TasLogger::logger()->info(message);
         case QtWarningMsg:
             TasLogger::logger()->warning(message);
             break;
@@ -60,20 +58,11 @@ QMutex* TasLogger::mInstanceMutex = 0;
 TasLogger::TasLogger()
 {
     mLogSize = LOG_SIZE;
-    mEnabled = false;    
+    mEnabled = false;
     mUseQDebug = false;
     mCurrentLevel = LOG_INFO;
     mLogFileName = TasCoreUtils::getApplicationName()+".log";
-#ifdef Q_OS_SYMBIAN
-    if(QDir(E_LOG_PATH).exists()){
-        mLogPath = E_LOG_PATH;
-    }
-    else{
-        mLogPath = C_LOG_PATH;
-    }
-#else
     mLogPath = LOG_PATH;
-#endif
     mOut = 0;
     mEventLogger = new EventLogger();
     mLastLogRollCheck = QTime::currentTime();
@@ -86,21 +75,21 @@ TasLogger* TasLogger::logger()
 {
     if(!mInstance){
         mInstanceMutex = new QMutex();
-        mInstance = new TasLogger();        
-    }    
-	QMutexLocker locker(mInstanceMutex);
-    return mInstance;    
+        mInstance = new TasLogger();
+    }
+    QMutexLocker locker(mInstanceMutex);
+    return mInstance;
 }
 
 
 /*!
-  Configures the logger based on the command data. 
+  Configures the logger based on the command data.
   Logger will not check the sanity of the settings.
  */
 void TasLogger::configureLogger(TasCommand& command)
 {
-    //lock the instance 
-	QMutexLocker locker(mInstanceMutex);
+    //lock the instance
+    QMutexLocker locker(mInstanceMutex);
 
     if(command.parameter(LOG_LEVEL) == "FATAL"){
         setLevel(LOG_FATAL);
@@ -131,7 +120,7 @@ void TasLogger::configureLogger(TasCommand& command)
     else if(command.parameter(LOG_QDEBUG) == "false"){
         setOutputter(false);
     }
-   
+
     if(!command.parameter(LOG_FILE_SIZE).isEmpty()){
         mLogSize = command.parameter(LOG_FILE_SIZE).toInt();
     }
@@ -144,24 +133,24 @@ void TasLogger::configureLogger(TasCommand& command)
         if(command.parameter(CLEAR_LOG) == "true"){
             clearLogFile();
         }
-        
+
         if(!command.parameter(LOG_FOLDER).isEmpty()){
             mLogPath = command.parameter(LOG_FOLDER);
             QDir().mkpath(mLogPath);
         }
 
-        //enable the logger unless instructed not to or if it was not on to begin with   
+        //enable the logger unless instructed not to or if it was not on to begin with
         if( ( (wasLogging && command.parameter(LOG_ENABLE) != "false") || command.parameter(LOG_ENABLE) == "true") && !mUseQDebug){
-            enableLogger();        
+            enableLogger();
             debug("TasLogger::configureLogger configuration done and logging enabled.");
         }
     }
     else{
-        //enable the logger unless instructed not to or if it was not on to begin with   
+        //enable the logger unless instructed not to or if it was not on to begin with
         if(command.parameter(LOG_ENABLE) == "true"){
-            enableLogger();        
+            enableLogger();
             debug("TasLogger::configureLogger configuration done and logging enabled.");
-        }        
+        }
         if(command.parameter(LOG_ENABLE) == "false"){
             disableLogger();
         }
@@ -174,7 +163,7 @@ void TasLogger::configureEventLogger(TasCommand& command)
     if(command.parameter(LOG_EVENTS) == "true"){
         QStringList events;
         if(!command.text().isEmpty()){
-            events = command.text().split(",");            
+            events = command.text().split(",");
         }
         logEvents(events);
     }
@@ -196,11 +185,11 @@ TasLogger::~TasLogger()
 
 void TasLogger::enableLogger()
 {
-	QMutexLocker locker(&mMutex);
+    QMutexLocker locker(&mMutex);
     mLastLogRollCheck.restart();
     if(!mEnabled && QDir(mLogPath).exists()){
         QString fileName = mLogPath+"/"+mLogFileName;
-        mOut = new QFile(fileName);        
+        mOut = new QFile(fileName);
         if(mOut->exists(fileName) && mOut->size() > mLogSize){
             QString storageName = mLogPath + "old_" + mLogFileName;
             QFile::remove(storageName);
@@ -210,8 +199,8 @@ void TasLogger::enableLogger()
         else{
             mOut->open(QIODevice::WriteOnly | QIODevice::Text | QIODevice::Append);
         }
-        mEnabled = true;        
-    }    
+        mEnabled = true;
+    }
 }
 
 /*!
@@ -219,7 +208,7 @@ void TasLogger::enableLogger()
  */
 void TasLogger::disableLogger()
 {
-	QMutexLocker locker(&mMutex);
+    QMutexLocker locker(&mMutex);
     mEnabled = false;
     if(mOut){
         mOut->close();
@@ -252,38 +241,38 @@ void TasLogger::removeLogger()
 
 void TasLogger::debug(const QString message)
 {
-    writeLogLine(LOG_DEBUG, message);    
+    writeLogLine(LOG_DEBUG, message);
 }
 
 void TasLogger::info(const QString message)
 {
-    writeLogLine(LOG_INFO, message);    
+    writeLogLine(LOG_INFO, message);
 }
 
 void TasLogger::error(const QString message)
 {
-    writeLogLine(LOG_ERROR, message);    
+    writeLogLine(LOG_ERROR, message);
 }
 
 void TasLogger::warning(const QString message)
 {
-    writeLogLine(LOG_WARNING, message);    
+    writeLogLine(LOG_WARNING, message);
 }
 
 void TasLogger::fatal(const QString message)
 {
-    writeLogLine(LOG_FATAL, message);    
+    writeLogLine(LOG_FATAL, message);
 }
 
 void TasLogger::setLevel(const LogType& level)
 {
     mCurrentLevel = level;
-    
+
 }
 
 /*!
-  Set the file and path to where to write the logs. The path needs to exists 
-  and is not created by the logger. logPath will default to /logs/testability 
+  Set the file and path to where to write the logs. The path needs to exists
+  and is not created by the logger. logPath will default to /logs/testability
   if not set. Will also enable the logger.
  */
 void TasLogger::setLogFile(const QString logFileName)
@@ -303,7 +292,7 @@ void TasLogger::setLogDir(const QString logPath)
 void TasLogger::writeLogLine(LogType type, const QString& message)
 {
     if(mEnabled && type <= mCurrentLevel){
-      
+
         if(message.contains("QMetaProperty::read")) return;
 
         if(!mUseQDebug){
@@ -321,24 +310,24 @@ void TasLogger::writeLogLine(LogType type, const QString& message)
         out << ">";
         switch (type) {
         case LOG_FATAL:
-            out << "FATAL: ";            
-            break;            
+            out << "FATAL: ";
+            break;
         case LOG_ERROR:
-            out << "ERROR: ";            
-            break;            
+            out << "ERROR: ";
+            break;
         case LOG_INFO:
-            out << "INFO: ";            
-            break;            
+            out << "INFO: ";
+            break;
         case LOG_WARNING:
-            out << "WARNING: ";            
-            break;            
+            out << "WARNING: ";
+            break;
         case LOG_DEBUG:
-            out << "DEBUG: ";    
-            break;            
+            out << "DEBUG: ";
+            break;
         }
         out << message;
         outPut(line);
-    }    
+    }
 }
 
 void TasLogger::outPut(const QString& line)
@@ -357,7 +346,7 @@ void TasLogger::outPut(const QString& line)
 }
 
 /*!
-  Directs all output from this logger to qDebug if true. 
+  Directs all output from this logger to qDebug if true.
  */
 void TasLogger::useQDebug(bool use)
 {
@@ -420,7 +409,7 @@ bool EventLogger::eventFilter(QObject *target, QEvent *event)
         TasLogger::logger()->debug(line);
     }
     return false;
-}    
+}
 
 void EventLogger::setFilterStrings(QStringList filterStrings)
 {

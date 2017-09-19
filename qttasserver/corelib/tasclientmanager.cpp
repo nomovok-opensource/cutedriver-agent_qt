@@ -95,15 +95,6 @@ TasClient* TasClientManager::addClient(quint64 processId, const QString& process
         TasLogger::logger()->debug("TasClientManager::addClient existing client found by id!");
     }
 
-#ifdef Q_OS_SYMBIAN
-    if(app == 0 && !processName.isEmpty()){
-        app = findByApplicationName(processName);
-        if(app){
-            TasLogger::logger()->debug("TasClientManager::addClient existing client found by name!");
-        }
-    }
-#endif
-
     if(app == 0){
         app = new TasClient(processId);
         mClients.insert(processId, app);
@@ -122,7 +113,7 @@ TasClient* TasClientManager::addClient(quint64 processId, const QString& process
   already exists only the data will be updated.
  */
 TasClient* TasClientManager::addRegisteredClient(quint64 processId, const QString& processName, TasSocket* socket,
-                                                 const QString& type, QString applicationUid)
+                                                 const QString& type)
 {
     QMutexLocker locker(&mMutex);
     TasLogger::logger()->info("TasClientManager::addRegisteredClient " + processName);
@@ -132,18 +123,6 @@ TasClient* TasClientManager::addRegisteredClient(quint64 processId, const QStrin
         app = mClients.value(processId);
         TasLogger::logger()->debug("TasClientManager::addRegisteredClient existing client found by id!");
     }
-
-#ifdef Q_OS_SYMBIAN
-    if(app == 0 && !processName.isEmpty()){
-        app = findByApplicationName(processName);
-        if(app && app->applicationUid() == applicationUid){
-            TasLogger::logger()->debug("TasClientManager::addRegisteredClient existing client found by name!");
-        }
-        else{
-            app = 0;
-        }
-    }
-#endif
 
     if(app == 0){
         app = new TasClient(processId);
@@ -155,10 +134,6 @@ TasClient* TasClientManager::addRegisteredClient(quint64 processId, const QStrin
     if(socket){
         app->setSocket(socket);
     }
-
-#ifdef Q_OS_SYMBIAN
-    app->setApplicationUid(applicationUid);
-#endif
 
     app->setPluginType(type);
     app->setRegistered();
@@ -187,7 +162,7 @@ void TasClientManager::addStartedApp(const QString& processName, qint64 timestam
 */
 void TasClientManager::removeClient(quint64 processId, bool kill)
 {
-    QMutexLocker locker(&mMutex);   
+    QMutexLocker locker(&mMutex);
 
     TasClient* app = removeByProcessId(processId);
     if(app){
@@ -219,13 +194,8 @@ TasClient* TasClientManager::findClient(TasCommandModel& request)
     //look for the client
     TasClient* client = 0;
     bool ok;
-    quint64 startedPid = request.id().toULongLong(&ok);  
+    quint64 startedPid = request.id().toULongLong(&ok);
     client = findByProcessId(startedPid);
-#ifdef Q_OS_SYMBIAN
-    if(client == 0){
-        client = findByApplicationUid(request.uid());
-    }
-#endif
     if(client == 0){
         client = findByApplicationName(request.name());
     }
@@ -258,29 +228,6 @@ TasClient* TasClientManager::findByProcessId(quint64 processId)
     }
     return match;
 }
-
-#ifdef Q_OS_SYMBIAN
-TasClient* TasClientManager::findByApplicationUid(const QString applicationUid)
-{
-    if(applicationUid.isNull() || applicationUid.isEmpty()){
-        return 0;
-    }
-    TasClient* match = 0;
-    foreach (TasClient* app, mClients){
-        if(app->applicationUid() == applicationUid){
-            //do not return socketless clients
-            if(app->socket()){
-                match = app;
-                break;
-            }
-        }
-    }
-    if(!verifyClient(match)){
-        match = 0;
-    }
-    return match;
-}
-#endif
 
 /*!
   Searches for a client with the given application name. Returns null if no match
@@ -322,7 +269,7 @@ TasClient* TasClientManager::latestClient()
 {
     //    int pid = TasNativeUtils::pidOfActiveWindow(mClients.keys());
     int pid = TasNativeUtils::pidOfActiveWindow(mClients);
-    if (pid != -1) {        
+    if (pid != -1) {
         if(mClients.contains(pid)){
             TasClient* app = mClients.value(pid);
             if(app->socket()){
@@ -330,9 +277,6 @@ TasClient* TasClientManager::latestClient()
             }
         }
     }
-#ifdef Q_OS_SYMBIAN
-    return 0;
-#else
     //find latest
     TasClient* match = 0;
     int smallest = -1;
@@ -351,7 +295,6 @@ TasClient* TasClientManager::latestClient()
         }
     }
     return match;
-#endif
 }
 
 
@@ -387,7 +330,7 @@ void TasClientManager::removeAllClients(bool kill)
     QMutexLocker locker(&mMutex);
     foreach (TasClient* app, mClients){
         app->closeConnection();
-        if(kill && mStartedPids.contains(app->pid())){            
+        if(kill && mStartedPids.contains(app->pid())){
             TasNativeUtils::killProcess(app->pid());
         }
         mStartedPids.removeAll(app->pid());
@@ -527,7 +470,7 @@ const quint64& TasClient::pid() const
 {
     return mPid;
 }
-        
+
 /*!
   Returns the application name associated with the client.
  */

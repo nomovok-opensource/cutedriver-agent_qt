@@ -25,7 +25,7 @@ verify and control them.
 %setup -q
 
 %build
-qtchooser -run-tool=qmake -qt=5 -r CONFIG+=RPM CONFIG+=no_mobility CONFIG+=no_webkit CONFIG+=wayland
+qtchooser -run-tool=qmake -qt=5 -r CONFIG+=RPM CONFIG+=no_webkit CONFIG+=wayland
 make %{?_smp_mflags}
 
 

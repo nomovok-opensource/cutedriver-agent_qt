@@ -1,22 +1,22 @@
-/*************************************************************************** 
-** 
-** Copyright (C) 2010 Nokia Corporation and/or its subsidiary(-ies). 
-** All rights reserved. 
-** Contact: Nokia Corporation (testabilitydriver@nokia.com) 
-** 
+/***************************************************************************
+**
+** Copyright (C) 2010 Nokia Corporation and/or its subsidiary(-ies).
+** All rights reserved.
+** Contact: Nokia Corporation (testabilitydriver@nokia.com)
+**
 ** This file is part of Testability Driver Qt Agent
-** 
-** If you have questions regarding the use of this file, please contact 
-** Nokia at testabilitydriver@nokia.com . 
-** 
-** This library is free software; you can redistribute it and/or 
-** modify it under the terms of the GNU Lesser General Public 
-** License version 2.1 as published by the Free Software Foundation 
-** and appearing in the file LICENSE.LGPL included in the packaging 
-** of this file. 
-** 
-****************************************************************************/ 
- 
+**
+** If you have questions regarding the use of this file, please contact
+** Nokia at testabilitydriver@nokia.com .
+**
+** This library is free software; you can redistribute it and/or
+** modify it under the terms of the GNU Lesser General Public
+** License version 2.1 as published by the Free Software Foundation
+** and appearing in the file LICENSE.LGPL included in the packaging
+** of this file.
+**
+****************************************************************************/
+
 
 
 #include "tasdeviceutils.h"
@@ -24,11 +24,11 @@
 
 /*!
     \class TasDeviceUtils
-    \brief Provides device dependent operations.    
-    
+    \brief Provides device dependent operations.
+
     TasNativeUtils contains generic operations for device specific calls. Use this class
-    to create operations that implement device specifics. Compare to TasNativeUtils, 
-    this class should be used that are not only platform (i.e. Windows/Unix/MACOS), 
+    to create operations that implement device specifics. Compare to TasNativeUtils,
+    this class should be used that are not only platform (i.e. Windows/Unix/MACOS),
     but also device specific (e.g. maemo 5)
 */
 
@@ -60,13 +60,13 @@ void TasDeviceUtils::stopPwrData()
 */
 
 
-void TasDeviceUtils::resetInactivity() 
+void TasDeviceUtils::resetInactivity()
 {
     //NOP
 }
 
 /*!
-  Returns the heap size of the process. 
+  Returns the heap size of the process.
   -1 means not supported.
  */
 int TasDeviceUtils::currentProcessHeapSize()
@@ -78,7 +78,9 @@ int TasDeviceUtils::currentProcessHeapSize()
   Not supported
  */
 void TasDeviceUtils::addSystemInformation(TasObject& object)
-{}
+{
+  Q_UNUSED(object);
+}
 
 
 qreal TasDeviceUtils::currentProcessCpuTime()
@@ -107,6 +109,11 @@ bool TasDeviceUtils::isServerRunning()
 
 void TasDeviceUtils::sendMouseEvent(int x, int y, Qt::MouseButton button, QEvent::Type type, uint pointerNumber)
 {
+    Q_UNUSED(x);
+    Q_UNUSED(y);
+    Q_UNUSED(button);
+    Q_UNUSED(type);
+    Q_UNUSED(pointerNumber);
 }
 
 

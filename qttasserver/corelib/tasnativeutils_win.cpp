@@ -1,22 +1,22 @@
-/*************************************************************************** 
-** 
-** Copyright (C) 2010 Nokia Corporation and/or its subsidiary(-ies). 
-** All rights reserved. 
-** Contact: Nokia Corporation (testabilitydriver@nokia.com) 
-** 
+/***************************************************************************
+**
+** Copyright (C) 2010 Nokia Corporation and/or its subsidiary(-ies).
+** All rights reserved.
+** Contact: Nokia Corporation (testabilitydriver@nokia.com)
+**
 ** This file is part of Testability Driver Qt Agent
-** 
-** If you have questions regarding the use of this file, please contact 
-** Nokia at testabilitydriver@nokia.com . 
-** 
-** This library is free software; you can redistribute it and/or 
-** modify it under the terms of the GNU Lesser General Public 
-** License version 2.1 as published by the Free Software Foundation 
-** and appearing in the file LICENSE.LGPL included in the packaging 
-** of this file. 
-** 
-****************************************************************************/ 
- 
+**
+** If you have questions regarding the use of this file, please contact
+** Nokia at testabilitydriver@nokia.com .
+**
+** This library is free software; you can redistribute it and/or
+** modify it under the terms of the GNU Lesser General Public
+** License version 2.1 as published by the Free Software Foundation
+** and appearing in the file LICENSE.LGPL included in the packaging
+** of this file.
+**
+****************************************************************************/
+
 
 #include "tasnativeutils.h"
 
@@ -78,14 +78,14 @@ bool TasNativeUtils::processExitStatus(quint64 pid, int &status)
         DWORD dwExitCode = 0;
         if(GetExitCodeProcess(hProcess, &dwExitCode)){
             if(dwExitCode == STILL_ACTIVE){
-                stopped =  false;            
+                stopped =  false;
             }
             else{
                 status = dwExitCode;
             }
         }
         else{
-            
+
             TasLogger::logger()->debug("TasNativeUtils::processExitStatus could not get status");
             //maybe no process since could not open
             status = 0;
@@ -115,7 +115,7 @@ void TasNativeUtils::runningProcesses(TasObject& applist)
             HANDLE hProcess = OpenProcess( PROCESS_QUERY_INFORMATION|PROCESS_VM_READ, FALSE, processID );
             if (NULL != hProcess ){
                 HMODULE hMod;
-                DWORD cbNeeded;                
+                DWORD cbNeeded;
                 TCHAR szProcessName[MAX_PATH] = TEXT("unknown");
                 if ( EnumProcessModules( hProcess, &hMod, sizeof(hMod), &cbNeeded) ){
                     GetModuleBaseName( hProcess, hMod, szProcessName, sizeof(szProcessName)/sizeof(TCHAR) );
@@ -125,7 +125,7 @@ void TasNativeUtils::runningProcesses(TasObject& applist)
                 fullName = QString::fromUtf16((ushort*)szProcessName);
 #else
                 fullName = QString::fromLocal8Bit(szProcessName);
-#endif                
+#endif
 
                 QString processName = fullName.split(".exe").first();
                 TasObject& processDetails = applist.addNewObject(QString::number(processID), processName, "process");
@@ -134,7 +134,7 @@ void TasNativeUtils::runningProcesses(TasObject& applist)
                 if(GetProcessMemoryInfo(hProcess,&pmc, sizeof(pmc))){
                     processDetails.addAttribute("memUsage", (int)pmc.WorkingSetSize);
                     processDetails.addAttribute("fullName", fullName);
-                }            
+                }
             }
             CloseHandle( hProcess );
         }

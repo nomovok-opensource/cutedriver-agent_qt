@@ -1,23 +1,23 @@
-/*************************************************************************** 
-** 
-** Copyright (C) 2010 Nokia Corporation and/or its subsidiary(-ies). 
-** All rights reserved. 
-** Contact: Nokia Corporation (testabilitydriver@nokia.com) 
-** 
+/***************************************************************************
+**
+** Copyright (C) 2010 Nokia Corporation and/or its subsidiary(-ies).
+** All rights reserved.
+** Contact: Nokia Corporation (testabilitydriver@nokia.com)
+**
 ** This file is part of Testability Driver Qt Agent
-** 
-** If you have questions regarding the use of this file, please contact 
-** Nokia at testabilitydriver@nokia.com . 
-** 
-** This library is free software; you can redistribute it and/or 
-** modify it under the terms of the GNU Lesser General Public 
-** License version 2.1 as published by the Free Software Foundation 
-** and appearing in the file LICENSE.LGPL included in the packaging 
-** of this file. 
-** 
-****************************************************************************/ 
+**
+** If you have questions regarding the use of this file, please contact
+** Nokia at testabilitydriver@nokia.com .
+**
+** This library is free software; you can redistribute it and/or
+** modify it under the terms of the GNU Lesser General Public
+** License version 2.1 as published by the Free Software Foundation
+** and appearing in the file LICENSE.LGPL included in the packaging
+** of this file.
+**
+****************************************************************************/
 /*
- * resourceloggingservice.cpp 
+ * resourceloggingservice.cpp
  */
 #include <QProcess>
 
@@ -39,20 +39,20 @@ bool ResourceLoggingService::executeService(TasCommandModel& model, TasResponse&
 {
     TasLogger::logger()->debug("> ResourceLoggingService::executeService: " + model.service());
     bool status = false;
-  
+
     if(model.service() == serviceName()) {
         status = true;
         //the server is not running so we need to start it (must be in path to work)
         qint64 pid;
-        if(QProcess::startDetached(SERVER_NAME, QStringList(), ".", &pid)){       
-            new MemLogServerWaiter(response.requester(), TasClientManager::instance()->addClient(pid), 
+        if(QProcess::startDetached(SERVER_NAME, QStringList(), ".", &pid)){
+            new MemLogServerWaiter(response.requester(), TasClientManager::instance()->addClient(pid),
                                    model.sourceString(), response.messageId());
         }
         else{
             response.setErrorMessage("Could not start the "+SERVER_NAME+", make sure it is in path!");
         }
     }
-   
+
     TasLogger::logger()->debug("< ResourceLoggingService::executeService");
     return status;
 }
@@ -63,7 +63,7 @@ MemLogServerWaiter::MemLogServerWaiter(TasSocket* requester, TasClient *target, 
     mTarget = target;
     mMessageId = messageId;
     mCommandXml = commandXml;
-    connect(mTarget, SIGNAL(registered(quint64)), this, SLOT(clientRegistered(quint64)));       
+    connect(mTarget, SIGNAL(registered(quint64)), this, SLOT(clientRegistered(quint64)));
     connect(mTarget, SIGNAL(crashed()), this, SLOT(crashed()));
     mWaiter.setSingleShot(true);
     mWaiter.start(10000);

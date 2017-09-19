@@ -1,21 +1,21 @@
-/*************************************************************************** 
-** 
-** Copyright (C) 2010 Nokia Corporation and/or its subsidiary(-ies). 
-** All rights reserved. 
-** Contact: Nokia Corporation (testabilitydriver@nokia.com) 
-** 
+/***************************************************************************
+**
+** Copyright (C) 2010 Nokia Corporation and/or its subsidiary(-ies).
+** All rights reserved.
+** Contact: Nokia Corporation (testabilitydriver@nokia.com)
+**
 ** This file is part of Testability Driver Qt Agent
-** 
-** If you have questions regarding the use of this file, please contact 
-** Nokia at testabilitydriver@nokia.com . 
-** 
-** This library is free software; you can redistribute it and/or 
-** modify it under the terms of the GNU Lesser General Public 
-** License version 2.1 as published by the Free Software Foundation 
-** and appearing in the file LICENSE.LGPL included in the packaging 
-** of this file. 
-** 
-****************************************************************************/ 
+**
+** If you have questions regarding the use of this file, please contact
+** Nokia at testabilitydriver@nokia.com .
+**
+** This library is free software; you can redistribute it and/or
+** modify it under the terms of the GNU Lesser General Public
+** License version 2.1 as published by the Free Software Foundation
+** and appearing in the file LICENSE.LGPL included in the packaging
+** of this file.
+**
+****************************************************************************/
 
 
 #include <QApplication>
@@ -34,7 +34,7 @@
   \class EventService
   \brief EventService collects events
 
-*/    
+*/
 
 EventService::EventService()
 {
@@ -47,7 +47,7 @@ EventService::~EventService()
 }
 
 bool EventService::executeService(TasCommandModel& model, TasResponse& response)
-{    
+{
     if(model.service() == serviceName() ){
         performEventCommands(model, response);
         return true;
@@ -65,7 +65,7 @@ void EventService::performEventCommands(TasCommandModel& model, TasResponse& res
     bool commandExecuted = false;
     while (i.hasNext()){
         TasTarget* commandTarget = i.next();
-        TasCommand* command = commandTarget->findCommand("EnableEvents");            
+        TasCommand* command = commandTarget->findCommand("EnableEvents");
         if(command){
             TasEventFilter* filter = getFilterForTarget(commandTarget, true);
             if(filter){
@@ -102,18 +102,18 @@ void EventService::performEventCommands(TasCommandModel& model, TasResponse& res
             else{
                 response.setErrorMessage("Event listening not enabled!");
             }
-            commandExecuted = true;                
+            commandExecuted = true;
         }
-        break;        
+        break;
     }
 
-    if(!commandExecuted){        
-        response.setErrorMessage(PARSE_ERROR);       
+    if(!commandExecuted){
+        response.setErrorMessage(PARSE_ERROR);
     }
 }
 
 void EventService::enableEvents(QString targetId, QObject* target, QStringList eventsToListen)
-{    
+{
     TasEventFilter* filter = 0;
     if(mEventFilters.contains(targetId)){
         filter = mEventFilters.value(targetId);
@@ -150,7 +150,7 @@ TasEventFilter* EventService::getFilterForTarget(TasTarget* commandTarget, bool 
     else if(create){
         QObject* target = 0;
         if(targetType == TYPE_GRAPHICS_VIEW){
-            QGraphicsItem* item = findGraphicsItem(targetId); 
+            QGraphicsItem* item = findGraphicsItem(targetId);
             target = (QObject*)TestabilityUtils::castToGraphicsWidget(item);
         }
         else if(targetType == TYPE_STANDARD_VIEW){
@@ -190,12 +190,12 @@ void EventService::addProcessStartEvent(QDateTime startTime)
 
 TasEventFilter::TasEventFilter(QObject* target, QObject* parent)
     :QObject(parent), trackId(""), found(false)
-{    
+{
     mTarget = target;
     mTasModel = new TasDataModel();
     QString qtVersion = "Qt" + QString(qVersion());
     TasObjectContainer& container = mTasModel->addNewObjectContainer(1, qtVersion, "qt");
-    mTasEvents = &container.addNewObject(0, "QtApplicationEvents", "events");   
+    mTasEvents = &container.addNewObject(0, "QtApplicationEvents", "events");
 }
 
 TasEventFilter::~TasEventFilter()
@@ -208,7 +208,7 @@ TasEventFilter::~TasEventFilter()
 void TasEventFilter::startFiltering(QStringList eventsToListen)
 {
     mEventsToListen = eventsToListen;
-    mTarget->installEventFilter(this);    
+    mTarget->installEventFilter(this);
 }
 
 void TasEventFilter::addStartTime(QDateTime startTime)
@@ -219,7 +219,7 @@ void TasEventFilter::addStartTime(QDateTime startTime)
         eventObj.setType(QString("event"));
         eventObj.setName(PROCESS_START_TIME);
         eventObj.addAttribute("timeStamp", startTime.toString(DATE_FORMAT));
-    }    
+    }
 }
 
 bool TasEventFilter::eventFilter(QObject *target, QEvent *event)
@@ -232,7 +232,7 @@ bool TasEventFilter::eventFilter(QObject *target, QEvent *event)
         if (found || (!mEventsToListen.contains(eventType) && !mEventsToListen.contains(QString("ALL"))))
             return false;
 
-        
+
 
 
         if (TasCoreUtils::objectId(target) == trackId) {
@@ -240,7 +240,7 @@ bool TasEventFilter::eventFilter(QObject *target, QEvent *event)
             mTasEvents->addAttribute("trackedFound", "true");
         } else if (trackId == "") {
             TasObject& eventObj = mTasEvents->addObject();
-            eventObj.setId(TasCoreUtils::pointerId(event));                                     
+            eventObj.setId(TasCoreUtils::pointerId(event));
 
             eventObj.setType(QString("event"));
             eventObj.setName(eventType);
@@ -287,7 +287,7 @@ void TasEventFilter::addMouseEventDetails(QEvent *event, TasObject& eventObj)
         eventObj.addAttribute("y", mouseEvent->y()).setType("int");
         eventObj.addAttribute("button", (int)mouseEvent->button()).setType("Qt::MouseButton");
     }
-    else if(type == QEvent::GraphicsSceneMouseDoubleClick || type == QEvent::GraphicsSceneMouseMove || 
+    else if(type == QEvent::GraphicsSceneMouseDoubleClick || type == QEvent::GraphicsSceneMouseMove ||
             type == QEvent::GraphicsSceneMousePress || type == QEvent::GraphicsSceneMouseRelease ){
         QGraphicsSceneMouseEvent* mouseEvent = dynamic_cast<QGraphicsSceneMouseEvent*>(event);
         eventObj.addAttribute("position", mouseEvent->pos()).setType("QPointF");
@@ -323,7 +323,7 @@ void TasEventFilter::addTouchEventDetails(QEvent *event, TasObject& eventObj)
 
                 eventObj.addAttribute("lastScenePosition_"+id, point.lastScenePos()).setType("QPointF");
                 eventObj.addAttribute("lastScreenPosition_"+id, point.lastScreenPos()).setType("QPoint");
-        
+
                 eventObj.addAttribute("pressure_"+id, point.pressure());
 
             }

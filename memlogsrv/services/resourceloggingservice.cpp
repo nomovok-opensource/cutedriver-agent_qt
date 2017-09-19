@@ -1,21 +1,21 @@
-/*************************************************************************** 
-** 
-** Copyright (C) 2010 Nokia Corporation and/or its subsidiary(-ies). 
-** All rights reserved. 
-** Contact: Nokia Corporation (testabilitydriver@nokia.com) 
-** 
+/***************************************************************************
+**
+** Copyright (C) 2010 Nokia Corporation and/or its subsidiary(-ies).
+** All rights reserved.
+** Contact: Nokia Corporation (testabilitydriver@nokia.com)
+**
 ** This file is part of Testability Driver Qt Agent
-** 
-** If you have questions regarding the use of this file, please contact 
-** Nokia at testabilitydriver@nokia.com . 
-** 
-** This library is free software; you can redistribute it and/or 
-** modify it under the terms of the GNU Lesser General Public 
-** License version 2.1 as published by the Free Software Foundation 
-** and appearing in the file LICENSE.LGPL included in the packaging 
-** of this file. 
-** 
-****************************************************************************/ 
+**
+** If you have questions regarding the use of this file, please contact
+** Nokia at testabilitydriver@nokia.com .
+**
+** This library is free software; you can redistribute it and/or
+** modify it under the terms of the GNU Lesser General Public
+** License version 2.1 as published by the Free Software Foundation
+** and appearing in the file LICENSE.LGPL included in the packaging
+** of this file.
+**
+****************************************************************************/
 
 #include "resourceloggingservice.h"
 #include "resourcedatagatherer.h"
@@ -31,14 +31,9 @@ const int INTERVAL_S_TO_MS              = 1000;
 const QString RESOURCE_LOGGER           = "resourcelogger";
 const QString LOG_FILE_NAME_PREFIX      = "mem_usage_";
 const QString LOG_FILE_EXT              = ".log";
-#ifdef Q_OS_SYMBIAN
-const QString LOG_FILE_PATH             = "c:\\data\\";
-_LIT(HEAP_DUMP_PATH,                      "\\memspy_data");
-#else
 const QString LOG_FILE_PATH             = "";
-#endif
 
-ResourceLoggingService::ResourceLoggingService() : 
+ResourceLoggingService::ResourceLoggingService() :
     mResourceLoggerProcessRunning(false),
     mLoadGenerator(0)
 {}
@@ -59,18 +54,18 @@ ResourceLoggingService::~ResourceLoggingService()
 }
 
 bool ResourceLoggingService::executeService(
-        TasCommandModel& model, 
+        TasCommandModel& model,
         TasResponse& response)
 {
     TasLogger::logger()->debug("> ResourceLoggingService::executeService: " + model.service());
     bool status = false;
-    
+
     if(model.service() == serviceName()) {
         status = true;
         int error = TAS_ERROR_NONE;
         TasCommand* command = 0;
         QString responseData;
-        
+
         /*
          * Start process memory logging
          */
@@ -90,7 +85,7 @@ bool ResourceLoggingService::executeService(
                 TasLogger::logger()->error("  Error in logging stop: " + QString::number(error));
                 response.setErrorMessage("Error in logging stop: " + QString::number(error));
             }
-            else { 
+            else {
                 response.setData(responseData);
             }
         }
@@ -123,11 +118,11 @@ bool ResourceLoggingService::executeService(
         else if (commandIs(model, "ThreadHeapDump", command)) {
             error = dumpThreadHeap(*command, responseData);
             if (TAS_ERROR_NONE != error) {
-                TasLogger::logger()->error("  Error in dumping thread heap: " 
-                                                + responseData 
+                TasLogger::logger()->error("  Error in dumping thread heap: "
+                                                + responseData
                                                 + QString::number(error));
-                response.setErrorMessage("Error in dumping thread heap: " 
-                                                + responseData 
+                response.setErrorMessage("Error in dumping thread heap: "
+                                                + responseData
                                                 + QString::number(error));
             }
         }
@@ -151,32 +146,32 @@ bool ResourceLoggingService::executeService(
     }
     //check to see if the server can be stopped
     if( (!mLoadGenerator || !mLoadGenerator->isRunning()) && mLoggingTimers.isEmpty()){
-        connect(response.requester(), SIGNAL(messageSent()), this, SLOT(requestQuit()));           
+        connect(response.requester(), SIGNAL(messageSent()), this, SLOT(requestQuit()));
     }
-    
+
     TasLogger::logger()->debug("< ResourceLoggingService::executeService");
     return status;
 }
 
 void ResourceLoggingService::requestQuit()
 {
-    //small delay to allow the server to read the response 
+    //small delay to allow the server to read the response
     QTimer::singleShot(100, QCoreApplication::instance(), SLOT(quit()));
 }
 
 
 int ResourceLoggingService::startLogging(
-        ResourceLoggingService::ResourceType resourceType, 
+        ResourceLoggingService::ResourceType resourceType,
         TasCommand& command)
 {
     Q_UNUSED(resourceType)
     TasLogger::logger()->debug("> ResourceLoggingService::startLogging: " + command.name());
-    
+
     QString processName = command.parameter("thread_name");
     if (processName.isEmpty()) {
         return TAS_ERROR_PARAMETER;
     }
-    
+
     QString logFileName = command.parameter("file_name");
     if (logFileName.isEmpty()) {
         logFileName.append(LOG_FILE_PATH);
@@ -184,12 +179,12 @@ int ResourceLoggingService::startLogging(
         logFileName.append(processName);
         logFileName.append(LOG_FILE_EXT);
     }
-    
+
     bool timestampAbsolute = false;
     if (command.parameter("timestamp") == "absolute") {
         timestampAbsolute = true;
     }
-    
+
     bool ok;
     int interval = command.parameter("interval_s").toInt(&ok);
     if (ok && interval > 0) {
@@ -198,8 +193,8 @@ int ResourceLoggingService::startLogging(
     else {
         interval = DEFAULT_LOGGING_INTERVAL_MS;
     }
-    
-    ResourceLoggingTimer* timer = new ResourceLoggingTimer(resourceType, processName, 
+
+    ResourceLoggingTimer* timer = new ResourceLoggingTimer(resourceType, processName,
             logFileName, timestampAbsolute, interval);
     if (!timer) {
         return TAS_ERROR_CREATION_FAILED;
@@ -208,13 +203,13 @@ int ResourceLoggingService::startLogging(
     mLoggingTimers.append(timer);
     timer->run();
     timer->start();
-    
+
     TasLogger::logger()->debug("< ResourceLoggingService::startLogging");
     return TAS_ERROR_NONE;
 }
 
 int ResourceLoggingService::stopLogging(
-        ResourceLoggingService::ResourceType resourceType, 
+        ResourceLoggingService::ResourceType resourceType,
         TasCommand& command,
         QString& responseData)
 {
@@ -230,7 +225,7 @@ int ResourceLoggingService::stopLogging(
     if (command.parameter("return_data") == "true") {
         returnData = true;
     }
-    
+
     bool foundAny = false;
     QMutableListIterator<ResourceLoggingTimer*> iter(mLoggingTimers);
     while (iter.hasNext()) {
@@ -252,7 +247,7 @@ int ResourceLoggingService::stopLogging(
     if (!foundAny) {
         return TAS_ERROR_NOT_FOUND;
     }
-    
+
     TasLogger::logger()->debug("< ResourceLoggingService::stopLogging");
     return TAS_ERROR_NONE;
 }
@@ -260,7 +255,7 @@ int ResourceLoggingService::stopLogging(
 int ResourceLoggingService::startLoad(TasCommand& command)
 {
     TasLogger::logger()->debug("> CpuLoadService::startLoad: " + command.name());
-    
+
     bool ok;
     int load = command.parameter("cpu_load").toInt(&ok);
     int error = TAS_ERROR_NONE;
@@ -273,7 +268,7 @@ int ResourceLoggingService::startLoad(TasCommand& command)
     else {
         error = TAS_ERROR_PARAMETER;
     }
-    
+
     TasLogger::logger()->debug("< CpuLoadService::startLoad");
     return error;
 }
@@ -289,7 +284,7 @@ int ResourceLoggingService::stopLoad(TasCommand& command, QString& responseData)
 //        delete mLoadGenerator;
 //        mLoadGenerator = 0;
     }
-    
+
     TasLogger::logger()->debug("< CpuLoadService::stopLoad");
     return error;
 }
@@ -298,13 +293,13 @@ int ResourceLoggingService::dumpThreadHeap(TasCommand& command, QString& respons
 {
     TasLogger::logger()->debug("> ResourceLoggingService::dumpThreadHeap: " + command.name());
     int error = TAS_ERROR_NONE;
-    
+
     QString threadName = command.parameter("thread_name");
     if (threadName.isEmpty()) {
         response = "No thread name given: ";
         return TAS_ERROR_PARAMETER;
     }
-    
+
     RMemSpySession memSpy;
     error = memSpy.Connect();
     if (KErrNone == error) {
@@ -323,7 +318,7 @@ int ResourceLoggingService::dumpThreadHeap(TasCommand& command, QString& respons
     else {
         response = "memSpy.Connect() failed: ";
     }
-    
+
     TasLogger::logger()->debug("< ResourceLoggingService::dumpThreadHeap");
     return error;
 }
@@ -344,8 +339,8 @@ void ResourceLoggingService::timerError(int errorCode, QString& resourceIdentifi
 }
 
 bool ResourceLoggingService::commandIs(
-        TasCommandModel& commandModel, 
-        const QString& commandName, 
+        TasCommandModel& commandModel,
+        const QString& commandName,
         TasCommand*& command)
 {
     TasTarget* target = commandModel.findTarget(APPLICATION_TARGET);
@@ -363,9 +358,9 @@ bool ResourceLoggingService::commandIs(
 
 ResourceLoggingTimer::ResourceLoggingTimer(
         ResourceLoggingService::ResourceType resourceType,
-        QString& resourceIdentifier, 
-        QString& logFileName, 
-        bool timestampAbsolute, 
+        QString& resourceIdentifier,
+        QString& logFileName,
+        bool timestampAbsolute,
         int milliSecInterval) :
             mTimer(0),
             mDataGatherer(0),
@@ -377,7 +372,7 @@ ResourceLoggingTimer::ResourceLoggingTimer(
 {
     mResourceIdentifier = resourceIdentifier;
     mLogFileName = logFileName;
-    
+
     int errorCode = TAS_ERROR_NONE;
     mTimer = new QTimer(this);
     if (mTimer) {
@@ -392,7 +387,7 @@ ResourceLoggingTimer::ResourceLoggingTimer(
             }
             if (mLogFile->open(QIODevice::ReadWrite | QIODevice::Text | QIODevice::Truncate)) {
                 mLogFileStream.setDevice(mLogFile);
-                mDataGatherer = new ResourceDataGatherer(resourceType, 
+                mDataGatherer = new ResourceDataGatherer(resourceType,
                         resourceIdentifier, timestampAbsolute);
                 if (!mDataGatherer) {
                     errorCode = TAS_ERROR_CREATION_FAILED;
@@ -409,13 +404,13 @@ ResourceLoggingTimer::ResourceLoggingTimer(
     else {
         errorCode = TAS_ERROR_CREATION_FAILED;
     }
-    
+
     if (TAS_ERROR_NONE != errorCode) {
         emit error(errorCode, mResourceIdentifier);
     }
 }
-    
-ResourceLoggingTimer::~ResourceLoggingTimer() 
+
+ResourceLoggingTimer::~ResourceLoggingTimer()
 {
     if (mTimer->isActive()) {
         mTimer->stop();
@@ -431,8 +426,8 @@ ResourceLoggingTimer::~ResourceLoggingTimer()
     delete mLogFileData;
 }
 
-int ResourceLoggingTimer::interval() 
-{ 
+int ResourceLoggingTimer::interval()
+{
     if (mTimer) {
         return mTimer->interval();
     }
@@ -441,9 +436,9 @@ int ResourceLoggingTimer::interval()
         return TAS_ERROR_INVALID_STATE;
     }
 }
-    
-void ResourceLoggingTimer::start() 
-{ 
+
+void ResourceLoggingTimer::start()
+{
     TasLogger::logger()->debug("> ResourceLoggingTimer::start");
     if (mTimer) {
         int interval = mTimer->interval();
@@ -461,8 +456,8 @@ void ResourceLoggingTimer::start()
         emit error(TAS_ERROR_INVALID_STATE, mResourceIdentifier);
     }
 }
-    
-void ResourceLoggingTimer::start(int milliSecInterval) 
+
+void ResourceLoggingTimer::start(int milliSecInterval)
 {
     TasLogger::logger()->debug("> ResourceLoggingTimer::start: " + QString::number(milliSecInterval));
     if (mTimer) {
@@ -477,9 +472,9 @@ void ResourceLoggingTimer::start(int milliSecInterval)
         emit error(TAS_ERROR_INVALID_STATE, mResourceIdentifier);
     }
 }
-    
-void ResourceLoggingTimer::stop() 
-{ 
+
+void ResourceLoggingTimer::stop()
+{
     TasLogger::logger()->debug("> ResourceLoggingTimer::stop");
     if (mTimer) {
         if (mTimer->isActive()) {
@@ -491,7 +486,7 @@ void ResourceLoggingTimer::stop()
     }
 }
 
-QString* ResourceLoggingTimer::getLogFileData() 
+QString* ResourceLoggingTimer::getLogFileData()
 {
     if (mLogFile) {
         if (mLogFile->isOpen()) {
@@ -509,10 +504,10 @@ QString* ResourceLoggingTimer::getLogFileData()
     else {
         emit error(TAS_ERROR_INVALID_STATE, mResourceIdentifier);
         return 0;
-    }    
+    }
 }
-    
-void ResourceLoggingTimer::run() 
+
+void ResourceLoggingTimer::run()
 {
     QString logEntry;
     int errorCode = mDataGatherer->getLogEntryData(logEntry);

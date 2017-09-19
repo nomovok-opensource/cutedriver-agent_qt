@@ -1,5 +1,5 @@
-unix:!macx:!symbian {
-    INCLUDEPATH += /usr/include/tdriver/                
+unix:!macx: {
+    INCLUDEPATH += /usr/include/tdriver/
     LIBS += -lqttestability
     TAS_TARGET_PLUGIN=$$[QT_INSTALL_PLUGINS]/
     QTTAS_FIXTURE_TARGET_PATH = $$TAS_TARGET_PLUGIN/tasfixtures

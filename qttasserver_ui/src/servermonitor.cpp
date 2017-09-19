@@ -1,22 +1,22 @@
-/*************************************************************************** 
-** 
-** Copyright (C) 2010 Nokia Corporation and/or its subsidiary(-ies). 
-** All rights reserved. 
-** Contact: Nokia Corporation (testabilitydriver@nokia.com) 
-** 
+/***************************************************************************
+**
+** Copyright (C) 2010 Nokia Corporation and/or its subsidiary(-ies).
+** All rights reserved.
+** Contact: Nokia Corporation (testabilitydriver@nokia.com)
+**
 ** This file is part of Testability Driver Qt Agent
-** 
-** If you have questions regarding the use of this file, please contact 
-** Nokia at testabilitydriver@nokia.com . 
-** 
-** This library is free software; you can redistribute it and/or 
-** modify it under the terms of the GNU Lesser General Public 
-** License version 2.1 as published by the Free Software Foundation 
-** and appearing in the file LICENSE.LGPL included in the packaging 
-** of this file. 
-** 
-****************************************************************************/ 
- 
+**
+** If you have questions regarding the use of this file, please contact
+** Nokia at testabilitydriver@nokia.com .
+**
+** This library is free software; you can redistribute it and/or
+** modify it under the terms of the GNU Lesser General Public
+** License version 2.1 as published by the Free Software Foundation
+** and appearing in the file LICENSE.LGPL included in the packaging
+** of this file.
+**
+****************************************************************************/
+
 
 
 #include <QByteArray>
@@ -38,18 +38,12 @@
 #include "taspluginloader.h"
 #include "tastraverseinterface.h"
 
-#ifdef Q_OS_SYMBIAN
-#include <e32base.h>
-_LIT( KQTasServerName, "qttasserver" );
-#endif
-
-
 const static QString SERVER_PATH = "qttasserver";
 
-const static QString CLOSE_APP = "<TasCommands service=\"closeApplication\" name=\"\" id=\"\">" 
+const static QString CLOSE_APP = "<TasCommands service=\"closeApplication\" name=\"\" id=\"\">"
     "<Target TasId=\"Application\"><Command name=\"Close\" uid=\"0\"/></Target></TasCommands>";
 
-const static QString SERVER_PING = "<TasCommands service=\"listApps\">" 
+const static QString SERVER_PING = "<TasCommands service=\"listApps\">"
     "<Target TasId=\"Application\"><Command name=\"listApps\"/></Target></TasCommands>";
 
 const static QString NOT_CONNECTED = "Down";
@@ -76,10 +70,10 @@ ServerMonitor::ServerMonitor(QObject* parent)
     connect(mClient, SIGNAL(info(const QString&)), this, SLOT(info(const QString&)));
     connect(mClient, SIGNAL(serverResponse(const QString&)), this, SLOT(serverResponse(const QString&)));
 
-    TasLogger::logger()->setLogFile("qttas_ui.log");         
+    TasLogger::logger()->setLogFile("qttas_ui.log");
     TasLogger::logger()->setLevel(LOG_DEBUG);
-    TasLogger::logger()->clearLogFile();   
-    
+    TasLogger::logger()->clearLogFile();
+
 }
 
 ServerMonitor::~ServerMonitor()
@@ -90,7 +84,7 @@ ServerMonitor::~ServerMonitor()
 void ServerMonitor::serverState()
 {
     mState = STATUS;
-    emit serverDebug("Get server status..");    
+    emit serverDebug("Get server status..");
     mClient->sendMessage(SERVER_PING);
 }
 
@@ -116,7 +110,7 @@ void ServerMonitor::startServer()
 }
 
 void ServerMonitor::stopServer()
-{        
+{
     emit beginMonitor();
     emit disableReBinding();
     mState = STOP;
@@ -163,18 +157,18 @@ void ServerMonitor::serverResponse(const QString& message)
 {
     TasLogger::logger()->debug("ServerMonitor::serverResponse " + message);
     if(mState == STOP || mState == RESTART){
-        emit serverDebug("Close command ok server stopping.");    
+        emit serverDebug("Close command ok server stopping.");
     }
     else{
-        QDomDocument doc("TasMessage");    
+        QDomDocument doc("TasMessage");
         if(mState == STATUS && doc.setContent(message)){
-            emit serverDebug("Currently registered applications:");    
+            emit serverDebug("Currently registered applications:");
             QDomNodeList targets = doc.elementsByTagName (QString("obj"));
-            int count = targets.count();        
+            int count = targets.count();
             for (int i = 0; i < count; i++){
                 QDomElement target = targets.item(i).toElement();
                 if(target.attribute("type") == "application"){
-                    emit serverDebug(target.attribute("name"));        
+                    emit serverDebug(target.attribute("name"));
                 }
                 // Get server host address and port binds
                 if(target.attribute("type") == "HostAddress"){
@@ -190,10 +184,10 @@ void ServerMonitor::serverResponse(const QString& message)
                     for(int j = 0; j < attrs.count(); j++){
                         QDomElement attribute = attrs.item(j).toElement();
                         if(attribute.attribute("name") == "startTime"){
-                            emit serverDebug("Server started: " + attribute.text());        
+                            emit serverDebug("Server started: " + attribute.text());
                         }
                         if(attribute.attribute("name") == "upTime"){
-                            emit serverDebug(attribute.text());        
+                            emit serverDebug(attribute.text());
                         }
                     }
                 }
@@ -210,9 +204,9 @@ void ServerMonitor::serverResponse(const QString& message)
             }
         }
         else{
-            emit serverDebug(message);    
+            emit serverDebug(message);
         }
-        emit serverState(RUNNING);                
+        emit serverState(RUNNING);
         emit stopMonitor();
         if (!BINDING.isEmpty()){
             emit enableReBinding(BINDING_ADDRESS);
@@ -221,39 +215,14 @@ void ServerMonitor::serverResponse(const QString& message)
 }
 
 void ServerMonitor::killServer()
-{ 
+{
     TasLogger::logger()->debug("ServerMonitor::killServer");
-#ifdef Q_OS_SYMBIAN
-    TFindProcess findProcess;
-    TFullName processName;
-    while ( findProcess.Next( processName ) == KErrNone )
-        {
-        if ( ( processName.Find( KQTasServerName ) != KErrNotFound ) )
-            {
-            RProcess process;
-            TInt err = process.Open( findProcess );
-            if( err == KErrNone)
-                {
-                if( process.ExitType() == EExitPending ){
-                    process.Kill(0);
-                    process.Close();
-                    break;
-                }
-                else
-                    {
-                    process.Close();
-                    }
-                }              
-            }
-        }
-#else
-    //make sure connections are re opened 
+    //make sure connections are re opened
     mClient->deleteLater();
     mClient = new TasClient();
     connect(mClient, SIGNAL(error(const QString&)), this, SLOT(error(const QString&)));
     connect(mClient, SIGNAL(info(const QString&)), this, SLOT(info(const QString&)));
     connect(mClient, SIGNAL(serverResponse(const QString&)), this, SLOT(serverResponse(const QString&)));
-#endif
 }
 
 void ServerMonitor::loadPlugins()
@@ -328,65 +297,10 @@ void ServerMonitor::loadPlugins()
         }else {
             status.append(" - failed");
         }
-        emit serverDebug(fileName + status);        
+        emit serverDebug(fileName + status);
     }
 
 }
-
-
-
-
-#ifdef Q_OS_SYMBIAN
-void ServerMonitor::enablePluginLoad()
-{  
-    emit serverDebug("Attempting to enable plugin loading...");    
-    QProcess process;
-    process.start("TasHookActivator");
-    if(process.waitForStarted()){
-        emit serverDebug("Plugin enabler started successfully.");    
-        if(process.waitForFinished()){            
-            emit serverDebug("Plugin enabler executed successfully.");    
-            emit serverDebug("Applications should now load the plugin.");    
-        }
-        else{
-            emit serverDebug("Plugin enabler did not finish properly.");    
-        }
-    }
-    else{
-        emit serverDebug("Could not start enabler. " + process.errorString());            
-    }
-}
-
-void ServerMonitor::setAutoStart(bool autostart)
-{
-    if(autostart){
-        emit serverDebug("Setting autostart value on");    
-        if(TestabilitySettings::settings()->setValue(AUTO_START, "on")){
-            emit serverDebug("Setting autostart value on succeeded.");    
-        }
-        else{
-            emit serverDebug("Setting autostart value on failed.");    
-        }
-    }
-    else{
-        emit serverDebug("Setting autostart value off");    
-        if(TestabilitySettings::settings()->setValue(AUTO_START, "off")){
-            emit serverDebug("Setting autostart value off succeeded.");    
-        }
-        else{
-            emit serverDebug("Setting autostart value off failed.");    
-        }
-    }
-}
-
-bool ServerMonitor::autostartState()
-{    
-    return TasCoreUtils::autostart();
-}
-
-#endif
-
-
 
 TasClient::TasClient()
 {
@@ -394,13 +308,13 @@ TasClient::TasClient()
     mTimer.setSingleShot(true);
     mConnected = false;
     TasLogger::logger()->debug("TasClient::TasClient make socket");
-    #if defined(TAS_NOLOCALSOCKET)
+#if defined(TAS_NOLOCALSOCKET)
     mServerConnection = new QTcpSocket(this);
 #else
     mServerConnection = new QLocalSocket(this);
 #endif
     mSocket = new TasClientSocket(mServerConnection);
-	connect(mSocket, SIGNAL(socketClosed()), this, SLOT(connectionClosed()));
+    connect(mSocket, SIGNAL(socketClosed()), this, SLOT(connectionClosed()));
     TasLogger::logger()->debug("TasClient::TasClient set responsehandler");
     mSocket->setResponseHandler(this);
     //connectToServer();
@@ -430,7 +344,7 @@ bool TasClient::connectToServer()
     mServerConnection->connectToHost(QT_SERVER_NAME, QT_SERVER_PORT);
 #else
     mServerConnection->connectToServer(LOCAL_SERVER_NAME);
-#endif   
+#endif
     mConnected = mServerConnection->waitForConnected(3000);
     return mConnected;
 }
@@ -440,7 +354,7 @@ void TasClient::sendMessage(const QString& message)
     if(mTimer.isActive()){
         emit error("Processing earlier message.");
     }
-    else{        
+    else{
         if(!mConnected){
             emit info("Not connected to server. Connecting...");
             connectToServer();
@@ -459,11 +373,11 @@ void TasClient::sendData(const QString& message)
 {
     TasLogger::logger()->debug("TasClient::sendData");
     mTimer.start(10000);
-    mMessageId = qrand();        
+    mMessageId = qrand();
     if(!mSocket->sendRequest(mMessageId, message)){
         mTimer.stop();
         mConnected = false;
-        mServerConnection->close();      
+        mServerConnection->close();
         emit error("Socket not writable!");
     }
     TasLogger::logger()->debug("TasClient::sendData done");
@@ -475,7 +389,7 @@ void TasClient::serviceResponse(TasMessage& response)
     if(response.messageId() == mMessageId){
         mTimer.stop();
         emit serverResponse(response.dataAsString());
-    }    
+    }
     else{
         emit error("Server responded with an invalid message.");
     }

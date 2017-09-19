@@ -1,22 +1,22 @@
-/*************************************************************************** 
-** 
-** Copyright (C) 2010 Nokia Corporation and/or its subsidiary(-ies). 
-** All rights reserved.  
-** Contact: Nokia Corporation (testabilitydriver@nokia.com) 
-** 
+/***************************************************************************
+**
+** Copyright (C) 2010 Nokia Corporation and/or its subsidiary(-ies).
+** All rights reserved.
+** Contact: Nokia Corporation (testabilitydriver@nokia.com)
+**
 ** This file is part of Testability Driver Qt Agent
-** 
-** If you have questions regarding the use of this file, please contact 
-** Nokia at testabilitydriver@nokia.com . 
-** 
-** This library is free software; you can redistribute it and/or 
-** modify it under the terms of the GNU Lesser General Public 
-** License version 2.1 as published by the Free Software Foundation 
-** and appearing in the file LICENSE.LGPL included in the packaging 
-** of this file. 
-** 
-****************************************************************************/ 
- 
+**
+** If you have questions regarding the use of this file, please contact
+** Nokia at testabilitydriver@nokia.com .
+**
+** This library is free software; you can redistribute it and/or
+** modify it under the terms of the GNU Lesser General Public
+** License version 2.1 as published by the Free Software Foundation
+** and appearing in the file LICENSE.LGPL included in the packaging
+** of this file.
+**
+****************************************************************************/
+
 
 
 #include <QMutableListIterator>
@@ -61,11 +61,11 @@ QString TasDomObject::parameter(const QString& name)
 
 /*!
     \class TasCommand
-    \brief TasCommand represents a single command to be sent to the application under testing.     
-    
+    \brief TasCommand represents a single command to be sent to the application under testing.
 
-    TasCommand contains the command to be executed and parameters needed for completing it. 
-    The TasCommander uses the values to send events to qApp. 
+
+    TasCommand contains the command to be executed and parameters needed for completing it.
+    The TasCommander uses the values to send events to qApp.
 */
 
 /*!
@@ -151,16 +151,16 @@ QHash<QString, QString> TasCommand::getApiParameters() const
         QDomElement apiParam = apiParams.item(i).toElement();
         if(!apiParam.isNull())
             params.insert(apiParam.attribute(COMMAND_TYPE_NAME), apiParam.attribute("value"));
-    }    
+    }
     return params;
 }
 
 
-/*! 
+/*!
   \class TasTargetObject
   \brief Search details about the target object or objecttree.
 
-  TasTargetObject provides the details to search for the object 
+  TasTargetObject provides the details to search for the object
   accessed from host side. Details used are object name, class name and
   a variety of search parameters (properties).
 
@@ -228,10 +228,10 @@ TasTargetObject* TasTargetObject::child() const
 
 /*!
     \class TasTarget
-    \brief TasTarget is the target object for the commands e.g QWidget     
-    
+    \brief TasTarget is the target object for the commands e.g QWidget
+
     TasTarget is the target object for the commands e.g QWidget
-     
+
 */
 
 /*!
@@ -305,7 +305,7 @@ TasCommand* TasTarget::findCommand(const QString& commandName)
 /*!
     Returns the id for the TasTarget.
 */
-QString TasTarget::id() const 
+QString TasTarget::id() const
 {
     return mElement.attribute(COMMAND_TARGET_ID);
 }
@@ -313,13 +313,13 @@ QString TasTarget::id() const
 /*!
     Returns the type for the TasTarget.
 */
-QString TasTarget::type() const 
+QString TasTarget::type() const
 {
     return mElement.attribute("type");
 }
 
 TasCommand& TasTarget::addCommand()
-{ 
+{
     TasCommand* command = new TasCommand(addChild(COMMAND_TYPE));
     mCommands.append(command);
     return *command;
@@ -328,10 +328,10 @@ TasCommand& TasTarget::addCommand()
 
 /*!
     \class TasTarget
-    \brief TasTarget is the target object for the commands e.g QWidget     
-    
+    \brief TasTarget is the target object for the commands e.g QWidget
+
     TasTarget is the target object for the commands e.g QWidget
-     
+
 */
 
 /*!
@@ -351,7 +351,7 @@ TasCommandModel::TasCommandModel(QDomDocument* document)
 TasCommandModel* TasCommandModel::makeModel(const QString& sourceXml)
 {
     TasCommandModel* model = 0;
-    QDomDocument *doc = new QDomDocument(COMMAND_ROOT);    
+    QDomDocument *doc = new QDomDocument(COMMAND_ROOT);
     QString errorMsg;
     if (doc->setContent(sourceXml, &errorMsg)){
         model = new TasCommandModel(doc);
@@ -368,7 +368,7 @@ TasCommandModel* TasCommandModel::makeModel(const QString& sourceXml)
 
 TasCommandModel* TasCommandModel::createModel()
 {
-    QDomDocument *doc = new QDomDocument(COMMAND_ROOT);        
+    QDomDocument *doc = new QDomDocument(COMMAND_ROOT);
     QDomElement root = doc->createElement(COMMAND_ROOT);
     doc->appendChild(root);
     return new TasCommandModel(doc);
@@ -380,9 +380,9 @@ TasCommandModel* TasCommandModel::createModel()
 TasCommandModel::~TasCommandModel()
 {
     qDeleteAll(mTargets);
-    mTargets.clear();    
+    mTargets.clear();
     delete mDocument;
-}    
+}
 
 QList<TasTarget*> TasCommandModel::targetList()
 {
@@ -390,7 +390,7 @@ QList<TasTarget*> TasCommandModel::targetList()
 }
 
 TasTarget& TasCommandModel::addTarget()
-{    
+{
     TasTarget* target = new TasTarget(addChild(COMMAND_TARGET));
     mTargets.append(target);
     return *target;
@@ -455,7 +455,7 @@ QString TasCommandModel::sourceString(bool original) const
     //if the model was edited then need to remake the xml
     //if not use the original (faster then always remaking)
     if(!original || mSource.isEmpty())
-        return mDocument->toString(-1);    
+        return mDocument->toString(-1);
     else
         return mSource;
 }

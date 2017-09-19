@@ -1,22 +1,22 @@
-/*************************************************************************** 
-** 
-** Copyright (C) 2010 Nokia Corporation and/or its subsidiary(-ies). 
-** All rights reserved. 
-** Contact: Nokia Corporation (testabilitydriver@nokia.com) 
-** 
+/***************************************************************************
+**
+** Copyright (C) 2010 Nokia Corporation and/or its subsidiary(-ies).
+** All rights reserved.
+** Contact: Nokia Corporation (testabilitydriver@nokia.com)
+**
 ** This file is part of Testability Driver Qt Agent
-** 
-** If you have questions regarding the use of this file, please contact 
-** Nokia at testabilitydriver@nokia.com . 
-** 
-** This library is free software; you can redistribute it and/or 
-** modify it under the terms of the GNU Lesser General Public 
-** License version 2.1 as published by the Free Software Foundation 
-** and appearing in the file LICENSE.LGPL included in the packaging 
-** of this file. 
-** 
-****************************************************************************/ 
- 
+**
+** If you have questions regarding the use of this file, please contact
+** Nokia at testabilitydriver@nokia.com .
+**
+** This library is free software; you can redistribute it and/or
+** modify it under the terms of the GNU Lesser General Public
+** License version 2.1 as published by the Free Software Foundation
+** and appearing in the file LICENSE.LGPL included in the packaging
+** of this file.
+**
+****************************************************************************/
+
 
 #include <QObject>
 #include <QDir>
@@ -77,7 +77,7 @@ bool TasPropertyLogger::startPropertyLog(QObject* object, QHash<QString, QString
     if(!validateParams(params, errorMsg)){
         return false;
     }
-    
+
     QString property = params.value(PROPERTY);
     if(!object->property(property.toLatin1()).isValid()){
         errorMsg = "Target object does not have a property "+property+".";
@@ -93,17 +93,17 @@ bool TasPropertyLogger::startPropertyLog(QObject* object, QHash<QString, QString
         fileMap = mTargets.value(object);
     }
     if(!fileMap.contains(property)){
-        QString name = params.value(FILEPATH);    
+        QString name = params.value(FILEPATH);
         if(!name.endsWith('/') && !name.endsWith('\\')){
             name.append(QDir::separator());
         }
-        name.append(TasCoreUtils::getApplicationName());  
+        name.append(TasCoreUtils::getApplicationName());
         name.append("_");
         name.append(object->metaObject()->className());
         name.append("_");
         name.append(property);
         name.append(".log");
-        bool append = (params.value(APPEND, "") == "true");    
+        bool append = (params.value(APPEND, "") == "true");
         QFile* file = mLoggerUtil.openFile(name, append);
         if(file->error()!= QFile::NoError){
             errorMsg = "Opening file failed, reason: " + QString::number(file->error());
@@ -113,7 +113,7 @@ bool TasPropertyLogger::startPropertyLog(QObject* object, QHash<QString, QString
         fileMap.insert(property, file);
     }
     mTargets.insert(object, fileMap);
-    
+
     if(params.contains(INTERVAL)){
         int interval = params.value(INTERVAL).toInt();
         if(interval != mInterval){

@@ -1,26 +1,26 @@
-/*************************************************************************** 
-** 
-** Copyright (C) 2010 Nokia Corporation and/or its subsidiary(-ies). 
-** All rights reserved. 
-** Contact: Nokia Corporation (testabilitydriver@nokia.com) 
-** 
+/***************************************************************************
+**
+** Copyright (C) 2010 Nokia Corporation and/or its subsidiary(-ies).
+** All rights reserved.
+** Contact: Nokia Corporation (testabilitydriver@nokia.com)
+**
 ** This file is part of Testability Driver Qt Agent
-** 
-** If you have questions regarding the use of this file, please contact 
-** Nokia at testabilitydriver@nokia.com . 
-** 
-** This library is free software; you can redistribute it and/or 
-** modify it under the terms of the GNU Lesser General Public 
-** License version 2.1 as published by the Free Software Foundation 
-** and appearing in the file LICENSE.LGPL included in the packaging 
-** of this file. 
-** 
-****************************************************************************/ 
+**
+** If you have questions regarding the use of this file, please contact
+** Nokia at testabilitydriver@nokia.com .
+**
+** This library is free software; you can redistribute it and/or
+** modify it under the terms of the GNU Lesser General Public
+** License version 2.1 as published by the Free Software Foundation
+** and appearing in the file LICENSE.LGPL included in the packaging
+** of this file.
+**
+****************************************************************************/
 
 
 
-#include <QDebug>    
-#include <QStack>    
+#include <QDebug>
+#include <QStack>
 #include <QObject>
 #include <QWeakPointer>
 #include <QDataStream>
@@ -32,7 +32,7 @@
 /*!
     \class TasSocket
     \brief TasSocket represents the socket communication between the server and client.
-    
+
     Plugins and and test framework communication with the server using tcp socket communication.
     The TasSocket class takes care of the communication details including messaging and connection
     details.
@@ -46,18 +46,15 @@
     Crc of the body: 2 bytes
     Compressed: 1 byte
     Body: Body size bytes.
-    
+
     The messages will be formatted in little endian byte order.
-    
+
     All communication is done synchronously so that the messaging will be
     expected to fail incase the given timeout value is exceeded. The default
     value is one second so operation expected to take longer must use
     larger values.
-    
- */
 
-static const int CHUNK_SIZE = 1024;
-static const int SLEEP_TIME = 5;
+ */
 
 TasServerSocket::TasServerSocket(QIODevice* device, QObject *parent)
     :TasSocket(device, parent)
@@ -104,7 +101,7 @@ void TasClientSocket::deviceDisconnected()
 */
 TasSocket::TasSocket(QIODevice* device, QObject *parent)
     :QObject(parent)
-{  
+{
     mDevice = device;
     clearHandlers();
 
@@ -114,13 +111,13 @@ TasSocket::TasSocket(QIODevice* device, QObject *parent)
     connect(mDevice, SIGNAL(aboutToClose()), this, SLOT(deviceDisconnected()));
     connect(mReader, SIGNAL(messageRead(TasMessage&)), this, SLOT(messageAvailable(TasMessage&)));
     connect(mDevice, SIGNAL(destroyed(QObject*)), this, SLOT(cleanUp(QObject*)));
-}                           
+}
 
 /*!
     Destructor
 */
 TasSocket::~TasSocket()
-{    
+{
     cleanUp();
     delete mReader;
     delete mWriter;
@@ -297,7 +294,7 @@ bool TasSocket::sendMessage(TasMessage& message)
 */
 //void TasSocket::dataAvailable()
 void TasSocket::messageAvailable(TasMessage& message)
-{ 
+{
     if (message.isRequest() && mRequestHandler) {
         mRequestHandler->serviceRequest(message, this);
     } else if (message.isResponse() && mResponseHandler) {
@@ -343,26 +340,9 @@ bool TasSocketWriter::writeMessage(TasMessage& message)
     return true;
 }
 
-void TasSocketWriter::writeBytes(const QByteArray& msgBytes)   
+void TasSocketWriter::writeBytes(const QByteArray& msgBytes)
 {
-#ifdef Q_OS_SYMBIAN
-    //write the data in one kb chunks to avoid problems caused by unstable hw
-    int bytesLeft = msgBytes.size();
-    int chunksWritten = 0;
-    forever{
-        if(bytesLeft > 0){
-            bytesLeft -= mDevice->write(msgBytes.mid(chunksWritten*CHUNK_SIZE).data(), qMin(CHUNK_SIZE,bytesLeft));
-            flush();
-            TasCoreUtils::wait(SLEEP_TIME);
-        }
-        else{
-            break;
-        }
-        chunksWritten++;
-    }
-#else
     mDevice->write(msgBytes.data(), msgBytes.size());
-#endif
     mDevice->waitForBytesWritten(READ_TIME_OUT);
 }
 
@@ -414,7 +394,7 @@ TasSocketReader::~TasSocketReader()
 }
 
 void TasSocketReader::close()
-{       
+{
     mDevice->disconnect(this);
     mDevice = 0;
 }
@@ -427,7 +407,7 @@ void TasSocketReader::close()
     compression may cause problems.
 */
 void TasSocketReader::readMessageData()
-{   
+{
     TasLogger::logger()->debug("TasSocketReader::readMessageData start.");
     if (!mDevice) {
         TasLogger::logger()->error("TasSocketReader::readMessageData reading device not available.");
@@ -470,7 +450,7 @@ bool TasSocketReader::readOneMessage(TasMessage& message)
 
     //read header
     in >> flag >> bodySize >> crc >> compressed >> messageId;
-    
+
     bool compression = false;
     if (compressed == COMPRESSION_ON) {
         compression = true;
@@ -480,7 +460,7 @@ bool TasSocketReader::readOneMessage(TasMessage& message)
 
     //read body, use weakpointer to try to detect sudden disconnections
     QByteArray rawBytes;
-    
+
     int totalBytes = 0;
     forever{
         if(mDevice->bytesAvailable() == 0){
@@ -492,7 +472,7 @@ bool TasSocketReader::readOneMessage(TasMessage& message)
                 break;
             }
         }
-        
+
         if(mDevice->bytesAvailable() < 0){
             TasLogger::logger()->error("TasSocket::readData error in reading data. ");
             ok = false;

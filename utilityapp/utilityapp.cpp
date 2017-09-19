@@ -1,21 +1,21 @@
-/*************************************************************************** 
-** 
-** Copyright (C) 2010 Nokia Corporation and/or its subsidiary(-ies). 
-** All rights reserved. 
-** Contact: Nokia Corporation (testabilitydriver@nokia.com) 
-** 
+/***************************************************************************
+**
+** Copyright (C) 2010 Nokia Corporation and/or its subsidiary(-ies).
+** All rights reserved.
+** Contact: Nokia Corporation (testabilitydriver@nokia.com)
+**
 ** This file is part of Testability Driver Qt Agent
-** 
-** If you have questions regarding the use of this file, please contact 
-** Nokia at testabilitydriver@nokia.com . 
-** 
-** This library is free software; you can redistribute it and/or 
-** modify it under the terms of the GNU Lesser General Public 
-** License version 2.1 as published by the Free Software Foundation 
-** and appearing in the file LICENSE.LGPL included in the packaging 
-** of this file. 
-** 
-****************************************************************************/ 
+**
+** If you have questions regarding the use of this file, please contact
+** Nokia at testabilitydriver@nokia.com .
+**
+** This library is free software; you can redistribute it and/or
+** modify it under the terms of the GNU Lesser General Public
+** License version 2.1 as published by the Free Software Foundation
+** and appearing in the file LICENSE.LGPL included in the packaging
+** of this file.
+**
+****************************************************************************/
 
 #include <QApplication>
 #include <QPixmap>
@@ -26,7 +26,7 @@
 #include "tasconstants.h"
 
 #include "utilityapp.h"
- 
+
 
 TasUtilityApp::TasUtilityApp()
 {}
@@ -56,7 +56,7 @@ void TasUtilityApp::sendData(const QByteArray& data, uint id)
     serverConnection.connectToHost(QT_SERVER_NAME, QT_SERVER_PORT);
 #else
     serverConnection.connectToServer(LOCAL_SERVER_NAME);
-#endif   
+#endif
     serverConnection.waitForConnected(3000);
     socket.sendResponse(id, data);
 }

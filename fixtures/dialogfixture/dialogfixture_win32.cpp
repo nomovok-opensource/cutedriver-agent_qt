@@ -19,7 +19,7 @@
 ****************************************************************************/
 
 
-#define NOMINMAX 
+#define NOMINMAX
 #include <windows.h>
 #include <psapi.h>
 

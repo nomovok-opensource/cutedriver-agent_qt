@@ -1,22 +1,22 @@
-/*************************************************************************** 
-** 
-** Copyright (C) 2010 Nokia Corporation and/or its subsidiary(-ies). 
-** All rights reserved. 
-** Contact: Nokia Corporation (testabilitydriver@nokia.com) 
-** 
+/***************************************************************************
+**
+** Copyright (C) 2010 Nokia Corporation and/or its subsidiary(-ies).
+** All rights reserved.
+** Contact: Nokia Corporation (testabilitydriver@nokia.com)
+**
 ** This file is part of Testability Driver Qt Agent
-** 
-** If you have questions regarding the use of this file, please contact 
-** Nokia at testabilitydriver@nokia.com . 
-** 
-** This library is free software; you can redistribute it and/or 
-** modify it under the terms of the GNU Lesser General Public 
-** License version 2.1 as published by the Free Software Foundation 
-** and appearing in the file LICENSE.LGPL included in the packaging 
-** of this file. 
-** 
-****************************************************************************/ 
- 
+**
+** If you have questions regarding the use of this file, please contact
+** Nokia at testabilitydriver@nokia.com .
+**
+** This library is free software; you can redistribute it and/or
+** modify it under the terms of the GNU Lesser General Public
+** License version 2.1 as published by the Free Software Foundation
+** and appearing in the file LICENSE.LGPL included in the packaging
+** of this file.
+**
+****************************************************************************/
+
 
 
 #include <QApplication>
@@ -29,7 +29,7 @@
   \class FixtureService
   \brief FixtureService invokes fixtures
 
-*/    
+*/
 
 FixtureService::FixtureService()
 {
@@ -45,13 +45,13 @@ FixtureService::~FixtureService()
     delete mPluginLoader;
     while (!commandQueue.isEmpty()){
         delete commandQueue.takeFirst();
-    } 
+    }
 }
 
 bool FixtureService::executeService(TasCommandModel& model, TasResponse& response)
-{    
+{
     if(model.service() == serviceName() ){
-        
+
         if(!model.isAsynchronous()){
             QString message = "";
             if(!performFixture(model, message)){
@@ -61,8 +61,8 @@ bool FixtureService::executeService(TasCommandModel& model, TasResponse& respons
         }
         else{
             //needs some refactoring to avoid double parse...(luckily small docs..)
-            commandQueue.enqueue(TasCommandModel::makeModel(model.sourceString()));            
-            mTimer.start();            
+            commandQueue.enqueue(TasCommandModel::makeModel(model.sourceString()));
+            mTimer.start();
         }
         return true;
     }
@@ -94,7 +94,7 @@ bool FixtureService::performFixture(TasCommandModel& model, QString& message)
         QString objectType = NULL_TYPE;
 
         if(targetType == TYPE_GRAPHICS_VIEW){
-            ptr = findGraphicsItem(targetId); 
+            ptr = findGraphicsItem(targetId);
             objectType = GRAPHICS_ITEM_TYPE;
         }
         else if(targetType == TYPE_STANDARD_VIEW){
@@ -104,7 +104,7 @@ bool FixtureService::performFixture(TasCommandModel& model, QString& message)
         else if(targetType == TYPE_WINDOW_VIEW) {
             ptr = findWindow(targetId);
             objectType = QQUICKVIEW_TYPE;
-        }        
+        }
         else if(targetType == TYPE_QSCENEGRAPH){
             ptr = findQuickItem(targetId);
             objectType = QQUICKITEM_TYPE;
@@ -115,14 +115,14 @@ bool FixtureService::performFixture(TasCommandModel& model, QString& message)
         }
         //only one supported for now
         TasCommand* fixture = commandTarget->findCommand("Fixture");
-        if(fixture){            
+        if(fixture){
             QString plugin = fixture->parameter("plugin");
             QString method = fixture->parameter("method");
             TasFixturePluginInterface* fixturePlugin = mPluginLoader->loadFixtureInterface(plugin);
             if(fixturePlugin){
                 TasLogger::logger()->debug("FixtureService::performFixture fixture found");
                 QHash<QString,QString> parameters = fixture->getApiParameters();
-                parameters.insert(OBJECT_TYPE, objectType);            
+                parameters.insert(OBJECT_TYPE, objectType);
                 TasLogger::logger()->debug("FixtureService::performFixture fixture execute");
                 QString stdOut;
                 result = fixturePlugin->execute(ptr, method, parameters, stdOut);
@@ -132,7 +132,7 @@ bool FixtureService::performFixture(TasCommandModel& model, QString& message)
                 message = "No fixture plugin found for the given id or path: " + plugin;
             }
         }
-        break;        
+        break;
     }
     return result;
 }
@@ -141,12 +141,12 @@ bool FixtureService::performFixture(TasCommandModel& model, QString& message)
     Perform delayed events.
 */
 void FixtureService::delayedEvent()
-{    
+{
     TasCommandModel* commands = commandQueue.dequeue();
     QString message;
     if(!performFixture(*commands, message)){
         TasLogger::logger()->error(message);
-    }    
+    }
     delete commands;
     if(commandQueue.isEmpty()){
         mTimer.stop();

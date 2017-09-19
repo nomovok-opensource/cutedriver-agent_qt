@@ -1,22 +1,22 @@
-/*************************************************************************** 
-** 
-** Copyright (C) 2010 Nokia Corporation and/or its subsidiary(-ies). 
-** All rights reserved. 
-** Contact: Nokia Corporation (testabilitydriver@nokia.com) 
-** 
+/***************************************************************************
+**
+** Copyright (C) 2010 Nokia Corporation and/or its subsidiary(-ies).
+** All rights reserved.
+** Contact: Nokia Corporation (testabilitydriver@nokia.com)
+**
 ** This file is part of Testability Driver Qt Agent
-** 
-** If you have questions regarding the use of this file, please contact 
-** Nokia at testabilitydriver@nokia.com . 
-** 
-** This library is free software; you can redistribute it and/or 
-** modify it under the terms of the GNU Lesser General Public 
-** License version 2.1 as published by the Free Software Foundation 
-** and appearing in the file LICENSE.LGPL included in the packaging 
-** of this file. 
-** 
-****************************************************************************/ 
- 
+**
+** If you have questions regarding the use of this file, please contact
+** Nokia at testabilitydriver@nokia.com .
+**
+** This library is free software; you can redistribute it and/or
+** modify it under the terms of the GNU Lesser General Public
+** License version 2.1 as published by the Free Software Foundation
+** and appearing in the file LICENSE.LGPL included in the packaging
+** of this file.
+**
+****************************************************************************/
+
 
 
 
@@ -53,33 +53,33 @@ public:
     ~TestabilityService();
 
 public:
-	bool eventFilter(QObject *target, QEvent *event);
+    bool eventFilter(QObject *target, QEvent *event);
 
 signals:
-	void registered();
-	void unRegistered();
-  
+    void registered();
+    void unRegistered();
+
 public slots:
-	void registerPlugin();
+    void registerPlugin();
     void unReqisterServicePlugin();
-	void serviceResponse(TasMessage& response);
-    
+    void serviceResponse(TasMessage& response);
+
 private slots:
-	void sendRegisterMessage();
+    void sendRegisterMessage();
     void connectionClosed();
-	void timeout();
+    void timeout();
 
 private:
     void initializeServiceManager();
-	QString makeReqisterMessage(QString command, QMap<QString,QString> attributes);
-	void loadStartUpParams(QString appName);
-	void enableSignalTracking(QString signal, QString timeStamp);
-	void prepareForDeletion();
-	void initializeConnections();
+    QString makeReqisterMessage(QString command, QMap<QString,QString> attributes);
+    void loadStartUpParams(QString appName);
+    void enableSignalTracking(QString signal, QString timeStamp);
+    void prepareForDeletion();
+    void initializeConnections();
 
 private:
-   
- 	TasServiceManager* mServiceManager;
+
+    TasServiceManager* mServiceManager;
 
 #if defined(TAS_NOLOCALSOCKET)
     QTcpSocket* mServerConnection;
@@ -88,32 +88,32 @@ private:
 #endif
 
     TasClientSocket* mSocket;
-    QString mPluginId;    
-    bool mRegistered;   
+    QString mPluginId;
+    bool mRegistered;
     bool mConnected;
     EventService* mEventService;
     FixtureService* mFixtureService;
-	QTimer mRegisterTime;
-	QTimer mRegisterWatchDog;
-	QTimer mPaintTracker;
-	qint32 mMessageId;
-	int mPaintEventCounter;
+    QTimer mRegisterTime;
+    QTimer mRegisterWatchDog;
+    QTimer mPaintTracker;
+    qint32 mMessageId;
+    int mPaintEventCounter;
 };
 
 
 class TestabilityLoader : public QObject
 {
-  Q_OBJECT
+    Q_OBJECT
 
 public:
-   TestabilityLoader();
+    TestabilityLoader();
 
 public slots:
-   void load();
-   void unload();
+    void load();
+    void unload();
 
 private:
-   TestabilityService *mService;
+    TestabilityService *mService;
 };
 
 #endif

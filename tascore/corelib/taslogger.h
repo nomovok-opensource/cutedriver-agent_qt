@@ -1,22 +1,22 @@
-/*************************************************************************** 
-** 
-** Copyright (C) 2010 Nokia Corporation and/or its subsidiary(-ies). 
-** All rights reserved. 
-** Contact: Nokia Corporation (testabilitydriver@nokia.com) 
-** 
+/***************************************************************************
+**
+** Copyright (C) 2010 Nokia Corporation and/or its subsidiary(-ies).
+** All rights reserved.
+** Contact: Nokia Corporation (testabilitydriver@nokia.com)
+**
 ** This file is part of Testability Driver Qt Agent
-** 
-** If you have questions regarding the use of this file, please contact 
-** Nokia at testabilitydriver@nokia.com . 
-** 
-** This library is free software; you can redistribute it and/or 
-** modify it under the terms of the GNU Lesser General Public 
-** License version 2.1 as published by the Free Software Foundation 
-** and appearing in the file LICENSE.LGPL included in the packaging 
-** of this file. 
-** 
-****************************************************************************/ 
- 
+**
+** If you have questions regarding the use of this file, please contact
+** Nokia at testabilitydriver@nokia.com .
+**
+** This library is free software; you can redistribute it and/or
+** modify it under the terms of the GNU Lesser General Public
+** License version 2.1 as published by the Free Software Foundation
+** and appearing in the file LICENSE.LGPL included in the packaging
+** of this file.
+**
+****************************************************************************/
+
 
 
 
@@ -42,7 +42,7 @@ enum LogType
     LOG_DEBUG = 4
 };
 
-class TAS_EXPORT TasLogger 
+class TAS_EXPORT TasLogger
 {
 
 private:
@@ -50,7 +50,7 @@ private:
     ~TasLogger();
 public:
     static TasLogger* logger();
-	static void removeLogger();
+    static void removeLogger();
     void debug(const QString message);
     void info(const QString message);
     void warning(const QString message);
@@ -58,33 +58,33 @@ public:
     void fatal(const QString message);
     void setLevel(const LogType& level);
     void setLogFile(const QString logFileName);
-	void setLogDir(const QString logPath);
+    void setLogDir(const QString logPath);
     void enableLogger();
-	void disableLogger();
-	void setOutputter(bool intercept=true);
-	void logEvents(QStringList filters=QStringList());
-	void stopEventLogging();
-	void useQDebug(bool use);
-	void setLogSize(int size);
-	void configureLogger(TasCommand& command);
-	void configureEventLogger(TasCommand& command);
-	void clearLogFile();
+    void disableLogger();
+    void setOutputter(bool intercept=true);
+    void logEvents(QStringList filters=QStringList());
+    void stopEventLogging();
+    void useQDebug(bool use);
+    void setLogSize(int size);
+    void configureLogger(TasCommand& command);
+    void configureEventLogger(TasCommand& command);
+    void clearLogFile();
 private:
-    void writeLogLine(LogType type, const QString& message);    
-    void intialize();    
-	void outPut(const QString& line);
+    void writeLogLine(LogType type, const QString& message);
+    void intialize();
+    void outPut(const QString& line);
 
 private:
-    static TasLogger* mInstance;    
-	bool mUseQDebug;
+    static TasLogger* mInstance;
+    bool mUseQDebug;
     QFile* mOut;
     bool mEnabled;
-    LogType mCurrentLevel;    
-	QString mLogFileName;
-	QString mLogPath;
-	EventLogger* mEventLogger;
-	QTime mLastLogRollCheck;
-	int mLogSize;
+    LogType mCurrentLevel;
+    QString mLogFileName;
+    QString mLogPath;
+    EventLogger* mEventLogger;
+    QTime mLastLogRollCheck;
+    int mLogSize;
     QMutex mMutex;
     static QMutex* mInstanceMutex;
 };
@@ -99,19 +99,18 @@ private:
 
 class EventLogger : public QObject
 {
-  Q_OBJECT
+    Q_OBJECT
 
 public:
-  bool eventFilter(QObject *target, QEvent *event);
-
-  void setFilterStrings(QStringList filterString);
-
-private:
-  bool logEvent(QString eventType);
+    bool eventFilter(QObject *target, QEvent *event);
+    void setFilterStrings(QStringList filterString);
 
 private:
-  QStringList mFilterStrings;
-  
+    bool logEvent(QString eventType);
+
+private:
+    QStringList mFilterStrings;
+
 };
 
 #endif

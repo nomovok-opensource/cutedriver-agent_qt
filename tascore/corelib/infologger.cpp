@@ -1,22 +1,22 @@
-/*************************************************************************** 
-** 
-** Copyright (C) 2010 Nokia Corporation and/or its subsidiary(-ies). 
-** All rights reserved.  
-** Contact: Nokia Corporation (testabilitydriver@nokia.com) 
-** 
+/***************************************************************************
+**
+** Copyright (C) 2010 Nokia Corporation and/or its subsidiary(-ies).
+** All rights reserved.
+** Contact: Nokia Corporation (testabilitydriver@nokia.com)
+**
 ** This file is part of Testability Driver Qt Agent
-** 
-** If you have questions regarding the use of this file, please contact 
-** Nokia at testabilitydriver@nokia.com . 
-** 
-** This library is free software; you can redistribute it and/or 
-** modify it under the terms of the GNU Lesser General Public 
-** License version 2.1 as published by the Free Software Foundation 
-** and appearing in the file LICENSE.LGPL included in the packaging 
-** of this file. 
-** 
-****************************************************************************/ 
- 
+**
+** If you have questions regarding the use of this file, please contact
+** Nokia at testabilitydriver@nokia.com .
+**
+** This library is free software; you can redistribute it and/or
+** modify it under the terms of the GNU Lesser General Public
+** License version 2.1 as published by the Free Software Foundation
+** and appearing in the file LICENSE.LGPL included in the packaging
+** of this file.
+**
+****************************************************************************/
+
 
 #include <QDir>
 
@@ -41,9 +41,9 @@ const static QString VALUE_DELIM = ":";
 InfoLogger::InfoLogger()
 {
     mCpu = 0;
-	mMem = 0;
-	mGpu = 0;
-	mPwr = 0;
+    mMem = 0;
+    mGpu = 0;
+    mPwr = 0;
     mState = 0;
     mDeviceUtils = new TasDeviceUtils();
     mTimer.setInterval(1000);
@@ -80,7 +80,7 @@ void InfoLogger::performLogService(TasCommandModel& model, TasResponse& response
                 else{
                     mLastCpuTime = mDeviceUtils->currentProcessCpuTime();
                     mInterval.start();
-                    mState |= CpuLogging;     
+                    mState |= CpuLogging;
                     if(mCpu){
                         delete mCpu;
                         mCpu = 0;
@@ -168,7 +168,7 @@ void InfoLogger::performLogService(TasCommandModel& model, TasResponse& response
 
 /*!
   Makes the file name for the requested log type. Filename is made from the application
-  name plug type and suffix .log. Returns false if the given command does not have 
+  name plug type and suffix .log. Returns false if the given command does not have
   the FILEPATH parameter.
 */
 bool InfoLogger::makeFileName(TasCommand* command, const QString& type, QString& name)
@@ -176,13 +176,13 @@ bool InfoLogger::makeFileName(TasCommand* command, const QString& type, QString&
     //cannot make a path since not given
     if(command->parameter(FILEPATH).isEmpty()) return false;
 
-    name = command->parameter(FILEPATH);    
+    name = command->parameter(FILEPATH);
 
     if(!name.endsWith('/') && !name.endsWith('\\')){
         name.append(QDir::separator());
     }
 
-    name.append(TasCoreUtils::getApplicationName());  
+    name.append(TasCoreUtils::getApplicationName());
     name.append(type);
     name.append(".log");
     TasLogger::logger()->debug("InfoLogger::makeFileName " + name);
@@ -190,8 +190,8 @@ bool InfoLogger::makeFileName(TasCommand* command, const QString& type, QString&
 }
 
 QFile* InfoLogger::openFile(const QString& fileName, TasCommand* command)
-{    
-    bool append = (command->parameter(APPEND) == "true");    
+{
+    bool append = (command->parameter(APPEND) == "true");
     return mLoggerUtil.openFile(fileName, append);
 }
 
@@ -202,11 +202,11 @@ QFile* InfoLogger::openFile(const QString& fileName, TasCommand* command)
 void InfoLogger::loadCpuData(TasResponse& response, TasCommand* command)
 {
     if(mCpu){
-        response.setData(loadData(mCpu, "cpuLoad", command));    
+        response.setData(loadData(mCpu, "cpuLoad", command));
         if(command->parameter(ACTION) == "stop"){
             delete mCpu;
             mCpu = 0;
-            mState ^= CpuLogging;                    
+            mState ^= CpuLogging;
         }
     }
     else{
@@ -221,7 +221,7 @@ void InfoLogger::loadCpuData(TasResponse& response, TasCommand* command)
 void InfoLogger::loadMemData(TasResponse& response, TasCommand* command)
 {
     if(mMem){
-        response.setData(loadData(mMem, "memUsage", command));    
+        response.setData(loadData(mMem, "memUsage", command));
         if(command->parameter(ACTION) == "stop"){
             delete mMem;
             mMem = 0;
@@ -241,7 +241,7 @@ void InfoLogger::loadMemData(TasResponse& response, TasCommand* command)
 void InfoLogger::loadGpuData(TasResponse& response, TasCommand* command)
 {
     if(mGpu){
-        response.setData(loadData(mGpu, "gpuMemUsage", command));            
+        response.setData(loadData(mGpu, "gpuMemUsage", command));
         if(command->parameter(ACTION) == "stop"){
             delete mGpu;
             mGpu = 0;
@@ -273,8 +273,8 @@ void InfoLogger::loadPwrData(TasResponse& response, TasCommand* command)
 }
 
 /*!
-  Loads the data from the file and makes a tasdatamodel out of the 
-  data. Serializes the data and returns a QByteArray containing the 
+  Loads the data from the file and makes a tasdatamodel out of the
+  data. Serializes the data and returns a QByteArray containing the
   serialized data.
 */
 QByteArray InfoLogger::loadData(QFile* file, const QString& name, TasCommand* command)
@@ -323,7 +323,7 @@ void InfoLogger::infoTimerEvent()
 }
 
 void InfoLogger::logMem()
-{    
+{
     QString line = "timeStamp:";
     line.append(QDateTime::currentDateTime().toString(DATE_FORMAT));
     line.append(ATTR_DELIM);
@@ -353,7 +353,7 @@ void InfoLogger::logCpu()
         // Calculate the thread's lapsed CPU time and CPU usage in percentage
         qreal cpuDiff = currentCpuTime - mLastCpuTime;
         mLastCpuTime =  currentCpuTime;
-        qreal cpuUsage = ( cpuDiff / elapsed ) * 100;        
+        qreal cpuUsage = ( cpuDiff / elapsed ) * 100;
         line.append(QString::number(cpuUsage));
     }
     mLoggerUtil.writeLine(line, mCpu);
@@ -367,11 +367,11 @@ void InfoLogger::logGpu()
     line.append(ATTR_DELIM);
     //not supported
     if(!details.isValid){
-        details.totalMem = -1; 
-        details.usedMem = -1; 
-        details.freeMem = -1; 
-        details.processPrivateMem = -1; 
-        details.processSharedMem = -1; 
+        details.totalMem = -1;
+        details.usedMem = -1;
+        details.freeMem = -1;
+        details.processPrivateMem = -1;
+        details.processSharedMem = -1;
     }
     line.append("totalMem:");
     line.append(QString::number(details.totalMem));
@@ -390,7 +390,7 @@ void InfoLogger::logGpu()
     line.append(ATTR_DELIM);
     line.append("processSharedMem");
     line.append(VALUE_DELIM);
-    line.append(QString::number(details.processSharedMem));    
+    line.append(QString::number(details.processSharedMem));
     mLoggerUtil.writeLine(line, mGpu);
 }
 
@@ -426,14 +426,14 @@ QByteArray TasInfoLoggerUtil::loadLoggedData(QFile* file, const QString& name, Q
     TasDataModel* tasModel = new TasDataModel();
     QString qtVersion = "Qt" + QString(qVersion());
     TasObjectContainer& container = tasModel->addNewObjectContainer(1, qtVersion, "qt");
-    TasObject& parentData = container.addNewObject("0", name, "logData");   
+    TasObject& parentData = container.addNewObject("0", name, "logData");
 
     int counter = 0;
     QTextStream in(file);
     in.seek(0);
     while (!in.atEnd()) {
         TasObject& obj = parentData.addObject();
-        obj.setId(QString::number(counter));        
+        obj.setId(QString::number(counter));
         obj.setType("logEntry");
         obj.setName("LogEntry");
         //load attributes format is: title:value;title:value....
@@ -445,10 +445,10 @@ QByteArray TasInfoLoggerUtil::loadLoggedData(QFile* file, const QString& name, Q
         }
         counter++;
     }
-    parentData.addAttribute("entryCount", counter);   
+    parentData.addAttribute("entryCount", counter);
     if(!params.isEmpty()){
         foreach(QString key, params.keys()){
-            parentData.addAttribute(key, params.value(key));   
+            parentData.addAttribute(key, params.value(key));
         }
     }
     QByteArray xml;
@@ -463,18 +463,18 @@ void TasInfoLoggerUtil::writeLine(const QString& line, QFile* file)
     if(file && file->isWritable()){
         file->write(line.toLatin1());
         file->write("\n");
-        file->flush();        
+        file->flush();
     }
 }
 
 QFile* TasInfoLoggerUtil::openFile(const QString& fileName, bool append)
 {
-    QFile* file = new QFile(fileName);    
+    QFile* file = new QFile(fileName);
     if(append){
-        file->open(QIODevice::ReadWrite | QIODevice::Text | QIODevice::Append);               
+        file->open(QIODevice::ReadWrite | QIODevice::Text | QIODevice::Append);
     }
     else{
-        file->open(QIODevice::ReadWrite | QIODevice::Text | QIODevice::Truncate);               
-    } 
+        file->open(QIODevice::ReadWrite | QIODevice::Text | QIODevice::Truncate);
+    }
     return file;
 }

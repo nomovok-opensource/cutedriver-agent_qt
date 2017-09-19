@@ -1,22 +1,22 @@
-/*************************************************************************** 
-** 
-** Copyright (C) 2010 Nokia Corporation and/or its subsidiary(-ies). 
-** All rights reserved. 
-** Contact: Nokia Corporation (testabilitydriver@nokia.com) 
-** 
+/***************************************************************************
+**
+** Copyright (C) 2010 Nokia Corporation and/or its subsidiary(-ies).
+** All rights reserved.
+** Contact: Nokia Corporation (testabilitydriver@nokia.com)
+**
 ** This file is part of Testability Driver Qt Agent
-** 
-** If you have questions regarding the use of this file, please contact 
-** Nokia at testabilitydriver@nokia.com . 
-** 
-** This library is free software; you can redistribute it and/or 
-** modify it under the terms of the GNU Lesser General Public 
-** License version 2.1 as published by the Free Software Foundation 
-** and appearing in the file LICENSE.LGPL included in the packaging 
-** of this file. 
-** 
-****************************************************************************/ 
- 
+**
+** If you have questions regarding the use of this file, please contact
+** Nokia at testabilitydriver@nokia.com .
+**
+** This library is free software; you can redistribute it and/or
+** modify it under the terms of the GNU Lesser General Public
+** License version 2.1 as published by the Free Software Foundation
+** and appearing in the file LICENSE.LGPL included in the packaging
+** of this file.
+**
+****************************************************************************/
+
 
 #include <QHash>
 
@@ -29,8 +29,8 @@
 
 FixtureService::FixtureService()
 {
-    mPluginLoader = new TasPluginLoader();    
-	mInitialized = false;
+    mPluginLoader = new TasPluginLoader();
+    mInitialized = false;
     mTimer = new QTimer();
     mTimer->setInterval(1);
     connect(mTimer, SIGNAL(timeout()), this, SLOT(delayedEvent()));
@@ -58,11 +58,11 @@ bool FixtureService::executeService(TasCommandModel& model, TasResponse& respons
 void FixtureService::performServerFixture(TasCommandModel &model, TasResponse& response)
 {
     TasLogger::logger()->debug("FixtureService::performServerFixture");
-	if(!mInitialized){
-		mPluginLoader->initializeFixturePlugins();
-		mInitialized = true;
-	}
-	
+    if(!mInitialized){
+        mPluginLoader->initializeFixturePlugins();
+        mInitialized = true;
+    }
+
     if(!model.isAsynchronous()){
         QString message = "";
         if(performFixture(model, message)){
@@ -75,8 +75,8 @@ void FixtureService::performServerFixture(TasCommandModel &model, TasResponse& r
     }
     else{
         //needs some refactoring to avoid double parse...(luckily small docs..)
-        commandQueue.enqueue(TasCommandModel::makeModel(model.sourceString()));            
-        mTimer->start();            
+        commandQueue.enqueue(TasCommandModel::makeModel(model.sourceString()));
+        mTimer->start();
     }
 }
 
@@ -119,12 +119,12 @@ bool FixtureService::performFixture(TasCommandModel& model, QString& message)
     Perform delayed events.
 */
 void FixtureService::delayedEvent()
-{    
+{
     TasCommandModel* commands = commandQueue.dequeue();
     QString message;
     if(!performFixture(*commands, message)){
         TasLogger::logger()->error(message);
-    }    
+    }
     delete commands;
     if(commandQueue.isEmpty()){
         mTimer->stop();

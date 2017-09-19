@@ -1,22 +1,22 @@
-/*************************************************************************** 
-** 
-** Copyright (C) 2010 Nokia Corporation and/or its subsidiary(-ies). 
-** All rights reserved. 
-** Contact: Nokia Corporation (testabilitydriver@nokia.com) 
-** 
+/***************************************************************************
+**
+** Copyright (C) 2010 Nokia Corporation and/or its subsidiary(-ies).
+** All rights reserved.
+** Contact: Nokia Corporation (testabilitydriver@nokia.com)
+**
 ** This file is part of Testability Driver Qt Agent
-** 
-** If you have questions regarding the use of this file, please contact 
-** Nokia at testabilitydriver@nokia.com . 
-** 
-** This library is free software; you can redistribute it and/or 
-** modify it under the terms of the GNU Lesser General Public 
-** License version 2.1 as published by the Free Software Foundation 
-** and appearing in the file LICENSE.LGPL included in the packaging 
-** of this file. 
-** 
-****************************************************************************/ 
- 
+**
+** If you have questions regarding the use of this file, please contact
+** Nokia at testabilitydriver@nokia.com .
+**
+** This library is free software; you can redistribute it and/or
+** modify it under the terms of the GNU Lesser General Public
+** License version 2.1 as published by the Free Software Foundation
+** and appearing in the file LICENSE.LGPL included in the packaging
+** of this file.
+**
+****************************************************************************/
+
 
 #include "tasnativeutils.h"
 
@@ -30,7 +30,7 @@
 #include <X11/Xutil.h>
 #include <X11/Xatom.h>
 
-int pidOfXWindow(Display* display, Window win) 
+int pidOfXWindow(Display* display, Window win)
 {
     int pid = -1;
     Atom atom;
@@ -53,10 +53,10 @@ int pidOfXWindow(Display* display, Window win)
                 //NOP
             } else {
                 pid = prop[1] * 256;
-                pid += prop[0];  
+                pid += prop[0];
             }
         }
-    }  
+    }
     if (prop) XFree(prop);
     return pid;
 }
@@ -65,14 +65,14 @@ int pidOfXWindow(Display* display, Window win)
 
 /*!
   \class TasNativeUtils
-  \brief Provides platform dependent operations.    
+  \brief Provides platform dependent operations.
 */
 
 // Window id of the currently active window
 
 
 
-bool  dockWindow(Display* dpy, Window window) 
+bool  dockWindow(Display* dpy, Window window)
 {
     unsigned long nitems, after;
     int format;
@@ -80,7 +80,7 @@ bool  dockWindow(Display* dpy, Window window)
     unsigned char* data = NULL;
     Atom _NET_WM_WINDOW_TYPE_DOCK = XInternAtom(dpy, "_NET_WM_WINDOW_TYPE_DOCK",
                                            False);
-    Atom WINDOW_TYPE = XInternAtom(dpy, "_NET_WM_WINDOW_TYPE", False);    
+    Atom WINDOW_TYPE = XInternAtom(dpy, "_NET_WM_WINDOW_TYPE", False);
 
     Atom curr_type;
 
@@ -96,7 +96,7 @@ bool  dockWindow(Display* dpy, Window window)
                 return true;
             }
         }
-        
+
     }
 
     if (data) XFree(data);
@@ -107,14 +107,14 @@ bool  dockWindow(Display* dpy, Window window)
 long getstate(Display* display, Window window)
 {
     static const long WM_STATE_ELEMENTS = 2L;
-    
+
     unsigned long nitems;
     unsigned long leftover;
     Atom xa_WM_STATE, actual_type;
     int actual_format;
     int status;
     unsigned char* p = NULL;
-    
+
     xa_WM_STATE = XInternAtom(display, "WM_STATE", True);
 
     if (window == None || window == 0) {
@@ -125,12 +125,12 @@ long getstate(Display* display, Window window)
                                 False, xa_WM_STATE, &actual_type, &actual_format,
                                 &nitems, &leftover, &p);
     long value = -1;
-    
+
     if (status == 0) {
         if (p != NULL) {
             // Take first 8 bits
             // Wonder if this is the same on a 64 bit system?
-            value = * (const unsigned long *) p & 0xffffffff; 
+            value = * (const unsigned long *) p & 0xffffffff;
             XFree(p);
         }
 
@@ -151,7 +151,7 @@ Window queryStack(Display* dpy, Window root, const QList<quint64>& pids)
     unsigned char* data = NULL;
     Window child;
     int i;
-            
+
     if (!STACK) {
         return root;
     }
@@ -159,18 +159,18 @@ Window queryStack(Display* dpy, Window root, const QList<quint64>& pids)
                                       &type, &format, &nitems, &after, &data)) {
         for (i = (nitems-1); i >= 0; --i) {
             child = ((Window*)data)[i];
-            if (!dockWindow(dpy, child) && getstate(dpy, child) == 1 && 
+            if (!dockWindow(dpy, child) && getstate(dpy, child) == 1 &&
                 pids.contains(pidOfXWindow(dpy, child))) {
 
                 if (data) XFree(data);
                 return child;
             }
         }
-            
+
     }
     if (data) XFree(data);
     return None;
-    
+
 }
 
 Window tryChildren(Display *dpy, Window win)
@@ -217,14 +217,14 @@ Window findActiveWindow(Display *dpy, Window win)
 }
 
 // Ignore errors related to the Window calls (of course, the pid is not resolved)
-int errorHandler(Display*, XErrorEvent* e) 
+int errorHandler(Display*, XErrorEvent* e)
 {
     TasLogger::logger()->warning("TasNativeUtils::errorHandler received X Error during request");
     if (e->error_code == BadWindow) {
         // More verbose on the most common one
         TasLogger::logger()->warning("TasNativeUtils::errorHandler BadWindow");
     } else {
-        TasLogger::logger()->warning("TasNativeUtils::errorHandler code " + 
+        TasLogger::logger()->warning("TasNativeUtils::errorHandler code " +
                                    QString::number(e->error_code));
     }
     // XGetErrorText contains more info, if necessary
@@ -267,7 +267,7 @@ int TasNativeUtils::pidOfActiveWindow(const QHash<quint64, TasClient*> clients)
 
 #if defined(Q_WS_X11)
     Display* display = 0;
-    display = XOpenDisplay(0); 
+    display = XOpenDisplay(0);
     XSetErrorHandler(errorHandler);
     if (!display) return -1;
 
@@ -303,7 +303,7 @@ void TasNativeUtils::changeOrientation(QString)
 {}
 
 bool TasNativeUtils::killProcess(quint64 pid)
-{ 
+{
     kill(pid, 9);
     return true;
 }

@@ -43,49 +43,49 @@ class MouseHandler : public InteractionHandler
 {
 public:
     enum PointerType{
-            TypeMouse = 0,
-                TypeTouch = 1,
-                TypeBoth = 2
+        TypeMouse = 0,
+        TypeTouch = 1,
+        TypeBoth = 2
         };
 
-	struct TapDetails{
+    struct TapDetails{
         QWidget* target;
         QWindow* targetWindow;
-	    Qt::MouseButton button;
-	    QPoint point;
-   	    //for touch events to generate touch point ids
-	    QString identifier;
- 	    MouseHandler::PointerType pointerType;
- 	    TasCommand* command;
-	};
+        Qt::MouseButton button;
+        QPoint point;
+        //for touch events to generate touch point ids
+        QString identifier;
+        MouseHandler::PointerType pointerType;
+        TasCommand* command;
+    };
 
 public:
      MouseHandler();
     ~MouseHandler();
 
 
-     virtual QString handlerName() { return QString("MouseHandler"); }
-     virtual bool executeInteraction(TargetData data);
+    virtual QString handlerName() { return QString("MouseHandler"); }
+    virtual bool executeInteraction(TargetData data);
 
-     static Qt::MouseButton getMouseButton(TasCommand& command);
+    static Qt::MouseButton getMouseButton(TasCommand& command);
 
 private:
-        bool performActionEvent(TapDetails details);
+    bool performActionEvent(TapDetails details);
     void checkMoveMouse(TasCommand& command);
     void setPoint(TasCommand& command, TapDetails& details);
     void checkMoveMouse(TapDetails details);
-        void press(TapDetails details);
-        void move(TapDetails details);
-        void release(TapDetails details);
+    void press(TapDetails details);
+    void move(TapDetails details);
+    void release(TapDetails details);
 
-        MouseHandler::TapDetails makeDetails(TargetData data);
-        QAction* getAction(QWidget* widget, int id);
+    MouseHandler::TapDetails makeDetails(TargetData data);
+    QAction* getAction(QWidget* widget, int id);
 
 private:
-        TasMouseEventGenerator mMouseGen;
-        TasTouchEventGenerator mTouchGen;
-        QStringList mCommands;
-        friend class Tapper;
+    TasMouseEventGenerator mMouseGen;
+    TasTouchEventGenerator mTouchGen;
+    QStringList mCommands;
+    friend class Tapper;
 };
 
 class Tapper : public QObject
@@ -98,9 +98,9 @@ private slots:
     void tap();
 
 private:
-        MouseHandler* mHandler;
+    MouseHandler* mHandler;
     QTimer mTimer;
-        MouseHandler::TapDetails mDetails;
+    MouseHandler::TapDetails mDetails;
     int mMaxCount;
     int mTapCount;
 };
