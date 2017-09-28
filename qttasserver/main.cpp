@@ -27,7 +27,6 @@
 #include <testabilitysettings.h>
 
 
-
 int main(int argc, char *argv[])
 {
     QCoreApplication app(argc, argv);
@@ -47,16 +46,31 @@ int main(int argc, char *argv[])
 
     // Update Persistent Settings if argument provided
     // Use persistent settings when no argument provided
-    //QSettings settings("qttasserver.ini", QSettings::IniFormat);
     TestabilitySettings *settings = TestabilitySettings::settings();
-    //QString settHostBinding = settings->value("hostBinding").toString();
-    QString settHostBinding = settings->getValue("hostBinding").toString();
-    if (!argHostBinding.isEmpty()){
-        settHostBinding = argHostBinding;
-        settings->setValue("hostBinding", settHostBinding);
+    QString hostBinding = settings->getValue("hostBinding").toString();
+    QString envHostBinding = qgetenv("QTTASSERVER_HOST_BINDING");
+    if (!argHostBinding.isEmpty() && envHostBinding.isEmpty()) {
+        hostBinding = argHostBinding;
+        settings->setValue("hostBinding", hostBinding);
+    } else if (!envHostBinding.isEmpty()) {
+        hostBinding = envHostBinding;
+        settings->setValue("hostBinding", hostBinding);
+    } else if (argHostBinding.isEmpty()) {
+        hostBinding = "any";
+        settings->setValue("hostBinding", hostBinding);
     }
 
-    TasServer* server = new TasServer(settHostBinding);
+    int hostPort = settings->getValue("hostPort").toInt();
+    bool wasEnvPortRead = false;
+    int envPort = qEnvironmentVariableIntValue("QTTASSERVER_HOST_PORT",&wasEnvPortRead);
+    if (hostPort == 0 && !wasEnvPortRead) {
+        hostPort = QT_SERVER_PORT_OUT;
+        settings->setValue("hostPort",envPort);
+    } else if (wasEnvPortRead) {
+        hostPort = envPort;
+        settings->setValue("hostPort",envPort);
+    }
+    TasServer* server = new TasServer(hostBinding, hostPort);
     if (server->startServer()){
         int code = app.exec();
         server->deleteLater();

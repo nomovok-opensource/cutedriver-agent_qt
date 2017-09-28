@@ -52,7 +52,7 @@ class TasServer : public QObject
     Q_OBJECT
 
 public:
-    TasServer(QString hostBinding, QObject *parent = 0 );
+    TasServer(QString hostBinding, int hostPort = QT_SERVER_PORT_OUT, QObject *parent = 0 );
     ~TasServer();
 
     bool startServer();
@@ -72,6 +72,7 @@ private:
 
 public:
     QHostAddress mHostBinding;
+    int mHostPort;
 
 private:
     TasTcpServer* mTcpServer;
