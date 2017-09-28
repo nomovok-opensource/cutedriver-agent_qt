@@ -73,7 +73,7 @@
 /*!
   Constructs a new TasServer with \a parent.
 */
-TasServer::TasServer(QString hostBinding, QObject *parent)
+TasServer::TasServer(QString hostBinding, int hostPort, QObject *parent)
     : QObject(parent)
 {
     TasLogger::logger()->setLogFile("qttasserver.log");
@@ -121,6 +121,8 @@ TasServer::TasServer(QString hostBinding, QObject *parent)
     else{
         mHostBinding = QHostAddress::Any;
     }
+
+    mHostPort = hostPort;
 
     connect(QCoreApplication::instance(), SIGNAL(aboutToQuit()), this, SLOT(shutdown()));
 }
@@ -189,7 +191,7 @@ void TasServer::killAllStartedProcesses()
 void TasServer::createServers()
 {
     if(!mTcpServer){
-        mTcpServer = new TasTcpServer(QT_SERVER_PORT_OUT, *mServiceManager,this);
+        mTcpServer = new TasTcpServer(mHostPort, *mServiceManager,this);
     }
 #if defined(TAS_USELOCALSOCKET)
     if(!mLocalServer){
