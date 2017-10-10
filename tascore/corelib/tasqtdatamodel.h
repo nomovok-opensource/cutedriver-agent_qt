@@ -102,6 +102,7 @@ public:
     TasAttribute& addAttribute();
     TasAttribute& addAttribute(const QString& name);
     TasAttribute& addAttribute(const QString& name, const QString& value);
+    TasAttribute& addAttribute(const QString& name, uint value);
     TasAttribute& addAttribute(const QString& name, int value);
     TasAttribute& addAttribute(const QString& name, qreal value);
     TasAttribute& addAttribute(const QString& name, const QSize& value);
