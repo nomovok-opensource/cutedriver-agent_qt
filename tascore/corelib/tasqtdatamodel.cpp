@@ -317,6 +317,16 @@ TasAttribute& TasObject::addAttribute(const QString& name, const QString& value)
 /*!
     Add new attribute to the object with the given name and value.
 */
+TasAttribute& TasObject::addAttribute(const QString& name, uint value) {
+    TasAttribute* attribute = new TasAttribute(name);
+    attribute->addValuePlainString(QString::number(value));
+    attributes.append(attribute);
+    return *attribute;
+}
+
+/*!
+    Add new attribute to the object with the given name and value.
+*/
 TasAttribute& TasObject::addAttribute(const QString& name, int value)
 {
 /*
