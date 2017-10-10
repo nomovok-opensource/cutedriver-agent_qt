@@ -27,8 +27,17 @@ SUBDIRS += layouttraverser
 
 SUBDIRS += scenegraphtraverser
 
-!CONFIG(no_webkit) {
-SUBDIRS += webkittraverser
+######
+# the Qt Webkit is no longer available since Qt 5.6
+greaterThan(QT_MAJOR_VERSION, 4) {
+  greaterThan(QT_MINOR_VERSION, 5) {
+    CONFIG += no_webkit
+  }
 }
+
+!CONFIG(no_webkit) {
+    SUBDIRS += webkittraverser
+}
+
 
 CONFIG  += ordered
