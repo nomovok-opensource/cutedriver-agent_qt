@@ -138,8 +138,7 @@ void SceneGraphTraverse::process(TasObject *objectInfo, QObject *object, TasComm
 
     mTraverseUtils->addObjectDetails(objectInfo, object);
 
-    objectInfo->addAttribute("objectType", TYPE_QSCENEGRAPH);
-
+    //objectInfo->addAttribute("objectType", TYPE_QSCENEGRAPH);
 
 }
 
