@@ -22,6 +22,14 @@ TAS_VERSION=2.0.0
 
 #CONFIG += silent
 
+######
+# the Qt Webkit is no longer available since Qt 5.6
+greaterThan(QT_MAJOR_VERSION, 4) {
+  greaterThan(QT_MINOR_VERSION, 5) {
+    CONFIG += no_webkit
+  }
+}
+
 unix:!macx {
   isEmpty(PREFIX) {
     PREFIX = /usr
