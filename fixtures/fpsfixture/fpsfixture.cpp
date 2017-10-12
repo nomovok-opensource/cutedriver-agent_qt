@@ -20,6 +20,8 @@
 
 #include <QApplication>
 #include <QQuickView>
+#include <QQuickItem>
+#include <QQuickWindow>
 #include <QtPlugin>
 #include <QDebug>
 #include <QHash>
@@ -173,6 +175,18 @@ QObject* FpsFixture::getTarget(void* objectInstance, QString objectType)
         if (view) {
             target = qobject_cast<QObject*>(view);
         }
+    } else if (objectType == QQUICKWINDOW_TYPE) {
+        QQuickWindow* window = reinterpret_cast<QQuickWindow*>(objectInstance);
+        if (window) {
+            target = qobject_cast<QObject*>(window);
+        }
+    } else if (objectType == QQUICKITEM_TYPE) {
+        QQuickItem* item = reinterpret_cast<QQuickItem*>(objectInstance);
+        if (item) {
+            target = qobject_cast<QObject*>(item);
+        }
+    } else {
+        TasLogger::logger()->debug("UNKNOWN objectType for FPS: " + objectType);
     }
     return target;
 }
@@ -211,8 +225,20 @@ void FspMeasurer::startFpsMeasure()
     if(mTarget->isWidgetType()) {
         mTarget->installEventFilter(this);
     } else if(mTarget->isWindowType()) {
-        QQuickView* view = qobject_cast<QQuickView*>(mTarget);
-        view->connect(view, SIGNAL(frameSwapped()), this, SLOT(collectFps()), Qt::DirectConnection);
+        QQuickWindow* window = reinterpret_cast<QQuickWindow*>(mTarget);
+        if (window) {
+            window->connect(window, SIGNAL(frameSwapped()), this, SLOT(collectFps()), Qt::DirectConnection);
+        } else {
+            QQuickView* view = qobject_cast<QQuickView*>(mTarget);
+            if (view) {
+                view->connect(view, SIGNAL(frameSwapped()), this, SLOT(collectFps()), Qt::DirectConnection);
+            } else {
+                QQuickItem* item = qobject_cast<QQuickItem*>(mTarget);
+                if (item) {
+                    item->connect(item, SIGNAL(frameSwapped()), this, SLOT(collectFps()), Qt::DirectConnection);
+                }
+            }
+        }
     }
 }
 
@@ -229,8 +255,20 @@ void FspMeasurer::stopFpsMeasure()
     if(mTarget->isWidgetType()) {
         mTarget->removeEventFilter(this);
     } else if(mTarget->isWindowType()) {
-        QQuickView* view = qobject_cast<QQuickView*>(mTarget);
-        view->disconnect(view, SIGNAL(frameSwapped()), this, SLOT(collectFps()));
+        QQuickWindow* window = reinterpret_cast<QQuickWindow*>(mTarget);
+        if (window) {
+            window->disconnect(window, SIGNAL(frameSwapped()), this, SLOT(collectFps()));
+        } else {
+            QQuickView* view = qobject_cast<QQuickView*>(mTarget);
+            if (view) {
+                view->disconnect(view, SIGNAL(frameSwapped()), this, SLOT(collectFps()));
+            } else {
+                QQuickItem* item = qobject_cast<QQuickItem*>(mTarget);
+                if (item) {
+                    item->disconnect(item, SIGNAL(frameSwapped()), this, SLOT(collectFps()));
+                }
+            }
+        }
     }
 }
 
