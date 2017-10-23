@@ -19,8 +19,5 @@
 
 TEMPLATE = subdirs
 
-SUBDIRS += style
-SUBDIRS += testability
-
-CONFIG  += ordered
-
+SUBDIRS += style \
+           testability

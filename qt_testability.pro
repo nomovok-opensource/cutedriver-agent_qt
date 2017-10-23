@@ -17,24 +17,20 @@
 ##
 ############################################################################
 
++include(tasbase.pri)
 
 TEMPLATE = subdirs
 
-SUBDIRS += tascore
+SUBDIRS += tascore \
+           qttasserver \
+           qttasserver_ui \
+           fixtures \
+           traversers \
+           loaders \
+           utilityapp
 
-SUBDIRS += qttasserver
-
-SUBDIRS += qttasserver_ui
-
-SUBDIRS += fixtures
-
-SUBDIRS += traversers
-
-SUBDIRS += loaders
-
-SUBDIRS += utilityapp
-
-CONFIG  += ordered
+fixtures.depends = tascore
+traversers.depends = tascore
 
 unix:!macx {
 #  EXAMPLES = doc/

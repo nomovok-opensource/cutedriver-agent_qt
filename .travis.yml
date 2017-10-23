@@ -48,4 +48,4 @@ before_script:
 
 script:
   - pushd $TRAVIS_BUILD_DIR
-  - make all
+  - make all -j2

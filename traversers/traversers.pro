@@ -19,13 +19,10 @@
 
 TEMPLATE = subdirs
 
-SUBDIRS += qttraverser
-
-SUBDIRS += viewitemtraverser
-
-SUBDIRS += layouttraverser
-
-SUBDIRS += scenegraphtraverser
+SUBDIRS += qttraverser \
+           viewitemtraverser \
+           layouttraverser \
+           scenegraphtraverser
 
 ######
 # the Qt Webkit is no longer available since Qt 5.6
@@ -39,5 +36,3 @@ greaterThan(QT_MAJOR_VERSION, 4) {
     SUBDIRS += webkittraverser
 }
 
-
-CONFIG  += ordered

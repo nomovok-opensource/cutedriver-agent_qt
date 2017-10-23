@@ -19,24 +19,12 @@
 
 TEMPLATE = subdirs
 
-SUBDIRS += signalfixture
+SUBDIRS += signalfixture \
+           tasfixture \
+           fpsfixture \
+           filefixture \
+           popupfixture \
+           tapfixture \
+           dialogfixture \
+           settingfixture \
 
-SUBDIRS += tasfixture
-
-SUBDIRS += fpsfixture
-
-SUBDIRS += filefixture
-
-SUBDIRS += popupfixture
-
-!symbian: {
-#SUBDIRS += qtscriptfixture
-}
-
-SUBDIRS += tapfixture
-
-SUBDIRS += dialogfixture
-
-SUBDIRS += settingfixture
-
-CONFIG  += ordered
