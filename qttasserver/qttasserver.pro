@@ -68,4 +68,10 @@ wayland {
 DEFINES += TAS_WAYLAND
 }
 
+debian {
+  systemd_service.files=contrib/qttas-server.service
+  systemd_service.path=/lib/systemd/system
+  INSTALLS += systemd_service
+}
+
 INSTALLS += target
