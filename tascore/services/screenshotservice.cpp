@@ -151,8 +151,8 @@ void ScreenshotService::getScreenshot(TasCommandModel& model, TasResponse& respo
             QQuickItem* item = TestabilityUtils::findQuickItem(targetId);
 
             if (item) {
-                QPointF offset = item->mapToScene(QPointF(0,0));
-                rect = QRect(-offset.x(), -offset.y(), item->width(), item->height());
+                QPointF offset = item->mapToScene(item->boundingRect().topLeft());
+                rect = QRect(offset.x(), offset.y(), item->width(), item->height());
                 qtQuickWindow = item->window();
             }
         } else {
@@ -182,7 +182,7 @@ void ScreenshotService::getScreenshot(TasCommandModel& model, TasResponse& respo
                 TasLogger::logger()->warning("widget: screenshot was null");
             }
         } else if (qtQuickWindow) {
-            screenshot = qtQuickWindow->screen()->grabWindow(qtQuickWindow->winId(), rect.x(), rect.y(), rect.width(), rect.height()).toImage();
+            screenshot = qtQuickWindow->grabWindow().copy(rect);
             if (!screenshot.isNull()) {
                 screenshot.setText("tas_id", objectId(qtQuickWindow));
             } else {
