@@ -17,7 +17,7 @@
 ##
 ############################################################################
 
-+include(tasbase.pri)
+include(tasbase.pri)
 
 TEMPLATE = subdirs
 
